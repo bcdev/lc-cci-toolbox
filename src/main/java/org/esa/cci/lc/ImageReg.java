@@ -24,10 +24,11 @@ import java.io.PrintWriter;
 public class ImageReg {
     private static final Interpolation INTERPOLATION = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
     private static final String OUTPUT_FILE_NAME = "image-reg-output.csv";
+    private static final char CSV_SEPARATOR_CHAR = '\t';
 
     public static void main(String[] args) throws IOException {
         if (args.length != 5) {
-            System.out.println("Usage: ImageReg <image1> <image2> <offset> <octaveCount> <band>");
+            System.out.println("Usage: ImageReg <image1> <image2> <offset> <octaves> <band>");
             System.exit(1);
         }
 
@@ -80,7 +81,7 @@ public class ImageReg {
                         data[2][offset + dy][offset + dx] = histogram.getPTileThreshold(0.9)[band];
                         data[3][offset + dy][offset + dx] = histogram.getEntropy()[band];
                     } catch (Exception e) {
-                        System.err.println("Error: octave = " + k + ", dx = " + dx + ", dy = " + dy + ": " + e.getMessage());
+                        System.err.println("Imaging error in octave " + k + ", dx = " + dx + ", dy = " + dy + ": " + e.getMessage());
                     }
 
                 }
@@ -107,9 +108,9 @@ public class ImageReg {
     private static void writeVariable(PrintWriter writer, String varName, double[][] varData, int offset) {
         writer.println(varName);
 
-        writer.print(" ");
+        writer.print("");
         for (int dx = -offset; dx <= offset; dx++) {
-            writer.print("\t");
+            writer.print(CSV_SEPARATOR_CHAR);
             writer.print(dx);
         }
         writer.println();
@@ -117,7 +118,7 @@ public class ImageReg {
         for (int dy = -offset; dy <= offset; dy++) {
             writer.print(dy);
             for (int dx = -offset; dx <= offset; dx++) {
-                writer.print("\t");
+                writer.print(CSV_SEPARATOR_CHAR);
                 writer.print(varData[offset + dy][offset + dx]);
             }
             writer.println();
