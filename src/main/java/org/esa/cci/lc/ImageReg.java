@@ -51,7 +51,7 @@ public class ImageReg {
 
             System.out.println("Computing octave " + k);
 
-            Rectangle image1Region = new Rectangle(source1.getWidth(), source1.getHeight());
+            Rectangle image1Region = new Rectangle(0, 0, source1.getWidth(), source1.getHeight());
 
             double[][][] data = new double[4][2 * offset + 1][2 * offset + 1];
 
@@ -80,6 +80,7 @@ public class ImageReg {
                         data[1][offset + dy][offset + dx] = histogram.getStandardDeviation()[band];
                         data[2][offset + dy][offset + dx] = histogram.getPTileThreshold(0.9)[band];
                         data[3][offset + dy][offset + dx] = histogram.getEntropy()[band];
+
                     } catch (Exception e) {
                         System.err.println("Imaging error in octave " + k + ", dx = " + dx + ", dy = " + dy + ": " + e.getMessage());
                     }
