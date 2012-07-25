@@ -27,7 +27,7 @@
         <module>beam-gpf</module>
     </dependency>
 
-    <categories>VISAT,Processing, Landcover, CCI</categories>
+    <categories>VISAT,Processing,Landcover,CCI</categories>
 
     <extension point="ceres-core:serviceProviders">
         <serviceProvider>org.esa.beam.framework.gpf.OperatorSpi</serviceProvider>
@@ -37,11 +37,9 @@
         <action>
             <parent>tool</parent>
             <id>lc_cci_aggregation</id>
-            <class>org.esa.cci.lc.aggregation.visat.AggregationAction</class>
-            <operatorName>AggregationOp</operatorName>
-            <dialogTitle>CCI Landcover Aggregation Tool</dialogTitle>
+            <class>org.esa.cci.lc.aggregation.ui.AggregationAction</class>
             <helpId>lc_cci_aggregation</helpId>
-            <text>CCI LC Aggregation Tool...</text>
+            <text>LC CCI Aggregation Tool...</text>
             <description>Re-project, aggregate and subset LC map and conditions products.</description>
             <mnemonic>A</mnemonic>
         </action>
