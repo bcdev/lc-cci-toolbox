@@ -2,11 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.esa.cci</groupId>
+    <groupId>org.esa.cci.lc</groupId>
     <artifactId>lc-cci-toolbox</artifactId>
     <version>1.0</version>
     <modules>
         <module>lc-image-registration</module>
+        <module>lc-aggregation-tool</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -14,10 +15,22 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <beam.version>4.10.3</beam.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-visat</artifactId>
+                <version>${beam.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-gpf</artifactId>
+                <version>${beam.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
