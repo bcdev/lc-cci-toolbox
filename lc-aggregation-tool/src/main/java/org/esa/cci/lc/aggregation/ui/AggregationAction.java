@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.ui.DefaultAppContext;
+import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
@@ -31,7 +32,7 @@ public class AggregationAction  extends AbstractVisatAction{
 
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
-        return new SingleTargetProductDialog(appContext, "Landcover CCI Aggregation Tool",
+        return new DefaultSingleTargetProductDialog("Aggregate", appContext, "Landcover CCI Aggregation Tool",
                                                helpId) {
             @Override
             protected Product createTargetProduct() throws Exception {
