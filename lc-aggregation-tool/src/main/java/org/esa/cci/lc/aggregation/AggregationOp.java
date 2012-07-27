@@ -48,14 +48,14 @@ public class AggregationOp extends Operator {
     @Parameter(description = "Whether or not to add majority classes and the fractional area to the output.")
     boolean outputMajorityClasses;
     // todo (mp, 26.07.12) - set value range if max. classes is fixed or add validator which uses input to define maximum.
-    @Parameter(description = "Whether or not to add majority classes to the output.", defaultValue = "5")
+    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
     int numberOfMajorityClasses;
 
     @Parameter(description = "Whether or not to add PFT classes to the output.")
     boolean outputPFTClasses;
     // todo (mp, 26.07.12) - set value range if max. classes is fixed or add validator which uses input to define maximum.
     // todo (mp, 26.07.12) - meaningful default value?
-    @Parameter(description = "Whether or not to add majority classes to the output.", defaultValue = "3")
+    @Parameter(description = "The number of PFT classes generated and added to the output.", defaultValue = "3")
     int numberOfPFTClasses;
 
     @Override
