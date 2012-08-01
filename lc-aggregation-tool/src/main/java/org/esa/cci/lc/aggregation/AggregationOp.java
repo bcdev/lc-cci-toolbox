@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -7,6 +8,11 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.util.math.MathUtils;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+
+import java.awt.geom.Rectangle2D;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -62,6 +68,44 @@ public class AggregationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         validateParameters();
+        // validateSourceProduct();
+        setTargetProduct(createTargetProduct());
+    }
+
+    private Product createTargetProduct() {
+        final ReferencedEnvelope targetEnvelope = createTargetEnvelope();
+        final int sceneWidth = MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
+        final int sceneHeight = MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
+        Product targetProduct = new Product("Aggregated LC Product", "LC_AGG", sceneWidth, sceneHeight);
+        final CrsGeoCoding geoCoding = createGeoCoding(targetEnvelope, sceneWidth, sceneHeight);
+        targetProduct.setGeoCoding(geoCoding);
+        return targetProduct;
+    }
+
+
+    private CrsGeoCoding createGeoCoding(ReferencedEnvelope targetEnvelope, int sceneWidth, int sceneHeight) {
+        // todo (mp, 26.07.12) - Currently only creating WGS84 CRS, needs to be extended.
+        if (projectionMethod != ProjectionMethod.GEOGRAPHIC_LAT_LON) {
+            throw new IllegalStateException("Only Geographic Lat/Lon implemented as projection method.");
+        }
+        try {
+            return new CrsGeoCoding(DefaultGeographicCRS.WGS84, sceneWidth, sceneHeight,
+                                    targetEnvelope.getMinimum(0), targetEnvelope.getMaximum(1),
+                                    pixelSizeX, pixelSizeY);
+        } catch (Exception e) {
+            throw new OperatorException(e);
+        }
+    }
+
+    private ReferencedEnvelope createTargetEnvelope() {
+        try {
+            final Rectangle2D bounds = new Rectangle2D.Double();
+            bounds.setFrameFromDiagonal(westBound, northBound, eastBound, southBound);
+            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+            return boundsEnvelope.transform(DefaultGeographicCRS.WGS84, true);
+        } catch (Exception e) {
+            throw new OperatorException(e);
+        }
     }
 
     ProjectionMethod getProjectionMethod() {
@@ -164,12 +208,6 @@ public class AggregationOp extends Operator {
             throw new OperatorException("Nothing to process. Majority classes and/or " +
                                         "PFT classes must be selected for output.");
         }
-    }
-
-    public enum ProjectionMethod {
-        GAUSSIAN_GRID,
-        GEOGRAPHIC_LAT_LON,
-        ROTATED_LAT_LON
     }
 
     /**

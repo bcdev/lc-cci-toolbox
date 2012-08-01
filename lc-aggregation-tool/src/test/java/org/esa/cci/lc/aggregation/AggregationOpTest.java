@@ -30,7 +30,7 @@ public class AggregationOpTest {
     @Test
     public void testDefaultValues() {
         AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
-        assertEquals(AggregationOp.ProjectionMethod.GAUSSIAN_GRID, aggrOp.getProjectionMethod());
+        assertEquals(ProjectionMethod.GAUSSIAN_GRID, aggrOp.getProjectionMethod());
         assertEquals(0.1, aggrOp.getPixelSizeX(), 1.0e-8);
         assertEquals(0.1, aggrOp.getPixelSizeY(), 1.0e-8);
         assertEquals(-15.0, aggrOp.getWestBound(), 1.0e-8);
@@ -84,4 +84,5 @@ public class AggregationOpTest {
             assertTrue(message.contains("classes"));
         }
     }
+
 }
