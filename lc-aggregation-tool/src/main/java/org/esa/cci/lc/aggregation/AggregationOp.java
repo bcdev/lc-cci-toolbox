@@ -75,7 +75,7 @@ public class AggregationOp extends Operator {
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("true");
         binningConfig.setNumRows(SEAGrid.DEFAULT_NUM_ROWS);
-        binningConfig.setAggregatorConfigs(new AggregatorConfig(LcAggregatorDescriptor.LC_AGGR));
+        binningConfig.setAggregatorConfigs(new LcAggregatorConfig(numberOfMajorityClasses));
         // todo: configure binningConfig
 
         BinningOp binningOp = new BinningOp();

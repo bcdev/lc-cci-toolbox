@@ -14,7 +14,7 @@ public class LcAggregator extends AbstractAggregator {
     private final int[] classToSpatialVectorIndex;
 
     LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames) {
-        super(LcAggregatorDescriptor.LC_AGGR, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
+        super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
 
         // this Lut is for the LC example
         classToSpatialVectorIndex = new int[]{
