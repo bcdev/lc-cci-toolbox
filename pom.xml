@@ -30,6 +30,11 @@
                 <artifactId>beam-gpf</artifactId>
                 <version>${beam.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-binning2</artifactId>
+                <version>0.8.1-SNAPSHOT</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>

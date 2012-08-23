@@ -40,7 +40,6 @@ public class AggregationOpTest {
         assertTrue(aggrOp.isOutputMajorityClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
-        assertEquals(3, aggrOp.getNumberOfPFTClasses());
     }
 
     @Test

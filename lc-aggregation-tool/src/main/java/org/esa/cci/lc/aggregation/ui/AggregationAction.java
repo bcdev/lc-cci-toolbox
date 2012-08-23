@@ -1,11 +1,9 @@
 package org.esa.cci.lc.aggregation.ui;
 
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
-import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
@@ -19,7 +17,8 @@ import javax.swing.UIManager;
 /**
  * @author Marco Peters
  */
-public class AggregationAction  extends AbstractVisatAction{
+public class AggregationAction extends AbstractVisatAction {
+
     private ModelessDialog dialog;
 
     @Override
@@ -33,11 +32,7 @@ public class AggregationAction  extends AbstractVisatAction{
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
         return new DefaultSingleTargetProductDialog("Aggregate", appContext, "Landcover CCI Aggregation Tool",
-                                               helpId) {
-            @Override
-            protected Product createTargetProduct() throws Exception {
-                return null;
-            }
+                                                    helpId) {
             @Override
             protected void onClose() {
                 super.onClose();
