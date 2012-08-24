@@ -31,8 +31,9 @@ public class AggregationAction extends AbstractVisatAction {
 
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
-        return new DefaultSingleTargetProductDialog("Aggregate", appContext, "Landcover CCI Aggregation Tool",
-                                                    helpId) {
+        DefaultSingleTargetProductDialog productDialog = new DefaultSingleTargetProductDialog(
+                "Aggregate", appContext, "Landcover CCI Aggregation Tool", helpId) {
+
             @Override
             protected void onClose() {
                 super.onClose();
@@ -41,6 +42,8 @@ public class AggregationAction extends AbstractVisatAction {
                 }
             }
         };
+        productDialog.setTargetProductNameSuffix("_aggr");
+        return productDialog;
     }
 
     public static void main(String[] args) throws Exception {
