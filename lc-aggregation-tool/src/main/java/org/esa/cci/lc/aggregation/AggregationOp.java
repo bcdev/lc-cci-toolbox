@@ -1,9 +1,9 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.operator.AggregatorConfig;
 import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
@@ -12,12 +12,12 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.util.Debug;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -36,66 +36,82 @@ import java.io.IOException;
 public class AggregationOp extends Operator {
 
     @SourceProduct(description = "LC CCI map or conditions product", optional = false)
-    Product source;
+    private Product sourceProduct;
 
     @Parameter(description = "Defines the projection method for the target product.",
                valueSet = {"GAUSSIAN_GRID", "GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON"}, defaultValue = "GAUSSIAN_GRID")
-    ProjectionMethod projectionMethod;
+    private ProjectionMethod projectionMethod;
 
     @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
-    double pixelSizeX;
+    private double pixelSizeX;
     @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
-    double pixelSizeY;
+    private double pixelSizeY;
 
     @Parameter(description = "The western longitude.", interval = "[-180,180]", defaultValue = "-15.0", unit = "°")
-    double westBound;
+    private double westBound;
     @Parameter(description = "The northern latitude.", interval = "[-90,90]", defaultValue = "75.0", unit = "°")
-    double northBound;
+    private double northBound;
     @Parameter(description = "The eastern longitude.", interval = "[-180,180]", defaultValue = "30.0", unit = "°")
-    double eastBound;
+    private double eastBound;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", defaultValue = "35.0", unit = "°")
-    double southBound;
+    private double southBound;
 
     @Parameter(description = "Whether or not to add majority classes and the fractional area to the output.",
                defaultValue = "true")
-    boolean outputMajorityClasses;
-    // todo (mp, 26.07.12) - set value range if max. classes is fixed or add validator which uses input to define maximum.
+    private boolean outputMajorityClasses;
+
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
-    int numberOfMajorityClasses;
+    private int numberOfMajorityClasses;
 
     @Parameter(description = "Whether or not to add PFT classes to the output.", defaultValue = "true")
-    boolean outputPFTClasses;
+    private boolean outputPFTClasses;
+
+    // todo: How to retrieve this information?
+    FormatterConfig formatterConfig;
+
+    int numRows = SEAGrid.DEFAULT_NUM_ROWS;
 
 
     @Override
     public void initialize() throws OperatorException {
+        Debug.setEnabled(true);
         validateParameters();
         // validateSourceProduct();
 
-        BinningConfig binningConfig = new BinningConfig();
-        binningConfig.setMaskExpr("true");
-        binningConfig.setNumRows(SEAGrid.DEFAULT_NUM_ROWS);
-        binningConfig.setAggregatorConfigs(new LcAggregatorConfig(numberOfMajorityClasses));
-        // todo: configure binningConfig
-
-        BinningOp binningOp = new BinningOp();
-        binningOp.setSourceProduct(source);
-        binningOp.setBinningConfig(binningConfig);
-
-        final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("BEAM-DIMAP");
-        try {
-            File tempFile = File.createTempFile("BEAM_", "LC_AGGR");
-            formatterConfig.setOutputFile(tempFile.getAbsolutePath());
-            formatterConfig.setOutputType("Product");
-        } catch (IOException e) {
-            throw new OperatorException(e);
+        BinningConfig binningConfig = createBinningConfig(sourceProduct.getBandAt(0).getName());
+        if (formatterConfig == null) {
+            formatterConfig = createFormatterConfig();
         }
 
+        BinningOp binningOp = new BinningOp();
+        binningOp.setSourceProduct(sourceProduct);
+        binningOp.setParameter("outputBinnedData", false);
+        binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
-        // todo: configure binningOp
 
         setTargetProduct(binningOp.getTargetProduct());
+    }
+
+    private FormatterConfig createFormatterConfig() {
+        final FormatterConfig formatterConfig = new FormatterConfig();
+        formatterConfig.setOutputFormat("BEAM-DIMAP");
+        File tempFile = new File("target.dim");
+        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
+        formatterConfig.setOutputType("Product");
+        return formatterConfig;
+    }
+
+    private BinningConfig createBinningConfig(String lcClassBandName) {
+        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(numberOfMajorityClasses);
+        VariableConfig variableConfig = new VariableConfig(lcClassBandName, null);
+        lcAggregatorConfig.setVarName(variableConfig.getName());
+        BinningConfig binningConfig = new BinningConfig();
+        binningConfig.setMaskExpr("true");
+        binningConfig.setNumRows(numRows);
+        binningConfig.setSuperSampling(1);
+        binningConfig.setVariableConfigs(variableConfig);
+        binningConfig.setAggregatorConfigs(lcAggregatorConfig);
+        return binningConfig;
     }
 
     private ReferencedEnvelope createTargetEnvelope() {

@@ -44,7 +44,7 @@ public class LcAggregator extends AbstractAggregator {
         Observation observation = (Observation) observationVector;
         // todo: estimate area for input observation latitude assuming it is the center of a LC-map pixel
         float area = 1.0F;
-        int classIndex = (int) observationVector.get(0);
+        int classIndex = (int) observation.get(0);
         // map classIndex to spatial vector index i
         int i = classToSpatialVectorIndex[classIndex];
         spatialVector.set(i, spatialVector.get(i) + area);

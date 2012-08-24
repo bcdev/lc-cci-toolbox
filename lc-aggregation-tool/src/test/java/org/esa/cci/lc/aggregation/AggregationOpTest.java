@@ -1,10 +1,20 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.media.jai.operator.ConstantDescriptor;
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -26,6 +36,33 @@ public class AggregationOpTest {
     public static void afterClass() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(aggregationSpi);
     }
+
+
+    //    @Test()
+    public void testProcessing() throws Exception {
+        AggregationOp aggregationOp = new AggregationOp();
+        aggregationOp.setSourceProduct(createSourceProduct());
+        int numMajorityClasses = 2;
+        aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
+        aggregationOp.numRows = 4;
+//        aggregationOp.formatterConfig = createFormatterConfig();    // todo find correct config
+        Product targetProduct = aggregationOp.getTargetProduct();
+
+        int numObsAndPasses = 2;
+        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses + numObsAndPasses,
+                     targetProduct.getNumBands());
+    }
+
+    private FormatterConfig createFormatterConfig() throws IOException {
+        final FormatterConfig formatterConfig = new FormatterConfig();
+        formatterConfig.setOutputFormat("NetCDF4");
+        File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
+        tempFile.deleteOnExit();
+        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
+        formatterConfig.setOutputType("Product");
+        return formatterConfig;
+    }
+
 
     @Test
     public void testDefaultValues() {
@@ -83,5 +120,14 @@ public class AggregationOpTest {
             assertTrue(message.contains("classes"));
         }
     }
+
+    private Product createSourceProduct() throws Exception {
+        Product product = new Product("P", "T", 360, 180);
+        Band classesBand = product.addBand("classes", ProductData.TYPE_UINT8);
+        classesBand.setSourceImage(ConstantDescriptor.create(360f, 180f, new Byte[]{10}, null));
+        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, 360, 180, -180.0, 90.0, 1.0, 1.0));
+        return product;
+    }
+
 
 }
