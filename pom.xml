@@ -35,6 +35,12 @@
                 <artifactId>beam-binning2</artifactId>
                 <version>0.8.1-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-netcdf</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>junit</groupId>

@@ -1,6 +1,8 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
@@ -25,27 +27,32 @@ import static org.junit.Assert.*;
 public class AggregationOpTest {
 
     private static AggregationOp.Spi aggregationSpi;
+    private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
         aggregationSpi = new AggregationOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(aggregationSpi);
+        beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
+        ProductIOPlugInManager.getInstance().addWriterPlugIn(beamNetCdf4WriterPlugIn);
     }
 
     @AfterClass
     public static void afterClass() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(aggregationSpi);
+        ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
     }
 
 
-    //    @Test()
+    @Test()
     public void testProcessing() throws Exception {
         AggregationOp aggregationOp = new AggregationOp();
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
         aggregationOp.numRows = 4;
-//        aggregationOp.formatterConfig = createFormatterConfig();    // todo find correct config
+        aggregationOp.formatterConfig = createFormatterConfig();
+
         Product targetProduct = aggregationOp.getTargetProduct();
 
         int numObsAndPasses = 2;
@@ -55,7 +62,7 @@ public class AggregationOpTest {
 
     private FormatterConfig createFormatterConfig() throws IOException {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("NetCDF4");
+        formatterConfig.setOutputFormat("NetCDF4-BEAM");
         File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
         tempFile.deleteOnExit();
         formatterConfig.setOutputFile(tempFile.getAbsolutePath());
@@ -77,6 +84,11 @@ public class AggregationOpTest {
         assertTrue(aggrOp.isOutputMajorityClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
+
+        FormatterConfig formatterConfig = aggrOp.getFormatterConfig();
+        assertEquals("Product", formatterConfig.getOutputType());
+        assertEquals("NetCDF4-BEAM", formatterConfig.getOutputFormat());
+        assertEquals("target.nc", formatterConfig.getOutputFile());
     }
 
     @Test
@@ -122,10 +134,13 @@ public class AggregationOpTest {
     }
 
     private Product createSourceProduct() throws Exception {
-        Product product = new Product("P", "T", 360, 180);
+        Integer width = 360;
+        Integer height = 180;
+        Product product = new Product("P", "T", width, height);
         Band classesBand = product.addBand("classes", ProductData.TYPE_UINT8);
-        classesBand.setSourceImage(ConstantDescriptor.create(360f, 180f, new Byte[]{10}, null));
-        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, 360, 180, -180.0, 90.0, 1.0, 1.0));
+        classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                             new Byte[]{10}, null));
+        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -180.0, 90.0, 1.0, 1.0));
         return product;
     }
 

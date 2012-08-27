@@ -5,6 +5,8 @@ import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.binning.support.SEAGrid;
+import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -17,7 +19,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -71,6 +72,8 @@ public class AggregationOp extends Operator {
 
     int numRows = SEAGrid.DEFAULT_NUM_ROWS;
 
+    private BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -78,9 +81,15 @@ public class AggregationOp extends Operator {
         validateParameters();
         // validateSourceProduct();
 
+        ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
+        if (!plugInManager.getWriterPlugIns("NetCDF4-BEAM").hasNext()) {
+            beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
+            plugInManager.addWriterPlugIn(beamNetCdf4WriterPlugIn);
+        }
+
         BinningConfig binningConfig = createBinningConfig(sourceProduct.getBandAt(0).getName());
         if (formatterConfig == null) {
-            formatterConfig = createFormatterConfig();
+            formatterConfig = getFormatterConfig();
         }
 
         BinningOp binningOp = new BinningOp();
@@ -92,24 +101,31 @@ public class AggregationOp extends Operator {
         setTargetProduct(binningOp.getTargetProduct());
     }
 
-    private FormatterConfig createFormatterConfig() {
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (beamNetCdf4WriterPlugIn != null) {
+            ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
+        }
+    }
+
+    FormatterConfig getFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("BEAM-DIMAP");
-        File tempFile = new File("target.dim");
-        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
+        formatterConfig.setOutputFormat("NetCDF4-BEAM");
+        formatterConfig.setOutputFile("target.nc");
         formatterConfig.setOutputType("Product");
         return formatterConfig;
     }
 
     private BinningConfig createBinningConfig(String lcClassBandName) {
-        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(numberOfMajorityClasses);
         VariableConfig variableConfig = new VariableConfig(lcClassBandName, null);
-        lcAggregatorConfig.setVarName(variableConfig.getName());
+        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(variableConfig.getName(),
+                                                                       numberOfMajorityClasses);
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("true");
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
-        binningConfig.setVariableConfigs(variableConfig);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);
         return binningConfig;
     }

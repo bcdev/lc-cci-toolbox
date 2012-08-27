@@ -26,6 +26,12 @@
     <dependency>
         <module>beam-gpf</module>
     </dependency>
+    <dependency>
+        <module>beam-binning</module>
+    </dependency>
+    <dependency>
+        <module>beam-netcdf</module>
+    </dependency>
 
     <categories>VISAT,Processing,Landcover,CCI</categories>
 
