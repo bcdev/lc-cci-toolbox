@@ -50,7 +50,7 @@ public class AggregationOpTest {
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
-        aggregationOp.numRows = 4;
+        aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
 
         Product targetProduct = aggregationOp.getTargetProduct();
@@ -70,7 +70,6 @@ public class AggregationOpTest {
         return formatterConfig;
     }
 
-
     @Test
     public void testDefaultValues() {
         AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
@@ -84,6 +83,7 @@ public class AggregationOpTest {
         assertTrue(aggrOp.isOutputMajorityClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
+        assertEquals(216, aggrOp.getNumRows());
 
         FormatterConfig formatterConfig = aggrOp.getFormatterConfig();
         assertEquals("Product", formatterConfig.getOutputType());

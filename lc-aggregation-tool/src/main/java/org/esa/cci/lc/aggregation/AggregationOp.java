@@ -4,7 +4,6 @@ import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.operator.VariableConfig;
-import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Product;
@@ -67,13 +66,12 @@ public class AggregationOp extends Operator {
     @Parameter(description = "Whether or not to add PFT classes to the output.", defaultValue = "true")
     private boolean outputPFTClasses;
 
-    // todo: How to retrieve this information?
+    @Parameter(defaultValue = "216")
+    private int numRows;
+
     FormatterConfig formatterConfig;
 
-    int numRows = SEAGrid.DEFAULT_NUM_ROWS;
-
     private BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
-
 
     @Override
     public void initialize() throws OperatorException {
@@ -219,6 +217,14 @@ public class AggregationOp extends Operator {
 
     void setOutputPFTClasses(boolean outputPFTClasses) {
         this.outputPFTClasses = outputPFTClasses;
+    }
+
+    int getNumRows() {
+        return numRows;
+    }
+
+    void setNumRows(int numRows) {
+        this.numRows = numRows;
     }
 
 
