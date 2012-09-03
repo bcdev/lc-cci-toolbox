@@ -121,7 +121,7 @@ public class AggregationOp extends Operator {
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(variableConfig.getName(),
                                                                        numberOfMajorityClasses);
         BinningConfig binningConfig = new BinningConfig();
-        binningConfig.setMaskExpr("true");
+        binningConfig.setMaskExpr("");
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);
