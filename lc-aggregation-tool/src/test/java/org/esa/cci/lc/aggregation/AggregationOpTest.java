@@ -60,16 +60,6 @@ public class AggregationOpTest {
                      targetProduct.getNumBands());
     }
 
-    private FormatterConfig createFormatterConfig() throws IOException {
-        final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("NetCDF4-BEAM");
-        File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
-        tempFile.deleteOnExit();
-        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
-        formatterConfig.setOutputType("Product");
-        return formatterConfig;
-    }
-
     @Test
     public void testDefaultValues() {
         AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
@@ -132,6 +122,17 @@ public class AggregationOpTest {
             assertTrue(message.contains("classes"));
         }
     }
+
+    private FormatterConfig createFormatterConfig() throws IOException {
+        final FormatterConfig formatterConfig = new FormatterConfig();
+        formatterConfig.setOutputFormat("NetCDF4-BEAM");
+        File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
+        tempFile.deleteOnExit();
+        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
+        formatterConfig.setOutputType("Product");
+        return formatterConfig;
+    }
+
 
     private Product createSourceProduct() throws Exception {
         Integer width = 360;
