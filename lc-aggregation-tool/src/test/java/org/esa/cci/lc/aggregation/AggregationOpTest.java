@@ -75,7 +75,7 @@ public class AggregationOpTest {
         assertTrue(aggrOp.isOutputPFTClasses());
         assertEquals(216, aggrOp.getNumRows());
 
-        FormatterConfig formatterConfig = aggrOp.getFormatterConfig();
+        FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertEquals("Product", formatterConfig.getOutputType());
         assertEquals("NetCDF4-BEAM", formatterConfig.getOutputFormat());
         assertEquals("target.nc", formatterConfig.getOutputFile());
