@@ -94,7 +94,7 @@ public class AggregationOp extends Operator {
 
         BinningConfig binningConfig = createBinningConfig(inputProduct);
         if (formatterConfig == null) {
-            formatterConfig = getFormatterConfig();
+            formatterConfig = createDefaultFormatterConfig();
         }
 
         BinningOp binningOp = new BinningOp();
@@ -115,7 +115,7 @@ public class AggregationOp extends Operator {
         }
     }
 
-    FormatterConfig getFormatterConfig() {
+    FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
         formatterConfig.setOutputFormat("NetCDF4-BEAM");
         formatterConfig.setOutputFile("target.nc");
