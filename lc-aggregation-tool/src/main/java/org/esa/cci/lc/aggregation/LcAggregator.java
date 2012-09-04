@@ -47,8 +47,12 @@ public class LcAggregator extends AbstractAggregator {
         int classIndex = (int) observation.get(0);
         // map classIndex to spatial vector index i
         int i = classToSpatialVectorIndex[classIndex];
-        int index = i % LcAggregatorDescriptor.NUM_LC_CLASSES;
-        spatialVector.set(index, spatialVector.get(index) + area);
+        int index = Math.abs(i) % LcAggregatorDescriptor.NUM_LC_CLASSES;
+        float oldValue = spatialVector.get(index);
+        if (Float.isNaN(oldValue)) {
+            oldValue = 0.0f;
+        }
+        spatialVector.set(index, oldValue + area);
     }
 
     @Override
