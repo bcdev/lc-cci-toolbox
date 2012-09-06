@@ -6,8 +6,11 @@ import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author Marco Peters
@@ -96,13 +99,24 @@ public class LcAggregator extends AbstractAggregator {
 
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
+        SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
         for (int i = 0; i < temporalVector.size(); i++) {
-            outputVector.set(i, temporalVector.get(i));
+            float classArea = temporalVector.get(i);
+            if (!Float.isNaN(classArea)) {
+                sortedMap.put(classArea, i + 1);
+            }
+            outputVector.set(i, classArea);
         }
 
-        // todo: Generate majority classes
-        for (int i = LcAggregatorDescriptor.NUM_LC_CLASSES; i < outputVector.size(); i++) {
-            outputVector.set(i, 0);
+        Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
+        for (int i = 0; i < outputVector.size() - LcAggregatorDescriptor.NUM_LC_CLASSES; i++) {
+            Float majorityClass;
+            if (i >= classesSortedByOccurrence.length) {
+                majorityClass = Float.NaN;
+            } else {
+                majorityClass = classesSortedByOccurrence[i].floatValue();
+            }
+            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass);
         }
 
         // todo: Generate overall area sum

@@ -58,21 +58,69 @@ public class LcAggregatorTest {
 
     @Test
     public void testAggregation() {
+        int numMajorityClasses = 2;
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(2);
+        LcAggregator aggregator = createAggregator(numMajorityClasses);
 
-        String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
-        float[] floats = new float[spatialFeatureNames.length];
-        VectorImpl spatialVector = vec(floats);
+        int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
+        VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
         aggregator.initSpatial(ctx, spatialVector);
 
-        int class8value = 80;
-        int class1value = 10;
-        aggregator.aggregateSpatial(ctx, obs(class8value), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class8value), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class1value), spatialVector);
+        int class1 = 10;
+        int class2 = 20;
+        int class8 = 80;
+        int class17 = 170;
+        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class1), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class2), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
         assertEquals(2.0f, spatialVector.get(7), 1.0e-6f);
         assertEquals(1.0f, spatialVector.get(0), 1.0e-6f);
+        assertEquals(1.0f, spatialVector.get(1), 1.0e-6f);
+        assertEquals(5.0f, spatialVector.get(16), 1.0e-6f);
+
+        VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
+        aggregator.aggregateTemporal(ctx, spatialVector, 9, temporalVector);
+
+        for (int i = 0; i < numSpatialFeatures; i++) {
+            assertEquals(spatialVector.get(i), temporalVector.get(i), 1.0e-6);
+        }
+
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
+        aggregator.computeOutput(temporalVector, outputVector);
+        for (int i = 0; i < temporalVector.size(); i++) {
+            assertEquals(temporalVector.get(i), outputVector.get(i), 1.0e-6);
+        }
+        assertEquals(17, outputVector.get(outputVector.size() - 2), 0.0f);
+        assertEquals(8, outputVector.get(outputVector.size() - 1), 0.0f);
+    }
+
+    @Test
+    public void testMajorityClassesWhenHavingLessClassesObserved() {
+        BinContext ctx = createCtx();
+        int numMajorityClasses = 2;
+        LcAggregator aggregator = createAggregator(numMajorityClasses);
+
+        int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
+        VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
+        aggregator.initSpatial(ctx, spatialVector);
+
+        int class8 = 80;
+        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
+        assertEquals(2.0f, spatialVector.get(7), 1.0e-6f);
+
+        VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
+        aggregator.aggregateTemporal(ctx, spatialVector, 9, temporalVector);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
+        aggregator.computeOutput(temporalVector, outputVector);
+        assertEquals(8, outputVector.get(outputVector.size() - 2), 0.0f);
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f);
     }
 
     private LcAggregator createAggregator(int numMajorityClasses) {
