@@ -61,13 +61,8 @@ public class LcAggregator extends AbstractAggregator {
         Observation observation = (Observation) observationVector;
         // todo: estimate area for input observation latitude assuming it is the center of a LC-map pixel
         float area = 1.0F;
-        int classValue = (int) observation.get(0);
-        // map classValue to spatial vector index i
-        Integer vectorIndex = classValueToVectorIndexMap.get(classValue);
-        if (vectorIndex == null) { // how to handle a value which is not assigned to a class
-            vectorIndex = 1;
-        }
-        int index = vectorIndex % LcAggregatorDescriptor.NUM_LC_CLASSES;
+
+        int index = getVectorIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
         if (Float.isNaN(oldValue)) {
             oldValue = 0.0f;
@@ -88,6 +83,7 @@ public class LcAggregator extends AbstractAggregator {
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs,
                                   WritableVector temporalVector) {
+        // simply copy the data; no temporal aggregation needed
         for (int i = 0; i < spatialVector.size(); i++) {
             temporalVector.set(i, spatialVector.get(i));
         }
@@ -100,7 +96,6 @@ public class LcAggregator extends AbstractAggregator {
 
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
-        // todo: Copy areal classes
         for (int i = 0; i < temporalVector.size(); i++) {
             outputVector.set(i, temporalVector.get(i));
         }
@@ -111,6 +106,15 @@ public class LcAggregator extends AbstractAggregator {
         }
 
         // todo: Generate overall area sum
+    }
+
+    private int getVectorIndex(int classValue) {
+        // map classValue to spatial vector index i
+        Integer vectorIndex = classValueToVectorIndexMap.get(classValue);
+        if (vectorIndex == null) { // how to handle a value which is not assigned to a class
+            vectorIndex = 1;
+        }
+        return vectorIndex % LcAggregatorDescriptor.NUM_LC_CLASSES;
     }
 
 
