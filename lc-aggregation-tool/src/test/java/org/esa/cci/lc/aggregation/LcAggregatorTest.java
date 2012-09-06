@@ -79,6 +79,7 @@ public class LcAggregatorTest {
         aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.completeSpatial(ctx, 9, spatialVector);
         assertEquals(2.0f, spatialVector.get(7), 1.0e-6f);
         assertEquals(1.0f, spatialVector.get(0), 1.0e-6f);
         assertEquals(1.0f, spatialVector.get(1), 1.0e-6f);
@@ -86,7 +87,7 @@ public class LcAggregatorTest {
 
         VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
         aggregator.aggregateTemporal(ctx, spatialVector, 9, temporalVector);
-
+        aggregator.completeTemporal(ctx, 1, temporalVector);
         for (int i = 0; i < numSpatialFeatures; i++) {
             assertEquals(spatialVector.get(i), temporalVector.get(i), 1.0e-6);
         }
