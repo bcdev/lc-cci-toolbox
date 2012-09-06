@@ -103,7 +103,7 @@ public class LcAggregatorTest {
     @Test
     public void testMajorityClassesWhenHavingLessClassesObserved() {
         BinContext ctx = createCtx();
-        int numMajorityClasses = 2;
+        int numMajorityClasses = 4;
         LcAggregator aggregator = createAggregator(numMajorityClasses);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
@@ -119,7 +119,9 @@ public class LcAggregatorTest {
         aggregator.aggregateTemporal(ctx, spatialVector, 9, temporalVector);
         VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
         aggregator.computeOutput(temporalVector, outputVector);
-        assertEquals(8, outputVector.get(outputVector.size() - 2), 0.0f);
+        assertEquals(8, outputVector.get(outputVector.size() - 4), 0.0f);
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f);
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f);
         assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f);
     }
 
