@@ -55,7 +55,7 @@ public class LcAggregator extends AbstractAggregator {
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         for (int i = 0; i < vector.size(); i++) {
-            vector.set(i, Float.NaN);
+            vector.set(i, 0.0f);
         }
     }
 
@@ -67,15 +67,19 @@ public class LcAggregator extends AbstractAggregator {
 
         int index = getVectorIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
-        if (Float.isNaN(oldValue)) {
-            oldValue = 0.0f;
-        }
         spatialVector.set(index, oldValue + area);
     }
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
-        // Nothing to be done here
+        for (int i = 0; i < spatialVector.size(); i++) {
+            float spatialValue = spatialVector.get(i);
+            if (Float.compare(spatialValue, 0.0f) != 0) {
+                spatialVector.set(i, spatialValue);
+            } else {
+                spatialVector.set(i, Float.NaN);
+            }
+        }
     }
 
     @Override
@@ -103,7 +107,7 @@ public class LcAggregator extends AbstractAggregator {
         for (int i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
-                sortedMap.put(classArea, i + 1);
+                sortedMap.put(classArea, i);
             }
             outputVector.set(i, classArea);
         }
@@ -116,7 +120,7 @@ public class LcAggregator extends AbstractAggregator {
             } else {
                 majorityClass = classesSortedByOccurrence[i].floatValue();
             }
-            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass);
+            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass + 1);
         }
 
         // todo: Generate overall area sum
