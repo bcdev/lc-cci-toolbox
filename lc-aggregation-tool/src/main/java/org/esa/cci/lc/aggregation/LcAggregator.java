@@ -5,6 +5,7 @@ import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
+import org.esa.beam.binning.support.SEAGrid;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,13 +13,23 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import static java.lang.Math.*;
+
 /**
  * @author Marco Peters
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class LcAggregator extends AbstractAggregator {
+
+    private static final int NUM_GRID_ROWS = 216;
+    private static final double INPUT_WIDTH = 12960.0;
+    private static final double INPUT_HEIGHT = 6480.0;
+//    private static final double INPUT_WIDTH = 129600.0;
+//    private static final double INPUT_HEIGHT = 64800.0;
 
     // this Lut is for the LC example
     private static Map<Integer, Integer> classValueToVectorIndexMap;
+    private final SEAGrid seaGrid;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
@@ -50,6 +61,7 @@ public class LcAggregator extends AbstractAggregator {
 
     LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
+        seaGrid = new SEAGrid(NUM_GRID_ROWS);
     }
 
     @Override
@@ -62,12 +74,24 @@ public class LcAggregator extends AbstractAggregator {
     @Override
     public void aggregateSpatial(BinContext ctx, Vector observationVector, WritableVector spatialVector) {
         Observation observation = (Observation) observationVector;
-        // todo: estimate area for input observation latitude assuming it is the center of a LC-map pixel
-        float area = 1.0F;
+        double latitude = observation.getLatitude();
+        // todo (mp) - generalize this
+        int rowIndex = seaGrid.getRowIndex(ctx.getIndex());
+        int numCols = seaGrid.getNumCols(rowIndex);
+        double observationArea = computeArea(latitude, 180.0 / INPUT_HEIGHT, 360.0 / INPUT_WIDTH);
+        double binArea = computeArea(seaGrid.getCenterLat(rowIndex), 180.0 / NUM_GRID_ROWS, 360.0 / numCols); // todo
+        float area = (float) (observationArea / binArea);
 
         int index = getVectorIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
         spatialVector.set(index, oldValue + area);
+    }
+
+    private double computeArea(double latitude, double deltaLat, double deltaLon) {
+        double r2 = SEAGrid.RE * cos(toRadians(latitude));
+        double a = r2 * toRadians(deltaLon);
+        double b = SEAGrid.RE * toRadians(deltaLat);
+        return a * b;
     }
 
     @Override
