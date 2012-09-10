@@ -12,17 +12,24 @@ public class LcAggregatorConfig extends AggregatorConfig {
     private String varName;
 
     @Parameter
-    int numMajorityClasses;
+    private int numMajorityClasses;
+    @Parameter
+    private int numGridRows;
+
+    @Parameter
+    private AreaCalculator areaCalculator;
 
 
     public LcAggregatorConfig() {
         super(LcAggregatorDescriptor.NAME);
     }
 
-    LcAggregatorConfig(String varName, int numMajorityClasses) {
+    LcAggregatorConfig(String varName, int numMajorityClasses, int numGridRows, AreaCalculator areaCalculator) {
         super(LcAggregatorDescriptor.NAME);
         this.numMajorityClasses = numMajorityClasses;
+        this.numGridRows = numGridRows;
         this.varName = varName;
+        this.areaCalculator = areaCalculator;
     }
 
     @Override

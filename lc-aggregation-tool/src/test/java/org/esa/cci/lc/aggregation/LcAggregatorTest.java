@@ -131,7 +131,16 @@ public class LcAggregatorTest {
     private LcAggregator createAggregator(int numMajorityClasses) {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcAggregatorDescriptor lcAggregatorDescriptor = new LcAggregatorDescriptor();
-        LcAggregatorConfig config = new LcAggregatorConfig("classes", numMajorityClasses);
+        AreaCalculator areaCalculator = new ConstAreaCalculator();
+        LcAggregatorConfig config = new LcAggregatorConfig("classes", numMajorityClasses, 10, areaCalculator);
         return (LcAggregator) lcAggregatorDescriptor.createAggregator(varCtx, config);
+    }
+
+    private static class ConstAreaCalculator implements AreaCalculator {
+
+        @Override
+        public double calculate(double observationLat, double gridLat, double numGridCols) {
+            return 1.0;
+        }
     }
 }

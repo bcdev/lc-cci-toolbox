@@ -4,6 +4,7 @@ import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.AggregatorDescriptor;
 import org.esa.beam.binning.VariableContext;
+import org.esa.beam.binning.support.SEAGrid;
 
 /**
  * @author Marco Peters
@@ -28,6 +29,8 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
 
         int numMajorityClasses = (Integer) aggregatorConfig.asPropertySet().getValue("numMajorityClasses");
+        int numGridRows = (Integer) aggregatorConfig.asPropertySet().getValue("numGridRows");
+        AreaCalculator areaCalculator = (AreaCalculator) aggregatorConfig.asPropertySet().getValue("areaCalculator");
 
         String[] spatialFeatureNames = new String[NUM_LC_CLASSES];
         for (int i = 0; i < NUM_LC_CLASSES; i++) {
@@ -39,6 +42,8 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
             outputFeatureNames[NUM_LC_CLASSES + i] = "majority_class_" + (i + 1);
         }
 
-        return new LcAggregator(spatialFeatureNames, outputFeatureNames);
+        SEAGrid grid = new SEAGrid(numGridRows);
+
+        return new LcAggregator(spatialFeatureNames, outputFeatureNames, areaCalculator, grid);
     }
 }

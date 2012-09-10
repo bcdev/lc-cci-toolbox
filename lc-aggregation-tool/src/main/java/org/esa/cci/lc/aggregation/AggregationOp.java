@@ -3,6 +3,7 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
@@ -124,8 +125,13 @@ public class AggregationOp extends Operator {
     }
 
     private BinningConfig createBinningConfig(Product product) {
+        int sceneWidth = sourceProduct.getSceneRasterWidth();
+        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(SEAGrid.RE, numRows,
+                                                                               sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
-                                                                       numberOfMajorityClasses);
+                                                                       numberOfMajorityClasses, numRows,
+                                                                       areaCalculator);
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("");
         binningConfig.setNumRows(numRows);

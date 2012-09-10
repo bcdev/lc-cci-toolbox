@@ -3,9 +3,9 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.AbstractAggregator;
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
+import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
-import org.esa.beam.binning.support.SEAGrid;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,23 +13,16 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static java.lang.Math.*;
-
 /**
  * @author Marco Peters
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class LcAggregator extends AbstractAggregator {
 
-    private static final int NUM_GRID_ROWS = 216;
-    private static final double INPUT_WIDTH = 12960.0;
-    private static final double INPUT_HEIGHT = 6480.0;
-//    private static final double INPUT_WIDTH = 129600.0;
-//    private static final double INPUT_HEIGHT = 64800.0;
-
     // this Lut is for the LC example
     private static Map<Integer, Integer> classValueToVectorIndexMap;
-    private final SEAGrid seaGrid;
+    private final PlanetaryGrid grid;
+    private AreaCalculator areaCalculator;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
@@ -59,9 +52,11 @@ public class LcAggregator extends AbstractAggregator {
         classValueToVectorIndexMap.put(255, 23);
     }
 
-    LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames) {
+    LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames,
+                 AreaCalculator areaCalculator, PlanetaryGrid grid) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
-        seaGrid = new SEAGrid(NUM_GRID_ROWS);
+        this.areaCalculator = areaCalculator;
+        this.grid = grid;
     }
 
     @Override
@@ -75,25 +70,13 @@ public class LcAggregator extends AbstractAggregator {
     public void aggregateSpatial(BinContext ctx, Vector observationVector, WritableVector spatialVector) {
         Observation observation = (Observation) observationVector;
         double latitude = observation.getLatitude();
-        // todo (mp) - where to retrieve the grid from
-        // todo (mp) - where to retrieve the width and height of the input from
-        int rowIndex = seaGrid.getRowIndex(ctx.getIndex());
-        int numCols = seaGrid.getNumCols(rowIndex);
-        int numRows = seaGrid.getNumRows();
-        double observationArea = computeArea(latitude, 180.0 / INPUT_HEIGHT, 360.0 / INPUT_WIDTH);
-        double binArea = computeArea(seaGrid.getCenterLat(rowIndex), 180.0 / numRows, 360.0 / numCols);
-        float area = (float) (observationArea / binArea);
+        int rowIndex = grid.getRowIndex(ctx.getIndex());
+        int numCols = grid.getNumCols(rowIndex);
+        float arealFraction = (float) areaCalculator.calculate(latitude, grid.getCenterLat(rowIndex), numCols);
 
         int index = getVectorIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
-        spatialVector.set(index, oldValue + area);
-    }
-
-    private double computeArea(double latitude, double deltaLat, double deltaLon) {
-        double r2 = SEAGrid.RE * cos(toRadians(latitude));
-        double a = r2 * toRadians(deltaLon);
-        double b = SEAGrid.RE * toRadians(deltaLat);
-        return a * b;
+        spatialVector.set(index, oldValue + arealFraction);
     }
 
     @Override
