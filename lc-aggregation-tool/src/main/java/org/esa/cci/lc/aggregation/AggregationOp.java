@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * @author Marco Peters
  */
 @OperatorMetadata(
-        alias = "Aggregate",
+        alias = "LCCCI.Aggregate",
         version = "0.1",
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
@@ -250,6 +250,12 @@ public class AggregationOp extends Operator {
         if (!outputMajorityClasses && !outputPFTClasses) {
             throw new OperatorException("Nothing to process. Majority classes and/or " +
                                         "PFT classes must be selected for output.");
+        }
+        if (numberOfMajorityClasses > LcAggregatorDescriptor.NUM_LC_CLASSES) {
+            throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
+        }
+        if (numRows < 2 || numRows % 2 != 0) {
+            throw new OperatorException("Number of rows must greater than 2 and must be an even number.");
         }
     }
 
