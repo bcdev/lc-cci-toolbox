@@ -32,7 +32,7 @@ public class AggregationAction extends AbstractVisatAction {
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
         DefaultSingleTargetProductDialog productDialog = new DefaultSingleTargetProductDialog(
-                "Aggregate", appContext, "Landcover CCI Aggregation Tool", helpId) {
+                "LCCCI.Aggregate", appContext, "Landcover CCI Aggregation Tool", helpId) {
 
             @Override
             protected void onClose() {
