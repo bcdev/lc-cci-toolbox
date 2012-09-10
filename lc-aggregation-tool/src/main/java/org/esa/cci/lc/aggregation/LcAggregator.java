@@ -75,11 +75,13 @@ public class LcAggregator extends AbstractAggregator {
     public void aggregateSpatial(BinContext ctx, Vector observationVector, WritableVector spatialVector) {
         Observation observation = (Observation) observationVector;
         double latitude = observation.getLatitude();
-        // todo (mp) - generalize this
+        // todo (mp) - where to retrieve the grid from
+        // todo (mp) - where to retrieve the width and height of the input from
         int rowIndex = seaGrid.getRowIndex(ctx.getIndex());
         int numCols = seaGrid.getNumCols(rowIndex);
+        int numRows = seaGrid.getNumRows();
         double observationArea = computeArea(latitude, 180.0 / INPUT_HEIGHT, 360.0 / INPUT_WIDTH);
-        double binArea = computeArea(seaGrid.getCenterLat(rowIndex), 180.0 / NUM_GRID_ROWS, 360.0 / numCols); // todo
+        double binArea = computeArea(seaGrid.getCenterLat(rowIndex), 180.0 / numRows, 360.0 / numCols);
         float area = (float) (observationArea / binArea);
 
         int index = getVectorIndex((int) observation.get(0));
