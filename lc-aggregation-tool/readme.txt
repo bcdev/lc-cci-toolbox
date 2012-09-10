@@ -12,10 +12,10 @@ Installation
    Change the line
         -Xmx1024M
     to
-        -Xmx3500M
-   This allows the tool to consume more memory. Instead of 1GB it can then use 3.5GB. If you can not specify such high
+        -Xmx5000M
+   This allows the tool to consume more memory. Instead of 1GB, it can then use 5GB. If you can not specify such high
    values (because your computer doesn't have enough memory installed) it can happen that the process takes very long or
-   brakes after a long time of computation.
+   brakes after a long time of computation. Therefore specify the highest possible value.
    After changing and saving the file copy it back to the original folder and replace the old batch file.
 
 Execution
