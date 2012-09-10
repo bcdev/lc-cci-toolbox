@@ -72,7 +72,7 @@ public class AggregationOp extends Operator {
     @Parameter(description = "Whether or not to add PFT classes to the output.", defaultValue = "true")
     private boolean outputPFTClasses;
 
-    @Parameter(defaultValue = "216")
+    @Parameter(defaultValue = "2160")
     private int numRows;
 
     FormatterConfig formatterConfig;
