@@ -73,12 +73,36 @@ public class AggregationOpTest {
         assertTrue(aggrOp.isOutputMajorityClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
-        assertEquals(216, aggrOp.getNumRows());
+        assertEquals(2160, aggrOp.getNumRows());
 
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertEquals("Product", formatterConfig.getOutputType());
         assertEquals("NetCDF4-BEAM", formatterConfig.getOutputFormat());
         assertEquals("target.nc", formatterConfig.getOutputFile());
+    }
+
+    @Test
+    public void testNumRows_LessThanTwo() {
+        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        aggrOp.setNumRows(1);
+        try {
+            aggrOp.initialize();
+        } catch (OperatorException oe) {
+            String message = oe.getMessage().toLowerCase();
+            assertTrue(message.contains("rows"));
+        }
+    }
+
+    @Test
+    public void testNumRows_OddValue() {
+        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        aggrOp.setNumRows(23);
+        try {
+            aggrOp.initialize();
+        } catch (OperatorException oe) {
+            String message = oe.getMessage().toLowerCase();
+            assertTrue(message.contains("rows"));
+        }
     }
 
     @Test
