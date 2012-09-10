@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-aggregation-tool</symbolicName>
-    <version>0.1</version>
+    <version>0.2</version>
     <name>LC CCI Aggregation Tool</name>
 
     <description>A tool allowing to re-project, aggregate and subset LC map and conditions products.</description>
