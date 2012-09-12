@@ -4,6 +4,7 @@ import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.binning.support.VectorImpl;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 
@@ -131,16 +132,14 @@ public class LcAggregatorTest {
     private LcAggregator createAggregator(int numMajorityClasses) {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcAggregatorDescriptor lcAggregatorDescriptor = new LcAggregatorDescriptor();
-        AreaCalculator areaCalculator = new ConstAreaCalculator();
+
+        FractionalAreaCalculator areaCalculator = Mockito.mock(FractionalAreaCalculator.class);
+        Mockito.when(
+                areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble())).thenReturn(
+                1.0);
+
         LcAggregatorConfig config = new LcAggregatorConfig("classes", numMajorityClasses, 10, areaCalculator);
         return (LcAggregator) lcAggregatorDescriptor.createAggregator(varCtx, config);
     }
 
-    private static class ConstAreaCalculator implements AreaCalculator {
-
-        @Override
-        public double calculate(double observationLat, double gridLat, double numGridCols) {
-            return 1.0;
-        }
-    }
 }

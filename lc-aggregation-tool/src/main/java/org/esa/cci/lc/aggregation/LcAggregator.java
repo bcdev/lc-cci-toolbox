@@ -22,7 +22,7 @@ public class LcAggregator extends AbstractAggregator {
     // this Lut is for the LC example
     private static Map<Integer, Integer> classValueToVectorIndexMap;
     private final PlanetaryGrid grid;
-    private AreaCalculator areaCalculator;
+    private FractionalAreaCalculator areaCalculator;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
@@ -53,7 +53,7 @@ public class LcAggregator extends AbstractAggregator {
     }
 
     LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames,
-                 AreaCalculator areaCalculator, PlanetaryGrid grid) {
+                 FractionalAreaCalculator areaCalculator, PlanetaryGrid grid) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
         this.areaCalculator = areaCalculator;
         this.grid = grid;

@@ -5,7 +5,7 @@ import static java.lang.Math.*;
 /**
  * @author Marco Peters
  */
-class FractionalAreaCalculator implements AreaCalculator {
+class FractionalAreaCalculator {
 
     private final double earthRadius;
     private final double deltaGridLat;
@@ -20,7 +20,6 @@ class FractionalAreaCalculator implements AreaCalculator {
     }
 
     // todo (mp) - consider the case if the pixel is only partly in the bin
-    @Override
     public double calculate(double observationLat, double gridLat, double numGridCols) {
         double observationArea = computeArea(observationLat, deltaMapLat, deltaMapLon);
         double deltaGridLon = 360.0 / numGridCols;

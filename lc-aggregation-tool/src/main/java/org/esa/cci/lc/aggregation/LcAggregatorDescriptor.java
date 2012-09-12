@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.AggregatorDescriptor;
@@ -28,9 +29,10 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
     @Override
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
 
-        int numMajorityClasses = (Integer) aggregatorConfig.asPropertySet().getValue("numMajorityClasses");
-        int numGridRows = (Integer) aggregatorConfig.asPropertySet().getValue("numGridRows");
-        AreaCalculator areaCalculator = (AreaCalculator) aggregatorConfig.asPropertySet().getValue("areaCalculator");
+        PropertySet propertySet = aggregatorConfig.asPropertySet();
+        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
+        int numGridRows = (Integer) propertySet.getValue("numGridRows");
+        FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
 
         String[] spatialFeatureNames = new String[NUM_LC_CLASSES];
         for (int i = 0; i < NUM_LC_CLASSES; i++) {

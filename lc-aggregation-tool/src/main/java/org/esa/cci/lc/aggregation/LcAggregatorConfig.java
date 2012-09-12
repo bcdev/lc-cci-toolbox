@@ -17,14 +17,15 @@ public class LcAggregatorConfig extends AggregatorConfig {
     private int numGridRows;
 
     @Parameter
-    private AreaCalculator areaCalculator;
+    private FractionalAreaCalculator areaCalculator;
 
 
     public LcAggregatorConfig() {
         super(LcAggregatorDescriptor.NAME);
     }
 
-    LcAggregatorConfig(String varName, int numMajorityClasses, int numGridRows, AreaCalculator areaCalculator) {
+    LcAggregatorConfig(String varName, int numMajorityClasses, int numGridRows,
+                       FractionalAreaCalculator areaCalculator) {
         super(LcAggregatorDescriptor.NAME);
         this.numMajorityClasses = numMajorityClasses;
         this.numGridRows = numGridRows;
