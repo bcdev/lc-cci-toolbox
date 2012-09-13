@@ -20,7 +20,7 @@ public class LcAggregatorConfig extends AggregatorConfig {
     private FractionalAreaCalculator areaCalculator;
 
 
-    public LcAggregatorConfig() {
+    LcAggregatorConfig() {
         super(LcAggregatorDescriptor.NAME);
     }
 
