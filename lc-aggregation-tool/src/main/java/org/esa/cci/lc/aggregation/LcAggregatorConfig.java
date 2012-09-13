@@ -4,9 +4,9 @@ import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 /**
- * @author Norman Fomferra
+ * @author Marco Peters
  */
-public class LcAggregatorConfig extends AggregatorConfig {
+class LcAggregatorConfig extends AggregatorConfig {
 
     @Parameter
     private String varName;

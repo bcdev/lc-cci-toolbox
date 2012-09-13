@@ -38,12 +38,12 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
         for (int i = 0; i < NUM_LC_CLASSES; i++) {
             spatialFeatureNames[i] = "class_area_" + (i + 1);
         }
-        String[] outputFeatureNames = new String[NUM_LC_CLASSES + numMajorityClasses];
+        String[] outputFeatureNames = new String[NUM_LC_CLASSES + numMajorityClasses + 1];
         System.arraycopy(spatialFeatureNames, 0, outputFeatureNames, 0, spatialFeatureNames.length);
         for (int i = 0; i < numMajorityClasses; i++) {
             outputFeatureNames[NUM_LC_CLASSES + i] = "majority_class_" + (i + 1);
         }
-
+        outputFeatureNames[outputFeatureNames.length - 1] = "class_area_sum";
         SEAGrid grid = new SEAGrid(numGridRows);
 
         return new LcAggregator(spatialFeatureNames, outputFeatureNames, areaCalculator, grid);

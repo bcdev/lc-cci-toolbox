@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * @author Marco Peters
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class LcAggregator extends AbstractAggregator {
+class LcAggregator extends AbstractAggregator {
 
     // this Lut is for the LC example
     private static Map<Integer, Integer> classValueToVectorIndexMap;
@@ -113,16 +113,18 @@ public class LcAggregator extends AbstractAggregator {
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
         SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
+        float sum = 0.0f;
         for (int i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
                 sortedMap.put(classArea, i);
+                sum += classArea;
             }
             outputVector.set(i, classArea);
         }
 
         Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
-        for (int i = 0; i < outputVector.size() - LcAggregatorDescriptor.NUM_LC_CLASSES; i++) {
+        for (int i = 0; i < outputVector.size() - 1 - LcAggregatorDescriptor.NUM_LC_CLASSES; i++) {
             Float majorityClass;
             if (i >= classesSortedByOccurrence.length) {
                 majorityClass = Float.NaN;
@@ -131,8 +133,7 @@ public class LcAggregator extends AbstractAggregator {
             }
             outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass + 1);
         }
-
-        // todo: Generate overall area sum
+        outputVector.set(outputVector.size() - 1, sum);
     }
 
     private int getVectorIndex(int classValue) {
