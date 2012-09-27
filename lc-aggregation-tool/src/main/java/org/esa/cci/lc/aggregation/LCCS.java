@@ -39,7 +39,7 @@ public class LCCS {
             List<String[]> records = csvReader.readStringRecords();
             int[] classValues = new int[records.size()];
             String[] classDescriptions = new String[records.size()];
-            for (int i = 0, recordsSize = records.size(); i < recordsSize; i++) {
+            for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
                 classValues[i] = Integer.parseInt(record[0]);
                 classDescriptions[i] = record[1];
