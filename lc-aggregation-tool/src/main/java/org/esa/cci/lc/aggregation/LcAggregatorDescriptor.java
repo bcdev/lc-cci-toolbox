@@ -12,8 +12,6 @@ import org.esa.beam.binning.VariableContext;
 public class LcAggregatorDescriptor implements AggregatorDescriptor {
 
     public static final String NAME = "LC_AGGR";
-    // todo: adapt to real number of LC classes
-    public static final int NUM_LC_CLASSES = 24;
 
     @Override
     public String getName() {
