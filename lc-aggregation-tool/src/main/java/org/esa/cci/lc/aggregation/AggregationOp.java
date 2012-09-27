@@ -7,6 +7,7 @@ import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -101,7 +102,16 @@ public class AggregationOp extends Operator {
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
 
-        setTargetProduct(binningOp.getTargetProduct());
+        Product targetProduct = binningOp.getTargetProduct();
+        LCCS lccs = LCCS.getInstance();
+        int[] classValues = lccs.getClassValues();
+        String[] classDescriptions = lccs.getClassDescriptions();
+        for (int i = 0; i < classValues.length; i++) {
+            int classValue = classValues[i];
+            Band band = targetProduct.getBand("class_area_" + classValue);
+            band.setDescription(classDescriptions[i]);
+        }
+        setTargetProduct(targetProduct);
     }
 
 
@@ -237,7 +247,8 @@ public class AggregationOp extends Operator {
             throw new OperatorException("Nothing to process. Majority classes and/or " +
                                         "PFT classes must be selected for output.");
         }
-        if (numberOfMajorityClasses > LcAggregatorDescriptor.NUM_LC_CLASSES) {
+        LCCS lccs = LCCS.getInstance();
+        if (numberOfMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
         }
         if (numRows < 2 || numRows % 2 != 0) {

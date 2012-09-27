@@ -21,45 +21,28 @@ import java.util.TreeMap;
 class LcAggregator extends AbstractAggregator {
 
     // this Lut is for the LC example
-    private static Map<Integer, Integer> classValueToVectorIndexMap;
-    private static Map<Integer, Integer> vectorIndexToClassValueMap;
+    private static final Map<Integer, Integer> classValueToVectorIndexMap;
+    private static final Map<Integer, Integer> vectorIndexToClassValueMap;
+    private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
         vectorIndexToClassValueMap = new HashMap<Integer, Integer>();
-        classValueToVectorIndexMap.put(10, 0);
-        classValueToVectorIndexMap.put(20, 1);
-        classValueToVectorIndexMap.put(30, 2);
-        classValueToVectorIndexMap.put(40, 3);
-        classValueToVectorIndexMap.put(50, 4);
-        classValueToVectorIndexMap.put(60, 5);
-        classValueToVectorIndexMap.put(70, 6);
-        classValueToVectorIndexMap.put(80, 7);
-        classValueToVectorIndexMap.put(90, 8);
-        classValueToVectorIndexMap.put(100, 9);
-        classValueToVectorIndexMap.put(110, 10);
-        classValueToVectorIndexMap.put(120, 11);
-        classValueToVectorIndexMap.put(130, 12);
-        classValueToVectorIndexMap.put(140, 13);
-        classValueToVectorIndexMap.put(150, 14);
-        classValueToVectorIndexMap.put(160, 15);
-        classValueToVectorIndexMap.put(170, 16);
-        classValueToVectorIndexMap.put(180, 17);
-        classValueToVectorIndexMap.put(190, 18);
-        classValueToVectorIndexMap.put(200, 19);
-        classValueToVectorIndexMap.put(210, 20);
-        classValueToVectorIndexMap.put(220, 21);
-        classValueToVectorIndexMap.put(230, 22);
-        classValueToVectorIndexMap.put(255, 23);
+        int[] classValues = LCCS_CLASSES.getClassValues();
+        for (int i = 0; i < classValues.length; i++) {
+            int classValue = classValues[i];
+            classValueToVectorIndexMap.put(classValue, i);
+        }
         for (Map.Entry<Integer, Integer> entry : classValueToVectorIndexMap.entrySet()) {
             vectorIndexToClassValueMap.put(entry.getValue(), entry.getKey());
         }
     }
 
-    LcAggregator(int numLCClasses, int numMajorityClasses, int numGridRows, FractionalAreaCalculator areaCalculator) {
-        this(createSpatialFeatureNames(numLCClasses), numMajorityClasses, numGridRows, areaCalculator);
+    public LcAggregator(int numMajorityClasses, int numGridRows, FractionalAreaCalculator areaCalculator) {
+        this(createSpatialFeatureNames(), numMajorityClasses, numGridRows, areaCalculator);
+
     }
 
     private LcAggregator(String[] spatialFeatureNames, int numMajorityClasses, int numGridRows,
@@ -81,10 +64,11 @@ class LcAggregator extends AbstractAggregator {
         return outputFeatureNames;
     }
 
-    private static String[] createSpatialFeatureNames(int numLCClasses) {
-        String[] spatialFeatureNames = new String[numLCClasses];
+    private static String[] createSpatialFeatureNames() {
+        String[] spatialFeatureNames = new String[LCCS_CLASSES.getNumClasses()];
+        int[] classValues = LCCS_CLASSES.getClassValues();
         for (int i = 0; i < spatialFeatureNames.length; i++) {
-            spatialFeatureNames[i] = "class_area_" + (i + 1);
+            spatialFeatureNames[i] = "class_area_" + classValues[i];
         }
         return spatialFeatureNames;
     }
@@ -154,20 +138,23 @@ class LcAggregator extends AbstractAggregator {
         }
 
         Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
-        for (int i = 0; i < outputVector.size() - 1 - LcAggregatorDescriptor.NUM_LC_CLASSES; i++) {
+        for (int i = 0; i < outputVector.size() - 1 - LCCS_CLASSES.getNumClasses(); i++) {
             Float majorityClass;
             if (i >= classesSortedByOccurrence.length) {
                 majorityClass = Float.NaN;
             } else {
                 majorityClass = classesSortedByOccurrence[i].floatValue();
             }
-            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass);
+            outputVector.set(i + LCCS_CLASSES.getNumClasses(), majorityClass);
         }
         outputVector.set(outputVector.size() - 1, sum);
     }
 
     private int getVectorIndex(int classValue) {
         // map classValue to spatial vector index i
+        if (!classValueToVectorIndexMap.containsKey(classValue)) {
+            classValue = 0;
+        }
         return classValueToVectorIndexMap.get(classValue);
     }
 
@@ -175,6 +162,5 @@ class LcAggregator extends AbstractAggregator {
         // map classValue to spatial vector index i
         return vectorIndexToClassValueMap.get(vectorIndex);
     }
-
 
 }

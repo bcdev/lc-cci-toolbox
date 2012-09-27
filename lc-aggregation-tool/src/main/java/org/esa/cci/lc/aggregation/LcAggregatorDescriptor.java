@@ -33,6 +33,6 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
         int numGridRows = (Integer) propertySet.getValue("numGridRows");
         FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
 
-        return new LcAggregator(NUM_LC_CLASSES, numMajorityClasses, numGridRows, areaCalculator);
+        return new LcAggregator(numMajorityClasses, numGridRows, areaCalculator);
     }
 }

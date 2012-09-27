@@ -24,22 +24,20 @@ public class LcAggregatorTest {
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         String[] outputFeatureNames = aggregator.getOutputFeatureNames();
 
-        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES, spatialFeatureNames.length);
-        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES, aggregator.getTemporalFeatureNames().length);
-        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses + 1, outputFeatureNames.length);
+        int numClasses = LCCS.getInstance().getNumClasses();
+        assertEquals(numClasses, spatialFeatureNames.length);
+        assertEquals(numClasses, aggregator.getTemporalFeatureNames().length);
+        assertEquals(numClasses + numMajorityClasses + 1, outputFeatureNames.length);
 
         assertTrue(Float.isNaN(aggregator.getOutputFillValue()));
 
-        assertEquals("class_area_1", spatialFeatureNames[0]);
-        assertEquals("class_area_" + LcAggregatorDescriptor.NUM_LC_CLASSES,
-                     spatialFeatureNames[LcAggregatorDescriptor.NUM_LC_CLASSES - 1]);
+        assertEquals("class_area_0", spatialFeatureNames[0]);
+        assertEquals("class_area_220", spatialFeatureNames[numClasses - 1]);
 
-        assertEquals("class_area_1", outputFeatureNames[0]);
-        assertEquals("class_area_" + LcAggregatorDescriptor.NUM_LC_CLASSES,
-                     outputFeatureNames[LcAggregatorDescriptor.NUM_LC_CLASSES - 1]);
-        assertEquals("majority_class_1", outputFeatureNames[LcAggregatorDescriptor.NUM_LC_CLASSES]);
-        assertEquals("majority_class_3",
-                     outputFeatureNames[LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses - 1]);
+        assertEquals("class_area_0", outputFeatureNames[0]);
+        assertEquals("class_area_220", outputFeatureNames[numClasses - 1]);
+        assertEquals("majority_class_1", outputFeatureNames[numClasses]);
+        assertEquals("majority_class_3", outputFeatureNames[numClasses + numMajorityClasses - 1]);
     }
 
     @Test
@@ -68,23 +66,23 @@ public class LcAggregatorTest {
         aggregator.initSpatial(ctx, spatialVector);
 
         int class1 = 10;
-        int class1Index = 0;
+        int class1Index = 1;
         int class2 = 20;
-        int class2Index = 1;
-        int class8 = 80;
-        int class8Index = 7;
-        int class17 = 170;
-        int class17Index = 16;
+        int class2Index = 4;
+        int class82 = 82;
+        int class8Index = 16;
+        int class170 = 170;
+        int class17Index = 30;
 
-        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class1), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class2), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class17), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
         int numObs = 9;
         aggregator.completeSpatial(ctx, numObs, spatialVector);
         assertEquals(1.0f, spatialVector.get(class1Index), 1.0e-6f);
@@ -105,7 +103,7 @@ public class LcAggregatorTest {
             assertEquals(temporalVector.get(i), outputVector.get(i), 1.0e-6);
         }
         assertEquals(170, outputVector.get(outputVector.size() - 3), 0.0f); // majority class 1
-        assertEquals(80, outputVector.get(outputVector.size() - 2), 0.0f);  // majority class 2
+        assertEquals(82, outputVector.get(outputVector.size() - 2), 0.0f);  // majority class 2
         assertEquals(numObs, outputVector.get(outputVector.size() - 1), 0.0f);  // sum
 
     }
@@ -120,10 +118,11 @@ public class LcAggregatorTest {
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
         aggregator.initSpatial(ctx, spatialVector);
 
-        int class8 = 80;
-        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
-        aggregator.aggregateSpatial(ctx, obs(class8), spatialVector);
-        assertEquals(2.0f, spatialVector.get(7), 1.0e-6f);
+        int class80 = 80;
+        int class80Index = 14;
+        aggregator.aggregateSpatial(ctx, obs(class80), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class80), spatialVector);
+        assertEquals(2.0f, spatialVector.get(class80Index), 1.0e-6f);
         aggregator.completeSpatial(ctx, 2, spatialVector);
 
         VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
