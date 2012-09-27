@@ -22,11 +22,13 @@ class LcAggregator extends AbstractAggregator {
 
     // this Lut is for the LC example
     private static Map<Integer, Integer> classValueToVectorIndexMap;
+    private static Map<Integer, Integer> vectorIndexToClassValueMap;
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
+        vectorIndexToClassValueMap = new HashMap<Integer, Integer>();
         classValueToVectorIndexMap.put(10, 0);
         classValueToVectorIndexMap.put(20, 1);
         classValueToVectorIndexMap.put(30, 2);
@@ -51,6 +53,9 @@ class LcAggregator extends AbstractAggregator {
         classValueToVectorIndexMap.put(220, 21);
         classValueToVectorIndexMap.put(230, 22);
         classValueToVectorIndexMap.put(255, 23);
+        for (Map.Entry<Integer, Integer> entry : classValueToVectorIndexMap.entrySet()) {
+            vectorIndexToClassValueMap.put(entry.getValue(), entry.getKey());
+        }
     }
 
     LcAggregator(int numLCClasses, int numMajorityClasses, int numGridRows, FractionalAreaCalculator areaCalculator) {
@@ -142,7 +147,7 @@ class LcAggregator extends AbstractAggregator {
         for (int i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
-                sortedMap.put(classArea, i);
+                sortedMap.put(classArea, getClassValue(i));
                 sum += classArea;
             }
             outputVector.set(i, classArea);
@@ -156,18 +161,19 @@ class LcAggregator extends AbstractAggregator {
             } else {
                 majorityClass = classesSortedByOccurrence[i].floatValue();
             }
-            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass + 1);
+            outputVector.set(i + LcAggregatorDescriptor.NUM_LC_CLASSES, majorityClass);
         }
         outputVector.set(outputVector.size() - 1, sum);
     }
 
     private int getVectorIndex(int classValue) {
         // map classValue to spatial vector index i
-        Integer vectorIndex = classValueToVectorIndexMap.get(classValue);
-        if (vectorIndex == null) { // how to handle a value which is not assigned to a class
-            vectorIndex = 1;
-        }
-        return vectorIndex % LcAggregatorDescriptor.NUM_LC_CLASSES;
+        return classValueToVectorIndexMap.get(classValue);
+    }
+
+    private int getClassValue(int vectorIndex) {
+        // map classValue to spatial vector index i
+        return vectorIndexToClassValueMap.get(vectorIndex);
     }
 
 
