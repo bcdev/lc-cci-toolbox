@@ -17,6 +17,9 @@ class LcAggregatorConfig extends AggregatorConfig {
     private int numGridRows;
 
     @Parameter
+    private boolean outputPFTClasses;
+
+    @Parameter
     private FractionalAreaCalculator areaCalculator;
 
 
@@ -25,11 +28,12 @@ class LcAggregatorConfig extends AggregatorConfig {
     }
 
     LcAggregatorConfig(String varName, int numMajorityClasses, int numGridRows,
-                       FractionalAreaCalculator areaCalculator) {
+                       boolean outputPFTClasses, FractionalAreaCalculator areaCalculator) {
         super(LcAggregatorDescriptor.NAME);
         this.numMajorityClasses = numMajorityClasses;
         this.numGridRows = numGridRows;
         this.varName = varName;
+        this.outputPFTClasses = outputPFTClasses;
         this.areaCalculator = areaCalculator;
     }
 

@@ -26,6 +26,7 @@ class LcAggregator extends AbstractAggregator {
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
+    private boolean outputPFTClasses;
 
     static {
         classValueToVectorIndexMap = new HashMap<Integer, Integer>();
@@ -40,21 +41,24 @@ class LcAggregator extends AbstractAggregator {
         }
     }
 
-    public LcAggregator(int numMajorityClasses, int numGridRows, FractionalAreaCalculator areaCalculator) {
-        this(createSpatialFeatureNames(), numMajorityClasses, numGridRows, areaCalculator);
+    public LcAggregator(int numMajorityClasses, int numGridRows, boolean outputPFTClasses,
+                        FractionalAreaCalculator areaCalculator) {
+        this(createSpatialFeatureNames(), numMajorityClasses, numGridRows, outputPFTClasses, areaCalculator);
 
     }
 
     private LcAggregator(String[] spatialFeatureNames, int numMajorityClasses, int numGridRows,
-                         FractionalAreaCalculator areaCalculator) {
+                         boolean outputPFTClasses, FractionalAreaCalculator areaCalculator) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(numMajorityClasses, spatialFeatureNames), null);
+              createOutputFeatureNames(numMajorityClasses, outputPFTClasses, spatialFeatureNames), null);
+        this.outputPFTClasses = outputPFTClasses;
         this.areaCalculator = areaCalculator;
         this.grid = new SEAGrid(numGridRows);
 
     }
 
-    private static String[] createOutputFeatureNames(int numMajorityClasses, String[] spatialFeatureNames) {
+    private static String[] createOutputFeatureNames(int numMajorityClasses, boolean outputPFTClasses,
+                                                     String[] spatialFeatureNames) {
         String[] outputFeatureNames = new String[spatialFeatureNames.length + numMajorityClasses + 1];
         System.arraycopy(spatialFeatureNames, 0, outputFeatureNames, 0, spatialFeatureNames.length);
         for (int i = 0; i < numMajorityClasses; i++) {

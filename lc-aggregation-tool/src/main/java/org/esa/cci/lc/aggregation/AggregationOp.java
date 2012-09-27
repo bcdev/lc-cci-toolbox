@@ -138,7 +138,7 @@ public class AggregationOp extends Operator {
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
                                                                        numberOfMajorityClasses, numRows,
-                                                                       areaCalculator);
+                                                                       outputPFTClasses, areaCalculator);
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("");
         binningConfig.setNumRows(numRows);
