@@ -56,7 +56,8 @@ public class AggregationOpTest {
         Product targetProduct = aggregationOp.getTargetProduct();
 
         int numObsAndPasses = 2;
-        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses + numObsAndPasses,
+        int sumAreaBand = 1;
+        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses + sumAreaBand + numObsAndPasses,
                      targetProduct.getNumBands());
     }
 

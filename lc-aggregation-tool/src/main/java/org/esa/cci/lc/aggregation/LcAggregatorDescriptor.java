@@ -5,7 +5,6 @@ import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.AggregatorDescriptor;
 import org.esa.beam.binning.VariableContext;
-import org.esa.beam.binning.support.SEAGrid;
 
 /**
  * @author Marco Peters
@@ -34,18 +33,6 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
         int numGridRows = (Integer) propertySet.getValue("numGridRows");
         FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
 
-        String[] spatialFeatureNames = new String[NUM_LC_CLASSES];
-        for (int i = 0; i < NUM_LC_CLASSES; i++) {
-            spatialFeatureNames[i] = "class_area_" + (i + 1);
-        }
-        String[] outputFeatureNames = new String[NUM_LC_CLASSES + numMajorityClasses + 1];
-        System.arraycopy(spatialFeatureNames, 0, outputFeatureNames, 0, spatialFeatureNames.length);
-        for (int i = 0; i < numMajorityClasses; i++) {
-            outputFeatureNames[NUM_LC_CLASSES + i] = "majority_class_" + (i + 1);
-        }
-        outputFeatureNames[outputFeatureNames.length - 1] = "class_area_sum";
-        SEAGrid grid = new SEAGrid(numGridRows);
-
-        return new LcAggregator(spatialFeatureNames, outputFeatureNames, areaCalculator, grid);
+        return new LcAggregator(NUM_LC_CLASSES, numMajorityClasses, numGridRows, areaCalculator);
     }
 }

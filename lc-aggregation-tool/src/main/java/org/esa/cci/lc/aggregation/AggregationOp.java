@@ -16,10 +16,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.ProductUtils;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -35,7 +32,7 @@ import java.util.regex.Pattern;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate",
-        version = "0.1",
+        version = "0.2",
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
@@ -138,17 +135,6 @@ public class AggregationOp extends Operator {
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);
         return binningConfig;
-    }
-
-    private ReferencedEnvelope createTargetEnvelope() {
-        try {
-            final Rectangle2D bounds = new Rectangle2D.Double();
-            bounds.setFrameFromDiagonal(westBound, northBound, eastBound, southBound);
-            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
-            return boundsEnvelope.transform(DefaultGeographicCRS.WGS84, true);
-        } catch (Exception e) {
-            throw new OperatorException(e);
-        }
     }
 
     ProjectionMethod getProjectionMethod() {

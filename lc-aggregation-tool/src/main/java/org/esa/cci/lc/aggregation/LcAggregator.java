@@ -6,6 +6,7 @@ import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
+import org.esa.beam.binning.support.SEAGrid;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,11 +53,35 @@ class LcAggregator extends AbstractAggregator {
         classValueToVectorIndexMap.put(255, 23);
     }
 
-    LcAggregator(String[] spatialFeatureNames, String[] outputFeatureNames,
-                 FractionalAreaCalculator areaCalculator, PlanetaryGrid grid) {
-        super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames, null);
+    LcAggregator(int numLCClasses, int numMajorityClasses, int numGridRows, FractionalAreaCalculator areaCalculator) {
+        this(createSpatialFeatureNames(numLCClasses), numMajorityClasses, numGridRows, areaCalculator);
+    }
+
+    private LcAggregator(String[] spatialFeatureNames, int numMajorityClasses, int numGridRows,
+                         FractionalAreaCalculator areaCalculator) {
+        super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
+              createOutputFeatureNames(numMajorityClasses, spatialFeatureNames), null);
         this.areaCalculator = areaCalculator;
-        this.grid = grid;
+        this.grid = new SEAGrid(numGridRows);
+
+    }
+
+    private static String[] createOutputFeatureNames(int numMajorityClasses, String[] spatialFeatureNames) {
+        String[] outputFeatureNames = new String[spatialFeatureNames.length + numMajorityClasses + 1];
+        System.arraycopy(spatialFeatureNames, 0, outputFeatureNames, 0, spatialFeatureNames.length);
+        for (int i = 0; i < numMajorityClasses; i++) {
+            outputFeatureNames[spatialFeatureNames.length + i] = "majority_class_" + (i + 1);
+        }
+        outputFeatureNames[outputFeatureNames.length - 1] = "class_area_sum";
+        return outputFeatureNames;
+    }
+
+    private static String[] createSpatialFeatureNames(int numLCClasses) {
+        String[] spatialFeatureNames = new String[numLCClasses];
+        for (int i = 0; i < spatialFeatureNames.length; i++) {
+            spatialFeatureNames[i] = "class_area_" + (i + 1);
+        }
+        return spatialFeatureNames;
     }
 
     @Override

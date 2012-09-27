@@ -26,7 +26,7 @@ public class LcAggregatorTest {
 
         assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES, spatialFeatureNames.length);
         assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES, aggregator.getTemporalFeatureNames().length);
-        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses, outputFeatureNames.length);
+        assertEquals(LcAggregatorDescriptor.NUM_LC_CLASSES + numMajorityClasses + 1, outputFeatureNames.length);
 
         assertTrue(Float.isNaN(aggregator.getOutputFillValue()));
 
@@ -93,13 +93,15 @@ public class LcAggregatorTest {
             assertEquals(spatialVector.get(i), temporalVector.get(i), 1.0e-6);
         }
 
-        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1]);
         aggregator.computeOutput(temporalVector, outputVector);
         for (int i = 0; i < temporalVector.size(); i++) {
             assertEquals(temporalVector.get(i), outputVector.get(i), 1.0e-6);
         }
-        assertEquals(17, outputVector.get(outputVector.size() - 2), 0.0f);
-        assertEquals(8, outputVector.get(outputVector.size() - 1), 0.0f);
+        assertEquals(17, outputVector.get(outputVector.size() - 3), 0.0f); // majority class 1
+        assertEquals(8, outputVector.get(outputVector.size() - 2), 0.0f);  // majority class 2
+        assertEquals(9, outputVector.get(outputVector.size() - 1), 0.0f);  // sum
+
     }
 
     @Test
@@ -123,10 +125,10 @@ public class LcAggregatorTest {
         aggregator.completeTemporal(ctx, 1, temporalVector);
         VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
         aggregator.computeOutput(temporalVector, outputVector);
-        assertEquals(8, outputVector.get(outputVector.size() - 4), 0.0f);
+        assertEquals(8.0f, outputVector.get(outputVector.size() - 4), 0.0f);
         assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f);
         assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f);
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f);
+        assertEquals(2.0f, outputVector.get(outputVector.size() - 1), 0.0f); // sum
     }
 
     private LcAggregator createAggregator(int numMajorityClasses) {
