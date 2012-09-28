@@ -11,13 +11,11 @@ import java.util.List;
  */
 public class PftLut {
 
-    private final String[] pftnames;
+    private final String[] pftNames;
     private final double[][] conversionFactors;
 
-    private Object PFTNames;
-
-    public PftLut(String[] pftnames, double[][] conversionFactors) {
-        this.pftnames = pftnames;
+    public PftLut(String[] pftNames, double[][] conversionFactors) {
+        this.pftNames = pftNames;
         this.conversionFactors = conversionFactors;
     }
 
@@ -45,7 +43,7 @@ public class PftLut {
     }
 
     public String[] getPFTNames() {
-        return pftnames;
+        return pftNames;
     }
 
     public double[][] getConversionFactors() {
