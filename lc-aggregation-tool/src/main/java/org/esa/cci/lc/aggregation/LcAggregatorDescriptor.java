@@ -6,6 +6,10 @@ import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.AggregatorDescriptor;
 import org.esa.beam.binning.VariableContext;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 /**
  * @author Marco Peters
  */
@@ -32,6 +36,16 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
         boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
         FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
 
-        return new LcAggregator(numMajorityClasses, numGridRows, outputPFTClasses, areaCalculator);
+        PftLut pftLut = null;
+        if (outputPFTClasses) {
+            try {
+                InputStream resourceAsStream = LcAggregator.class.getResourceAsStream("Example_PFT_LUT.csv");
+                InputStreamReader reader = new InputStreamReader(resourceAsStream);
+                pftLut = PftLut.load(reader);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return new LcAggregator(numMajorityClasses, numGridRows, areaCalculator, pftLut);
     }
 }

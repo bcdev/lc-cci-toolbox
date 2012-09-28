@@ -21,9 +21,6 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 
-/**
- * @author Marco Peters
- */
 public class AggregationOpTest {
 
     private static AggregationOp.Spi aggregationSpi;
@@ -46,7 +43,7 @@ public class AggregationOpTest {
 
     @Test()
     public void testProcessing() throws Exception {
-        AggregationOp aggregationOp = new AggregationOp();
+        AggregationOp aggregationOp = createAggrOp();
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
@@ -57,7 +54,8 @@ public class AggregationOpTest {
 
         int numObsAndPasses = 2;
         int sumAreaBand = 1;
-        assertEquals(LCCS.getInstance().getNumClasses() + numMajorityClasses + sumAreaBand + numObsAndPasses,
+        int numPFTs = 14;
+        assertEquals(LCCS.getInstance().getNumClasses() + numMajorityClasses + sumAreaBand + numObsAndPasses + numPFTs,
                      targetProduct.getNumBands());
     }
 
@@ -79,12 +77,11 @@ public class AggregationOpTest {
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertEquals("Product", formatterConfig.getOutputType());
         assertEquals("NetCDF4-BEAM", formatterConfig.getOutputFormat());
-        assertEquals("target.nc", formatterConfig.getOutputFile());
     }
 
     @Test
     public void testNumRows_LessThanTwo() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        AggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(1);
         try {
             aggrOp.initialize();
@@ -96,7 +93,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNumRows_OddValue() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        AggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(23);
         try {
             aggrOp.initialize();
@@ -108,7 +105,7 @@ public class AggregationOpTest {
 
     @Test
     public void testWestEastBound() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        AggregationOp aggrOp = createAggrOp();
         aggrOp.setWestBound(10);
         aggrOp.setEastBound(3);
         try {
@@ -122,7 +119,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNorthSouthBound() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        AggregationOp aggrOp = createAggrOp();
         aggrOp.setNorthBound(30);
         aggrOp.setSouthBound(70);
         try {
@@ -136,7 +133,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNoOutputClassesSelected() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        AggregationOp aggrOp = createAggrOp();
         aggrOp.setOutputMajorityClasses(false);
         aggrOp.setOutputPFTClasses(false);
         try {
@@ -168,6 +165,12 @@ public class AggregationOpTest {
                                                              new Byte[]{10}, null));
         product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -180.0, 90.0, 1.0, 1.0));
         return product;
+    }
+
+    private AggregationOp createAggrOp() {
+        AggregationOp aggregationOp = (AggregationOp) aggregationSpi.createOperator();
+        aggregationOp.setTargetFile(new File("test-target.nc"));
+        return aggregationOp;
     }
 
 

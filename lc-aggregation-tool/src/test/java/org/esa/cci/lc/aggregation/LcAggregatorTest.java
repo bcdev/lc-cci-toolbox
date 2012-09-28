@@ -11,9 +11,6 @@ import java.util.Arrays;
 import static org.esa.cci.lc.aggregation.AggregatorTestUtils.*;
 import static org.junit.Assert.*;
 
-/**
- * @author Marco Peters
- */
 public class LcAggregatorTest {
 
     @Test
@@ -128,11 +125,12 @@ public class LcAggregatorTest {
         VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
         aggregator.aggregateTemporal(ctx, spatialVector, 2, temporalVector);
         aggregator.completeTemporal(ctx, 1, temporalVector);
-        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1]);
         aggregator.computeOutput(temporalVector, outputVector);
-        assertEquals(80.0f, outputVector.get(outputVector.size() - 4), 0.0f);
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f);
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f);
+        assertEquals(80.0f, outputVector.get(outputVector.size() - 5), 0.0f); // majority_1
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 4), 0.0f); // majority_2
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f); // majority_3
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f); // majority_4
         assertEquals(2.0f, outputVector.get(outputVector.size() - 1), 0.0f); // sum
     }
 

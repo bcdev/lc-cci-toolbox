@@ -12,26 +12,21 @@ import java.util.List;
 class PftLut {
 
     private final String[] pftNames;
-    private final double[][] conversionFactors;
-
-    public PftLut(String[] pftNames, double[][] conversionFactors) {
-        this.pftNames = pftNames;
-        this.conversionFactors = conversionFactors;
-    }
+    private final float[][] conversionFactors;
 
     public static PftLut load(Reader reader) throws IOException {
         CsvReader csvReader = new CsvReader(reader, new char[]{'|'});
         try {
-            String[] pftNames = csvReader.readRecord();
+            String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
-            double[][] conversionFactors = new double[records.size()][pftNames.length];
+            float[][] conversionFactors = new float[records.size()][pftNames.length];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
                 for (int j = 0; j < record.length; j++) {
-                    double pftFactor = 0.0;
+                    float pftFactor = Float.NaN;
                     String stringValue = record[j];
                     if (!stringValue.isEmpty()) {
-                        pftFactor = Double.parseDouble(stringValue);
+                        pftFactor = Float.parseFloat(stringValue) / 100.0f;
                     }
                     conversionFactors[i][j] = pftFactor;
                 }
@@ -42,11 +37,23 @@ class PftLut {
         }
     }
 
+    private PftLut(String[] pftNames, float[][] conversionFactors) {
+        this.pftNames = pftNames;
+        this.conversionFactors = conversionFactors;
+    }
+
+    private static String[] ensureValidNames(String[] pftNames) {
+        for (int i = 0; i < pftNames.length; i++) {
+            pftNames[i] = pftNames[i].replaceAll("[ /]", "_");
+        }
+        return pftNames;
+    }
+
     public String[] getPFTNames() {
         return pftNames;
     }
 
-    public double[][] getConversionFactors() {
+    public float[][] getConversionFactors() {
         return conversionFactors;
     }
 }

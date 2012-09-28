@@ -7,7 +7,6 @@ import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -39,8 +38,11 @@ import java.util.regex.Pattern;
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class AggregationOp extends Operator {
 
-    @SourceProduct(description = "LC CCI map or conditions product", optional = false)
+    @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
+
+    @Parameter(description = "The target file location.", defaultValue = "target.nc")
+    private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
                valueSet = {"GAUSSIAN_GRID", "GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON"}, defaultValue = "GAUSSIAN_GRID")
@@ -103,14 +105,15 @@ public class AggregationOp extends Operator {
         binningOp.setFormatterConfig(formatterConfig);
 
         Product targetProduct = binningOp.getTargetProduct();
-        LCCS lccs = LCCS.getInstance();
-        int[] classValues = lccs.getClassValues();
-        String[] classDescriptions = lccs.getClassDescriptions();
-        for (int i = 0; i < classValues.length; i++) {
-            int classValue = classValues[i];
-            Band band = targetProduct.getBand("class_area_" + classValue);
-            band.setDescription(classDescriptions[i]);
-        }
+// todo - useless code; Product is not written again
+//        LCCS lccs = LCCS.getInstance();
+//        int[] classValues = lccs.getClassValues();
+//        String[] classDescriptions = lccs.getClassDescriptions();
+//        for (int i = 0; i < classValues.length; i++) {
+//            int classValue = classValues[i];
+//            Band band = targetProduct.getBand("class_area_" + classValue);
+//            band.setDescription(classDescriptions[i]);
+//        }
         setTargetProduct(targetProduct);
     }
 
@@ -126,7 +129,7 @@ public class AggregationOp extends Operator {
     FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
         formatterConfig.setOutputFormat("NetCDF4-BEAM");
-        formatterConfig.setOutputFile("target.nc");
+        formatterConfig.setOutputFile(targetFile.getAbsolutePath());
         formatterConfig.setOutputType("Product");
         return formatterConfig;
     }
@@ -145,6 +148,15 @@ public class AggregationOp extends Operator {
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);
         return binningConfig;
+    }
+
+
+    File getTargetFile() {
+        return targetFile;
+    }
+
+    void setTargetFile(File targetFile) {
+        this.targetFile = targetFile;
     }
 
     ProjectionMethod getProjectionMethod() {
@@ -237,6 +249,9 @@ public class AggregationOp extends Operator {
 
 
     private void validateParameters() {
+        if (targetFile == null) {
+            throw new OperatorException("No target file specified");
+        }
         if (westBound >= eastBound) {
             throw new OperatorException("West bound must be western of east bound.");
         }
