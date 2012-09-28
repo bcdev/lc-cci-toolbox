@@ -9,8 +9,6 @@ import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.SEAGrid;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -20,31 +18,14 @@ import java.util.TreeMap;
 @SuppressWarnings("FieldCanBeLocal")
 class LcAggregator extends AbstractAggregator {
 
-    // this Lut is for the LC example
-    private static final Map<Integer, Integer> classValueToVectorIndexMap;
-    private static final Map<Integer, Integer> vectorIndexToClassValueMap;
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
     private boolean outputPFTClasses;
 
-    static {
-        classValueToVectorIndexMap = new HashMap<Integer, Integer>();
-        vectorIndexToClassValueMap = new HashMap<Integer, Integer>();
-        int[] classValues = LCCS_CLASSES.getClassValues();
-        for (int i = 0; i < classValues.length; i++) {
-            int classValue = classValues[i];
-            classValueToVectorIndexMap.put(classValue, i);
-        }
-        for (Map.Entry<Integer, Integer> entry : classValueToVectorIndexMap.entrySet()) {
-            vectorIndexToClassValueMap.put(entry.getValue(), entry.getKey());
-        }
-    }
-
     public LcAggregator(int numMajorityClasses, int numGridRows, boolean outputPFTClasses,
                         FractionalAreaCalculator areaCalculator) {
         this(createSpatialFeatureNames(), numMajorityClasses, numGridRows, outputPFTClasses, areaCalculator);
-
     }
 
     private LcAggregator(String[] spatialFeatureNames, int numMajorityClasses, int numGridRows,
@@ -92,7 +73,7 @@ class LcAggregator extends AbstractAggregator {
         int numCols = grid.getNumCols(rowIndex);
         float arealFraction = (float) areaCalculator.calculate(latitude, grid.getCenterLat(rowIndex), numCols);
 
-        int index = getVectorIndex((int) observation.get(0));
+        int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
         spatialVector.set(index, oldValue + arealFraction);
     }
@@ -135,7 +116,7 @@ class LcAggregator extends AbstractAggregator {
         for (int i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
-                sortedMap.put(classArea, getClassValue(i));
+                sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
                 sum += classArea;
             }
             outputVector.set(i, classArea);
@@ -152,19 +133,6 @@ class LcAggregator extends AbstractAggregator {
             outputVector.set(i + LCCS_CLASSES.getNumClasses(), majorityClass);
         }
         outputVector.set(outputVector.size() - 1, sum);
-    }
-
-    private int getVectorIndex(int classValue) {
-        // map classValue to spatial vector index i
-        if (!classValueToVectorIndexMap.containsKey(classValue)) {
-            classValue = 0;
-        }
-        return classValueToVectorIndexMap.get(classValue);
-    }
-
-    private int getClassValue(int vectorIndex) {
-        // map classValue to spatial vector index i
-        return vectorIndexToClassValueMap.get(vectorIndex);
     }
 
 }

@@ -6,16 +6,20 @@ import org.esa.beam.util.io.CsvReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Marco Peters
  */
-public class LCCS {
+class LCCS {
 
     private int[] classValues;
     private String[] classDescriptions;
     private int noDataClassValue;
+    private Map<Integer, Integer> classValueToIndexMap;
+    private Map<Integer, Integer> indexToClassValueMap;
 
     public static LCCS getInstance() {
         try {
@@ -31,6 +35,16 @@ public class LCCS {
         this.classValues = classValues;
         this.classDescriptions = classDescriptions;
         this.noDataClassValue = classValues[0];
+        this.classValueToIndexMap = new HashMap<Integer, Integer>();
+        this.indexToClassValueMap = new HashMap<Integer, Integer>();
+        for (int i = 0; i < classValues.length; i++) {
+            int classValue = classValues[i];
+            classValueToIndexMap.put(classValue, i);
+        }
+        for (Map.Entry<Integer, Integer> entry : classValueToIndexMap.entrySet()) {
+            indexToClassValueMap.put(entry.getValue(), entry.getKey());
+        }
+
     }
 
     static LCCS load(Reader reader) throws IOException {
@@ -62,8 +76,14 @@ public class LCCS {
         return classDescriptions;
     }
 
-    public int getNoDataClassValue() {
-        return noDataClassValue;
+    int getClassIndex(int classValue) {
+        if (!classValueToIndexMap.containsKey(classValue)) {
+            classValue = noDataClassValue;
+        }
+        return classValueToIndexMap.get(classValue);
     }
 
+    int getClassValue(int classIndex) {
+        return indexToClassValueMap.get(classIndex);
+    }
 }

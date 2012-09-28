@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Marco Peters
  */
-public class PftLut {
+class PftLut {
 
     private final String[] pftNames;
     private final double[][] conversionFactors;
