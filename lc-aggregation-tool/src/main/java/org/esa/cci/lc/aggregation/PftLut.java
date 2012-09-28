@@ -22,9 +22,9 @@ public class PftLut {
     public static PftLut load(Reader reader) throws IOException {
         CsvReader csvReader = new CsvReader(reader, new char[]{'|'});
         try {
-            String[] pftnames = csvReader.readRecord();
+            String[] pftNames = csvReader.readRecord();
             List<String[]> records = csvReader.readStringRecords();
-            double[][] conversionFactors = new double[records.size()][pftnames.length];
+            double[][] conversionFactors = new double[records.size()][pftNames.length];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
                 for (int j = 0; j < record.length; j++) {
@@ -36,7 +36,7 @@ public class PftLut {
                     conversionFactors[i][j] = pftFactor;
                 }
             }
-            return new PftLut(pftnames, conversionFactors);
+            return new PftLut(pftNames, conversionFactors);
         } finally {
             csvReader.close();
         }
