@@ -59,10 +59,9 @@ class LcAggregator extends AbstractAggregator {
     @Override
     public void aggregateSpatial(BinContext ctx, Vector observationVector, WritableVector spatialVector) {
         Observation observation = (Observation) observationVector;
-        double latitude = observation.getLatitude();
-        int rowIndex = grid.getRowIndex(ctx.getIndex());
-        int numCols = grid.getNumCols(rowIndex);
-        float arealFraction = (float) areaCalculator.calculate(latitude, grid.getCenterLat(rowIndex), numCols);
+        double obsLatitude = observation.getLatitude();
+        double obsLongitude = observation.getLongitude();
+        float arealFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
 
         int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);

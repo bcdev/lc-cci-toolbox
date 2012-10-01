@@ -180,7 +180,7 @@ public class LcAggregatorTest {
 
         FractionalAreaCalculator areaCalculator = Mockito.mock(FractionalAreaCalculator.class);
         Mockito.when(
-                areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble())).thenReturn(
+                areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
                 1.0);
 
         LcAggregatorConfig config = new LcAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses, 10,

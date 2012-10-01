@@ -135,7 +135,7 @@ public class LCAggregationOp extends Operator {
     private BinningConfig createBinningConfig(Product product) {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
-        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(SEAGrid.RE, numRows,
+        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(new SEAGrid(numRows),
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
                                                                        outputLCCSClasses, numberOfMajorityClasses,
