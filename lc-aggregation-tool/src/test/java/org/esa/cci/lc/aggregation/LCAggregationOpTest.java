@@ -21,14 +21,14 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 
-public class AggregationOpTest {
+public class LCAggregationOpTest {
 
-    private static AggregationOp.Spi aggregationSpi;
+    private static LCAggregationOp.Spi aggregationSpi;
     private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
-        aggregationSpi = new AggregationOp.Spi();
+        aggregationSpi = new LCAggregationOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(aggregationSpi);
         beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(beamNetCdf4WriterPlugIn);
@@ -41,8 +41,8 @@ public class AggregationOpTest {
     }
 
     @Test()
-    public void testProcessing() throws Exception {
-        AggregationOp aggregationOp = createAggrOp();
+    public void testDefaultTargetProductCreation() throws Exception {
+        LCAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
@@ -58,9 +58,28 @@ public class AggregationOpTest {
                      targetProduct.getNumBands());
     }
 
+    @Test()
+    public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
+        LCAggregationOp aggregationOp = createAggrOp();
+        aggregationOp.setSourceProduct(createSourceProduct());
+        aggregationOp.setOutputLCCSClasses(false);
+        int numMajorityClasses = 0;
+        aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
+        aggregationOp.setNumRows(4);
+        aggregationOp.formatterConfig = createFormatterConfig();
+
+        Product targetProduct = aggregationOp.getTargetProduct();
+
+        int numObsAndPasses = 2;
+        int sumAreaBand = 1;
+        int numPFTs = 14;
+        assertEquals(numMajorityClasses + sumAreaBand + numObsAndPasses + numPFTs,
+                     targetProduct.getNumBands());
+    }
+
     @Test
     public void testDefaultValues() {
-        AggregationOp aggrOp = (AggregationOp) aggregationSpi.createOperator();
+        LCAggregationOp aggrOp = (LCAggregationOp) aggregationSpi.createOperator();
         assertEquals(ProjectionMethod.GAUSSIAN_GRID, aggrOp.getProjectionMethod());
         assertEquals(0.1, aggrOp.getPixelSizeX(), 1.0e-8);
         assertEquals(0.1, aggrOp.getPixelSizeY(), 1.0e-8);
@@ -68,6 +87,7 @@ public class AggregationOpTest {
         assertEquals(30.0, aggrOp.getEastBound(), 1.0e-8);
         assertEquals(75.0, aggrOp.getNorthBound(), 1.0e-8);
         assertEquals(35.0, aggrOp.getSouthBound(), 1.0e-8);
+        assertTrue(aggrOp.isOutputLCCSClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
         assertEquals(2160, aggrOp.getNumRows());
@@ -79,7 +99,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNumRows_LessThanTwo() {
-        AggregationOp aggrOp = createAggrOp();
+        LCAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(1);
         try {
             aggrOp.initialize();
@@ -91,7 +111,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNumRows_OddValue() {
-        AggregationOp aggrOp = createAggrOp();
+        LCAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(23);
         try {
             aggrOp.initialize();
@@ -103,7 +123,7 @@ public class AggregationOpTest {
 
     @Test
     public void testWestEastBound() {
-        AggregationOp aggrOp = createAggrOp();
+        LCAggregationOp aggrOp = createAggrOp();
         aggrOp.setWestBound(10);
         aggrOp.setEastBound(3);
         try {
@@ -117,7 +137,7 @@ public class AggregationOpTest {
 
     @Test
     public void testNorthSouthBound() {
-        AggregationOp aggrOp = createAggrOp();
+        LCAggregationOp aggrOp = createAggrOp();
         aggrOp.setNorthBound(30);
         aggrOp.setSouthBound(70);
         try {
@@ -151,8 +171,8 @@ public class AggregationOpTest {
         return product;
     }
 
-    private AggregationOp createAggrOp() {
-        AggregationOp aggregationOp = (AggregationOp) aggregationSpi.createOperator();
+    private LCAggregationOp createAggrOp() {
+        LCAggregationOp aggregationOp = (LCAggregationOp) aggregationSpi.createOperator();
         aggregationOp.setTargetFile(new File("test-target.nc"));
         return aggregationOp;
     }

@@ -8,7 +8,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.cci.lc.aggregation.AggregationOp;
+import org.esa.cci.lc.aggregation.LCAggregationOp;
 
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
@@ -17,7 +17,7 @@ import javax.swing.UIManager;
 /**
  * @author Marco Peters
  */
-public class AggregationAction extends AbstractVisatAction {
+public class LCAggregationAction extends AbstractVisatAction {
 
     private ModelessDialog dialog;
 
@@ -51,7 +51,7 @@ public class AggregationAction extends AbstractVisatAction {
 
         final DefaultAppContext context = new DefaultAppContext("dev0");
         final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        registry.addOperatorSpi(new AggregationOp.Spi());
+        registry.addOperatorSpi(new LCAggregationOp.Spi());
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override

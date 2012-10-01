@@ -24,17 +24,20 @@ class LcAggregator extends AbstractAggregator {
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
+    private boolean outputLCCSClasses;
     private int numMajorityClasses;
     private PftLut pftLut;
 
-    public LcAggregator(int numMajorityClasses, int numGridRows, FractionalAreaCalculator calculator, PftLut pftLut) {
-        this(createSpatialFeatureNames(), numMajorityClasses, numGridRows, calculator, pftLut);
+    public LcAggregator(boolean outputLCCSClasses, int numMajorityClasses, int numGridRows,
+                        FractionalAreaCalculator calculator, PftLut pftLut) {
+        this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, numGridRows, calculator, pftLut);
     }
 
-    private LcAggregator(String[] spatialFeatureNames, int numMajorityClasses, int numGridRows,
-                         FractionalAreaCalculator calculator, PftLut pftLut) {
+    private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
+                         int numGridRows, FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(numMajorityClasses, pftLut, spatialFeatureNames), null);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), null);
+        this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
         this.areaCalculator = calculator;
@@ -111,7 +114,9 @@ class LcAggregator extends AbstractAggregator {
                 sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
                 sum += classArea;
             }
-            outputVector.set(outputVectorIndex++, classArea);
+            if (outputLCCSClasses) {
+                outputVector.set(outputVectorIndex++, classArea);
+            }
         }
 
         Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
@@ -162,10 +167,12 @@ class LcAggregator extends AbstractAggregator {
         return spatialFeatureNames;
     }
 
-    private static String[] createOutputFeatureNames(int numMajorityClasses, PftLut pftLut,
+    private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, PftLut pftLut,
                                                      String[] spatialFeatureNames) {
         List<String> outputFeatureNames = new ArrayList<String>();
-        outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
+        if (outputLCCSClasses) {
+            outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
+        }
         for (int i = 0; i < numMajorityClasses; i++) {
             outputFeatureNames.add("majority_class_" + (i + 1));
         }

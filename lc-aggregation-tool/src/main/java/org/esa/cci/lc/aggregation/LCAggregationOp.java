@@ -31,7 +31,7 @@ import java.io.File;
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
-public class AggregationOp extends Operator {
+public class LCAggregationOp extends Operator {
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
@@ -56,6 +56,9 @@ public class AggregationOp extends Operator {
     private double eastBound;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", defaultValue = "35.0", unit = "°")
     private double southBound;
+
+    @Parameter(description = "Whether or not to add LCCS classes to the output.", defaultValue = "true")
+    private boolean outputLCCSClasses;
 
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
     private int numberOfMajorityClasses;
@@ -130,8 +133,8 @@ public class AggregationOp extends Operator {
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(SEAGrid.RE, numRows,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
-                                                                       numberOfMajorityClasses, numRows,
-                                                                       outputPFTClasses, areaCalculator);
+                                                                       outputLCCSClasses, numberOfMajorityClasses,
+                                                                       numRows, outputPFTClasses, areaCalculator);
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("");
         binningConfig.setNumRows(numRows);
@@ -205,6 +208,15 @@ public class AggregationOp extends Operator {
         this.southBound = southBound;
     }
 
+
+    public boolean isOutputLCCSClasses() {
+        return outputLCCSClasses;
+    }
+
+    public void setOutputLCCSClasses(boolean outputLCCSClasses) {
+        this.outputLCCSClasses = outputLCCSClasses;
+    }
+
     int getNumberOfMajorityClasses() {
         return numberOfMajorityClasses;
     }
@@ -256,7 +268,7 @@ public class AggregationOp extends Operator {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(AggregationOp.class);
+            super(LCAggregationOp.class);
         }
     }
 
