@@ -5,7 +5,6 @@ import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
@@ -15,12 +14,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.Debug;
-import org.esa.beam.util.ProductUtils;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -251,49 +246,6 @@ public class AggregationOp extends Operator {
         }
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must greater than 2 and must be an even number.");
-        }
-    }
-
-    static Product createInputProduct(Product product) throws OperatorException {
-
-        if (!product.getName().startsWith("lc_classif_lccs_v2")) {
-            throw new OperatorException("Not a LC classification product");
-        }
-
-        Product inputProduct = new Product("LC_STATE_MAP", "LC_STATE",
-                                           product.getSceneRasterWidth(), product.getSceneRasterHeight());
-        product.transferGeoCodingTo(inputProduct, null);
-        ProductUtils.copyBand(product.getBandAt(0).getName(), product, "lc_classif_lccs", inputProduct, true);
-
-        File fileLocation = product.getFileLocation();
-        File directory = fileLocation.getParentFile();
-        File[] flagFiles = directory.listFiles(new PatternFilenameFilter("lc_flag[1-5]_v2.tif"));
-        for (File file : flagFiles) {
-            Product flagProduct;
-            try {
-                flagProduct = ProductIO.readProduct(file, "GeoTIFF");
-            } catch (IOException e) {
-                throw new OperatorException(e);
-            }
-            if (product.isCompatibleProduct(flagProduct, 1.0e-4f)) {
-                String bandName = flagProduct.getBandAt(0).getName();
-                ProductUtils.copyBand(bandName, flagProduct, flagProduct.getName(), inputProduct, true);
-            }
-        }
-        return inputProduct;
-    }
-
-    private static class PatternFilenameFilter implements FilenameFilter {
-
-        private final Pattern pattern;
-
-        public PatternFilenameFilter(String regexPattern) {
-            pattern = Pattern.compile(regexPattern);
-        }
-
-        @Override
-        public boolean accept(File dir, String name) {
-            return pattern.matcher(name.toLowerCase()).matches();
         }
     }
 
