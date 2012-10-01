@@ -53,7 +53,7 @@ public class LcAggregatorTest {
     }
 
     @Test
-    public void testAggregation() {
+    public void testAggregation_WithoutPFTs() {
         int numMajorityClasses = 2;
         BinContext ctx = createCtx();
         LcAggregator aggregator = createAggregator(numMajorityClasses, false);
@@ -102,6 +102,48 @@ public class LcAggregatorTest {
         assertEquals(170, outputVector.get(outputVector.size() - 3), 0.0f); // majority class 1
         assertEquals(82, outputVector.get(outputVector.size() - 2), 0.0f);  // majority class 2
         assertEquals(numObs, outputVector.get(outputVector.size() - 1), 0.0f);  // sum
+
+    }
+
+    @Test
+    public void testAggregation_WithPFTs() {
+        int numMajorityClasses = 0;
+        BinContext ctx = createCtx();
+        LcAggregator aggregator = createAggregator(numMajorityClasses, true);
+
+        int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
+        VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
+        aggregator.initSpatial(ctx, spatialVector);
+
+        int class1 = 10;
+        int class2 = 20;
+        int class82 = 82;
+        int class170 = 170;
+
+        aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class1), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class2), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class170), spatialVector);
+        int numObs = 9;
+        aggregator.completeSpatial(ctx, numObs, spatialVector);
+        VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
+        aggregator.aggregateTemporal(ctx, spatialVector, numObs, temporalVector);
+        aggregator.completeTemporal(ctx, 1, temporalVector);
+
+        int numPFTs = aggregator.getNumPFTs();
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1 + numPFTs]);
+        aggregator.computeOutput(temporalVector, outputVector);
+        int startIndex = outputVector.size() - numPFTs;
+        assertEquals(outputVector.get(startIndex + 0), 3, 1.0e-6); // Tree Broadleaf Evergreen ( 5 * 60% class170)
+        assertEquals(outputVector.get(startIndex + 3), 0.6, 1.0e-6); // Tree Needleleaf Deciduous ( 2 * 30% class82)
+        assertEquals(outputVector.get(startIndex + 7), 0.5, 1.0e-6); // Shrub Needleleaf Deciduous ( 2 * 25% class82)
+        assertEquals(outputVector.get(startIndex + 9), 2.0, 1.0e-6); // Managed Grass ( 100% class1 & class2)
+        assertEquals(outputVector.get(startIndex + 13), Float.NaN, 1.0e-6); // No data
 
     }
 

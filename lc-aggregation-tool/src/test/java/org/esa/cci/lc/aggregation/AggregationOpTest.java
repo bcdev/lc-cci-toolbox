@@ -40,7 +40,6 @@ public class AggregationOpTest {
         ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
     }
 
-
     @Test()
     public void testProcessing() throws Exception {
         AggregationOp aggregationOp = createAggrOp();
@@ -69,7 +68,6 @@ public class AggregationOpTest {
         assertEquals(30.0, aggrOp.getEastBound(), 1.0e-8);
         assertEquals(75.0, aggrOp.getNorthBound(), 1.0e-8);
         assertEquals(35.0, aggrOp.getSouthBound(), 1.0e-8);
-        assertTrue(aggrOp.isOutputMajorityClasses());
         assertEquals(5, aggrOp.getNumberOfMajorityClasses());
         assertTrue(aggrOp.isOutputPFTClasses());
         assertEquals(2160, aggrOp.getNumRows());
@@ -128,20 +126,6 @@ public class AggregationOpTest {
             String message = oe.getMessage().toLowerCase();
             assertTrue(message.contains("north bound"));
             assertTrue(message.contains("south bound"));
-        }
-    }
-
-    @Test
-    public void testNoOutputClassesSelected() {
-        AggregationOp aggrOp = createAggrOp();
-        aggrOp.setOutputMajorityClasses(false);
-        aggrOp.setOutputPFTClasses(false);
-        try {
-            aggrOp.initialize();
-        } catch (OperatorException oe) {
-            String message = oe.getMessage().toLowerCase();
-            assertTrue(message.contains("and/or"));
-            assertTrue(message.contains("classes"));
         }
     }
 

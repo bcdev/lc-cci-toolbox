@@ -41,6 +41,10 @@ class LcAggregator extends AbstractAggregator {
         this.grid = new SEAGrid(numGridRows);
     }
 
+    int getNumPFTs() {
+        return pftLut.getPFTNames().length;
+    }
+
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         initVector(vector, 0.0f);

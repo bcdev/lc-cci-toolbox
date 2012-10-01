@@ -62,10 +62,6 @@ public class AggregationOp extends Operator {
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", defaultValue = "35.0", unit = "°")
     private double southBound;
 
-    @Parameter(description = "Whether or not to add majority classes and the fractional area to the output.",
-               defaultValue = "true")
-    private boolean outputMajorityClasses;
-
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
     private int numberOfMajorityClasses;
 
@@ -84,7 +80,6 @@ public class AggregationOp extends Operator {
         Debug.setEnabled(true);
         validateParameters();
 
-//        Product inputProduct = createInputProduct(sourceProduct);
         Product inputProduct = sourceProduct;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
@@ -215,14 +210,6 @@ public class AggregationOp extends Operator {
         this.southBound = southBound;
     }
 
-    boolean isOutputMajorityClasses() {
-        return outputMajorityClasses;
-    }
-
-    void setOutputMajorityClasses(boolean outputMajorityClasses) {
-        this.outputMajorityClasses = outputMajorityClasses;
-    }
-
     int getNumberOfMajorityClasses() {
         return numberOfMajorityClasses;
     }
@@ -257,10 +244,6 @@ public class AggregationOp extends Operator {
         }
         if (northBound <= southBound) {
             throw new OperatorException("North bound must be northern of south bound.");
-        }
-        if (!outputMajorityClasses && !outputPFTClasses) {
-            throw new OperatorException("Nothing to process. Majority classes and/or " +
-                                        "PFT classes must be selected for output.");
         }
         LCCS lccs = LCCS.getInstance();
         if (numberOfMajorityClasses > lccs.getNumClasses()) {
