@@ -21,6 +21,8 @@ import java.util.TreeMap;
 @SuppressWarnings("FieldCanBeLocal")
 class LcAggregator extends AbstractAggregator {
 
+    private static boolean DEBUG_OUTPUT_SUM = false;
+
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
@@ -36,7 +38,8 @@ class LcAggregator extends AbstractAggregator {
     private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
                          int numGridRows, FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), null);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames
+              ), null);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
@@ -129,7 +132,9 @@ class LcAggregator extends AbstractAggregator {
             }
             outputVector.set(outputVectorIndex++, majorityClass);
         }
-        outputVector.set(outputVectorIndex++, sum);
+        if (DEBUG_OUTPUT_SUM) {
+            outputVector.set(outputVectorIndex++, sum);
+        }
 
         if (pftLut != null) {
             float[][] conversionFactors = pftLut.getConversionFactors();
@@ -176,7 +181,9 @@ class LcAggregator extends AbstractAggregator {
         for (int i = 0; i < numMajorityClasses; i++) {
             outputFeatureNames.add("majority_class_" + (i + 1));
         }
-        outputFeatureNames.add("class_area_sum");
+        if (DEBUG_OUTPUT_SUM) {
+            outputFeatureNames.add("class_area_sum");
+        }
         if (pftLut != null) {
             outputFeatureNames.addAll(Arrays.asList(pftLut.getPFTNames()));
         }

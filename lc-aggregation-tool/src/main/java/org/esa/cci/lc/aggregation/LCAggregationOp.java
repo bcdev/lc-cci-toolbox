@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
 
@@ -40,7 +41,7 @@ public class LCAggregationOp extends Operator {
     private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
-               valueSet = {"GEOGRAPHIC_LAT_LON"/*, "GAUSSIAN_GRID", "ROTATED_LAT_LON"*/},
+               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "GAUSSIAN_GRID"},
                defaultValue = "GEOGRAPHIC_LAT_LON")
     private ProjectionMethod projectionMethod;
 
@@ -125,6 +126,7 @@ public class LCAggregationOp extends Operator {
     FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
         formatterConfig.setOutputFormat("NetCDF4-BEAM");
+        targetFile = FileUtils.ensureExtension(targetFile, ".nc");
         formatterConfig.setOutputFile(targetFile.getAbsolutePath());
         formatterConfig.setOutputType("Product");
         return formatterConfig;
@@ -255,12 +257,15 @@ public class LCAggregationOp extends Operator {
         if (northBound <= southBound) {
             throw new OperatorException("North bound must be northern of south bound.");
         }
+        if (numberOfMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
+            throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
+        }
         LCCS lccs = LCCS.getInstance();
         if (numberOfMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
         }
         if (numRows < 2 || numRows % 2 != 0) {
-            throw new OperatorException("Number of rows must greater than 2 and must be an even number.");
+            throw new OperatorException("Number of rows be must greater than 2 and must be an even number.");
         }
     }
 

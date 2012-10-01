@@ -52,9 +52,8 @@ public class LCAggregationOpTest {
         Product targetProduct = aggregationOp.getTargetProduct();
 
         int numObsAndPasses = 2;
-        int sumAreaBand = 1;
         int numPFTs = 14;
-        assertEquals(LCCS.getInstance().getNumClasses() + numMajorityClasses + sumAreaBand + numObsAndPasses + numPFTs,
+        assertEquals(LCCS.getInstance().getNumClasses() + numMajorityClasses + numObsAndPasses + numPFTs,
                      targetProduct.getNumBands());
     }
 
@@ -71,16 +70,14 @@ public class LCAggregationOpTest {
         Product targetProduct = aggregationOp.getTargetProduct();
 
         int numObsAndPasses = 2;
-        int sumAreaBand = 1;
         int numPFTs = 14;
-        assertEquals(numMajorityClasses + sumAreaBand + numObsAndPasses + numPFTs,
-                     targetProduct.getNumBands());
+        assertEquals(numMajorityClasses + numObsAndPasses + numPFTs, targetProduct.getNumBands());
     }
 
     @Test
     public void testDefaultValues() {
         LCAggregationOp aggrOp = (LCAggregationOp) aggregationSpi.createOperator();
-        assertEquals(ProjectionMethod.GAUSSIAN_GRID, aggrOp.getProjectionMethod());
+        assertEquals(ProjectionMethod.GEOGRAPHIC_LAT_LON, aggrOp.getProjectionMethod());
         assertEquals(0.1, aggrOp.getPixelSizeX(), 1.0e-8);
         assertEquals(0.1, aggrOp.getPixelSizeY(), 1.0e-8);
         assertEquals(-15.0, aggrOp.getWestBound(), 1.0e-8);
@@ -146,6 +143,22 @@ public class LCAggregationOpTest {
             String message = oe.getMessage().toLowerCase();
             assertTrue(message.contains("north bound"));
             assertTrue(message.contains("south bound"));
+        }
+    }
+
+    @Test
+    public void testNoOutputSelected() {
+        LCAggregationOp aggrOp = createAggrOp();
+        aggrOp.setOutputLCCSClasses(false);
+        aggrOp.setOutputPFTClasses(false);
+        aggrOp.setNumberOfMajorityClasses(0);
+        try {
+            aggrOp.initialize();
+        } catch (OperatorException oe) {
+            String message = oe.getMessage();
+            assertTrue(message.contains("LCCS"));
+            assertTrue(message.contains("majority"));
+            assertTrue(message.contains("PFT"));
         }
     }
 

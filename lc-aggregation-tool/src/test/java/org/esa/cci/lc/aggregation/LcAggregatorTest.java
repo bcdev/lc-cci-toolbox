@@ -24,7 +24,7 @@ public class LcAggregatorTest {
         int numClasses = LCCS.getInstance().getNumClasses();
         assertEquals(numClasses, spatialFeatureNames.length);
         assertEquals(numClasses, aggregator.getTemporalFeatureNames().length);
-        assertEquals(numClasses + numMajorityClasses + 1, outputFeatureNames.length);
+        assertEquals(numClasses + numMajorityClasses, outputFeatureNames.length);
 
         assertTrue(Float.isNaN(aggregator.getOutputFillValue()));
 
@@ -94,14 +94,13 @@ public class LcAggregatorTest {
             assertEquals(spatialVector.get(i), temporalVector.get(i), 1.0e-6);
         }
 
-        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1]);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
         aggregator.computeOutput(temporalVector, outputVector);
         for (int i = 0; i < temporalVector.size(); i++) {
             assertEquals(temporalVector.get(i), outputVector.get(i), 1.0e-6);
         }
-        assertEquals(170, outputVector.get(outputVector.size() - 3), 0.0f); // majority class 1
-        assertEquals(82, outputVector.get(outputVector.size() - 2), 0.0f);  // majority class 2
-        assertEquals(numObs, outputVector.get(outputVector.size() - 1), 0.0f);  // sum
+        assertEquals(170, outputVector.get(outputVector.size() - 2), 0.0f); // majority class 1
+        assertEquals(82, outputVector.get(outputVector.size() - 1), 0.0f);  // majority class 2
 
     }
 
@@ -136,7 +135,7 @@ public class LcAggregatorTest {
         aggregator.completeTemporal(ctx, 1, temporalVector);
 
         int numPFTs = aggregator.getNumPFTs();
-        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1 + numPFTs]);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + numPFTs]);
         aggregator.computeOutput(temporalVector, outputVector);
         int startIndex = outputVector.size() - numPFTs;
         assertEquals(outputVector.get(startIndex + 0), 3, 1.0e-6); // Tree Broadleaf Evergreen ( 5 * 60% class170)
@@ -167,13 +166,12 @@ public class LcAggregatorTest {
         VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
         aggregator.aggregateTemporal(ctx, spatialVector, 2, temporalVector);
         aggregator.completeTemporal(ctx, 1, temporalVector);
-        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + 1]);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses]);
         aggregator.computeOutput(temporalVector, outputVector);
-        assertEquals(80.0f, outputVector.get(outputVector.size() - 5), 0.0f); // majority_1
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 4), 0.0f); // majority_2
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f); // majority_3
-        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f); // majority_4
-        assertEquals(2.0f, outputVector.get(outputVector.size() - 1), 0.0f); // sum
+        assertEquals(80.0f, outputVector.get(outputVector.size() - 4), 0.0f); // majority_1
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 3), 0.0f); // majority_2
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 2), 0.0f); // majority_3
+        assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f); // majority_4
     }
 
     private LcAggregator createAggregator(boolean outputLCCSClasses, int numMajorityClasses, boolean outputPFTClasses) {
