@@ -40,7 +40,8 @@ public class LCAggregationOp extends Operator {
     private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
-               valueSet = {"GAUSSIAN_GRID", "GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON"}, defaultValue = "GAUSSIAN_GRID")
+               valueSet = {"GEOGRAPHIC_LAT_LON"/*, "GAUSSIAN_GRID", "ROTATED_LAT_LON"*/},
+               defaultValue = "GEOGRAPHIC_LAT_LON")
     private ProjectionMethod projectionMethod;
 
     @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
@@ -57,13 +58,15 @@ public class LCAggregationOp extends Operator {
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", defaultValue = "35.0", unit = "°")
     private double southBound;
 
-    @Parameter(description = "Whether or not to add LCCS classes to the output.", defaultValue = "true")
+    @Parameter(description = "Whether or not to add LCCS classes to the output.",
+               label = "Output LCCS classes", defaultValue = "true")
     private boolean outputLCCSClasses;
 
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
     private int numberOfMajorityClasses;
 
-    @Parameter(description = "Whether or not to add PFT classes to the output.", defaultValue = "true")
+    @Parameter(description = "Whether or not to add PFT classes to the output.",
+               label = "Output PFT classes", defaultValue = "true")
     private boolean outputPFTClasses;
 
     @Parameter(defaultValue = "2160")

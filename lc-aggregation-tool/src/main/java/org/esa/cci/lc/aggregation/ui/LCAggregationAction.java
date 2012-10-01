@@ -1,18 +1,9 @@
 package org.esa.cci.lc.aggregation.ui;
 
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
-import org.esa.beam.framework.gpf.ui.DefaultAppContext;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.cci.lc.aggregation.LCAggregationOp;
-
-import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  * @author Marco Peters
@@ -31,7 +22,7 @@ public class LCAggregationAction extends AbstractVisatAction {
 
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
-        DefaultSingleTargetProductDialog productDialog = new DefaultSingleTargetProductDialog(
+        return new LCAggregationDialog(
                 "LCCCI.Aggregate", appContext, "Landcover CCI Aggregation Tool", helpId) {
 
             @Override
@@ -42,27 +33,6 @@ public class LCAggregationAction extends AbstractVisatAction {
                 }
             }
         };
-        productDialog.setTargetProductNameSuffix("_aggr");
-        return productDialog;
     }
-
-    public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-        final DefaultAppContext context = new DefaultAppContext("dev0");
-        final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        registry.addOperatorSpi(new LCAggregationOp.Spi());
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ModelessDialog dialog = createDialog(true, "no_help_id", context);
-                JDialog jDialog = dialog.getJDialog();
-                jDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-                dialog.show();
-            }
-        });
-    }
-
 
 }
