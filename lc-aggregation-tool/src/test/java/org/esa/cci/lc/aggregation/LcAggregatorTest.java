@@ -183,7 +183,7 @@ public class LcAggregatorTest {
                 areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
                 1.0);
 
-        LcAggregatorConfig config = new LcAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses, 10,
+        LcAggregatorConfig config = new LcAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses,
                                                            outputPFTClasses, areaCalculator);
         return (LcAggregator) lcAggregatorDescriptor.createAggregator(varCtx, config);
     }

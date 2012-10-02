@@ -33,7 +33,6 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
         PropertySet propertySet = aggregatorConfig.asPropertySet();
         boolean outputLCCSClasses = (Boolean) propertySet.getValue("outputLCCSClasses");
         int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        int numGridRows = (Integer) propertySet.getValue("numGridRows");
         boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
         FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
 
@@ -47,6 +46,6 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
                 throw new IllegalStateException(e);
             }
         }
-        return new LcAggregator(outputLCCSClasses, numMajorityClasses, numGridRows, areaCalculator, pftLut);
+        return new LcAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut);
     }
 }

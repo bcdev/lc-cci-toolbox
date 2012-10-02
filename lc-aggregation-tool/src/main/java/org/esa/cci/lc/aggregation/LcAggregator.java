@@ -3,10 +3,8 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.AbstractAggregator;
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
-import org.esa.beam.binning.support.SEAGrid;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,27 +22,24 @@ class LcAggregator extends AbstractAggregator {
     private static boolean DEBUG_OUTPUT_SUM = false;
 
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
-    private final PlanetaryGrid grid;
     private FractionalAreaCalculator areaCalculator;
     private boolean outputLCCSClasses;
     private int numMajorityClasses;
     private PftLut pftLut;
 
-    public LcAggregator(boolean outputLCCSClasses, int numMajorityClasses, int numGridRows,
+    public LcAggregator(boolean outputLCCSClasses, int numMajorityClasses,
                         FractionalAreaCalculator calculator, PftLut pftLut) {
-        this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, numGridRows, calculator, pftLut);
+        this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, calculator, pftLut);
     }
 
     private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
-                         int numGridRows, FractionalAreaCalculator calculator, PftLut pftLut) {
+                         FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames
-              ), null);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), null);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
         this.areaCalculator = calculator;
-        this.grid = new SEAGrid(numGridRows);
     }
 
     int getNumPFTs() {
