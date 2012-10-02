@@ -27,7 +27,7 @@
         <module>beam-gpf</module>
     </dependency>
     <dependency>
-        <module>beam-binning</module>
+        <module>beam-binning2</module>
     </dependency>
     <dependency>
         <module>beam-netcdf</module>
