@@ -20,9 +20,9 @@ Installation
 
 Execution
 ~~~~~~~~~
-In the tools menu of VISAT a menu item named 'LC CCI Aggregation Tool...' can be found. This entry in the menu invokes
-the user interface for the aggregation tool. The parameters for defining the output (projection method, pixel size,
-bounds) are not considered in this version.
+In the tools menu of VISAT a menu item named 'LC CCI Aggregation Tool...' can be found. This entry invokes the user
+interface for the aggregation tool. The parameters for defining the output (projection method, pixel size, bounds) are
+not considered in this version.
 
 On the command line the tool can be invoked as follows.
 1) Change the current directory to <BEAM_INSTALLATION_DIR>\bin
