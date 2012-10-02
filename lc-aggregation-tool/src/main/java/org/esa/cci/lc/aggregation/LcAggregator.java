@@ -35,7 +35,7 @@ class LcAggregator extends AbstractAggregator {
     private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
                          FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), null);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), Float.NaN);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
@@ -48,7 +48,7 @@ class LcAggregator extends AbstractAggregator {
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
-        initVector(vector, 0.0f);
+        initVector(vector, Float.NaN);
     }
 
     @Override
@@ -56,23 +56,20 @@ class LcAggregator extends AbstractAggregator {
         Observation observation = (Observation) observationVector;
         double obsLatitude = observation.getLatitude();
         double obsLongitude = observation.getLongitude();
-        float arealFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
+        float areaFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
 
         int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
         float oldValue = spatialVector.get(index);
-        spatialVector.set(index, oldValue + arealFraction);
+        if (Float.isNaN(oldValue)) {
+            spatialVector.set(index, areaFraction);
+        } else {
+            spatialVector.set(index, oldValue + areaFraction);
+        }
     }
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
-        for (int i = 0; i < spatialVector.size(); i++) {
-            float spatialValue = spatialVector.get(i);
-            if (Float.compare(spatialValue, 0.0f) != 0) {
-                spatialVector.set(i, spatialValue);
-            } else {
-                spatialVector.set(i, Float.NaN);
-            }
-        }
+        // Nothing to be done here
     }
 
     @Override
@@ -141,9 +138,10 @@ class LcAggregator extends AbstractAggregator {
                         if (!Float.isNaN(factor)) {
                             float oldValue = outputVector.get(outputVectorIndex + j);
                             if (Float.isNaN(oldValue)) {
-                                oldValue = 0.0f;
+                                outputVector.set(outputVectorIndex + j, classArea * factor);
+                            } else {
+                                outputVector.set(outputVectorIndex + j, oldValue + (classArea * factor));
                             }
-                            outputVector.set(outputVectorIndex + j, oldValue + (classArea * factor));
                         }
                     }
                 }

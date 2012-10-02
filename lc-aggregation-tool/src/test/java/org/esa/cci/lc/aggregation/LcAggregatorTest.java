@@ -48,7 +48,7 @@ public class LcAggregatorTest {
         VectorImpl spatialVector = vec(floats);
         aggregator.initSpatial(ctx, spatialVector);
         for (int i = 0; i < spatialVector.size(); i++) {
-            assertEquals(0.0f, spatialVector.get(i), 1.0e-6f);
+            assertEquals(Float.NaN, spatialVector.get(i), 1.0e-6f);
         }
     }
 
