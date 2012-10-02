@@ -15,15 +15,11 @@ import org.esa.beam.framework.gpf.ui.OperatorMenu;
 import org.esa.beam.framework.gpf.ui.OperatorParameterSupport;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.lang.reflect.Field;
 
 /**
@@ -47,11 +43,6 @@ public class LCAggregationDialog extends SingleTargetProductDialog {
         final PropertySet propertyContainer = parameterSupport.getPopertySet();
         bindingContext = new BindingContext(propertyContainer);
         sourceProductSelector = createSourceProductSelector();
-        final TargetProductSelectorModel tpsModel = getTargetProductSelector().getModel();
-        tpsModel.setOpenInAppSelected(false);
-        tpsModel.setSaveToFileSelected(false);
-
-        bindingContext.addPropertyChangeListener("targetFile", new TargetProductSelectorUpdater(tpsModel));
     }
 
     @Override
@@ -123,23 +114,6 @@ public class LCAggregationDialog extends SingleTargetProductDialog {
         return operatorSpi.getOperatorClass();
     }
 
-    private static class TargetProductSelectorUpdater implements PropertyChangeListener {
-
-        private final TargetProductSelectorModel tpsModel;
-
-        public TargetProductSelectorUpdater(TargetProductSelectorModel tpsModel) {
-            this.tpsModel = tpsModel;
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            File targetFile = (File) evt.getNewValue();
-            tpsModel.setProductName(targetFile.getName());
-            tpsModel.setProductDir(targetFile.getParentFile());
-        }
-    }
-
-
     private class TargetProductCreator extends ProgressMonitorSwingWorker<Product, Void> {
 
         private AppContext appContext;
@@ -163,7 +137,6 @@ public class LCAggregationDialog extends SingleTargetProductDialog {
 
         @Override
         protected void done() {
-            super.done();
             try {
                 get();
             } catch (Exception e) {
