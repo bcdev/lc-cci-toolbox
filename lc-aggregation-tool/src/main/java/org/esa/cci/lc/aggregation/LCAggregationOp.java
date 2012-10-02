@@ -34,6 +34,9 @@ import java.io.File;
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class LCAggregationOp extends Operator {
 
+    public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
+
+
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
 
@@ -85,7 +88,7 @@ public class LCAggregationOp extends Operator {
         Product inputProduct = sourceProduct;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-        if (!plugInManager.getWriterPlugIns("NetCDF4-BEAM").hasNext()) {
+        if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
             beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
             plugInManager.addWriterPlugIn(beamNetCdf4WriterPlugIn);
         }
@@ -125,7 +128,7 @@ public class LCAggregationOp extends Operator {
 
     FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("NetCDF4-BEAM");
+        formatterConfig.setOutputFormat(NETCDF4_BEAM_FORMAT_STRING);
         targetFile = FileUtils.ensureExtension(targetFile, ".nc");
         formatterConfig.setOutputFile(targetFile.getAbsolutePath());
         formatterConfig.setOutputType("Product");
