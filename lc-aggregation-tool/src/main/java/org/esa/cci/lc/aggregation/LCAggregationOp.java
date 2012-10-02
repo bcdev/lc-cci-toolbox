@@ -78,8 +78,6 @@ public class LCAggregationOp extends Operator {
 
     FormatterConfig formatterConfig;
 
-    private BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
-
     @Override
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
@@ -89,8 +87,7 @@ public class LCAggregationOp extends Operator {
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
         if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
-            beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
-            plugInManager.addWriterPlugIn(beamNetCdf4WriterPlugIn);
+            plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
         }
 
         BinningConfig binningConfig = createBinningConfig(inputProduct);
@@ -115,15 +112,6 @@ public class LCAggregationOp extends Operator {
 //            band.setDescription(classDescriptions[i]);
 //        }
         setTargetProduct(targetProduct);
-    }
-
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        if (beamNetCdf4WriterPlugIn != null) {
-            ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
-        }
     }
 
     FormatterConfig createDefaultFormatterConfig() {
