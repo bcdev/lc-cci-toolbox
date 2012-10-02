@@ -11,7 +11,7 @@
 
     <artifactId>lc-aggregation-tool</artifactId>
     <name>LC CCI Aggregation Tool</name>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
 
     <dependencies>
         <dependency>
