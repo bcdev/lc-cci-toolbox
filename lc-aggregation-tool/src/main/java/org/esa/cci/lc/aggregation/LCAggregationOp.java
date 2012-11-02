@@ -28,7 +28,7 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate",
-        version = "0.2",
+        version = "0.5",
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
