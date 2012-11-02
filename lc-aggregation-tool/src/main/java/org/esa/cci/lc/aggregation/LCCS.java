@@ -15,6 +15,8 @@ import java.util.Map;
  */
 class LCCS {
 
+    private static final String CLASS_DEFINTIONS_FILE = "LCCS_class_defintions.csv";
+
     private int[] classValues;
     private String[] classDescriptions;
     private int noDataClassValue;
@@ -23,7 +25,7 @@ class LCCS {
 
     public static LCCS getInstance() {
         try {
-            return LCCS.load(new InputStreamReader(LcAggregator.class.getResourceAsStream("lccs_classes.csv")));
+            return LCCS.load(new InputStreamReader(LcAggregator.class.getResourceAsStream(CLASS_DEFINTIONS_FILE)));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -6,6 +6,9 @@ import org.esa.beam.binning.support.VectorImpl;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 
 import static org.esa.cci.lc.aggregation.AggregatorTestUtils.*;
@@ -16,7 +19,7 @@ public class LcAggregatorTest {
     @Test
     public void testFeatureNames() throws Exception {
         int numMajorityClasses = 3;
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false);
+        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         String[] outputFeatureNames = aggregator.getOutputFeatureNames();
@@ -40,7 +43,7 @@ public class LcAggregatorTest {
     @Test
     public void testInitSpatial() {
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, 2, false);
+        LcAggregator aggregator = createAggregator(true, 2, false, null);
 
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         float[] floats = new float[spatialFeatureNames.length];
@@ -56,7 +59,7 @@ public class LcAggregatorTest {
     public void testAggregation_WithoutPFTs() {
         int numMajorityClasses = 2;
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false);
+        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -108,7 +111,7 @@ public class LcAggregatorTest {
     public void testAggregation_WithPFTs() {
         int numMajorityClasses = 0;
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, true);
+        LcAggregator aggregator = createAggregator(true, numMajorityClasses, true, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -135,14 +138,59 @@ public class LcAggregatorTest {
         aggregator.completeTemporal(ctx, 1, temporalVector);
 
         int numPFTs = aggregator.getNumPFTs();
+        assertEquals(14, numPFTs);
         VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + numPFTs]);
         aggregator.computeOutput(temporalVector, outputVector);
         int startIndex = outputVector.size() - numPFTs;
-        assertEquals(outputVector.get(startIndex + 0), 3, 1.0e-6); // Tree Broadleaf Evergreen ( 5 * 60% class170)
-        assertEquals(outputVector.get(startIndex + 3), 0.6, 1.0e-6); // Tree Needleleaf Deciduous ( 2 * 30% class82)
-        assertEquals(outputVector.get(startIndex + 7), 0.5, 1.0e-6); // Shrub Needleleaf Deciduous ( 2 * 25% class82)
-        assertEquals(outputVector.get(startIndex + 9), 2.0, 1.0e-6); // Managed Grass ( 100% class1 & class2)
-        assertEquals(outputVector.get(startIndex + 13), Float.NaN, 1.0e-6); // No data
+        assertEquals(3, outputVector.get(startIndex + 0), 1.0e-6); // Tree Broadleaf Evergreen ( 5 * 60% class170)
+        assertEquals(0.6, outputVector.get(startIndex + 3), 1.0e-6); // Tree Needleleaf Deciduous ( 2 * 30% class82)
+        assertEquals(0.5, outputVector.get(startIndex + 7), 1.0e-6); // Shrub Needleleaf Deciduous ( 2 * 25% class82)
+        assertEquals(2.0, outputVector.get(startIndex + 9), 1.0e-6); // Managed Grass ( 100% class1 & class2)
+        assertEquals(Float.NaN, outputVector.get(startIndex + 13), 1.0e-6); // No data
+    }
+
+    @Test
+    public void testAggregation_WithUserPFTs() throws URISyntaxException {
+        int numMajorityClasses = 0;
+        BinContext ctx = createCtx();
+        URL resource = LcAggregatorTest.class.getResource("Test_User_LCCS_2PFT.csv");
+        File lccs2PFTFile = new File(resource.toURI());
+
+        LcAggregator aggregator = createAggregator(true, numMajorityClasses, true, lccs2PFTFile);
+
+        int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
+        VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
+        aggregator.initSpatial(ctx, spatialVector);
+
+        int class0 = 0;
+        int class10 = 10;
+        int class11 = 11;
+        int class12 = 12;
+
+        aggregator.aggregateSpatial(ctx, obs(class12), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class12), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class10), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class11), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        int numObs = 9;
+        aggregator.completeSpatial(ctx, numObs, spatialVector);
+        VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
+        aggregator.aggregateTemporal(ctx, spatialVector, numObs, temporalVector);
+        aggregator.completeTemporal(ctx, 1, temporalVector);
+
+        int numPFTs = aggregator.getNumPFTs();
+        assertEquals(4, numPFTs);
+        VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + numPFTs]);
+        aggregator.computeOutput(temporalVector, outputVector);
+        int startIndex = outputVector.size() - numPFTs;
+        assertEquals(1.0, outputVector.get(startIndex + 0), 1.0e-6); // Bare Soil: 1 * 100% class11
+        assertEquals(1.5, outputVector.get(startIndex + 1), 1.0e-6);  // Water: 5 * 10% class0 + 1 * 100% class10
+        assertEquals(4.4, outputVector.get(startIndex + 2), 1.0e-6);  // Snow/Ice: 5 * 52% class0 + 2 * 90% class12
+        assertEquals(2.1, outputVector.get(startIndex + 3), 1.0e-6);  // No data: 5 * 38% class0 + 2 * 10% class12
 
     }
 
@@ -150,7 +198,7 @@ public class LcAggregatorTest {
     public void testMajorityClassesWhenHavingLessClassesObserved() {
         BinContext ctx = createCtx();
         int numMajorityClasses = 4;
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false);
+        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -174,7 +222,8 @@ public class LcAggregatorTest {
         assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f); // majority_4
     }
 
-    private LcAggregator createAggregator(boolean outputLCCSClasses, int numMajorityClasses, boolean outputPFTClasses) {
+    private LcAggregator createAggregator(boolean outputLCCSClasses, int numMajorityClasses, boolean outputPFTClasses,
+                                          File lccs2PFTFile) {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcAggregatorDescriptor lcAggregatorDescriptor = new LcAggregatorDescriptor();
 
@@ -184,7 +233,7 @@ public class LcAggregatorTest {
                 1.0);
 
         LcAggregatorConfig config = new LcAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses,
-                                                           outputPFTClasses, areaCalculator);
+                                                           outputPFTClasses, lccs2PFTFile, areaCalculator);
         return (LcAggregator) lcAggregatorDescriptor.createAggregator(varCtx, config);
     }
 

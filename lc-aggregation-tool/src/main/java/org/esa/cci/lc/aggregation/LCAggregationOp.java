@@ -73,6 +73,11 @@ public class LCAggregationOp extends Operator {
                label = "Output PFT classes", defaultValue = "true")
     private boolean outputPFTClasses;
 
+    @Parameter(description = "The user defined conversion table from LCCS to PFTs. " +
+                             "If not given the standard LC-CCI table is used.",
+               label = "User defined PFT conversion table")
+    private File userPFTConversionTable;
+
     @Parameter(defaultValue = "2160")
     private int numRows;
 
@@ -130,7 +135,8 @@ public class LCAggregationOp extends Operator {
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
                                                                        outputLCCSClasses, numberOfMajorityClasses,
-                                                                       outputPFTClasses, areaCalculator);
+                                                                       outputPFTClasses, userPFTConversionTable,
+                                                                       areaCalculator);
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr("");
         binningConfig.setNumRows(numRows);
