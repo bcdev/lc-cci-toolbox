@@ -80,6 +80,7 @@ public class LcMapTiffReader extends AbstractProductReader {
                                      lcClassifLccsProduct.getSceneRasterWidth(),
                                      lcClassifLccsProduct.getSceneRasterHeight());
         result.setPreferredTileSize(new Dimension(1024, 1024));
+        result.setFileLocation(lcClassifLccsFile);
         ProductUtils.copyGeoCoding(lcClassifLccsProduct, result);
         result.getMetadataRoot().setAttributeString("epoch", epoch);
         result.getMetadataRoot().setAttributeString("version", version);

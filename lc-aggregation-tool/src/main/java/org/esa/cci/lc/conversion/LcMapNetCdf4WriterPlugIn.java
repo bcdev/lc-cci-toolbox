@@ -205,9 +205,9 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
-                final byte[] LCCS_CLASS_FLAG_VALUES = new byte[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, (byte)130, (byte)140, (byte)150, (byte)160, (byte)170, (byte)180, (byte)190, (byte)200, (byte)210, (byte)220, (byte)230, (byte)240 };
+                final short[] LCCS_CLASS_FLAG_VALUES = new short[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240 };
                 final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed cropland_irrigated mosaic_cropland mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed mosaic_tree_and_shrub mosaic_herbaceous shrubland grassland sparse_vegetation tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded urban bare_areas water snow_and_ice";
-                final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
+                final ArrayShort.D1 valids = new ArrayShort.D1(LCCS_CLASS_FLAG_VALUES.length);
                 for (int i=0; i<LCCS_CLASS_FLAG_VALUES.length; ++i) {
                     valids.set(i, LCCS_CLASS_FLAG_VALUES[i]);
                 }
