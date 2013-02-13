@@ -45,7 +45,7 @@ public class LcConversionOpTest {
 
         final File output = new File("/tmp/ESACCI-LC-L4-Map-10000m-P5Y-2010-v0.nc");
         assertTrue("output exists", output.exists());
-        //output.delete();
+        output.delete();
     }
 
     private Product createSourceProduct() throws Exception {
