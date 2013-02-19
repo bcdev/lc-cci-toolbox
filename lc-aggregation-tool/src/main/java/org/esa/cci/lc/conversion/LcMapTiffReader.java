@@ -35,11 +35,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This reader is capable of reading a collection of TIF products
- * located in one directory (which can be a zip archive as well) into a single product.
+ * This reader is capable of reading a collection of Land Cover CCI TIF products
+ * located in one directory into a single product.
  * Each of the single TIFs will be represented by one band in the target product.
  *
- * @author Olaf Danne
+ * @author Martin Böttcher
  */
 public class LcMapTiffReader extends AbstractProductReader {
 

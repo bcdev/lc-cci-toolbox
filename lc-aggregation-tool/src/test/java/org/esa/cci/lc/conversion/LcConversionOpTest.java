@@ -1,11 +1,13 @@
 package org.esa.cci.lc.conversion;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,31 +22,31 @@ import static org.junit.Assert.assertTrue;
 
 public class LcConversionOpTest {
 
-    private static LcConversionOp.Spi conversionSpi;
+    private static WriteOp.Spi writeOpSpI;
     private static LcMapNetCdf4WriterPlugIn writerPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
-        conversionSpi = new LcConversionOp.Spi();
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(conversionSpi);
+        writeOpSpI = new WriteOp.Spi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(writeOpSpI);
         writerPlugIn = new LcMapNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(writerPlugIn);
     }
 
     @AfterClass
     public static void afterClass() {
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(conversionSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(writeOpSpI);
         ProductIOPlugInManager.getInstance().removeWriterPlugIn(writerPlugIn);
     }
 
     @Test()
     public void testTargetProductCreation() throws Exception {
-        LcConversionOp op = createOp();
-        op.setSourceProduct(createSourceProduct());
+        WriteOp op = createOp();
         Product targetProduct = op.getTargetProduct();
+        op.writeProduct(ProgressMonitor.NULL);
 
         final File output = new File("/tmp/ESACCI-LC-L4-Map-10000m-P5Y-2010-v0.nc");
-        assertTrue("output exists", output.exists());
+        assertTrue("check output exists", output.exists());
         output.delete();
     }
 
@@ -64,9 +66,10 @@ public class LcConversionOpTest {
         return product;
     }
 
-    private LcConversionOp createOp() {
-        LcConversionOp op = (LcConversionOp) conversionSpi.createOperator();
-        return op;
+    private WriteOp createOp() throws Exception {
+        WriteOp writeOp = new WriteOp(createSourceProduct(), new File("/tmp/dummy"), "NetCDF4-LC-Map");
+        writeOp.setClearCacheAfterRowWrite(true);
+        return writeOp;
     }
 
 
