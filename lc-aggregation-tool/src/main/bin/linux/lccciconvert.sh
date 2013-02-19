@@ -1,8 +1,8 @@
 #!/bin/sh
 # lccciconvert.sh /data/lc-map-example/lc_classif_lccs_2010_v2.tif
 
-if [ -z $1 ]; then
-    echo "Land Cover CCI Tiff to NetCDF 4 converter
+if [ -z "$1" ]; then
+    echo "Land Cover CCI Tiff to NetCDF 4 converter"
     echo "call   : lccciconvert.sh <classification-tif-file>"
     echo "example: lccciconvert.sh /data/lc-map-product/lc_classif_lccs_2010_v2.tif"
     echo "pattern: lc_classif_lccs_<epoch>_<version>.tif"
@@ -12,7 +12,7 @@ if [ -z $1 ]; then
     exit 1
 fi
 
-export BEAM4_HOME=`dirname $0`/..
+export BEAM4_HOME=`( cd ..; pwd )`
 target=`dirname $1`/dummy
 
 exec java \
