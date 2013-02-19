@@ -1,8 +1,6 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -12,7 +10,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.gpf.operators.standard.WriteOp;
-import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 
 import java.io.File;
@@ -24,7 +21,7 @@ import java.io.File;
  * @author Martin Böttcher
  */
 @OperatorMetadata(
-        alias = "LCCCI.Convert",
+        alias = "LCCCI.Convert2",
         version = "0.5",
         authors = "Martin Böttcher",
         copyright = "(c) 2013 by Brockmann Consult",
@@ -62,7 +59,7 @@ public class LcConversionOp extends Operator implements Output {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(LcConversionOp.class);
+            super(LcConversionOpOrig.class);
         }
 
     }
