@@ -3,6 +3,7 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.binning.operator.GeneralSpatialBinCollector;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
@@ -100,7 +101,12 @@ public class LCAggregationOp extends Operator {
             formatterConfig = createDefaultFormatterConfig();
         }
 
-        BinningOp binningOp = new BinningOp();
+        BinningOp binningOp;
+        try {
+            binningOp = new BinningOp(new GeneralSpatialBinCollector());
+        } catch (Exception e) {
+            throw new OperatorException("Could not create binning operator.", e);
+        }
         binningOp.setSourceProduct(inputProduct);
         binningOp.setParameter("outputBinnedData", false);
         binningOp.setBinningConfig(binningConfig);
