@@ -8,12 +8,14 @@ import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 
@@ -33,7 +35,7 @@ import java.io.File;
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
-public class LCAggregationOp extends Operator {
+public class LCAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
@@ -112,7 +114,12 @@ public class LCAggregationOp extends Operator {
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
 
-        Product targetProduct = binningOp.getTargetProduct();
+        binningOp.getTargetProduct();
+
+        final Product product = new Product("dummy", "dummy", 2, 2);
+        product.addBand("dummy", ProductData.TYPE_INT8);
+        setTargetProduct(product);
+
 // todo - useless code; Product is not written again
 //        LCCS lccs = LCCS.getInstance();
 //        int[] classValues = lccs.getClassValues();
@@ -122,7 +129,7 @@ public class LCAggregationOp extends Operator {
 //            Band band = targetProduct.getBand("class_area_" + classValue);
 //            band.setDescription(classDescriptions[i]);
 //        }
-        setTargetProduct(targetProduct);
+//        setTargetProduct(targetProduct);
     }
 
     FormatterConfig createDefaultFormatterConfig() {
