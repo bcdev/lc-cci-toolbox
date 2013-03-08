@@ -2,6 +2,7 @@ package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.AbstractAggregator;
 import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
@@ -28,7 +29,7 @@ class LcBinIndexAggregator extends AbstractAggregator {
     }
 
     @Override
-    public void aggregateSpatial(BinContext ctx, Vector observationVector, WritableVector spatialVector) {
+    public void aggregateSpatial(BinContext ctx, Observation observation, WritableVector spatialVector) {
         spatialVector.set(0, ctx.getIndex());
     }
 
