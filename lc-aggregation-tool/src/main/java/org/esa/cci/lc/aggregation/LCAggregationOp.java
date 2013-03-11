@@ -1,9 +1,12 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.CompositingType;
+import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.operator.GeneralSpatialBinCollector;
+import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
@@ -77,7 +80,7 @@ public class LCAggregationOp extends Operator implements Output {
     private boolean outputPFTClasses;
 
     @Parameter(description = "The user defined conversion table from LCCS to PFTs. " +
-                             "If not given the standard LC-CCI table is used.",
+                             "If not given, the standard LC-CCI table is used.",
                label = "User defined PFT conversion table")
     private File userPFTConversionTable;
 
@@ -144,7 +147,14 @@ public class LCAggregationOp extends Operator implements Output {
     private BinningConfig createBinningConfig(Product product) {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
-        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(new SEAGrid(numRows),
+        PlanetaryGrid planetaryGrid;
+        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)) {
+            planetaryGrid = new PlateCarreeGrid(numRows);
+        } else {
+            planetaryGrid = new SEAGrid(numRows);
+        }
+
+        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
                                                                        outputLCCSClasses, numberOfMajorityClasses,
@@ -155,6 +165,8 @@ public class LCAggregationOp extends Operator implements Output {
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);
+        binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
+        binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
     }
 
