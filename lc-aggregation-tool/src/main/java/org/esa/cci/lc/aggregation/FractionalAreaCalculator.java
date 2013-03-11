@@ -1,6 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.support.SEAGrid;
+import org.esa.beam.binning.PlanetaryGrid;
 
 import java.awt.geom.Rectangle2D;
 
@@ -12,22 +12,21 @@ class FractionalAreaCalculator {
     private final double deltaGridLat;
     private final double deltaMapLat;
     private final double deltaMapLon;
-    private final SEAGrid seaGrid;
+    private final PlanetaryGrid planetaryGrid;
 
-    public FractionalAreaCalculator(SEAGrid seaGrid, int mapWidth, int mapHeight) {
-        this.seaGrid = seaGrid;
-        deltaGridLat = 180.0 / seaGrid.getNumRows();
+    public FractionalAreaCalculator(PlanetaryGrid planetaryGrid, int mapWidth, int mapHeight) {
+        this.planetaryGrid = planetaryGrid;
+        deltaGridLat = 180.0 / planetaryGrid.getNumRows();
         deltaMapLat = 180.0 / mapHeight;
         deltaMapLon = 360.0 / mapWidth;
     }
 
     public double calculate(double longitude, double latitude, long binIndex) {
-        int rowIndex = seaGrid.getRowIndex(binIndex);
-        long firstBinIndex = seaGrid.getFirstBinIndex(rowIndex);
-        int colInRowIndex = (int) (binIndex - firstBinIndex);
-        double binCenterLon = seaGrid.getCenterLon(rowIndex, colInRowIndex);
-        double binCenterLat = seaGrid.getCenterLat(rowIndex);
-        double deltaGridLon = 360.0 / seaGrid.getNumCols(rowIndex);
+        int rowIndex = planetaryGrid.getRowIndex(binIndex);
+        double[] binCenterLatLon = planetaryGrid.getCenterLatLon(binIndex);
+        double binCenterLon = binCenterLatLon[1];
+        double binCenterLat = binCenterLatLon[0];
+        double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
         Rectangle2D.Double binRect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
         Rectangle2D.Double obsRect = createRect(longitude, latitude, deltaMapLon, deltaMapLat);
         return calcFraction(binRect, obsRect);
