@@ -7,6 +7,8 @@ import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.operator.GeneralSpatialBinCollector;
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.ReducedGaussianGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
@@ -50,7 +52,7 @@ public class LCAggregationOp extends Operator implements Output {
     private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
-               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "GAUSSIAN_GRID"},
+               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "REGULAR_GAUSSIAN_GRID", "REDUCED_GAUSSIAN_GRID"},
                defaultValue = "GEOGRAPHIC_LAT_LON")
     private ProjectionMethod projectionMethod;
 
@@ -145,15 +147,19 @@ public class LCAggregationOp extends Operator implements Output {
     }
 
     private BinningConfig createBinningConfig(Product product) {
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
         PlanetaryGrid planetaryGrid;
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)) {
             planetaryGrid = new PlateCarreeGrid(numRows);
+        } else if (ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
+            planetaryGrid = new RegularGaussianGrid(numRows);
+        } else if (ProjectionMethod.REDUCED_GAUSSIAN_GRID.equals(projectionMethod)) {
+            planetaryGrid = new ReducedGaussianGrid(numRows);
         } else {
             planetaryGrid = new SEAGrid(numRows);
         }
 
+        int sceneWidth = sourceProduct.getSceneRasterWidth();
+        int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
