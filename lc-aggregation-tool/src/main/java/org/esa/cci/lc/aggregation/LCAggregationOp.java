@@ -12,8 +12,8 @@ import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -25,6 +25,7 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -119,11 +120,17 @@ public class LCAggregationOp extends Operator implements Output {
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
 
-        binningOp.getTargetProduct();
+        Product binningTarget = binningOp.getTargetProduct();
 
-        final Product product = new Product("dummy", "dummy", 2, 2);
-        product.addBand("dummy", ProductData.TYPE_INT8);
-        setTargetProduct(product);
+        ProductSubsetDef subsetDef = new ProductSubsetDef();
+        subsetDef.setRegion(0, 0, 2, 2);
+        Product dummyTarget = null;
+        try {
+            dummyTarget = binningTarget.createSubset(subsetDef, "dummy", "dummy");
+        } catch (IOException e) {
+            throw new OperatorException(e);
+        }
+        setTargetProduct(dummyTarget);
 
 // todo - useless code; Product is not written again
 //        LCCS lccs = LCCS.getInstance();
