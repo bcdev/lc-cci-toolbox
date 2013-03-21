@@ -5,7 +5,6 @@ import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.FormatterConfig;
-import org.esa.beam.binning.operator.GeneralSpatialBinCollector;
 import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
@@ -111,7 +110,7 @@ public class LCAggregationOp extends Operator implements Output {
 
         BinningOp binningOp;
         try {
-            binningOp = new BinningOp(new GeneralSpatialBinCollector());
+            binningOp = new BinningOp();
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
