@@ -1,1 +1,2 @@
 org.esa.cci.lc.conversion.LcMapNetCdf4WriterPlugIn
+org.esa.cci.lc.conversion.LcConditionNetCdf4WriterPlugIn
