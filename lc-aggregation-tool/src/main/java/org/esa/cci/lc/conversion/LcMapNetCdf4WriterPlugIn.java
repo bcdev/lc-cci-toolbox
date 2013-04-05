@@ -211,7 +211,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 240);
                 variable.addAttribute("_Unsigned", "true");
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, 0);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)0);
             }
 
             private void addProcessedFlagVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -230,7 +230,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, -1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
             }
 
             private void addCurrentPixelStateVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -249,7 +249,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 5);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, -1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
             }
 
             private void addObservationCountVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -260,7 +260,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "land_cover_lccs number_of_observations");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 32767);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, -1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
             }
 
             private void addAlgorithmicConfidenceLevelVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -272,7 +272,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, -1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
             }
 
             private void addOverallConfidenceLevelVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -291,7 +291,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, -1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
             }
         };
     }

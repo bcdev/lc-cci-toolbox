@@ -12,7 +12,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-export BEAM4_HOME=`( cd ..; pwd )`
+export BEAM4_HOME=`( cd $(dirname $0); cd ..; pwd )`
 target=`dirname $1`/dummy
 
 exec java \
