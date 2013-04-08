@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <beam.version>4.10.4-SNAPSHOT</beam.version>
+        <beam.version>4.11</beam.version>
     </properties>
 
     <dependencyManagement>
@@ -38,12 +38,12 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>1.1.2-SNAPSHOT</version>
+                <version>1.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-geotiff</artifactId>
-                <version>1.2.2-SNAPSHOT</version>
+                <version>1.2.2</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
