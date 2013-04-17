@@ -29,8 +29,6 @@ public class LcAggregatorTest {
         assertEquals(numClasses, aggregator.getTemporalFeatureNames().length);
         assertEquals(numClasses + numMajorityClasses, outputFeatureNames.length);
 
-        assertTrue(Float.isNaN(aggregator.getOutputFillValue()));
-
         assertEquals("class_area_0", spatialFeatureNames[0]);
         assertEquals("class_area_220", spatialFeatureNames[numClasses - 1]);
 

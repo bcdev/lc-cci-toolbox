@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.AbstractAggregator;
+import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
@@ -17,14 +18,13 @@ class LcBinIndexAggregator extends AbstractAggregator {
     }
 
     private LcBinIndexAggregator(String[] spatialFeatureNames) {
-        super(LcBinIndexAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, spatialFeatureNames,
-              Float.NaN);
+        super(LcBinIndexAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, spatialFeatureNames);
     }
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         for (int i = 0; i < vector.size(); i++) {
-            vector.set(i, getOutputFillValue());
+            vector.set(i, Aggregator.OUTPUT_FILL_VALUE);
         }
     }
 

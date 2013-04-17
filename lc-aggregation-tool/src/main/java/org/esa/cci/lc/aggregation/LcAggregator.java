@@ -35,7 +35,7 @@ class LcAggregator extends AbstractAggregator {
     private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
                          FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), Float.NaN);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames));
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
