@@ -1,13 +1,15 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.AbstractAggregator;
-import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
 /**
+ * A simple aggregator adding bini indices to the output.
+ * Mainly intended for debugging.
+ *
  * @author Marco Peters
  */
 class LcBinIndexAggregator extends AbstractAggregator {
@@ -24,7 +26,7 @@ class LcBinIndexAggregator extends AbstractAggregator {
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         for (int i = 0; i < vector.size(); i++) {
-            vector.set(i, Aggregator.OUTPUT_FILL_VALUE);
+            vector.set(i, Float.NaN);
         }
     }
 
