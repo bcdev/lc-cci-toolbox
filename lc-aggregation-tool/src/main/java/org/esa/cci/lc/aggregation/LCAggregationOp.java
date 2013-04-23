@@ -306,7 +306,7 @@ public class LCAggregationOp extends Operator implements Output {
             throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
         }
         if (numRows < 2 || numRows % 2 != 0) {
-            throw new OperatorException("Number of rows be must greater than 2 and must be an even number.");
+            throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
         }
     }
 
