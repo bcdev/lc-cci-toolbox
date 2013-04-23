@@ -71,7 +71,6 @@ class LcMedianAggregator extends AbstractAggregator {
 
     @Override
     public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
-        //Todo change body of created method. Use File | Settings | File Templates to change
     }
 
     @Override
