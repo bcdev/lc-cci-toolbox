@@ -104,11 +104,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
             if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
                 MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
-//                MessageFormat.format("ESACCI-LC-L4-Map-{0}m-P{1}Y-{2}-v{3}",
-//                                     spatialResolution,
-//                                     temporalResolution,
-//                                     epoch,
-//                                     version)
                 final String id = globalAttributes.getAttributeString("id");
                 int mpPos = id.indexOf("m-P");
                 int yPos = id.indexOf("Y-");
@@ -193,13 +188,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
             writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y",
-                                                       spatialResolution,
-                                                       temporalResolution));
+                                                                      spatialResolution,
+                                                                      temporalResolution));
             writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}",
-                                                       spatialResolution,
-                                                       temporalResolution,
-                                                       epoch,
-                                                       version));
+                                                                    spatialResolution,
+                                                                    temporalResolution,
+                                                                    epoch,
+                                                                    version));
             writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
             writeable.addGlobalAttribute("product_version", version);
             writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
@@ -277,7 +272,33 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                final byte[] LCCS_CLASS_FLAG_VALUES = new byte[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, (byte)130, (byte)140, (byte)150, (byte)160, (byte)170, (byte)180, (byte)190, (byte)200, (byte)210, (byte)220, (byte)230, (byte)240 };
+                final byte[] LCCS_CLASS_FLAG_VALUES = new byte[]{
+                        0,
+                        10,
+                        20,
+                        30,
+                        40,
+                        50,
+                        60,
+                        70,
+                        80,
+                        90,
+                        100,
+                        110,
+                        120,
+                        (byte) 130,
+                        (byte) 140,
+                        (byte) 150,
+                        (byte) 160,
+                        (byte) 170,
+                        (byte) 180,
+                        (byte) 190,
+                        (byte) 200,
+                        (byte) 210,
+                        (byte) 220,
+                        (byte) 230,
+                        (byte) 240
+                };
                 final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed cropland_irrigated mosaic_cropland mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed mosaic_tree_and_shrub mosaic_herbaceous shrubland grassland sparse_vegetation tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded urban bare_areas water snow_and_ice";
                 final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
                 for (int i = 0; i < LCCS_CLASS_FLAG_VALUES.length; ++i) {
@@ -290,7 +311,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 240);
                 variable.addAttribute("_Unsigned", "true");
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)0);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
                 }
