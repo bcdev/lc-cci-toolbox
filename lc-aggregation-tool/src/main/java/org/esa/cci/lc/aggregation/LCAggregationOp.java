@@ -44,6 +44,8 @@ public class LCAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
+    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
+
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
@@ -90,6 +92,7 @@ public class LCAggregationOp extends Operator implements Output {
     private int numRows;
 
     FormatterConfig formatterConfig;
+    private static final String CLASS_BAND_NAME = "lccs_class";
 
     @Override
     public void initialize() throws OperatorException {
@@ -168,12 +171,16 @@ public class LCAggregationOp extends Operator implements Output {
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
-        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(product.getBandAt(0).getName(),
+        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(CLASS_BAND_NAME,
                                                                        outputLCCSClasses, numberOfMajorityClasses,
                                                                        outputPFTClasses, userPFTConversionTable,
                                                                        areaCalculator);
         BinningConfig binningConfig = new BinningConfig();
-        binningConfig.setMaskExpr("");
+        int processed = 1;
+        int clearLand = 1;
+        int clearWater = 2;
+        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater);
+        binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(lcAggregatorConfig);

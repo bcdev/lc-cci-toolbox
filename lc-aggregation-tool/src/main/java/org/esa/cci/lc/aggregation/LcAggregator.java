@@ -35,7 +35,7 @@ class LcAggregator extends AbstractAggregator {
     private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
                          FractionalAreaCalculator calculator, PftLut pftLut) {
         super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames), Float.NaN);
+              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames));
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
@@ -90,14 +90,9 @@ class LcAggregator extends AbstractAggregator {
         // Nothing to be done here
     }
 
-    // todo - should be in interface and called by framework
-    private void initOutput(WritableVector outputVector) {
-        initVector(outputVector, Float.NaN);
-    }
-
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
-        initOutput(outputVector);
+        initVector(outputVector, Float.NaN);
         SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
         float sum = 0.0f;
         int outputVectorIndex = 0;

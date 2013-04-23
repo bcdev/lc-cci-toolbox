@@ -7,6 +7,9 @@ import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
 /**
+ * A simple aggregator adding bini indices to the output.
+ * Mainly intended for debugging.
+ *
  * @author Marco Peters
  */
 class LcBinIndexAggregator extends AbstractAggregator {
@@ -17,14 +20,13 @@ class LcBinIndexAggregator extends AbstractAggregator {
     }
 
     private LcBinIndexAggregator(String[] spatialFeatureNames) {
-        super(LcBinIndexAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, spatialFeatureNames,
-              Float.NaN);
+        super(LcBinIndexAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, spatialFeatureNames);
     }
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         for (int i = 0; i < vector.size(); i++) {
-            vector.set(i, getOutputFillValue());
+            vector.set(i, Float.NaN);
         }
     }
 
