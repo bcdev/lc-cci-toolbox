@@ -175,6 +175,8 @@ public class LCAggregationOp extends Operator implements Output {
                                                                        outputLCCSClasses, numberOfMajorityClasses,
                                                                        outputPFTClasses, userPFTConversionTable,
                                                                        areaCalculator);
+        final LcMedianAggregatorConfig lcMedianAggregatorConfig = new LcMedianAggregatorConfig("algorithmic_confidence_level");
+
         BinningConfig binningConfig = new BinningConfig();
         int processed = 1;
         int clearLand = 1;
@@ -183,7 +185,7 @@ public class LCAggregationOp extends Operator implements Output {
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(lcAggregatorConfig);
+        binningConfig.setAggregatorConfigs(lcAggregatorConfig, lcMedianAggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;

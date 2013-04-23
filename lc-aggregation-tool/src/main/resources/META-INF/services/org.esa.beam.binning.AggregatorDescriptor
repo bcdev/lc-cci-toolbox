@@ -1,2 +1,3 @@
 org.esa.cci.lc.aggregation.LcAggregatorDescriptor
 org.esa.cci.lc.aggregation.LcBinIndexAggregatorDescriptor
+org.esa.cci.lc.aggregation.LcMedianAggregatorDescriptor
