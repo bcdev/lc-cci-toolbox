@@ -54,7 +54,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String weekNumber = sourceProduct.getMetadataRoot().getAttributeString("weekNumber");
                 final String version = sourceProduct.getMetadataRoot().getAttributeString("version");
                 String lcOutputFilename =
-                        MessageFormat.format("ESACCI-LC-L4-Cond-{0}-{1}m-P{2}D-{3}-{4}-{5}-v{6}.nc",
+                        MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}.nc",
                                              condition,
                                              spatialResolution,
                                              temporalResolution,
@@ -103,10 +103,17 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String temporalResolution = product.getMetadataRoot().getAttributeString("temporalResolution");
             final String startYear = product.getMetadataRoot().getAttributeString("startYear");
             final String endYear = product.getMetadataRoot().getAttributeString("endYear");
+            final String weekNumber = product.getMetadataRoot().getAttributeString("weekNumber");
             final String version = product.getMetadataRoot().getAttributeString("version");
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
-            final String startTime = startYear + "0101";
-            final String endTime = endYear + "1231";
+            final String startTime = startYear + weekNumber;
+            final String endTime = endYear + weekNumber;
+            final int temporalCoverageYears;
+            try {
+                temporalCoverageYears = Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1;
+            } catch (NumberFormatException ex) {
+                throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
+            }
             float latMax = 90.0f;
             float latMin = -90.0f;
             float lonMin = -180.0f;
@@ -135,16 +142,17 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
-            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-Cond-{0}-{1}m-P{2}D",
+            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D",
                                                        condition,
                                                        spatialResolution,
                                                        temporalResolution));
-            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-Cond-{0}-{1}m-P{2}D-{3}-{4}-v{5}",
+            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}",
                                                        condition,
                                                        spatialResolution,
                                                        temporalResolution,
                                                        startYear,
                                                        endYear,
+                                                       weekNumber,
                                                        version));
             writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
             writeable.addGlobalAttribute("product_version", version);
@@ -157,7 +165,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 //            writeable.addGlobalAttribute("time_coverage_end", COMPACT_ISO_FORMAT.format(product.getEndTime().getAsDate()));
             writeable.addGlobalAttribute("time_coverage_start", startTime);
             writeable.addGlobalAttribute("time_coverage_end", endTime);
-            writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalResolution + "D");
+            writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalCoverageYears + "Y");
+            writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + "D");
 
             writeable.addGlobalAttribute("geospatial_lat_min", String.valueOf(latMin));
             writeable.addGlobalAttribute("geospatial_lat_max", String.valueOf(latMax));
@@ -185,9 +194,20 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 Dimension tileSize = ImageManager.getPreferredTileSize(p);
+                StringBuffer ancillaryVariables = new StringBuffer();
+                for (Band band : p.getBands()) {
+                    if ("ndvi_std".equals(band.getName()) ||
+                        "ndvi_nYearObs".equals(band.getName()) ||
+                        "ndvi_status".equals(band.getName())) {
+                        if (ancillaryVariables.length() > 0) {
+                            ancillaryVariables.append(' ');
+                        }
+                        ancillaryVariables.append(band.getName());
+                    }
+                }
                 for (Band band : p.getBands()) {
                     if ("ndvi_mean".equals(band.getName())) {
-                        addNdviMeanVariable(ncFile, band, tileSize);
+                        addNdviMeanVariable(ncFile, band, tileSize, ancillaryVariables.toString());
                     } else if ("ndvi_std".equals(band.getName())) {
                         addNdviStdVariable(ncFile, band, tileSize);
                     } else if ("ndvi_nYearObs".equals(band.getName())) {
@@ -198,16 +218,19 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 }
             }
 
-            private void addNdviMeanVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+            private void addNdviMeanVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "normalised_difference_vegetation_index");
+                variable.addAttribute("standard_name", "normalized_difference_vegetation_index");
                 variable.addAttribute("valid_min", -100);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short)255);
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
             }
 
             private void addNdviStdVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -215,7 +238,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "normalised_difference_vegetation_index standard_error");
+                variable.addAttribute("standard_name", "normalized_difference_vegetation_index standard_error");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
@@ -227,7 +250,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "normalised_difference_vegetation_index number_of_observations");
+                variable.addAttribute("standard_name", "normalized_difference_vegetation_index number_of_observations");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 30);
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
@@ -244,7 +267,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     valids.set(i, CONDITION_FLAG_VALUES[i]);
                 }
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "normalised_difference_vegetation_index status_flag");
+                variable.addAttribute("standard_name", "normalized_difference_vegetation_index status_flag");
                 variable.addAttribute("flag_values", valids);
                 variable.addAttribute("flag_meanings", CONDITION_FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 1);

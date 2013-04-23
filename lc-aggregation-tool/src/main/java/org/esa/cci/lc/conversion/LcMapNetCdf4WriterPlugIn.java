@@ -51,7 +51,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String spatialResolution = sourceProduct.getMetadataRoot().getAttributeString("spatialResolution");
                 final String temporalResolution = sourceProduct.getMetadataRoot().getAttributeString("temporalResolution");
                 String lcOutputFilename =
-                        MessageFormat.format("ESACCI-LC-L4-Map-{0}m-P{1}Y-{2}-v{3}.nc",
+                        MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
                                              spatialResolution,
                                              temporalResolution,
                                              epoch,
@@ -127,10 +127,10 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
-            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-Map-{0}m-P{1}Y",
+            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y",
                                                        spatialResolution,
                                                        temporalResolution));
-            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-Map-{0}m-P{1}Y-{2}-v{3}",
+            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}",
                                                        spatialResolution,
                                                        temporalResolution,
                                                        epoch,
@@ -147,6 +147,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("time_coverage_start", startTime);
             writeable.addGlobalAttribute("time_coverage_end", endTime);
             writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalResolution + "Y");
+            writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + "Y");
 
             writeable.addGlobalAttribute("geospatial_lat_min", String.valueOf(latMin));
             writeable.addGlobalAttribute("geospatial_lat_max", String.valueOf(latMax));
@@ -177,9 +178,22 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
+                StringBuffer ancillaryVariables = new StringBuffer();
+                for (Band band : p.getBands()) {
+                    if ("processed_flag".equals(band.getName()) ||
+                        "current_pixel_state".equals(band.getName()) ||
+                        "observation_count".equals(band.getName()) ||
+                        "algorithmic_confidence_level".equals(band.getName()) ||
+                        "overall_confidence_level".equals(band.getName())) {
+                        if (ancillaryVariables.length() > 0) {
+                            ancillaryVariables.append(' ');
+                        }
+                        ancillaryVariables.append(band.getName());
+                    }
+                }
                 for (Band band : p.getBands()) {
                     if ("lccs_class".equals(band.getName())) {
-                        addLccsClassVariable(ncFile, band, tileSize);
+                        addLccsClassVariable(ncFile, band, tileSize, ancillaryVariables.toString());
                     } else if ("processed_flag".equals(band.getName())) {
                         addProcessedFlagVariable(ncFile, band, tileSize);
                     } else if ("current_pixel_state".equals(band.getName())) {
@@ -194,7 +208,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 }
             }
 
-            private void addLccsClassVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+            private void addLccsClassVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
@@ -212,6 +226,9 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_max", 240);
                 variable.addAttribute("_Unsigned", "true");
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)0);
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
             }
 
             private void addProcessedFlagVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
