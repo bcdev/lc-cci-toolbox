@@ -1,18 +1,19 @@
 package org.esa.cci.lc.aggregation;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-
 import org.esa.beam.binning.SpatialBin;
 import org.esa.beam.binning.TemporalBin;
 import org.esa.beam.binning.support.ObservationImpl;
 import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.binning.support.VectorImpl;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
-public class LcMedianAggregatorTest {
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 
-    private LcMedianAggregator aggregator;
+public class LcAccuracyAggregatorTest {
+
+    private LcAccuracyAggregator aggregator;
     private SpatialBin spatialBin;
     private float[] elements;
     private int latitude;
@@ -24,7 +25,7 @@ public class LcMedianAggregatorTest {
         final VariableContextImpl varCtx = new VariableContextImpl();
         varCtx.defineVariable("name");
 
-        aggregator = new LcMedianAggregator(varCtx, new String[]{"name"});
+        aggregator = new LcAccuracyAggregator(varCtx, new String[]{"name"});
         spatialBin = new SpatialBin();
         elements = new float[1];
         latitude = 0;
@@ -62,10 +63,10 @@ public class LcMedianAggregatorTest {
     public void testThatEvenNumberOfObservationsResolvesTo_TheMeanOfTheTwoCenterValuesOfSortedValues() {
         // preparation
         final float[] observations = {
-                    3.1f,
-                    2.2f,
-                    2.6f,
-                    1.2f
+                3.1f,
+                2.2f,
+                2.6f,
+                1.2f
         };
 
         // execution
@@ -83,11 +84,11 @@ public class LcMedianAggregatorTest {
     public void testThatOddNumberOfObservationsResolvesTo_TheCenterValueOfSortedValues() {
         // preparation
         final float[] observations = {
-                    3.1f,
-                    2.2f,
-                    4.2f,
-                    2.6f,
-                    1.2f
+                3.1f,
+                2.2f,
+                4.2f,
+                2.6f,
+                1.2f
         };
 
         // execution
@@ -119,7 +120,7 @@ public class LcMedianAggregatorTest {
         aggregator.aggregateTemporal(temporalBin, spatialVector, 127836, temporalVector);
         aggregator.aggregateTemporal(temporalBin, spatialVector, 127836, temporalVector);
         aggregator.aggregateTemporal(temporalBin, spatialVector, 127836, temporalVector);
-        aggregator.completeTemporal(temporalBin, 23178,temporalVector);
+        aggregator.completeTemporal(temporalBin, 23178, temporalVector);
 
         final float[] output = new float[1];
         aggregator.computeOutput(temporalVector, new VectorImpl(output));

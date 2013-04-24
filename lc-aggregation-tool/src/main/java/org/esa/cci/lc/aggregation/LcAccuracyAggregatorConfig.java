@@ -3,17 +3,17 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
-class LcMedianAggregatorConfig extends AggregatorConfig {
+class LcAccuracyAggregatorConfig extends AggregatorConfig {
 
     @Parameter
     private String varName;
 
-    LcMedianAggregatorConfig() {
-        super(LcMedianAggregatorDescriptor.NAME);
+    LcAccuracyAggregatorConfig() {
+        super(LcAccuracyAggregatorDescriptor.NAME);
     }
 
-    LcMedianAggregatorConfig(final String varName) {
-        super(LcMedianAggregatorDescriptor.NAME);
+    LcAccuracyAggregatorConfig(final String varName) {
+        super(LcAccuracyAggregatorDescriptor.NAME);
         this.varName = varName;
     }
 

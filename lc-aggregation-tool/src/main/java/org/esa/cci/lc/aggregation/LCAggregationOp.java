@@ -40,7 +40,7 @@ import java.io.IOException;
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
-public class LCAggregationOp extends Operator implements Output {
+public class LcAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
@@ -92,6 +92,7 @@ public class LCAggregationOp extends Operator implements Output {
     private int numRows;
 
     FormatterConfig formatterConfig;
+
     private static final String CLASS_BAND_NAME = "lccs_class";
 
     @Override
@@ -175,7 +176,7 @@ public class LCAggregationOp extends Operator implements Output {
                                                                        outputLCCSClasses, numberOfMajorityClasses,
                                                                        outputPFTClasses, userPFTConversionTable,
                                                                        areaCalculator);
-        final LcMedianAggregatorConfig lcMedianAggregatorConfig = new LcMedianAggregatorConfig("algorithmic_confidence_level");
+        final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
 
         BinningConfig binningConfig = new BinningConfig();
         int processed = 1;
@@ -185,7 +186,7 @@ public class LCAggregationOp extends Operator implements Output {
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(lcAggregatorConfig, lcMedianAggregatorConfig);
+        binningConfig.setAggregatorConfigs(lcAggregatorConfig, lcAccuracyAggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
@@ -319,7 +320,7 @@ public class LCAggregationOp extends Operator implements Output {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(LCAggregationOp.class);
+            super(LcAggregationOp.class);
         }
     }
 

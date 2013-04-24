@@ -38,7 +38,7 @@ public class LcConversionOp extends Operator implements Output {
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
 
-        final LCMetadata lcMetadata = new LCMetadata(sourceProduct);
+        final LcMetadata lcMetadata = new LcMetadata(sourceProduct);
         final String spatialResolution = lcMetadata.getSpatialResolution();
         final String temporalResolution = lcMetadata.getTemporalResolution();
         final String epoch = lcMetadata.getEpoch();

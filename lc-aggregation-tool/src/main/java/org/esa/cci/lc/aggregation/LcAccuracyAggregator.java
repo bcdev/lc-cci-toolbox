@@ -10,16 +10,19 @@ import org.esa.beam.binning.support.GrowableVector;
 
 import java.util.Arrays;
 
-class LcMedianAggregator extends AbstractAggregator {
+/**
+ * This class implements a median average to aggregate the accuracy.
+ */
+class LcAccuracyAggregator extends AbstractAggregator {
 
-    private final static String[] featureNames = new String[]{"lc_median"};
+    private final static String[] featureNames = new String[]{"accuracy"};
 
     private final int varIndex;
     private final String contextNameSpace;
 
 
-    LcMedianAggregator(VariableContext varCtx, String[] varNames) {
-        super(LcMedianAggregatorDescriptor.NAME,
+    LcAccuracyAggregator(VariableContext varCtx, String[] varNames) {
+        super(LcAccuracyAggregatorDescriptor.NAME,
               featureNames,
               featureNames,
               featureNames);

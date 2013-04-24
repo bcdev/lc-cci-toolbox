@@ -5,9 +5,9 @@ import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.AggregatorDescriptor;
 import org.esa.beam.binning.VariableContext;
 
-public class LcMedianAggregatorDescriptor implements AggregatorDescriptor {
+public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
 
-    public static final String NAME = "LC_Median_AGGR";
+    public static final String NAME = "LC_ACCURACY_AGGR";
 
     @Override
     public String getName() {
@@ -16,11 +16,11 @@ public class LcMedianAggregatorDescriptor implements AggregatorDescriptor {
 
     @Override
     public AggregatorConfig createAggregatorConfig() {
-        return new LcMedianAggregatorConfig();
+        return new LcAccuracyAggregatorConfig();
     }
 
     @Override
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-        return new LcMedianAggregator(varCtx, aggregatorConfig.getVarNames());
+        return new LcAccuracyAggregator(varCtx, aggregatorConfig.getVarNames());
     }
 }

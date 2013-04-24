@@ -21,14 +21,14 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 
-public class LCAggregationOpTest {
+public class LcAggregationOpTest {
 
-    private static LCAggregationOp.Spi aggregationSpi;
+    private static LcAggregationOp.Spi aggregationSpi;
     private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
-        aggregationSpi = new LCAggregationOp.Spi();
+        aggregationSpi = new LcAggregationOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(aggregationSpi);
         beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(beamNetCdf4WriterPlugIn);
@@ -42,7 +42,7 @@ public class LCAggregationOpTest {
 
     @Test()
     public void testDefaultTargetProductCreation() throws Exception {
-        LCAggregationOp aggregationOp = createAggrOp();
+        LcAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
@@ -59,7 +59,7 @@ public class LCAggregationOpTest {
 
     @Test()
     public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
-        LCAggregationOp aggregationOp = createAggrOp();
+        LcAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setSourceProduct(createSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
@@ -76,7 +76,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testDefaultValues() {
-        LCAggregationOp aggrOp = (LCAggregationOp) aggregationSpi.createOperator();
+        LcAggregationOp aggrOp = (LcAggregationOp) aggregationSpi.createOperator();
         assertEquals(ProjectionMethod.GEOGRAPHIC_LAT_LON, aggrOp.getProjectionMethod());
         assertEquals(0.1, aggrOp.getPixelSizeX(), 1.0e-8);
         assertEquals(0.1, aggrOp.getPixelSizeY(), 1.0e-8);
@@ -96,7 +96,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testNumRows_LessThanTwo() {
-        LCAggregationOp aggrOp = createAggrOp();
+        LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(1);
         try {
             aggrOp.initialize();
@@ -108,7 +108,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testNumRows_OddValue() {
-        LCAggregationOp aggrOp = createAggrOp();
+        LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(23);
         try {
             aggrOp.initialize();
@@ -120,7 +120,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testWestEastBound() {
-        LCAggregationOp aggrOp = createAggrOp();
+        LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setWestBound(10);
         aggrOp.setEastBound(3);
         try {
@@ -134,7 +134,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testNorthSouthBound() {
-        LCAggregationOp aggrOp = createAggrOp();
+        LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setNorthBound(30);
         aggrOp.setSouthBound(70);
         try {
@@ -148,7 +148,7 @@ public class LCAggregationOpTest {
 
     @Test
     public void testNoOutputSelected() {
-        LCAggregationOp aggrOp = createAggrOp();
+        LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setOutputLCCSClasses(false);
         aggrOp.setOutputPFTClasses(false);
         aggrOp.setNumberOfMajorityClasses(0);
@@ -184,8 +184,8 @@ public class LCAggregationOpTest {
         return product;
     }
 
-    private LCAggregationOp createAggrOp() {
-        LCAggregationOp aggregationOp = (LCAggregationOp) aggregationSpi.createOperator();
+    private LcAggregationOp createAggrOp() {
+        LcAggregationOp aggregationOp = (LcAggregationOp) aggregationSpi.createOperator();
         aggregationOp.setTargetFile(new File("test-target.nc"));
         return aggregationOp;
     }

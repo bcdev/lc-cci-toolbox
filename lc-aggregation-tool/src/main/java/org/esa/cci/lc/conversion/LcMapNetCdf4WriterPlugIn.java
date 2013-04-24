@@ -72,7 +72,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
-            final LCMetadata lcMetadata = new LCMetadata(product);
+            final LcMetadata lcMetadata = new LcMetadata(product);
             final String spatialResolution = lcMetadata.getSpatialResolution();
             final String temporalResolution = lcMetadata.getTemporalResolution();
             final String epoch = lcMetadata.getEpoch();
