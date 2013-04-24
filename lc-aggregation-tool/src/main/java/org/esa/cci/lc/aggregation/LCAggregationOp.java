@@ -46,7 +46,6 @@ public class LcAggregationOp extends Operator implements Output {
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
 
-
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
 
@@ -63,14 +62,16 @@ public class LcAggregationOp extends Operator implements Output {
     @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeY;
 
-    @Parameter(description = "The western longitude.", interval = "[-180,180]", defaultValue = "-15.0", unit = "°")
+    @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
     private double westBound;
-    @Parameter(description = "The northern latitude.", interval = "[-90,90]", defaultValue = "75.0", unit = "°")
+    @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
     private double northBound;
-    @Parameter(description = "The eastern longitude.", interval = "[-180,180]", defaultValue = "30.0", unit = "°")
+    @Parameter(description = "The eastern longitude.", interval = "[-180,180]", unit = "°")
     private double eastBound;
-    @Parameter(description = "The southern latitude.", interval = "[-90,90]", defaultValue = "35.0", unit = "°")
+    @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
     private double southBound;
+    @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
+    private double predefinedBounds;
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -135,16 +136,16 @@ public class LcAggregationOp extends Operator implements Output {
         }
         setTargetProduct(dummyTarget);
 
-// todo - useless code; Product is not written again
-//        LCCS lccs = LCCS.getInstance();
-//        int[] classValues = lccs.getClassValues();
-//        String[] classDescriptions = lccs.getClassDescriptions();
-//        for (int i = 0; i < classValues.length; i++) {
-//            int classValue = classValues[i];
-//            Band band = targetProduct.getBand("class_area_" + classValue);
-//            band.setDescription(classDescriptions[i]);
-//        }
-//        setTargetProduct(targetProduct);
+        // todo - useless code; Product is not written again
+        //        LCCS lccs = LCCS.getInstance();
+        //        int[] classValues = lccs.getClassValues();
+        //        String[] classDescriptions = lccs.getClassDescriptions();
+        //        for (int i = 0; i < classValues.length; i++) {
+        //            int classValue = classValues[i];
+        //            Band band = targetProduct.getBand("class_area_" + classValue);
+        //            band.setDescription(classDescriptions[i]);
+        //        }
+        //        setTargetProduct(targetProduct);
     }
 
     FormatterConfig createDefaultFormatterConfig() {
@@ -191,7 +192,6 @@ public class LcAggregationOp extends Operator implements Output {
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
     }
-
 
     File getTargetFile() {
         return targetFile;
@@ -257,7 +257,6 @@ public class LcAggregationOp extends Operator implements Output {
         this.southBound = southBound;
     }
 
-
     public boolean isOutputLCCSClasses() {
         return outputLCCSClasses;
     }
@@ -289,7 +288,6 @@ public class LcAggregationOp extends Operator implements Output {
     void setNumRows(int numRows) {
         this.numRows = numRows;
     }
-
 
     private void validateParameters() {
         if (targetFile == null) {
@@ -323,5 +321,4 @@ public class LcAggregationOp extends Operator implements Output {
             super(LcAggregationOp.class);
         }
     }
-
 }
