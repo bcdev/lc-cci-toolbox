@@ -15,14 +15,12 @@ import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
 import org.esa.beam.dataio.netcdf.util.ReaderUtils;
 import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -45,40 +43,12 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     @Override
     public ProductWriter createWriterInstance() {
-        return new DefaultNetCdfWriter(this) {
-            @Override
-            public Object getOutput() {
-                final Product sourceProduct = getSourceProduct();
-                final LCMetadata lcMetadata = new LCMetadata(sourceProduct);
-                final String spatialResolution = lcMetadata.getSpatialResolution();
-                final String temporalResolution = lcMetadata.getTemporalResolution();
-                final String epoch = lcMetadata.getEpoch();
-                final String version = lcMetadata.getVersion();
-                final String lcOutputFilename =
-                        MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
-                                             spatialResolution,
-                                             temporalResolution,
-                                             epoch,
-                                             version);
-                String lcOutputPath;
-                String outputPath = super.getOutput().toString();
-                int pos = outputPath.lastIndexOf(File.separatorChar);
-                if (pos >= 0) {
-                    lcOutputPath = outputPath.substring(0, pos + 1) + lcOutputFilename;
-                } else {
-                    lcOutputPath = lcOutputFilename;
-                }
-
-                return lcOutputPath;
-            }
-
-        };
+        return new DefaultNetCdfWriter(this);
     }
 
     @Override
     public ProfilePartWriter createMetadataPartWriter() {
         return new NullProfilePartWriter();
-        //return super.createMetadataPartWriter();
     }
 
     @Override
@@ -89,54 +59,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
     @Override
     public ProfilePartWriter createDescriptionPartWriter() {
         return new NullProfilePartWriter();
-    }
-
-    private class LCMetadata {
-
-        private static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
-
-        private String epoch;
-        private String version;
-        private String spatialResolution;
-        private String temporalResolution;
-
-        public LCMetadata(Product sourceProduct) {
-            MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
-            if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
-                MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
-                final String id = globalAttributes.getAttributeString("id");
-                int mpPos = id.indexOf("m-P");
-                int yPos = id.indexOf("Y-");
-                int vPos = id.indexOf("-v");
-                spatialResolution = id.substring(17, mpPos);
-                temporalResolution = id.substring(mpPos + 3, yPos);
-                epoch = id.substring(yPos + 2, vPos);
-                version = id.substring(vPos + 2);
-            } else {
-                epoch = metadataRoot.getAttributeString("epoch");
-                version = metadataRoot.getAttributeString("version");
-                spatialResolution = metadataRoot.getAttributeString("spatialResolution");
-                temporalResolution = metadataRoot.getAttributeString("temporalResolution");
-
-            }
-        }
-
-        public String getEpoch() {
-            return epoch;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public String getSpatialResolution() {
-            return spatialResolution;
-        }
-
-        public String getTemporalResolution() {
-            return temporalResolution;
-        }
-
     }
 
     class LcSrInitialisationPart extends BeamInitialisationPart {
@@ -229,16 +151,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     @Override
     public ProfilePartWriter createBandPartWriter() {
-//        return super.createBandPartWriter();    //To change body of overridden methods use File | Settings | File Templates.
-        // TODO pre-encode überschreiben, variablen-attribute setzen
         return new BeamBandPart() {
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
-//                super.preEncode(ctx, p);    //To change body of overridden methods use File | Settings | File Templates.
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                StringBuffer ancillaryVariables = new StringBuffer();
+                StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
                     if ("processed_flag".equals(band.getName()) ||
                         "current_pixel_state".equals(band.getName()) ||

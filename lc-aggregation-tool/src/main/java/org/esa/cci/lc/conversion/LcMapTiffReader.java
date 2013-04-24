@@ -29,7 +29,7 @@ import org.esa.beam.util.ProductUtils;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-import java.lang.IllegalArgumentException;import java.lang.IllegalStateException;import java.lang.Object;import java.lang.Override;import java.lang.String;import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 public class LcMapTiffReader extends AbstractProductReader {
 
     public static final String LC_CLASSIF_FILENAME_PATTERN = "lc_classif_lccs_(....)_v(.*)\\.(tiff?)";
-    public static final String[] LC_VARIABLE_DESCRIPTIONS = new String[] {
+    public static final String[] LC_VARIABLE_DESCRIPTIONS = new String[]{
             "Land cover class defined in LCCS",
             "LC map processed area flag",
             "LC pixel type mask",
@@ -53,7 +53,14 @@ public class LcMapTiffReader extends AbstractProductReader {
             "LC map confidence level based on product validation"
     };
     private List<Product> bandProducts;
-    private static final String[] FLAG_NETCDF_VARIABLE = { "lccs_class", "processed_flag", "current_pixel_state", "observation_count", "algorithmic_confidence_level", "overall_confidence_level" };
+    private static final String[] FLAG_NETCDF_VARIABLE = {
+            "lccs_class",
+            "processed_flag",
+            "current_pixel_state",
+            "observation_count",
+            "algorithmic_confidence_level",
+            "overall_confidence_level"
+    };
 
     public LcMapTiffReader(LcMapTiffReaderPlugin readerPlugin) {
         super(readerPlugin);
@@ -65,6 +72,9 @@ public class LcMapTiffReader extends AbstractProductReader {
         bandProducts = new ArrayList<Product>();
 
         final File lcClassifLccsFile = getFileInput(getInput());
+        if (!lcClassifLccsFile.exists()) {
+            throw new IOException("Input file does not exist: " + lcClassifLccsFile.getAbsolutePath());
+        }
         final File productDir = lcClassifLccsFile.getParentFile();
 
         final String lcClassifLccsFilename = lcClassifLccsFile.getName();
@@ -91,7 +101,7 @@ public class LcMapTiffReader extends AbstractProductReader {
         Band band = addBand(0, lcClassifLccsProduct, result);
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
 
-        for (int i=1; i<=5; ++i) {
+        for (int i = 1; i <= 5; ++i) {
             String lcFlagFilename = "lc_flag" + i + "_" + epoch + "_v" + version + "." + extension;
             final Product lcFlagProduct = readProduct(productDir, lcFlagFilename, plugIn);
             if (lcFlagProduct == null) {
@@ -99,7 +109,7 @@ public class LcMapTiffReader extends AbstractProductReader {
             }
             if (result.getSceneRasterWidth() != lcFlagProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != lcFlagProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of flag band "  + i + " does not match map");
+                throw new IllegalArgumentException("dimensions of flag band " + i + " does not match map");
             }
             bandProducts.add(lcFlagProduct);
             band = addBand(i, lcFlagProduct, result);
@@ -110,7 +120,9 @@ public class LcMapTiffReader extends AbstractProductReader {
     }
 
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
+                                          Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
+                                          ProgressMonitor pm) throws IOException {
         // all bands use source images as source for its data
         throw new IllegalStateException();
     }
@@ -129,7 +141,7 @@ public class LcMapTiffReader extends AbstractProductReader {
     private static Matcher lcClassifLccsFileMatcher(String lcClassifLccsFilename) {
         Pattern p = Pattern.compile(LC_CLASSIF_FILENAME_PATTERN);
         final Matcher m = p.matcher(lcClassifLccsFilename);
-        if (! m.matches()) {
+        if (!m.matches()) {
             throw new IllegalArgumentException("input file name " + lcClassifLccsFilename + " does not match pattern " + LC_CLASSIF_FILENAME_PATTERN);
         }
         return m;
