@@ -53,14 +53,14 @@ public class LcAggregationOp extends Operator implements Output {
     private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
-               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "REGULAR_GAUSSIAN_GRID", "REDUCED_GAUSSIAN_GRID"},
-               defaultValue = "GEOGRAPHIC_LAT_LON")
+               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "REGULAR_GAUSSIAN_GRID", "REDUCED_GAUSSIAN_GRID"})
     private ProjectionMethod projectionMethod;
-
     @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeX;
     @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeY;
+    @Parameter(defaultValue = "2160")
+    private int numRows;
 
     @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
     private double westBound;
@@ -70,6 +70,7 @@ public class LcAggregationOp extends Operator implements Output {
     private double eastBound;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
     private double southBound;
+
     @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
     private double predefinedBounds;
 
@@ -88,9 +89,6 @@ public class LcAggregationOp extends Operator implements Output {
                              "If not given, the standard LC-CCI table is used.",
                label = "User defined PFT conversion table")
     private File userPFTConversionTable;
-
-    @Parameter(defaultValue = "2160")
-    private int numRows;
 
     FormatterConfig formatterConfig;
 
