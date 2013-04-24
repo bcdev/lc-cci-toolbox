@@ -30,4 +30,4 @@ exec java \
     "-Dncsa.hdf.hdflib.HDFLibrary.hdflib=$BEAM4_HOME/modules/lib-hdf-2.7/lib/libjhdf.so" \
     "-Dncsa.hdf.hdf5lib.H5.hdf5lib=$BEAM4_HOME/modules/lib-hdf-2.7/lib/libjhdf5.so" \
     -jar "$BEAM4_HOME/bin/ceres-launcher.jar" \
-    Write -PclearCacheAfterRowWrite=true -f $outputFormat -t $target $@
+    LCCCI.Convert -f $outputFormat -t $target $@
