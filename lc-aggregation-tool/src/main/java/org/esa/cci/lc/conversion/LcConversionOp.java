@@ -67,7 +67,7 @@ public class LcConversionOp extends Operator implements Output {
         File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
-
+        System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
         writeOp.writeProduct(ProgressMonitor.NULL);
         setTargetProduct(new Product("foo", "dummy", 2, 2));
     }
