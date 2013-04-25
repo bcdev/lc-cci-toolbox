@@ -35,11 +35,11 @@ import java.io.IOException;
  * @author Marco Peters
  */
 @OperatorMetadata(
-        alias = "LCCCI.Aggregate",
-        version = "0.5",
-        authors = "Marco Peters",
-        copyright = "(c) 2012 by Brockmann Consult",
-        description = "Allows to re-project, aggregate and subset LC map and conditions products.")
+            alias = "LCCCI.Aggregate",
+            version = "0.5",
+            authors = "Marco Peters",
+            copyright = "(c) 2012 by Brockmann Consult",
+            description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class LcAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
@@ -59,20 +59,18 @@ public class LcAggregationOp extends Operator implements Output {
     private double pixelSizeX;
     @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeY;
-    @Parameter(defaultValue = "2160")
-    private int numRows;
 
     @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
-    private double westBound;
+    private Double westBound;
     @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
-    private double northBound;
+    private Double northBound;
     @Parameter(description = "The eastern longitude.", interval = "[-180,180]", unit = "°")
-    private double eastBound;
+    private Double eastBound;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
-    private double southBound;
+    private Double southBound;
 
     @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
-    private double predefinedBounds;
+    private PredefinedRegion predefinedRegion;
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -91,6 +89,7 @@ public class LcAggregationOp extends Operator implements Output {
     private File userPFTConversionTable;
 
     FormatterConfig formatterConfig;
+    private int numRows = 2160;
 
     private static final String CLASS_BAND_NAME = "lccs_class";
 
@@ -99,14 +98,13 @@ public class LcAggregationOp extends Operator implements Output {
         Debug.setEnabled(true);
         validateParameters();
 
-        Product inputProduct = sourceProduct;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
         if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
             plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
         }
 
-        BinningConfig binningConfig = createBinningConfig(inputProduct);
+        BinningConfig binningConfig = createBinningConfig(sourceProduct);
         if (formatterConfig == null) {
             formatterConfig = createDefaultFormatterConfig();
         }
@@ -117,7 +115,7 @@ public class LcAggregationOp extends Operator implements Output {
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        binningOp.setSourceProduct(inputProduct);
+        binningOp.setSourceProduct(sourceProduct);
         binningOp.setParameter("outputBinnedData", false);
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
@@ -223,7 +221,7 @@ public class LcAggregationOp extends Operator implements Output {
         this.pixelSizeY = pixelSizeY;
     }
 
-    double getWestBound() {
+    Double getWestBound() {
         return westBound;
     }
 
@@ -231,7 +229,7 @@ public class LcAggregationOp extends Operator implements Output {
         this.westBound = westBound;
     }
 
-    double getNorthBound() {
+    Double getNorthBound() {
         return northBound;
     }
 
@@ -239,7 +237,7 @@ public class LcAggregationOp extends Operator implements Output {
         this.northBound = northBound;
     }
 
-    double getEastBound() {
+    Double getEastBound() {
         return eastBound;
     }
 
@@ -247,7 +245,7 @@ public class LcAggregationOp extends Operator implements Output {
         this.eastBound = eastBound;
     }
 
-    double getSouthBound() {
+    Double getSouthBound() {
         return southBound;
     }
 
@@ -291,6 +289,10 @@ public class LcAggregationOp extends Operator implements Output {
         if (targetFile == null) {
             throw new OperatorException("No target file specified");
         }
+        if (!onlyOneIsTrue(projetionIsWellDefined(), predefinedRegionIsSelected(), subsetBoundsAreDefined())) {
+            throw new OperatorException("Either projection or a predefined region or user defined bounds must be selected.");
+        }
+
         if (westBound >= eastBound) {
             throw new OperatorException("West bound must be western of east bound.");
         }
@@ -307,6 +309,34 @@ public class LcAggregationOp extends Operator implements Output {
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
         }
+    }
+
+    static boolean onlyOneIsTrue(boolean b1, boolean b2, boolean b3) {
+        int count = 0;
+        count += b1 ? 1 : 0;
+        count += b2 ? 1 : 0;
+        count += b3 ? 1 : 0;
+        return count == 1;
+    }
+
+    private boolean projetionIsWellDefined() {
+        if (projectionMethod == null) {
+            return false;
+        }
+        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
+            || ProjectionMethod.ROTATED_LAT_LON.equals(projectionMethod)) {
+            final double minPixelSizeInDegree = 180d/sourceProduct.getSceneRasterHeight();
+            return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
+        }
+        return true;
+    }
+
+    private boolean predefinedRegionIsSelected() {
+        return predefinedRegion != null;
+    }
+
+    private boolean subsetBoundsAreDefined() {
+        return northBound != null && eastBound != null && southBound != null && westBound != null;
     }
 
     /**
