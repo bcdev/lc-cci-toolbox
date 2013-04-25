@@ -67,6 +67,9 @@ public class LcConversionOp extends Operator implements Output {
         File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
+        // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
+        // if only 2GB of heap space is available:
+        // Exception in thread "SunTileScheduler0Standard2" java.lang.OutOfMemoryError: Java heap space
         System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
         writeOp.writeProduct(ProgressMonitor.NULL);
         setTargetProduct(new Product("foo", "dummy", 2, 2));
