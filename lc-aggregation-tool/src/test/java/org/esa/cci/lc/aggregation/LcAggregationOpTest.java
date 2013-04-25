@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
 
-public class LCxAggregationOpTest {
+public class LcAggregationOpTest {
 
     private static LcAggregationOp.Spi aggregationSpi;
     private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
