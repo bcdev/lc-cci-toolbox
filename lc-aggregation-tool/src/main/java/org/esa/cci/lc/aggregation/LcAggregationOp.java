@@ -40,7 +40,7 @@ import java.io.IOException;
         authors = "Marco Peters",
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
-public class LCxAggregationOp extends Operator implements Output {
+public class LcAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
@@ -346,7 +346,7 @@ public class LCxAggregationOp extends Operator implements Output {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(LCxAggregationOp.class);
+            super(LcAggregationOp.class);
         }
     }
 }
