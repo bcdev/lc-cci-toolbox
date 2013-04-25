@@ -29,10 +29,11 @@ import java.text.MessageFormat;
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names")
 public class LcConversionOp extends Operator implements Output {
 
+    private static final String LC_MAP_FORMAT = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
+    private static final String LC_CONDITION_FORMAT = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
+
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
     private Product sourceProduct;
-
-    private static final String NETCDF4_LC_MAP_FORMAT = "NetCDF4-LC-Map";
 
     @Override
     public void initialize() throws OperatorException {
@@ -49,9 +50,17 @@ public class LcConversionOp extends Operator implements Output {
                                      temporalResolution,
                                      epoch,
                                      version);
-        File targetFile = new File(sourceProduct.getFileLocation().getParent(), lcOutputFilename);
+        File sourceFile = sourceProduct.getFileLocation();
+        File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
 
-        WriteOp writeOp = new WriteOp(sourceProduct, targetFile, NETCDF4_LC_MAP_FORMAT);
+        String outputFormat;
+        if (sourceFile.getName().startsWith("lc_classif")) {
+            outputFormat = LC_MAP_FORMAT;
+        } else {
+            outputFormat = LC_CONDITION_FORMAT;
+        }
+
+        WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
 
         writeOp.writeProduct(ProgressMonitor.NULL);

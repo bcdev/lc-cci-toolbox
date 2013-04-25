@@ -35,9 +35,12 @@ import java.util.UUID;
  * @author Martin Boettcher
  */
 public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
+
+    static final String FORMAT_NAME = "NetCDF4-LC-Condition";
+
     @Override
     public String[] getFormatNames() {
-        return new String[]{"NetCDF4-LC-Condition"};
+        return new String[]{FORMAT_NAME};
     }
 
     @Override
@@ -66,7 +69,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 String outputPath = super.getOutput().toString();
                 int pos = outputPath.lastIndexOf(File.separatorChar);
                 if (pos >= 0) {
-                    lcOutputPath = outputPath.substring(0, pos+1) + lcOutputFilename;
+                    lcOutputPath = outputPath.substring(0, pos + 1) + lcOutputFilename;
                 } else {
                     lcOutputPath = lcOutputFilename;
                 }
@@ -123,7 +126,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Condition " + condition);
-            writeable.addGlobalAttribute("summary", "This dataset contains the global ESA CCI land cover condition derived from satellite data of a range of years.");
+            writeable.addGlobalAttribute("summary",
+                                         "This dataset contains the global ESA CCI land cover condition derived from satellite data of a range of years.");
             writeable.addGlobalAttribute("project", "Climate Change Initiative - European Space Agency");
             writeable.addGlobalAttribute("references", "http://www.esa-landcover-cci.org/");
             writeable.addGlobalAttribute("institution", "Universite catholique de Louvain");
@@ -143,17 +147,17 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
             writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D",
-                                                       condition,
-                                                       spatialResolution,
-                                                       temporalResolution));
+                                                                      condition,
+                                                                      spatialResolution,
+                                                                      temporalResolution));
             writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}",
-                                                       condition,
-                                                       spatialResolution,
-                                                       temporalResolution,
-                                                       startYear,
-                                                       endYear,
-                                                       weekNumber,
-                                                       version));
+                                                                    condition,
+                                                                    spatialResolution,
+                                                                    temporalResolution,
+                                                                    startYear,
+                                                                    endYear,
+                                                                    weekNumber,
+                                                                    version));
             writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
             writeable.addGlobalAttribute("product_version", version);
             writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
@@ -227,7 +231,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", -100);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short)255);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 255);
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
                 }
@@ -242,7 +246,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
             }
 
             private void addNdviNYearObsVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -253,17 +257,17 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index number_of_observations");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 30);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
             }
 
             private void addNdviStatusVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                final byte[] CONDITION_FLAG_VALUES = new byte[] { 0, 1, 2, 3, 4, 5, 6 };
+                final byte[] CONDITION_FLAG_VALUES = new byte[]{0, 1, 2, 3, 4, 5, 6};
                 final String CONDITION_FLAG_MEANINGS = "no_data land water snow cloud cloud_shadow invalid";
                 final ArrayByte.D1 valids = new ArrayByte.D1(CONDITION_FLAG_VALUES.length);
-                for (int i=0; i<CONDITION_FLAG_VALUES.length; ++i) {
+                for (int i = 0; i < CONDITION_FLAG_VALUES.length; ++i) {
                     valids.set(i, CONDITION_FLAG_VALUES[i]);
                 }
                 variable.addAttribute("long_name", band.getDescription());
@@ -272,7 +276,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", CONDITION_FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 5);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte)-1);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
             }
         };
 

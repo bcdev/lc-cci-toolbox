@@ -35,10 +35,11 @@ import java.util.UUID;
  */
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
+    static final String FORMAT_NAME = "NetCDF4-LC-Map";
 
     @Override
     public String[] getFormatNames() {
-        return new String[]{"NetCDF4-LC-Map"};
+        return new String[]{FORMAT_NAME};
     }
 
     @Override
