@@ -10,23 +10,21 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.hamcrest.Matcher;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.matchers.*;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.junit.matchers.JUnitMatchers.*;
 
 
-public class LcAggregationOpTest {
+public class LCxAggregationOpTest {
 
     private static LcAggregationOp.Spi aggregationSpi;
     private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
@@ -241,13 +239,13 @@ public class LcAggregationOpTest {
                                                              new Byte[]{10}, null));
         final Band confidBand = product.addBand("algorithmic_confidence_level", ProductData.TYPE_FLOAT32);
         confidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                             new Float[]{10f}, null));
+                                                            new Float[]{10f}, null));
         final Band processedFlag = product.addBand("processed_flag", ProductData.TYPE_UINT8);
         processedFlag.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                             new Byte[]{1}, null));
+                                                               new Byte[]{1}, null));
         final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_UINT8);
         currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                             new Byte[]{1}, null));
+                                                                   new Byte[]{1}, null));
         product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -180.0, 90.0, 1.0, 1.0));
         return product;
     }
