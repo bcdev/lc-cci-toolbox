@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.Product;
 /**
  * @author Marco Peters
  */
-class LcMetadata {
+class LcMapMetadata {
 
     private static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
@@ -15,7 +15,7 @@ class LcMetadata {
     private String spatialResolution;
     private String temporalResolution;
 
-    public LcMetadata(Product sourceProduct) {
+    public LcMapMetadata(Product sourceProduct) {
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
         if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);

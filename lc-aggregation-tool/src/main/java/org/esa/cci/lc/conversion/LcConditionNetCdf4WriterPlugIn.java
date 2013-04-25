@@ -21,7 +21,6 @@ import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -45,38 +44,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     @Override
     public ProductWriter createWriterInstance() {
-        return new DefaultNetCdfWriter(this) {
-            @Override
-            public Object getOutput() {
-                final Product sourceProduct = getSourceProduct();
-                final String condition = sourceProduct.getMetadataRoot().getAttributeString("condition");
-                final String spatialResolution = sourceProduct.getMetadataRoot().getAttributeString("spatialResolution");
-                final String temporalResolution = sourceProduct.getMetadataRoot().getAttributeString("temporalResolution");
-                final String startYear = sourceProduct.getMetadataRoot().getAttributeString("startYear");
-                final String endYear = sourceProduct.getMetadataRoot().getAttributeString("endYear");
-                final String weekNumber = sourceProduct.getMetadataRoot().getAttributeString("weekNumber");
-                final String version = sourceProduct.getMetadataRoot().getAttributeString("version");
-                String lcOutputFilename =
-                        MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}.nc",
-                                             condition,
-                                             spatialResolution,
-                                             temporalResolution,
-                                             startYear,
-                                             endYear,
-                                             weekNumber,
-                                             version);
-                String lcOutputPath;
-                String outputPath = super.getOutput().toString();
-                int pos = outputPath.lastIndexOf(File.separatorChar);
-                if (pos >= 0) {
-                    lcOutputPath = outputPath.substring(0, pos + 1) + lcOutputFilename;
-                } else {
-                    lcOutputPath = lcOutputFilename;
-                }
-
-                return lcOutputPath;
-            }
-        };
+        return new DefaultNetCdfWriter(this);
     }
 
     @Override
@@ -101,6 +69,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
+            LcCondMetadata metadata = new LcCondMetadata(product);
             final String condition = product.getMetadataRoot().getAttributeString("condition");
             final String spatialResolution = product.getMetadataRoot().getAttributeString("spatialResolution");
             final String temporalResolution = product.getMetadataRoot().getAttributeString("temporalResolution");

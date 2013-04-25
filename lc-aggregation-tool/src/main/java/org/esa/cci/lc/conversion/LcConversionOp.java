@@ -39,27 +39,32 @@ public class LcConversionOp extends Operator implements Output {
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
 
-        final LcMetadata lcMetadata = new LcMetadata(sourceProduct);
-        final String spatialResolution = lcMetadata.getSpatialResolution();
-        final String temporalResolution = lcMetadata.getTemporalResolution();
-        final String epoch = lcMetadata.getEpoch();
-        final String version = lcMetadata.getVersion();
-        final String lcOutputFilename =
-                MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
-                                     spatialResolution,
-                                     temporalResolution,
-                                     epoch,
-                                     version);
+        final String lcOutputFilename;
         File sourceFile = sourceProduct.getFileLocation();
-        File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
 
         String outputFormat;
         if (sourceFile.getName().startsWith("lc_classif")) {
             outputFormat = LC_MAP_FORMAT;
+            final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
+            lcOutputFilename = MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
+                                                    metadata.getSpatialResolution(),
+                                                    metadata.getTemporalResolution(),
+                                                    metadata.getEpoch(),
+                                                    metadata.getVersion());
         } else {
             outputFormat = LC_CONDITION_FORMAT;
+            LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
+            lcOutputFilename = MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}.nc",
+                                                    metadata.getCondition(),
+                                                    metadata.getSpatialResolution(),
+                                                    metadata.getTemporalResolution(),
+                                                    metadata.getStartYear(),
+                                                    metadata.getEndYear(),
+                                                    metadata.getWeekNumber(),
+                                                    metadata.getVersion());
         }
 
+        File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
 

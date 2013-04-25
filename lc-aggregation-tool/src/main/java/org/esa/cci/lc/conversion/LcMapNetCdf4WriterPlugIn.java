@@ -73,11 +73,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
-            final LcMetadata lcMetadata = new LcMetadata(product);
-            final String spatialResolution = lcMetadata.getSpatialResolution();
-            final String temporalResolution = lcMetadata.getTemporalResolution();
-            final String epoch = lcMetadata.getEpoch();
-            final String version = lcMetadata.getVersion();
+            final LcMapMetadata lcMapMetadata = new LcMapMetadata(product);
+            final String spatialResolution = lcMapMetadata.getSpatialResolution();
+            final String temporalResolution = lcMapMetadata.getTemporalResolution();
+            final String epoch = lcMapMetadata.getEpoch();
+            final String version = lcMapMetadata.getVersion();
             final String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
             final String startTime = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2) + "0101";
             final String endTime = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2) + "1231";
