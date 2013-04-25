@@ -32,7 +32,6 @@ class LcMetadata {
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
-
         }
     }
 
