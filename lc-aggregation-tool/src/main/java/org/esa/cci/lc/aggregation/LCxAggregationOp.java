@@ -35,12 +35,12 @@ import java.io.IOException;
  * @author Marco Peters
  */
 @OperatorMetadata(
-            alias = "LCCCI.Aggregate",
-            version = "0.5",
-            authors = "Marco Peters",
-            copyright = "(c) 2012 by Brockmann Consult",
-            description = "Allows to re-project, aggregate and subset LC map and conditions products.")
-public class LcAggregationOp extends Operator implements Output {
+        alias = "LCCCI.Aggregate",
+        version = "0.5",
+        authors = "Marco Peters",
+        copyright = "(c) 2012 by Brockmann Consult",
+        description = "Allows to re-project, aggregate and subset LC map and conditions products.")
+public class LCxAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
@@ -325,7 +325,7 @@ public class LcAggregationOp extends Operator implements Output {
         }
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
             || ProjectionMethod.ROTATED_LAT_LON.equals(projectionMethod)) {
-            final double minPixelSizeInDegree = 180d/sourceProduct.getSceneRasterHeight();
+            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
             return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
         }
         return true;
@@ -346,7 +346,7 @@ public class LcAggregationOp extends Operator implements Output {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(LcAggregationOp.class);
+            super(LCxAggregationOp.class);
         }
     }
 }
