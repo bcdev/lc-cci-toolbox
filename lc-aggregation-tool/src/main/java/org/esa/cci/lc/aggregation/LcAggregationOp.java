@@ -12,6 +12,9 @@ import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -35,11 +38,11 @@ import java.io.IOException;
  * @author Marco Peters
  */
 @OperatorMetadata(
-        alias = "LCCCI.Aggregate",
-        version = "0.5",
-        authors = "Marco Peters",
-        copyright = "(c) 2012 by Brockmann Consult",
-        description = "Allows to re-project, aggregate and subset LC map and conditions products.")
+            alias = "LCCCI.Aggregate",
+            version = "0.5",
+            authors = "Marco Peters",
+            copyright = "(c) 2012 by Brockmann Consult",
+            description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class LcAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
@@ -97,51 +100,66 @@ public class LcAggregationOp extends Operator implements Output {
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
         validateParameters();
+        if (predefinedRegionIsSelected() || userDefinedRegionIsSelected()) {
+            setTargetProduct(createProductSubset());
+        } else {
+            ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
+            if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
+                plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
+            }
 
+            BinningConfig binningConfig = createBinningConfig(sourceProduct);
+            if (formatterConfig == null) {
+                formatterConfig = createDefaultFormatterConfig();
+            }
 
-        ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-        if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
-            plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
+            BinningOp binningOp;
+            try {
+                binningOp = new BinningOp();
+            } catch (Exception e) {
+                throw new OperatorException("Could not create binning operator.", e);
+            }
+            binningOp.setSourceProduct(sourceProduct);
+            binningOp.setParameter("outputBinnedData", false);
+            binningOp.setBinningConfig(binningConfig);
+            binningOp.setFormatterConfig(formatterConfig);
+
+            Product binningTarget = binningOp.getTargetProduct();
+
+            setTargetProduct(binningTarget);
+
+            // todo - useless code; Product is not written again
+            //        LCCS lccs = LCCS.getInstance();
+            //        int[] classValues = lccs.getClassValues();
+            //        String[] classDescriptions = lccs.getClassDescriptions();
+            //        for (int i = 0; i < classValues.length; i++) {
+            //            int classValue = classValues[i];
+            //            Band band = targetProduct.getBand("class_area_" + classValue);
+            //            band.setDescription(classDescriptions[i]);
+            //        }
+            //        setTargetProduct(targetProduct);
         }
+    }
 
-        BinningConfig binningConfig = createBinningConfig(sourceProduct);
-        if (formatterConfig == null) {
-            formatterConfig = createDefaultFormatterConfig();
-        }
+    private Product createProductSubset() {
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
 
-        BinningOp binningOp;
-        try {
-            binningOp = new BinningOp();
-        } catch (Exception e) {
-            throw new OperatorException("Could not create binning operator.", e);
-        }
-        binningOp.setSourceProduct(sourceProduct);
-        binningOp.setParameter("outputBinnedData", false);
-        binningOp.setBinningConfig(binningConfig);
-        binningOp.setFormatterConfig(formatterConfig);
-
-        Product binningTarget = binningOp.getTargetProduct();
+        final GeoPos ulGePo = new GeoPos(northBound.floatValue(), westBound.floatValue());
+        final GeoPos lrGePo = new GeoPos(southBound.floatValue(), eastBound.floatValue());
+        final PixelPos ulPiPo = geoCoding.getPixelPos(ulGePo, null);
+        final PixelPos lrPiPo = geoCoding.getPixelPos(lrGePo, null);
 
         ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setRegion(0, 0, 2, 2);
-        Product dummyTarget = null;
+        final int x = (int) ulPiPo.x;
+        final int y = (int) ulPiPo.y;
+        final int width = (int) lrPiPo.x - x + 1;
+        final int height = (int) lrPiPo.y - y + 1;
+        subsetDef.setRegion(x, y, width, height);
         try {
-            dummyTarget = binningTarget.createSubset(subsetDef, "dummy", "dummy");
+            return sourceProduct.createSubset(subsetDef, "SubsetName", "SubsetDescription");
         } catch (IOException e) {
             throw new OperatorException(e);
         }
-        setTargetProduct(dummyTarget);
-
-        // todo - useless code; Product is not written again
-        //        LCCS lccs = LCCS.getInstance();
-        //        int[] classValues = lccs.getClassValues();
-        //        String[] classDescriptions = lccs.getClassDescriptions();
-        //        for (int i = 0; i < classValues.length; i++) {
-        //            int classValue = classValues[i];
-        //            Band band = targetProduct.getBand("class_area_" + classValue);
-        //            band.setDescription(classDescriptions[i]);
-        //        }
-        //        setTargetProduct(targetProduct);
     }
 
     FormatterConfig createDefaultFormatterConfig() {
@@ -289,16 +307,10 @@ public class LcAggregationOp extends Operator implements Output {
         if (targetFile == null) {
             throw new OperatorException("No target file specified");
         }
-        if (!onlyOneIsTrue(projetionIsWellDefined(), predefinedRegionIsSelected(), subsetBoundsAreDefined())) {
+        if (!onlyOneIsTrue(projetionIsWellDefined(), predefinedRegionIsSelected(), userDefinedRegionIsSelected())) {
             throw new OperatorException("Either projection or a predefined region or user defined bounds must be selected.");
         }
 
-        if (westBound >= eastBound) {
-            throw new OperatorException("West bound must be western of east bound.");
-        }
-        if (northBound <= southBound) {
-            throw new OperatorException("North bound must be northern of south bound.");
-        }
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
         }
@@ -335,8 +347,17 @@ public class LcAggregationOp extends Operator implements Output {
         return predefinedRegion != null;
     }
 
-    private boolean subsetBoundsAreDefined() {
-        return northBound != null && eastBound != null && southBound != null && westBound != null;
+    private boolean userDefinedRegionIsSelected() {
+        final boolean valid = northBound != null && eastBound != null && southBound != null && westBound != null;
+        if (valid) {
+            if (westBound >= eastBound) {
+                throw new OperatorException("West bound must be western of east bound.");
+            }
+            if (northBound <= southBound) {
+                throw new OperatorException("North bound must be northern of south bound.");
+            }
+        }
+        return valid;
     }
 
     /**

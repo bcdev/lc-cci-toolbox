@@ -5,21 +5,29 @@ import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
+import java.awt.Rectangle;
+import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
@@ -44,18 +52,20 @@ public class LcAggregationOpTest {
     }
 
     @Test()
-    public void testDefaultTargetProductCreation() throws Exception {
+    public void testTargetProductCreation_Binning() throws Exception {
+        // preparation
         LcAggregationOp aggregationOp = createAggrOp();
-
+        aggregationOp.setProjectionMethod(ProjectionMethod.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
-        setDefaultBounds(aggregationOp);
 
+        // execution
         Product targetProduct = aggregationOp.getTargetProduct();
 
+        // verification
         int numObsAndPasses = 2;
         int numPFTs = 14;
         int numAccuracyBands = 1;
@@ -67,17 +77,11 @@ public class LcAggregationOpTest {
         assertThat(targetProduct.getNumBands(), is(expectedNumBands));
     }
 
-    private void setDefaultBounds(LcAggregationOp aggregationOp) {
-        aggregationOp.setEastBound(15);
-        aggregationOp.setWestBound(-15);
-        aggregationOp.setSouthBound(-15);
-        aggregationOp.setNorthBound(15);
-    }
-
     @Test()
     public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
+        // preparation
         LcAggregationOp aggregationOp = createAggrOp();
-        setDefaultBounds(aggregationOp);
+        aggregationOp.setProjectionMethod(ProjectionMethod.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
@@ -85,8 +89,10 @@ public class LcAggregationOpTest {
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
 
+        // execution
         Product targetProduct = aggregationOp.getTargetProduct();
 
+        // verification
         int numObsAndPasses = 2;
         int numPFTs = 14;
         int numAccuracyBands = 1;
@@ -96,6 +102,38 @@ public class LcAggregationOpTest {
                                      + numAccuracyBands;
         assertThat(targetProduct.getNumBands(), is(expectedNumBands));
     }
+
+    @Test
+    public void testTargetProductCreation_userdefinedRegion() throws Exception {
+        // preparation
+        LcAggregationOp aggregationOp = createAggrOp();
+        aggregationOp.setEastBound(14.95);
+        aggregationOp.setWestBound(-14.95);
+        aggregationOp.setSouthBound(-14.95);
+        aggregationOp.setNorthBound(14.95);
+        final Product sourceProduct = createSourceProduct();
+        final int sw = sourceProduct.getSceneRasterWidth();
+        final int sh = sourceProduct.getSceneRasterHeight();
+        final GeoCoding sourceGC = sourceProduct.getGeoCoding();
+        assertThat(sw, is(3600));
+        assertThat(sh, is(1800));
+        assertThat(sourceGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(90, -180)));
+        assertThat(sourceGC.getGeoPos(new PixelPos(sw, sh), null), equalTo(new GeoPos(-90, 180)));
+        aggregationOp.setSourceProduct(sourceProduct);
+
+        // execution
+        Product targetProduct = aggregationOp.getTargetProduct();
+
+        //verification
+        final int th = targetProduct.getSceneRasterHeight();
+        final int tw = targetProduct.getSceneRasterWidth();
+        final GeoCoding targetGC = targetProduct.getGeoCoding();
+        assertThat(th, is(300));
+        assertThat(tw, is(300));
+        assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15, -15)));
+        assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15, 15)));
+    }
+
 
     @Test
     public void testDefaultValues() {
@@ -111,17 +149,6 @@ public class LcAggregationOpTest {
         assertThat(aggrOp.getNumMajorityClasses(), is(5));
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
         assertThat(aggrOp.getNumRows(), is(2160));
-//        assertEquals(ProjectionMethod.GEOGRAPHIC_LAT_LON, aggrOp.getProjectionMethod());
-//        assertEquals(0.1, aggrOp.getPixelSizeX(), 1.0e-8);
-//        assertEquals(0.1, aggrOp.getPixelSizeY(), 1.0e-8);
-//        assertEquals(-15.0, aggrOp.getWestBound(), 1.0e-8);
-//        assertEquals(30.0, aggrOp.getEastBound(), 1.0e-8);
-//        assertEquals(75.0, aggrOp.getNorthBound(), 1.0e-8);
-//        assertEquals(35.0, aggrOp.getSouthBound(), 1.0e-8);
-//        assertTrue(aggrOp.isOutputLCCSClasses());
-//        assertEquals(5, aggrOp.getNumberOfMajorityClasses());
-//        assertTrue(aggrOp.isOutputPFTClasses());
-//        assertEquals(2160, aggrOp.getNumRows());
 
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
@@ -220,6 +247,13 @@ public class LcAggregationOpTest {
         assertThat(LcAggregationOp.onlyOneIsTrue(I, I, I), is(false));
     }
 
+    private void setDefaultBounds(LcAggregationOp aggregationOp) {
+        aggregationOp.setEastBound(15);
+        aggregationOp.setWestBound(-15);
+        aggregationOp.setSouthBound(-15);
+        aggregationOp.setNorthBound(15);
+    }
+
     private FormatterConfig createFormatterConfig() throws IOException {
         final FormatterConfig formatterConfig = new FormatterConfig();
         formatterConfig.setOutputFormat("NetCDF4-BEAM");
@@ -231,8 +265,8 @@ public class LcAggregationOpTest {
     }
 
     private Product createSourceProduct() throws Exception {
-        final Integer width = 360;
-        final Integer height = 180;
+        final Integer width = 3600;
+        final Integer height = 1800;
         final Product product = new Product("P", "T", width, height);
         final Band classesBand = product.addBand("lccs_class", ProductData.TYPE_UINT8);
         classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
@@ -246,7 +280,7 @@ public class LcAggregationOpTest {
         final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_UINT8);
         currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                    new Byte[]{1}, null));
-        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -180.0, 90.0, 1.0, 1.0));
+        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
         return product;
     }
 
