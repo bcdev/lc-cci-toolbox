@@ -49,7 +49,7 @@ public class LcAggregationOpTest {
 
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
-        aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
+        aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
         setDefaultBounds(aggregationOp);
@@ -81,7 +81,7 @@ public class LcAggregationOpTest {
         aggregationOp.setSourceProduct(createSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
-        aggregationOp.setNumberOfMajorityClasses(numMajorityClasses);
+        aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
 
@@ -108,7 +108,7 @@ public class LcAggregationOpTest {
         assertThat(aggrOp.getNorthBound(), isNull());
         assertThat(aggrOp.getSouthBound(), isNull());
         assertThat(aggrOp.isOutputLCCSClasses(), is(true));
-        assertThat(aggrOp.getNumberOfMajorityClasses(), is(5));
+        assertThat(aggrOp.getNumMajorityClasses(), is(5));
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
         assertThat(aggrOp.getNumRows(), is(2160));
 //        assertEquals(ProjectionMethod.GEOGRAPHIC_LAT_LON, aggrOp.getProjectionMethod());
@@ -193,7 +193,7 @@ public class LcAggregationOpTest {
         LcAggregationOp aggrOp = createAggrOp();
         aggrOp.setOutputLCCSClasses(false);
         aggrOp.setOutputPFTClasses(false);
-        aggrOp.setNumberOfMajorityClasses(0);
+        aggrOp.setNumMajorityClasses(0);
         setDefaultBounds(aggrOp);
         try {
             aggrOp.initialize();

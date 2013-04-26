@@ -27,7 +27,7 @@ not considered in this version.
 On the command line the tool can be invoked as follows.
 1) Change the current directory to <BEAM_INSTALLATION_DIR>\bin
 2) The tool can then be called by:
-gpt LCCCI.Aggregate -PoutputLCCSClasses=<boolean> -PnumberOfMajorityClasses=<integer>
+gpt LCCCI.Aggregate -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
           -PoutputPFTClasses=<boolean> -PnumRows=<integer>
           -PtargetFile=<filePath> -SsourceProduct=<filePath>
 
@@ -35,12 +35,12 @@ Where
 * gpt LCCCI.Aggregate calls the gpt tool with the LC-CCI aggregation tool.
 * -PoutputLCCSClasses=<boolean> specifies if the LCCS classes shall be added to the output. This parameter can be
    omitted.The default is true.
-* -PnumberOfMajorityClasses=<numMajorityClasses> specifies the number of majority classes in the output. This parameter
+* -PnumMajorityClasses=<number> specifies the number of majority classes in the output. This parameter
   can be omitted, in this case the default (5) is used.
 * -PoutputPFTClasses=<boolean> specifies if a conversion to PFT classes shall be performed and the result added to the
   output. This parameter can be omitted.The default is true. In this version a fixed Look-Up-Table (LUT) is used. In
   later versions the LUT will be selectable.
-* -PnumRows=<numRows> specifies the number of rows of the internally use SEA (Sinusoidal Equal Area) grid. Specifies
+* -PnumRows=<number> specifies the number of rows of the internally use SEA (Sinusoidal Equal Area) grid. Specifies
   indirectly the resolution of the output. If omitted, the default value (2160) is used. A grid with the default number
   of rows leads to a resolution of ~9.8km/pixel in the target product.
 * -PtargetFile=<filePath> specifies the the file where the target will be written. It is written as NetCDF4 file.

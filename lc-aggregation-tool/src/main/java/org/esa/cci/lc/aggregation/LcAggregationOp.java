@@ -77,7 +77,7 @@ public class LcAggregationOp extends Operator implements Output {
     private boolean outputLCCSClasses;
 
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
-    private int numberOfMajorityClasses;
+    private int numMajorityClasses;
 
     @Parameter(description = "Whether or not to add PFT classes to the output.",
                label = "Output PFT classes", defaultValue = "true")
@@ -170,7 +170,7 @@ public class LcAggregationOp extends Operator implements Output {
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(CLASS_BAND_NAME,
-                                                                       outputLCCSClasses, numberOfMajorityClasses,
+                                                                       outputLCCSClasses, numMajorityClasses,
                                                                        outputPFTClasses, userPFTConversionTable,
                                                                        areaCalculator);
         final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
@@ -261,12 +261,12 @@ public class LcAggregationOp extends Operator implements Output {
         this.outputLCCSClasses = outputLCCSClasses;
     }
 
-    int getNumberOfMajorityClasses() {
-        return numberOfMajorityClasses;
+    int getNumMajorityClasses() {
+        return numMajorityClasses;
     }
 
-    void setNumberOfMajorityClasses(int numberOfMajorityClasses) {
-        this.numberOfMajorityClasses = numberOfMajorityClasses;
+    void setNumMajorityClasses(int numMajorityClasses) {
+        this.numMajorityClasses = numMajorityClasses;
     }
 
     boolean isOutputPFTClasses() {
@@ -299,11 +299,11 @@ public class LcAggregationOp extends Operator implements Output {
         if (northBound <= southBound) {
             throw new OperatorException("North bound must be northern of south bound.");
         }
-        if (numberOfMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
+        if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
         }
         LCCS lccs = LCCS.getInstance();
-        if (numberOfMajorityClasses > lccs.getNumClasses()) {
+        if (numMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
         }
         if (numRows < 2 || numRows % 2 != 0) {
