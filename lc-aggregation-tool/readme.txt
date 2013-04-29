@@ -29,7 +29,7 @@ On the command line the tool can be invoked as follows.
 2) The tool can then be called by:
 gpt LCCCI.Aggregate -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
           -PoutputPFTClasses=<boolean> -PnumRows=<integer>
-          -PtargetFile=<filePath> -SsourceProduct=<filePath>
+          -PtargetFile=<filePath> -Ssource=<filePath>
 
 Where
 * gpt LCCCI.Aggregate calls the gpt tool with the LC-CCI aggregation tool.
@@ -45,12 +45,12 @@ Where
   of rows leads to a resolution of ~9.8km/pixel in the target product.
 * -PtargetFile=<filePath> specifies the the file where the target will be written. It is written as NetCDF4 file.
   Previous results are overwritten.
-* -SsourceProduct=<filePath> defines the path to the source file.
+* -Ssource=<filePath> defines the path to the source file.
 
 
 A real example might look like the following:
 gpt LCCCI.Aggregate -PoutputLCCSClasses=false -PnumberOfMajorityClasses=3 -PnumRows=216
-       -PtargetFile="C:\Data\output\aggregated.nc" -SsourceProduct="C:\Data\LCCCI\lc_classif_lccs_v2.tif"
+       -PtargetFile="C:\Data\output\aggregated.nc" -Ssource="C:\Data\LCCCI\lc_classif_lccs_v2.tif"
 
 
 

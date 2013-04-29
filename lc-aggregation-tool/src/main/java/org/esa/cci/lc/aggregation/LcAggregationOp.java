@@ -38,11 +38,11 @@ import java.io.IOException;
  * @author Marco Peters
  */
 @OperatorMetadata(
-            alias = "LCCCI.Aggregate",
-            version = "0.5",
-            authors = "Marco Peters",
-            copyright = "(c) 2012 by Brockmann Consult",
-            description = "Allows to re-project, aggregate and subset LC map and conditions products.")
+        alias = "LCCCI.Aggregate",
+        version = "0.5",
+        authors = "Marco Peters",
+        copyright = "(c) 2012 by Brockmann Consult",
+        description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class LcAggregationOp extends Operator implements Output {
 
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
@@ -50,7 +50,7 @@ public class LcAggregationOp extends Operator implements Output {
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
-    private Product sourceProduct;
+    private Product source;
 
     @Parameter(description = "The target file location.", defaultValue = "target.nc")
     private File targetFile;
@@ -108,7 +108,7 @@ public class LcAggregationOp extends Operator implements Output {
                 plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
             }
 
-            BinningConfig binningConfig = createBinningConfig(sourceProduct);
+            BinningConfig binningConfig = createBinningConfig(source);
             if (formatterConfig == null) {
                 formatterConfig = createDefaultFormatterConfig();
             }
@@ -119,7 +119,7 @@ public class LcAggregationOp extends Operator implements Output {
             } catch (Exception e) {
                 throw new OperatorException("Could not create binning operator.", e);
             }
-            binningOp.setSourceProduct(sourceProduct);
+            binningOp.setSourceProduct(source);
             binningOp.setParameter("outputBinnedData", false);
             binningOp.setBinningConfig(binningConfig);
             binningOp.setFormatterConfig(formatterConfig);
@@ -142,7 +142,7 @@ public class LcAggregationOp extends Operator implements Output {
     }
 
     private Product createProductSubset() {
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        final GeoCoding geoCoding = source.getGeoCoding();
 
         final GeoPos ulGePo = new GeoPos(northBound.floatValue(), westBound.floatValue());
         final GeoPos lrGePo = new GeoPos(southBound.floatValue(), eastBound.floatValue());
@@ -156,7 +156,7 @@ public class LcAggregationOp extends Operator implements Output {
         final int height = (int) lrPiPo.y - y + 1;
         subsetDef.setRegion(x, y, width, height);
         try {
-            return sourceProduct.createSubset(subsetDef, "SubsetName", "SubsetDescription");
+            return source.createSubset(subsetDef, "SubsetName", "SubsetDescription");
         } catch (IOException e) {
             throw new OperatorException(e);
         }
@@ -183,8 +183,8 @@ public class LcAggregationOp extends Operator implements Output {
             planetaryGrid = new SEAGrid(numRows);
         }
 
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        int sceneWidth = source.getSceneRasterWidth();
+        int sceneHeight = source.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(CLASS_BAND_NAME,
@@ -337,7 +337,7 @@ public class LcAggregationOp extends Operator implements Output {
         }
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
             || ProjectionMethod.ROTATED_LAT_LON.equals(projectionMethod)) {
-            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
+            final double minPixelSizeInDegree = 180d / source.getSceneRasterHeight();
             return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
         }
         return true;
