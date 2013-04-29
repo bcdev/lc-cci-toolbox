@@ -79,7 +79,8 @@ public class LcAggregationOp extends Operator implements Output {
                label = "Output LCCS classes", defaultValue = "true")
     private boolean outputLCCSClasses;
 
-    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5")
+    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5",
+               label = "Number of majority classes")
     private int numMajorityClasses;
 
     @Parameter(description = "Whether or not to add PFT classes to the output.",
