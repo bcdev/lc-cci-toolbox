@@ -18,7 +18,7 @@ public class LcBinIndexAggregatorDescriptor implements AggregatorDescriptor {
     }
 
     @Override
-    public AggregatorConfig createAggregatorConfig() {
+    public AggregatorConfig createConfig() {
         return new LcBinIndexAggregatorConfig();
     }
 

@@ -25,7 +25,7 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
     }
 
     @Override
-    public AggregatorConfig createAggregatorConfig() {
+    public AggregatorConfig createConfig() {
         return new LcAggregatorConfig();
     }
 

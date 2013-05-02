@@ -15,7 +15,7 @@ public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
     }
 
     @Override
-    public AggregatorConfig createAggregatorConfig() {
+    public AggregatorConfig createConfig() {
         return new LcAccuracyAggregatorConfig();
     }
 
