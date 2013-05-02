@@ -29,7 +29,7 @@ On the command line the tool can be invoked as follows.
 2) The tool can then be called by:
 gpt LCCCI.Aggregate -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
           -PoutputPFTClasses=<boolean> -PnumRows=<integer>
-          -PtargetFile=<filePath> -Ssource=<filePath>
+          -PtargetFile=<filePath> -SsourceProduct=<filePath>
 
 Where
 * gpt LCCCI.Aggregate calls the gpt tool with the LC-CCI aggregation tool.

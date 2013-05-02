@@ -12,22 +12,18 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
-import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsEqual.*;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
@@ -61,6 +57,7 @@ public class LcAggregationOpTest {
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
+        aggregationOp.outputTargetProduct = true;
 
         // execution
         Product targetProduct = aggregationOp.getTargetProduct();
@@ -88,6 +85,7 @@ public class LcAggregationOpTest {
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
         aggregationOp.formatterConfig = createFormatterConfig();
+        aggregationOp.outputTargetProduct = true;
 
         // execution
         Product targetProduct = aggregationOp.getTargetProduct();

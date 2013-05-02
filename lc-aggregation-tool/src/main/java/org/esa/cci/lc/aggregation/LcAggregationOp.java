@@ -48,9 +48,10 @@ public class LcAggregationOp extends Operator implements Output {
     public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
+    private static final String CLASS_BAND_NAME = "lccs_class";
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
-    private Product source;
+    private Product sourceProduct;
 
     @Parameter(description = "The target file location.", defaultValue = "target.nc")
     private File targetFile;
@@ -62,6 +63,8 @@ public class LcAggregationOp extends Operator implements Output {
     private double pixelSizeX;
     @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeY;
+    @Parameter(defaultValue = "2160")
+    private int numRows;
 
     @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
     private Double westBound;
@@ -93,9 +96,7 @@ public class LcAggregationOp extends Operator implements Output {
     private File userPFTConversionTable;
 
     FormatterConfig formatterConfig;
-    private int numRows = 2160;
-
-    private static final String CLASS_BAND_NAME = "lccs_class";
+    boolean outputTargetProduct;
 
     @Override
     public void initialize() throws OperatorException {
@@ -109,7 +110,7 @@ public class LcAggregationOp extends Operator implements Output {
                 plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
             }
 
-            BinningConfig binningConfig = createBinningConfig(source);
+            BinningConfig binningConfig = createBinningConfig(sourceProduct);
             if (formatterConfig == null) {
                 formatterConfig = createDefaultFormatterConfig();
             }
@@ -120,14 +121,17 @@ public class LcAggregationOp extends Operator implements Output {
             } catch (Exception e) {
                 throw new OperatorException("Could not create binning operator.", e);
             }
-            binningOp.setSourceProduct(source);
-            binningOp.setParameter("outputBinnedData", false);
+            binningOp.setSourceProduct(sourceProduct);
+            binningOp.setOutputTargetProduct(outputTargetProduct);
+            binningOp.setParameter("outputBinnedData", true);
+            binningOp.setBinWriter(new LcBinWriter());
             binningOp.setBinningConfig(binningConfig);
             binningOp.setFormatterConfig(formatterConfig);
 
-            Product binningTarget = binningOp.getTargetProduct();
-
-            setTargetProduct(binningTarget);
+            Product dummyTarget = binningOp.getTargetProduct();
+//            binningOp.initialize(); // triggers the computation
+//            setTargetProduct(binningTarget);
+            setTargetProduct(dummyTarget);
 
             // todo - useless code; Product is not written again
             //        LCCS lccs = LCCS.getInstance();
@@ -143,7 +147,7 @@ public class LcAggregationOp extends Operator implements Output {
     }
 
     private Product createProductSubset() {
-        final GeoCoding geoCoding = source.getGeoCoding();
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
 
         final GeoPos ulGePo = new GeoPos(northBound.floatValue(), westBound.floatValue());
         final GeoPos lrGePo = new GeoPos(southBound.floatValue(), eastBound.floatValue());
@@ -157,7 +161,7 @@ public class LcAggregationOp extends Operator implements Output {
         final int height = (int) lrPiPo.y - y + 1;
         subsetDef.setRegion(x, y, width, height);
         try {
-            return source.createSubset(subsetDef, "SubsetName", "SubsetDescription");
+            return sourceProduct.createSubset(subsetDef, "SubsetName", "SubsetDescription");
         } catch (IOException e) {
             throw new OperatorException(e);
         }
@@ -184,8 +188,8 @@ public class LcAggregationOp extends Operator implements Output {
             planetaryGrid = new SEAGrid(numRows);
         }
 
-        int sceneWidth = source.getSceneRasterWidth();
-        int sceneHeight = source.getSceneRasterHeight();
+        int sceneWidth = sourceProduct.getSceneRasterWidth();
+        int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
         LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(CLASS_BAND_NAME,
@@ -338,7 +342,7 @@ public class LcAggregationOp extends Operator implements Output {
         }
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
             || ProjectionMethod.ROTATED_LAT_LON.equals(projectionMethod)) {
-            final double minPixelSizeInDegree = 180d / source.getSceneRasterHeight();
+            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
             return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
         }
         return true;
@@ -371,4 +375,5 @@ public class LcAggregationOp extends Operator implements Output {
             super(LcAggregationOp.class);
         }
     }
+
 }
