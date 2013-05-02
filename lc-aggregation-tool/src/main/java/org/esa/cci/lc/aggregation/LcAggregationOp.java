@@ -56,7 +56,7 @@ public class LcAggregationOp extends Operator implements Output {
     private File targetFile;
 
     @Parameter(description = "Defines the projection method for the target product.",
-               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "REGULAR_GAUSSIAN_GRID", "REDUCED_GAUSSIAN_GRID"})
+               valueSet = {"GEOGRAPHIC_LAT_LON", "ROTATED_LAT_LON", "REGULAR_GAUSSIAN_GRID"})
     private ProjectionMethod projectionMethod;
     @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
     private double pixelSizeX;
