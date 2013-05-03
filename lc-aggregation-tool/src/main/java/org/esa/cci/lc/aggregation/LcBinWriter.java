@@ -1,9 +1,11 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.Aggregator;
+import org.esa.beam.binning.BinManager;
 import org.esa.beam.binning.BinningContext;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.TemporalBin;
+import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.operator.BinWriter;
 import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
@@ -11,7 +13,6 @@ import org.esa.beam.dataio.netcdf.nc.NVariable;
 import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.DataType;
 
@@ -19,6 +20,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -42,19 +44,20 @@ class LcBinWriter implements BinWriter {
         NFileWriteable writeable = NWritableFactory.create(targetFilePath, "netcdf4");
         try {
             PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
-            int width = planetaryGrid.getNumCols(0);
-            int height = planetaryGrid.getNumRows();
-            writeable.addDimension("lon", width);
-            writeable.addDimension("lat", height);
-            Dimension tileSize = JAIUtils.computePreferredTileSize(width, height, 1);
+            int sceneWidth = planetaryGrid.getNumCols(0);
+            int sceneHeight = planetaryGrid.getNumRows();
+            writeable.addDimension("lat", sceneHeight);
+            writeable.addDimension("lon", sceneWidth);
+            Dimension tileSize = new Dimension(32, 32);
             addGlobalAttributes(writeable);
             addCoordinateVariables(writeable, tileSize);
             ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
-            fillVariables(temporalBins, variables, width, height);
+            writeable.create();
+            fillVariables(temporalBins, variables, sceneWidth, sceneHeight);
+            // todo coordinate data needs to be written too.
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
-            writeable.create();
             writeable.close();
         }
     }
@@ -101,12 +104,12 @@ class LcBinWriter implements BinWriter {
     private void addCoordinateVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {
 
         if (binningContext.getPlanetaryGrid() instanceof PlateCarreeGrid) {
-            final NVariable lat = writeable.addVariable("lat", DataType.FLOAT, tileSize, "y x");
+            final NVariable lat = writeable.addVariable("lat", DataType.FLOAT, tileSize, "lat");
             lat.addAttribute("units", "degrees_north");
             lat.addAttribute("long_name", "latitude coordinate");
             lat.addAttribute("standard_name", "latitude");
 
-            final NVariable lon = writeable.addVariable("lon", DataType.FLOAT, tileSize, "y x");
+            final NVariable lon = writeable.addVariable("lon", DataType.FLOAT, tileSize, "lon");
             lon.addAttribute("units", "degrees_east");
             lon.addAttribute("long_name", "longitude coordinate");
             lon.addAttribute("standard_name", "longitude");
@@ -118,7 +121,7 @@ class LcBinWriter implements BinWriter {
         final ArrayList<NVariable> featureVars = new ArrayList<NVariable>(60);
         for (int i = 0; i < aggregatorCount; i++) {
             final Aggregator aggregator = binningContext.getBinManager().getAggregator(i);
-            final String[] featureNames = aggregator.getTemporalFeatureNames();
+            final String[] featureNames = aggregator.getOutputFeatureNames();
             for (String featureName : featureNames) {
                 final NVariable featureVar = writeable.addVariable(featureName, DataType.FLOAT, tileSize, writeable.getDimensions());
                 featureVar.addAttribute("_FillValue", FILL_VALUE);
@@ -129,20 +132,59 @@ class LcBinWriter implements BinWriter {
         return featureVars;
     }
 
-    private void fillVariables(List<TemporalBin> temporalBins, ArrayList<NVariable> variables, int width, int height) throws IOException {
-        // todo write the actual data, coordinate data need to be written too.
-        // Problem: The second chunk (tile) has a width of zero
-        float[] line = new float[width];
-        Arrays.fill(line, FILL_VALUE);
-        ProductData dataLine = ProductData.createInstance(line);
-        for (int y = 0; y < height; y++) {
-            for (NVariable variable : variables) {
-                variable.write(0, y, width, 1, false, dataLine);
+    private void fillVariables(List<TemporalBin> temporalBins, ArrayList<NVariable> variables, int sceneWidth, int sceneHeight) throws IOException {
+        final Iterator<TemporalBin> iterator = temporalBins.iterator();
+        final BinManager binManager = binningContext.getBinManager();
+        final WritableVector resultVector = binManager.createResultVector();
+
+        ProductData.Float[] dataLines = new ProductData.Float[variables.size()];
+        initDataLines(variables, sceneWidth, dataLines);
+
+        int lineY = 0;
+        while (iterator.hasNext()) {
+            final TemporalBin temporalBin = iterator.next();
+            final long binIndex = temporalBin.getIndex();
+            final int binX = (int) (binIndex % sceneWidth);
+            final int binY = (int) (binIndex / sceneWidth);
+            binManager.computeResult(temporalBin, resultVector);
+            if (binY != lineY) {
+                lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
+                initDataLines(variables, sceneWidth, dataLines);
+                lineY = writeEmptyLines(variables, sceneWidth, dataLines, lineY, binY);
             }
-
+            for (int i = 0; i < variables.size(); i++) {
+                dataLines[i].setElemFloatAt(binX, resultVector.get(i));
+            }
         }
-
+        lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
+        writeEmptyLines(variables, sceneWidth, dataLines, lineY, sceneHeight);
     }
 
+    private int writeEmptyLines(ArrayList<NVariable> variables, int sceneWidth, ProductData.Float[] dataLines, int lastY, int y) throws IOException {
+        for (; lastY < y; lastY++) {
+            writeDataLine(variables, sceneWidth, dataLines, lastY);
+        }
+        return lastY;
+    }
 
+    private int writeDataLine(ArrayList<NVariable> variables, int sceneWidth, ProductData.Float[] dataLines, int y) throws IOException {
+        System.out.println("y = " + y);
+        for (int i = 0; i < variables.size(); i++) {
+            NVariable variable = variables.get(i);
+            variable.write(0, y, sceneWidth, 1, false, dataLines[i]);
+        }
+        return y + 1;
+    }
+
+    private void initDataLines(ArrayList<NVariable> variables, int sceneWidth, ProductData.Float[] dataLines) {
+        for (int i = 0; i < variables.size(); i++) {
+            if (dataLines[i] != null) {
+                Arrays.fill(dataLines[i].getArray(), FILL_VALUE);
+            } else {
+                float[] line = new float[sceneWidth];
+                Arrays.fill(line, FILL_VALUE);
+                dataLines[i] = new ProductData.Float(line);
+            }
+        }
+    }
 }
