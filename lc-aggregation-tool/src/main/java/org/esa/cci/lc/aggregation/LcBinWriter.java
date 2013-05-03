@@ -16,7 +16,6 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
@@ -65,7 +64,6 @@ class LcBinWriter implements BinWriter {
             writeable.create();
             fillVariables(temporalBins, variables, sceneWidth, sceneHeight);
             coordinateEncoder.fillCoordinateVars(writeable);
-            // todo coordinate data needs to be written too.
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
@@ -77,7 +75,7 @@ class LcBinWriter implements BinWriter {
         final PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
         if (planetaryGrid instanceof PlateCarreeGrid) {
             return new PlateCareeCoordinateEncoder(planetaryGrid);
-        } else if(planetaryGrid instanceof RegularGaussianGrid) {
+        } else if (planetaryGrid instanceof RegularGaussianGrid) {
             return new RegularGaussianGridCoordinateEncoder(planetaryGrid);
         } else {
             throw new IllegalStateException("Unknown projection method");
@@ -214,13 +212,19 @@ class LcBinWriter implements BinWriter {
 
         @Override
         public void fillCoordinateVars(NFileWriteable writeable) throws IOException {
-            int sceneWidth = planetaryGrid.getNumCols(0);
             int sceneHeight = planetaryGrid.getNumRows();
 
             final float[] lats = new float[sceneHeight];
-            final float[] lons = new float[sceneWidth];
-
+            for (int i = 0; i < sceneHeight; i++) {
+                lats[i] = (float) planetaryGrid.getCenterLat(i);
+            }
             latVar.writeFully(Array.factory(lats));
+
+            int sceneWidth = planetaryGrid.getNumCols(0);
+            final float[] lons = new float[sceneWidth];
+            for (int i = 0; i < sceneWidth; i++) {
+                lons[i] = (float) planetaryGrid.getCenterLatLon(i)[1];
+            }
             lonVar.writeFully(Array.factory(lons));
         }
     }

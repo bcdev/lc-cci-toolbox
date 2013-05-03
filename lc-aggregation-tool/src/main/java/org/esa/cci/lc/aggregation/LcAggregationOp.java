@@ -129,8 +129,6 @@ public class LcAggregationOp extends Operator implements Output {
             binningOp.setFormatterConfig(formatterConfig);
 
             Product dummyTarget = binningOp.getTargetProduct();
-//            binningOp.initialize(); // triggers the computation
-//            setTargetProduct(binningTarget);
             setTargetProduct(dummyTarget);
 
             // todo - useless code; Product is not written again
@@ -341,11 +339,13 @@ public class LcAggregationOp extends Operator implements Output {
             return false;
         }
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
-            || ProjectionMethod.ROTATED_LAT_LON.equals(projectionMethod)) {
-            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
-            return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
+            || ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
+//            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
+//            boolean b = pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
+//            return b;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private boolean predefinedRegionIsSelected() {
