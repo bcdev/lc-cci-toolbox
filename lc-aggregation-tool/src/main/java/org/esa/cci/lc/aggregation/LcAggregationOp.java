@@ -204,7 +204,8 @@ public class LcAggregationOp extends Operator implements Output {
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(numRows);
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(lcAggregatorConfig, lcAccuracyAggregatorConfig);
+        // todo - accuracy aggregator seems to increase memory consumption dramatically
+        binningConfig.setAggregatorConfigs(lcAggregatorConfig/*, lcAccuracyAggregatorConfig*/);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;

@@ -32,7 +32,7 @@ class LcAccuracyAggregator extends AbstractAggregator {
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
-        ctx.put(contextNameSpace, new GrowableVector(512));
+        ctx.put(contextNameSpace, new GrowableVector(128));
     }
 
     @Override
