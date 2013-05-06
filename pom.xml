@@ -7,7 +7,7 @@
     <version>1.0</version>
     <modules>
         <module>lc-image-registration</module>
-        <module>lc-aggregation-tool</module>
+        <module>lc-user-tools</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -104,17 +104,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <finalName>lc-cci-toolbox</finalName>
-                    <descriptors>
-                        <descriptor>src/main/assembly/bin.xml</descriptor>
-                    </descriptors>
-                </configuration>
-            </plugin>
-        </plugins>
     </build>
 
 </project>

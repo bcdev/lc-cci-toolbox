@@ -26,17 +26,17 @@ import java.io.File;
 import java.util.Locale;
 
 /**
- * Plugin class for the {@link org.esa.cci.lc.conversion.LcMapTiffReader} reader.
+ * Plugin class for the {@link LcMapTiffReader} reader.
  *
  * @author Olaf Danne
  */
-public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
+public class LcMapTiffReaderPlugin implements ProductReaderPlugIn {
 
-    private static final Class[] READER_INPUT_TYPES = new Class[] { String.class, File.class };
-    private static final String FORMAT_NAME_TIFF = "LC_COND_TIFF";
-    private static final String[] FORMAT_NAMES = new String[] { FORMAT_NAME_TIFF };
-    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[] { ".tif", ".tiff", ".TIF", ".TIFF" };
-    private static final String READER_DESCRIPTION = "Land Cover CCI condition tiff with mean and std in same dir";
+    private static final Class[] READER_INPUT_TYPES = new Class[]{String.class, File.class};
+    private static final String FORMAT_NAME_TIFF = "LC_MAP_TIFF";
+    private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_TIFF};
+    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".tif", ".tiff", ".TIF", ".TIFF"};
+    private static final String READER_DESCRIPTION = "Land Cover CCI map tiff with flag tiffs in same dir";
     private static final BeamFileFilter FILE_FILTER = new TiffFileFilter();
 
     @Override
@@ -49,7 +49,7 @@ public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
-        if (filename.matches(LcConditionTiffReader.LC_CONDITION_FILENAME_PATTERN)) {
+        if (filename.matches(LcMapTiffReader.LC_CLASSIF_FILENAME_PATTERN)) {
             return DecodeQualification.INTENDED;
         } else {
             return DecodeQualification.UNABLE;
@@ -64,7 +64,7 @@ public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new LcConditionTiffReader(this);
+        return new LcMapTiffReader(this);
     }
 
     @Override

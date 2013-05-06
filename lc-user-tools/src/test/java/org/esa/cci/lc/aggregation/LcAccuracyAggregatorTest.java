@@ -1,14 +1,15 @@
 package org.esa.cci.lc.aggregation;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-
 import org.esa.beam.binning.SpatialBin;
 import org.esa.beam.binning.TemporalBin;
 import org.esa.beam.binning.support.ObservationImpl;
 import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.binning.support.VectorImpl;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 
 public class LcAccuracyAggregatorTest {
 
@@ -62,10 +63,10 @@ public class LcAccuracyAggregatorTest {
     public void testThatEvenNumberOfObservationsResolvesTo_TheMeanOfTheTwoCenterValuesOfSortedValues() {
         // preparation
         final float[] observations = {
-                    3.1f,
-                    2.2f,
-                    2.6f,
-                    1.2f
+                3.1f,
+                2.2f,
+                2.6f,
+                1.2f
         };
 
         // execution
@@ -83,11 +84,11 @@ public class LcAccuracyAggregatorTest {
     public void testThatOddNumberOfObservationsResolvesTo_TheCenterValueOfSortedValues() {
         // preparation
         final float[] observations = {
-                    3.1f,
-                    2.2f,
-                    4.2f,
-                    2.6f,
-                    1.2f
+                3.1f,
+                2.2f,
+                4.2f,
+                2.6f,
+                1.2f
         };
 
         // execution

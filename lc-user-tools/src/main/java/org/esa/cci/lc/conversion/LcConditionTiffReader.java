@@ -137,7 +137,9 @@ public class LcConditionTiffReader extends AbstractProductReader {
     }
 
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
+                                          Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
+                                          ProgressMonitor pm) throws IOException {
         // all bands use source images as source for its data
         throw new IllegalStateException();
     }
@@ -156,7 +158,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
     private static Matcher lcConditionFileMatcher(String lcConditionFilename) {
         Pattern p = Pattern.compile(LC_CONDITION_FILENAME_PATTERN);
         final Matcher m = p.matcher(lcConditionFilename);
-        if (! m.matches()) {
+        if (!m.matches()) {
             throw new IllegalArgumentException("input file name " + lcConditionFilename + " does not match pattern " + LC_CONDITION_FILENAME_PATTERN);
         }
         return m;

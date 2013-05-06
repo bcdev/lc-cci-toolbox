@@ -23,20 +23,20 @@ import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
-import java.lang.Class;import java.lang.Object;import java.lang.Override;import java.lang.String;import java.util.Locale;
+import java.util.Locale;
 
 /**
- * Plugin class for the {@link LcMapTiffReader} reader.
+ * Plugin class for the {@link org.esa.cci.lc.conversion.LcMapTiffReader} reader.
  *
  * @author Olaf Danne
  */
-public class LcMapTiffReaderPlugin implements ProductReaderPlugIn {
+public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
 
-    private static final Class[] READER_INPUT_TYPES = new Class[] { String.class, File.class };
-    private static final String FORMAT_NAME_TIFF = "LC_MAP_TIFF";
-    private static final String[] FORMAT_NAMES = new String[] { FORMAT_NAME_TIFF };
-    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[] { ".tif", ".tiff", ".TIF", ".TIFF" };
-    private static final String READER_DESCRIPTION = "Land Cover CCI map tiff with flag tiffs in same dir";
+    private static final Class[] READER_INPUT_TYPES = new Class[]{String.class, File.class};
+    private static final String FORMAT_NAME_TIFF = "LC_COND_TIFF";
+    private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_TIFF};
+    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".tif", ".tiff", ".TIF", ".TIFF"};
+    private static final String READER_DESCRIPTION = "Land Cover CCI condition tiff with mean and std in same dir";
     private static final BeamFileFilter FILE_FILTER = new TiffFileFilter();
 
     @Override
@@ -49,7 +49,7 @@ public class LcMapTiffReaderPlugin implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
-        if (filename.matches(LcMapTiffReader.LC_CLASSIF_FILENAME_PATTERN)) {
+        if (filename.matches(LcConditionTiffReader.LC_CONDITION_FILENAME_PATTERN)) {
             return DecodeQualification.INTENDED;
         } else {
             return DecodeQualification.UNABLE;
@@ -64,7 +64,7 @@ public class LcMapTiffReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new LcMapTiffReader(this);
+        return new LcConditionTiffReader(this);
     }
 
     @Override

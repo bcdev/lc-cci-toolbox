@@ -39,11 +39,11 @@
         </fileSet>
     </fileSets>
 
-<!--    <binaries>
-        <outputDirectory>modules</outputDirectory>
-        <unpack>false</unpack>
-        <outputFileNameMapping>${module.artifactId}-${module.version}.${module.extension}</outputFileNameMapping>
-        <includeDependencies>true</includeDependencies>
-    </binaries>-->
+    <!--    <binaries>
+            <outputDirectory>modules</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>${module.artifactId}-${module.version}.${module.extension}</outputFileNameMapping>
+            <includeDependencies>true</includeDependencies>
+        </binaries>-->
 
 </assembly>
