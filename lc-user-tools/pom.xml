@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>lc-aggregation-tool</artifactId>
-    <name>LC CCI Aggregation Tool</name>
+    <artifactId>lc-user-tools</artifactId>
+    <name>LC CCI User Tools</name>
     <version>0.5-SNAPSHOT</version>
 
     <dependencies>
