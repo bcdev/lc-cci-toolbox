@@ -15,7 +15,6 @@ import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
-import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
@@ -187,74 +186,4 @@ class LcBinWriter implements BinWriter {
         }
     }
 
-    private static class PlateCareeCoordinateEncoder implements CoordinateEncoder {
-
-        private final PlanetaryGrid planetaryGrid;
-        private NVariable latVar;
-        private NVariable lonVar;
-
-        public PlateCareeCoordinateEncoder(PlanetaryGrid planetaryGrid) {
-            this.planetaryGrid = planetaryGrid;
-        }
-
-        @Override
-        public void addCoordVars(NFileWriteable writeable) throws IOException {
-            latVar = writeable.addVariable("lat", DataType.FLOAT, null, "lat");
-            latVar.addAttribute("units", "degrees_north");
-            latVar.addAttribute("long_name", "latitude");
-            latVar.addAttribute("standard_name", "latitude");
-
-            lonVar = writeable.addVariable("lon", DataType.FLOAT, null, "lon");
-            lonVar.addAttribute("units", "degrees_east");
-            lonVar.addAttribute("long_name", "longitude");
-            lonVar.addAttribute("standard_name", "longitude");
-        }
-
-        @Override
-        public void fillCoordinateVars(NFileWriteable writeable) throws IOException {
-            int sceneHeight = planetaryGrid.getNumRows();
-
-            final float[] lats = new float[sceneHeight];
-            for (int i = 0; i < sceneHeight; i++) {
-                lats[i] = (float) planetaryGrid.getCenterLat(i);
-            }
-            latVar.writeFully(Array.factory(lats));
-
-            int sceneWidth = planetaryGrid.getNumCols(0);
-            final float[] lons = new float[sceneWidth];
-            for (int i = 0; i < sceneWidth; i++) {
-                lons[i] = (float) planetaryGrid.getCenterLatLon(i)[1];
-            }
-            lonVar.writeFully(Array.factory(lons));
-        }
-    }
-
-    private static class RegularGaussianGridCoordinateEncoder implements CoordinateEncoder {
-
-        private final PlanetaryGrid planetaryGrid;
-        private NVariable latVar;
-        private NVariable lonVar;
-
-        public RegularGaussianGridCoordinateEncoder(PlanetaryGrid planetaryGrid) {
-            this.planetaryGrid = planetaryGrid;
-        }
-
-        @Override
-        public void addCoordVars(NFileWriteable writeable) throws IOException {
-            latVar = writeable.addVariable("lat", DataType.FLOAT, null, "lat");
-            latVar.addAttribute("units", "degrees_north");
-            latVar.addAttribute("long_name", "latitude");
-            latVar.addAttribute("standard_name", "latitude");
-
-            lonVar = writeable.addVariable("lon", DataType.FLOAT, null, "lon");
-            lonVar.addAttribute("units", "degrees_east");
-            lonVar.addAttribute("long_name", "longitude");
-            lonVar.addAttribute("standard_name", "longitude");
-        }
-
-        @Override
-        public void fillCoordinateVars(NFileWriteable writeable) throws IOException {
-            //Todo change body of created method. Use File | Settings | File Templates to change
-        }
-    }
 }
