@@ -341,10 +341,8 @@ public class LcAggregationOp extends Operator implements Output {
         }
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
             || ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
-//            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
-//            boolean b = pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
-//            return b;
-            return true;
+            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
+            return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
         }
         return false;
     }
