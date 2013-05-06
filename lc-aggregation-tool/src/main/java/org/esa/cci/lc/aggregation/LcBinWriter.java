@@ -72,10 +72,8 @@ class LcBinWriter implements BinWriter {
 
     private CoordinateEncoder createCoordinateEncoder() {
         final PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
-        if (planetaryGrid instanceof PlateCarreeGrid) {
-            return new PlateCareeCoordinateEncoder(planetaryGrid);
-        } else if (planetaryGrid instanceof RegularGaussianGrid) {
-            return new RegularGaussianGridCoordinateEncoder(planetaryGrid);
+        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof RegularGaussianGrid) {
+            return new RegularCoordinateEncoder(planetaryGrid);
         } else {
             throw new IllegalStateException("Unknown projection method");
         }

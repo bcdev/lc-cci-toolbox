@@ -4,21 +4,32 @@ import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.nc.NVariable;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 
 import java.io.IOException;
 
-public abstract class AbstractRegularCoordinateEncoder implements CoordinateEncoder {
+public class RegularCoordinateEncoder implements CoordinateEncoder {
 
     protected final PlanetaryGrid planetaryGrid;
     protected NVariable latVar;
     protected NVariable lonVar;
 
-    public AbstractRegularCoordinateEncoder(PlanetaryGrid planetaryGrid) {
+    public RegularCoordinateEncoder(PlanetaryGrid planetaryGrid) {
         this.planetaryGrid = planetaryGrid;
     }
 
     @Override
-    public abstract void addCoordVars(NFileWriteable writeable) throws IOException;
+    public void addCoordVars(NFileWriteable writeable) throws IOException {
+        latVar = writeable.addVariable("lat", DataType.FLOAT, null, "lat");
+        latVar.addAttribute("units", "degrees_north");
+        latVar.addAttribute("long_name", "latitude");
+        latVar.addAttribute("standard_name", "latitude");
+
+        lonVar = writeable.addVariable("lon", DataType.FLOAT, null, "lon");
+        lonVar.addAttribute("units", "degrees_east");
+        lonVar.addAttribute("long_name", "longitude");
+        lonVar.addAttribute("standard_name", "longitude");
+    }
 
     @Override
     public void fillCoordinateVars(NFileWriteable writeable) throws IOException {
