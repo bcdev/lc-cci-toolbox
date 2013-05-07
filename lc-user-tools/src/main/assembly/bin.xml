@@ -1,6 +1,6 @@
 <!-- module binary distribution -->
-
-<assembly>
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
     <id>bin</id>
 
     <includeBaseDirectory>false</includeBaseDirectory>
@@ -15,6 +15,17 @@
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>modules</outputDirectory>
             <unpack>false</unpack>
+            <excludes>
+                <exclude>org.esa.beam:beam-ui</exclude>
+                <exclude>org.esa.beam:beam-visat-rcp</exclude>
+                <exclude>org.esa.beam:beam-visat</exclude>
+                <exclude>org.esa.beam:beam-csv-dataio</exclude>
+                <exclude>org.esa.beam:beam-processing</exclude>
+                <exclude>org.esa.beam:beam-statistics-op</exclude>
+                <exclude>org.jython:jython</exclude>
+                <exclude>com.jidesoft:jide-*</exclude>
+                <exclude>jfree:jfreechart</exclude>
+            </excludes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>bin</outputDirectory>
@@ -37,13 +48,15 @@
             </includes>
             <filtered>true</filtered>
         </fileSet>
+        <fileSet>
+            <directory>src/main/bin/win</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
     </fileSets>
-
-    <!--    <binaries>
-            <outputDirectory>modules</outputDirectory>
-            <unpack>false</unpack>
-            <outputFileNameMapping>${module.artifactId}-${module.version}.${module.extension}</outputFileNameMapping>
-            <includeDependencies>true</includeDependencies>
-        </binaries>-->
 
 </assembly>
