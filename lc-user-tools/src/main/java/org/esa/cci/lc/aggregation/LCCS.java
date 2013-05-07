@@ -6,9 +6,9 @@ import org.esa.beam.util.io.CsvReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Marco Peters
@@ -37,8 +37,8 @@ class LCCS {
         this.classValues = classValues;
         this.classDescriptions = classDescriptions;
         this.noDataClassValue = classValues[0];
-        this.classValueToIndexMap = new HashMap<Integer, Integer>();
-        this.indexToClassValueMap = new HashMap<Integer, Integer>();
+        this.classValueToIndexMap = new TreeMap<Integer, Integer>();
+        this.indexToClassValueMap = new TreeMap<Integer, Integer>();
         for (int i = 0; i < classValues.length; i++) {
             int classValue = classValues[i];
             classValueToIndexMap.put(classValue, i);

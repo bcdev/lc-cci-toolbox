@@ -19,8 +19,6 @@ import java.util.TreeMap;
 @SuppressWarnings("FieldCanBeLocal")
 class LcAggregator extends AbstractAggregator {
 
-    private static boolean DEBUG_OUTPUT_SUM = false;
-
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private FractionalAreaCalculator areaCalculator;
     private boolean outputLCCSClasses;
@@ -53,12 +51,12 @@ class LcAggregator extends AbstractAggregator {
 
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observation, WritableVector spatialVector) {
-        double obsLatitude = observation.getLatitude();
-        double obsLongitude = observation.getLongitude();
-        float areaFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
+        final double obsLatitude = observation.getLatitude();
+        final double obsLongitude = observation.getLongitude();
+        final float areaFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
 
-        int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
-        float oldValue = spatialVector.get(index);
+        final int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
+        final float oldValue = spatialVector.get(index);
         if (Float.isNaN(oldValue)) {
             spatialVector.set(index, areaFraction);
         } else {
@@ -94,13 +92,11 @@ class LcAggregator extends AbstractAggregator {
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
         initVector(outputVector, Float.NaN);
         SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
-        float sum = 0.0f;
         int outputVectorIndex = 0;
         for (int i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
                 sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
-                sum += classArea;
             }
             if (outputLCCSClasses) {
                 outputVector.set(outputVectorIndex++, classArea);
@@ -109,16 +105,11 @@ class LcAggregator extends AbstractAggregator {
 
         Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
         for (int i = 0; i < numMajorityClasses; i++) {
-            Float majorityClass;
             if (i >= classesSortedByOccurrence.length) {
-                majorityClass = Float.NaN;
+                outputVector.set(outputVectorIndex++, Float.NaN);
             } else {
-                majorityClass = classesSortedByOccurrence[i].floatValue();
+                outputVector.set(outputVectorIndex++, classesSortedByOccurrence[i]);
             }
-            outputVector.set(outputVectorIndex++, majorityClass);
-        }
-        if (DEBUG_OUTPUT_SUM) {
-            outputVector.set(outputVectorIndex++, sum);
         }
 
         if (pftLut != null) {
@@ -130,11 +121,12 @@ class LcAggregator extends AbstractAggregator {
                     for (int j = 0; j < classPftFactors.length; j++) {
                         float factor = classPftFactors[j];
                         if (!Float.isNaN(factor)) {
-                            float oldValue = outputVector.get(outputVectorIndex + j);
+                            int currentOutputIndex = outputVectorIndex + j;
+                            float oldValue = outputVector.get(currentOutputIndex);
                             if (Float.isNaN(oldValue)) {
-                                outputVector.set(outputVectorIndex + j, classArea * factor);
+                                outputVector.set(currentOutputIndex, classArea * factor);
                             } else {
-                                outputVector.set(outputVectorIndex + j, oldValue + (classArea * factor));
+                                outputVector.set(currentOutputIndex, oldValue + (classArea * factor));
                             }
                         }
                     }
@@ -166,9 +158,6 @@ class LcAggregator extends AbstractAggregator {
         }
         for (int i = 0; i < numMajorityClasses; i++) {
             outputFeatureNames.add("majority_class_" + (i + 1));
-        }
-        if (DEBUG_OUTPUT_SUM) {
-            outputFeatureNames.add("class_area_sum");
         }
         if (pftLut != null) {
             outputFeatureNames.addAll(Arrays.asList(pftLut.getPFTNames()));
