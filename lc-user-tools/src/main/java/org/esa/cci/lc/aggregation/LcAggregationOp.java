@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.binning.CompositingType;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
@@ -9,13 +10,12 @@ import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -24,7 +24,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
-import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +43,6 @@ import java.io.IOException;
         copyright = "(c) 2012 by Brockmann Consult",
         description = "Allows to re-project, aggregate and subset LC map and conditions products.")
 public class LcAggregationOp extends Operator implements Output {
-
-    public static final String NETCDF4_BEAM_FORMAT_STRING = "NetCDF4-BEAM";
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
     private static final String CLASS_BAND_NAME = "lccs_class";
@@ -103,12 +100,16 @@ public class LcAggregationOp extends Operator implements Output {
         Debug.setEnabled(true);
         validateParameters();
         if (predefinedRegionIsSelected() || userDefinedRegionIsSelected()) {
-            setTargetProduct(createProductSubset());
-        } else {
-            ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-            if (!plugInManager.getWriterPlugIns(NETCDF4_BEAM_FORMAT_STRING).hasNext()) {
-                plugInManager.addWriterPlugIn(new BeamNetCdf4WriterPlugIn());
+            String sourceDir = sourceProduct.getFileLocation().getParent();
+            // todo - extract into separate operator? or main?
+            // todo - support condition products
+            if (sourceDir == null) {
+                throw new OperatorException("Can not retrieve parent directory from source product");
             }
+            Product productSubset = createProductSubset();
+            GPF.writeProduct(productSubset, targetFile, "NetCDF4-LC-Map", false, ProgressMonitor.NULL);
+            setTargetProduct(productSubset);
+        } else {
 
             BinningConfig binningConfig = createBinningConfig(sourceProduct);
             if (formatterConfig == null) {
@@ -167,8 +168,6 @@ public class LcAggregationOp extends Operator implements Output {
 
     FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat(NETCDF4_BEAM_FORMAT_STRING);
-        targetFile = FileUtils.ensureExtension(targetFile, ".nc");
         formatterConfig.setOutputFile(targetFile.getAbsolutePath());
         formatterConfig.setOutputType("Product");
         return formatterConfig;
@@ -341,7 +340,11 @@ public class LcAggregationOp extends Operator implements Output {
         if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
             || ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
             final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
-            return pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
+            boolean valid = pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
+            if (!valid) {
+                throw new OperatorException("Pixel size of the target product is smaller than the pixel size of the source product");
+            }
+            return valid;
         }
         return false;
     }

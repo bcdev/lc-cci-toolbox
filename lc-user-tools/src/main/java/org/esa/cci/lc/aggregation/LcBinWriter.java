@@ -1,7 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.BinManager;
 import org.esa.beam.binning.BinningContext;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.TemporalBin;
@@ -131,8 +130,6 @@ class LcBinWriter implements BinWriter {
 
     private void fillVariables(List<TemporalBin> temporalBins, ArrayList<NVariable> variables, int sceneWidth, int sceneHeight) throws IOException {
         final Iterator<TemporalBin> iterator = temporalBins.iterator();
-        final BinManager binManager = binningContext.getBinManager();
-        final WritableVector resultVector = binManager.createResultVector();
 
         ProductData.Float[] dataLines = new ProductData.Float[variables.size()];
         initDataLines(variables, sceneWidth, dataLines);
@@ -143,7 +140,7 @@ class LcBinWriter implements BinWriter {
             final long binIndex = temporalBin.getIndex();
             final int binX = (int) (binIndex % sceneWidth);
             final int binY = (int) (binIndex / sceneWidth);
-            binManager.computeResult(temporalBin, resultVector);
+            final WritableVector resultVector = temporalBin.toVector();
             if (binY != lineY) {
                 lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
                 initDataLines(variables, sceneWidth, dataLines);

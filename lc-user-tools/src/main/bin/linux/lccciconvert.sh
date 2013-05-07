@@ -12,22 +12,14 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-inputFilename=$(basename $1)
-if [ "${inputFilename:0:10}" = lc_classif ]; then
-    outputFormat=NetCDF4-LC-Map
-else
-    outputFormat=NetCDF4-LC-Condition
-fi
-
-export BEAM4_HOME=`( cd $(dirname $0); cd ..; pwd )`
-target=`dirname $1`/dummy
+export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
 
 exec java \
     -Xmx2048M -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 \
     -Dceres.context=beam \
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
-    "-Dbeam.home=$BEAM4_HOME" \
-    "-Dncsa.hdf.hdflib.HDFLibrary.hdflib=$BEAM4_HOME/modules/lib-hdf-2.7/lib/libjhdf.so" \
-    "-Dncsa.hdf.hdf5lib.H5.hdf5lib=$BEAM4_HOME/modules/lib-hdf-2.7/lib/libjhdf5.so" \
-    -jar "$BEAM4_HOME/bin/ceres-launcher.jar" \
-    LCCCI.Convert -f $outputFormat -t $target $@
+    "-Dbeam.home=$TOOL_HOME" \
+    "-Dncsa.hdf.hdflib.HDFLibrary.hdflib=$TOOL_HOME/modules/lib-hdf-2.7/lib/libjhdf.so" \
+    "-Dncsa.hdf.hdf5lib.H5.hdf5lib=$TOOL_HOME/modules/lib-hdf-2.7/lib/libjhdf5.so" \
+    -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
+    LCCCI.Convert $@

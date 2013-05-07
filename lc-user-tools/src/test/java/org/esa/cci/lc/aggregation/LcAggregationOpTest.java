@@ -7,11 +7,14 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
@@ -36,14 +39,16 @@ public class LcAggregationOpTest {
     @BeforeClass
     public static void beforeClass() {
         aggregationSpi = new LcAggregationOp.Spi();
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(aggregationSpi);
+        OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        spiRegistry.addOperatorSpi(aggregationSpi);
         beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(beamNetCdf4WriterPlugIn);
     }
 
     @AfterClass
     public static void afterClass() {
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(aggregationSpi);
+        OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        spiRegistry.removeOperatorSpi(aggregationSpi);
         ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
     }
 
@@ -128,8 +133,8 @@ public class LcAggregationOpTest {
         final GeoCoding targetGC = targetProduct.getGeoCoding();
         assertThat(th, is(300));
         assertThat(tw, is(300));
-        assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15, -15)));
-        assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15, 15)));
+        assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15.0f, -15.0f)));
+        assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15.0f, 15.0f)));
     }
 
 
@@ -150,7 +155,6 @@ public class LcAggregationOpTest {
 
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
-        assertThat(formatterConfig.getOutputFormat(), is("NetCDF4-BEAM"));
     }
 
     private IsNull isNull() {
@@ -266,6 +270,7 @@ public class LcAggregationOpTest {
         final Integer width = 3600;
         final Integer height = 1800;
         final Product product = new Product("P", "T", width, height);
+        product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"));
         final Band classesBand = product.addBand("lccs_class", ProductData.TYPE_UINT8);
         classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                              new Byte[]{10}, null));
@@ -279,6 +284,9 @@ public class LcAggregationOpTest {
         currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                    new Byte[]{1}, null));
         product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+        MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
+        globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2"), true));
+        product.getMetadataRoot().addElement(globalAttributes);
         return product;
     }
 
