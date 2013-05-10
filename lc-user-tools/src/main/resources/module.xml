@@ -1,10 +1,12 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>lc-aggregation-tool</symbolicName>
+    <symbolicName>lc-user-tools</symbolicName>
     <version>0.5</version>
-    <name>LC CCI Aggregation Tool</name>
+    <name>LC CCI User Tools</name>
 
-    <description>A tool allowing to re-project, aggregate and subset LC map and conditions products.</description>
+    <description>A set of tools providing functionality to convert, aggregate and subset
+        LC map and condition products.
+    </description>
 
     <!--<changelog>-->
     <!--<![CDATA[-->

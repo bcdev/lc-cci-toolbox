@@ -44,7 +44,15 @@ import java.util.regex.Pattern;
 public class LcMapTiffReader extends AbstractProductReader {
 
     public static final String LC_CLASSIF_FILENAME_PATTERN = "lc_classif_lccs_(....)_v(.*)\\.(tiff?)";
-    public static final String[] LC_VARIABLE_DESCRIPTIONS = new String[]{
+    public static final String[] LC_VARIABLE_NAMES = {
+            "lccs_class",
+            "processed_flag",
+            "current_pixel_state",
+            "observation_count",
+            "algorithmic_confidence_level",
+            "overall_confidence_level"
+    };
+    private static final String[] LC_VARIABLE_DESCRIPTIONS = new String[]{
             "Land cover class defined in LCCS",
             "LC map processed area flag",
             "LC pixel type mask",
@@ -53,15 +61,6 @@ public class LcMapTiffReader extends AbstractProductReader {
             "LC map confidence level based on product validation"
     };
     private List<Product> bandProducts;
-    private static final String[] FLAG_NETCDF_VARIABLE = {
-            "lccs_class",
-            "processed_flag",
-            "current_pixel_state",
-            "observation_count",
-            "algorithmic_confidence_level",
-            "overall_confidence_level"
-    };
-
     public LcMapTiffReader(LcMapTiffReaderPlugin readerPlugin) {
         super(readerPlugin);
     }
@@ -159,7 +158,7 @@ public class LcMapTiffReader extends AbstractProductReader {
 
     private static Band addBand(int i, Product lcFlagProduct, Product result) {
         final Band srcBand = lcFlagProduct.getBandAt(0);
-        final String bandName = FLAG_NETCDF_VARIABLE[i];
+        final String bandName = LC_VARIABLE_NAMES[i];
         final Band band = result.addBand(bandName, srcBand.getDataType());
         band.setNoDataValueUsed(false);
         band.setSourceImage(srcBand.getSourceImage());

@@ -18,6 +18,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
+import org.esa.cci.lc.conversion.LcMapTiffReader;
 
 import java.io.File;
 import java.util.HashMap;
@@ -44,12 +45,12 @@ public class LcAggregationOp extends Operator implements Output {
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
 
-    @Parameter(description = "The target file location.", defaultValue = "target.nc")
+    @Parameter(description = "The target file location.")
     private File targetFile;
 
-    @Parameter(description = "Defines the projection method for the target product.", notNull = true,
+    @Parameter(description = "Defines the grid for the target product.", notNull = true,
                valueSet = {"GEOGRAPHIC_LAT_LON", "REGULAR_GAUSSIAN_GRID"})
-    private ProjectionMethod projectionMethod;
+    private PlanetaryGridName gridName;
 //    @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
 //    private double pixelSizeX;
 //    @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
@@ -85,7 +86,7 @@ public class LcAggregationOp extends Operator implements Output {
     @Override
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
-        validateParameters();
+        validateInputSettings();
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         appendGridNameProperty(planetaryGrid);
         BinningConfig binningConfig = createBinningConfig(planetaryGrid);
@@ -182,11 +183,11 @@ public class LcAggregationOp extends Operator implements Output {
 
     private PlanetaryGrid createPlanetaryGrid() {
         PlanetaryGrid planetaryGrid;
-        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)) {
+        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             planetaryGrid = new PlateCarreeGrid(numRows);
-        } else if (ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
+        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
             planetaryGrid = new RegularGaussianGrid(numRows);
-        } else if (ProjectionMethod.REDUCED_GAUSSIAN_GRID.equals(projectionMethod)) {
+        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {
             planetaryGrid = new ReducedGaussianGrid(numRows);
         } else {
             planetaryGrid = new SEAGrid(numRows);
@@ -202,12 +203,12 @@ public class LcAggregationOp extends Operator implements Output {
         this.targetFile = targetFile;
     }
 
-    ProjectionMethod getProjectionMethod() {
-        return projectionMethod;
+    PlanetaryGridName getGridName() {
+        return gridName;
     }
 
-    void setProjectionMethod(ProjectionMethod projectionMethod) {
-        this.projectionMethod = projectionMethod;
+    void setGridName(PlanetaryGridName gridName) {
+        this.gridName = gridName;
     }
 
 //    double getPixelSizeX() {
@@ -258,11 +259,10 @@ public class LcAggregationOp extends Operator implements Output {
         this.numRows = numRows;
     }
 
-    private void validateParameters() {
+    private void validateInputSettings() {
         if (targetFile == null) {
             throw new OperatorException("No target file specified");
         }
-
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
         }
@@ -272,6 +272,14 @@ public class LcAggregationOp extends Operator implements Output {
         }
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
+        }
+        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
+            numRows *= 2;
+        }
+        for (String variableName : LcMapTiffReader.LC_VARIABLE_NAMES) {
+            if(!sourceProduct.containsBand(variableName)) {
+                throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
+            }
         }
     }
 

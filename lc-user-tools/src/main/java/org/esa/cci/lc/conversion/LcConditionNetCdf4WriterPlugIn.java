@@ -70,13 +70,14 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
             LcCondMetadata metadata = new LcCondMetadata(product);
-            final String condition = product.getMetadataRoot().getAttributeString("condition");
-            final String spatialResolution = product.getMetadataRoot().getAttributeString("spatialResolution");
-            final String temporalResolution = product.getMetadataRoot().getAttributeString("temporalResolution");
-            final String startYear = product.getMetadataRoot().getAttributeString("startYear");
-            final String endYear = product.getMetadataRoot().getAttributeString("endYear");
-            final String weekNumber = product.getMetadataRoot().getAttributeString("weekNumber");
-            final String version = product.getMetadataRoot().getAttributeString("version");
+            final String condition = metadata.getCondition();
+            final String startYear = metadata.getStartYear();
+            final String endYear = metadata.getEndYear();
+            final String weekNumber = metadata.getWeekNumber();
+            final String spatialResolution = metadata.getSpatialResolution();
+            final String temporalResolution = metadata.getTemporalResolution();
+            final String version = metadata.getVersion();
+
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
             final String startTime = startYear + weekNumber;
             final String endTime = endYear + weekNumber;
@@ -167,7 +168,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                StringBuffer ancillaryVariables = new StringBuffer();
+                StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
                     if ("ndvi_std".equals(band.getName()) ||
                         "ndvi_nYearObs".equals(band.getName()) ||

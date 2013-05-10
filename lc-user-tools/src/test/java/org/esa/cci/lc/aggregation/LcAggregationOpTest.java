@@ -50,7 +50,7 @@ public class LcAggregationOpTest {
     public void testTargetProductCreation_Binning() throws Exception {
         // preparation
         LcAggregationOp aggregationOp = createAggrOp();
-        aggregationOp.setProjectionMethod(ProjectionMethod.GEOGRAPHIC_LAT_LON);
+        aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
@@ -77,7 +77,7 @@ public class LcAggregationOpTest {
     public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
         // preparation
         LcAggregationOp aggregationOp = createAggrOp();
-        aggregationOp.setProjectionMethod(ProjectionMethod.GEOGRAPHIC_LAT_LON);
+        aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
@@ -103,7 +103,8 @@ public class LcAggregationOpTest {
     @Test
     public void testDefaultValues() {
         LcAggregationOp aggrOp = (LcAggregationOp) aggregationSpi.createOperator();
-        assertThat(aggrOp.getProjectionMethod(), isNull());
+        aggrOp.setTargetFile(new File("dummy"));
+        assertThat(aggrOp.getGridName(), isNull());
 //        assertThat(aggrOp.getPixelSizeX(), is(0.1));
 //        assertThat(aggrOp.getPixelSizeY(), is(0.1));
         assertThat(aggrOp.isOutputLCCSClasses(), is(true));
@@ -192,15 +193,21 @@ public class LcAggregationOpTest {
         final Band classesBand = product.addBand("lccs_class", ProductData.TYPE_UINT8);
         classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                              new Byte[]{10}, null));
-        final Band confidBand = product.addBand("algorithmic_confidence_level", ProductData.TYPE_FLOAT32);
-        confidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                            new Float[]{10f}, null));
-        final Band processedFlag = product.addBand("processed_flag", ProductData.TYPE_UINT8);
+        final Band processedFlag = product.addBand("processed_flag", ProductData.TYPE_INT8);
         processedFlag.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                new Byte[]{1}, null));
-        final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_UINT8);
+        final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_INT8);
         currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                    new Byte[]{1}, null));
+        final Band observationBand = product.addBand("observation_count", ProductData.TYPE_INT8);
+        observationBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                            new Float[]{10f}, null));
+        final Band algoConfidBand = product.addBand("algorithmic_confidence_level", ProductData.TYPE_FLOAT32);
+        algoConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                            new Float[]{10f}, null));
+        final Band overallConfidBand = product.addBand("overall_confidence_level", ProductData.TYPE_INT8);
+        overallConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                            new Float[]{10f}, null));
         product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2"), true));

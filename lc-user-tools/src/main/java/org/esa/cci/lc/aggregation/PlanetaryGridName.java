@@ -3,7 +3,7 @@ package org.esa.cci.lc.aggregation;
 /**
  * @author Marco Peters
  */
-public enum ProjectionMethod {
+enum PlanetaryGridName {
     REGULAR_GAUSSIAN_GRID,
     REDUCED_GAUSSIAN_GRID,
     GEOGRAPHIC_LAT_LON,
