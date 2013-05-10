@@ -17,13 +17,13 @@ java -Xmx4G -Dceres.context=lccci ^
 exit /B %ERRORLEVEL%
 
 :HELP
-@echo off
 echo Land Cover CCI Aggregation Tool
-echo call   : lccciaggregation.bat ^<map-netcdf-file^>
+echo call: aggregation.bat ^<map-netcdf-file^>
 echo
 echo For further information see the readme.txt
 exit /B 1
 
 :JAVA_NO_INSTALLED
-echo Java is not installed. Please install Java JRE (version >= 1.6) first. (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+echo Java is not installed. Please install Java JRE (version >= 1.6) first. ^
+(http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 exit /B 2
