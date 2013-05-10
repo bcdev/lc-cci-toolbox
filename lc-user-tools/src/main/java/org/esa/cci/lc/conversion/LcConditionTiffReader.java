@@ -104,7 +104,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (stdProduct != null) {
             if (result.getSceneRasterWidth() != stdProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != stdProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of std band does not match dimenstions of mean band");
+                throw new IllegalArgumentException("dimensions of std band does not match dimensions of mean band");
             }
             bandProducts.add(stdProduct);
             band = addBand(condition.toLowerCase() + "_std", stdProduct, result);
@@ -115,7 +115,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (statusProduct != null) {
             if (result.getSceneRasterWidth() != statusProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != statusProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of status band does not match dimenstions of mean band");
+                throw new IllegalArgumentException("dimensions of status band does not match dimensions of mean band");
             }
             bandProducts.add(statusProduct);
             band = addBand(condition.toLowerCase() + "_status", statusProduct, result);
@@ -126,7 +126,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (nYearObsProduct != null) {
             if (result.getSceneRasterWidth() != nYearObsProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != nYearObsProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of NYearObs band does not match dimenstions of mean band");
+                throw new IllegalArgumentException("dimensions of NYearObs band does not match dimensions of mean band");
             }
             bandProducts.add(nYearObsProduct);
             band = addBand(condition.toLowerCase() + "_nYearObs", nYearObsProduct, result);
