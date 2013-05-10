@@ -15,8 +15,12 @@ import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
 import org.esa.beam.dataio.netcdf.util.ReaderUtils;
 import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.ProductUtils;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -81,10 +85,14 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
             final String startTime = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2) + "0101";
             final String endTime = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2) + "1231";
-            final float latMax = 90.0f;
-            final float latMin = -90.0f;
-            final float lonMin = -180.0f;
-            final float lonMax = 180.0f;
+
+            final GeoCoding geoCoding = product.getGeoCoding();
+            final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
+            final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
+            final float latMax = upperLeft.getLat();
+            final float latMin = lowerRight.getLat();
+            final float lonMin = upperLeft.getLon();
+            final float lonMax = lowerRight.getLon();
 
             final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
 

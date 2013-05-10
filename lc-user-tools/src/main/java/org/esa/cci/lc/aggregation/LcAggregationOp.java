@@ -1,6 +1,5 @@
 package org.esa.cci.lc.aggregation;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.binning.CompositingType;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
@@ -10,12 +9,7 @@ import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -26,7 +20,7 @@ import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -37,11 +31,11 @@ import java.io.IOException;
  * @author Marco Peters
  */
 @OperatorMetadata(
-        alias = "LCCCI.Aggregate",
-        version = "0.5",
-        authors = "Marco Peters",
-        copyright = "(c) 2012 by Brockmann Consult",
-        description = "Allows to re-project, aggregate and subset LC map and conditions products.")
+            alias = "LCCCI.Aggregate",
+            version = "0.5",
+            authors = "Marco Peters",
+            copyright = "(c) 2013 by Brockmann Consult",
+            description = "Allows to aggregate LC map and condition products.")
 public class LcAggregationOp extends Operator implements Output {
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
@@ -53,27 +47,15 @@ public class LcAggregationOp extends Operator implements Output {
     @Parameter(description = "The target file location.", defaultValue = "target.nc")
     private File targetFile;
 
-    @Parameter(description = "Defines the projection method for the target product.",
+    @Parameter(description = "Defines the projection method for the target product.", notNull = true,
                valueSet = {"GEOGRAPHIC_LAT_LON", "REGULAR_GAUSSIAN_GRID"})
     private ProjectionMethod projectionMethod;
-    @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
-    private double pixelSizeX;
-    @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
-    private double pixelSizeY;
+//    @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
+//    private double pixelSizeX;
+//    @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
+//    private double pixelSizeY;
     @Parameter(defaultValue = "2160")
     private int numRows;
-
-    @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
-    private Double westBound;
-    @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
-    private Double northBound;
-    @Parameter(description = "The eastern longitude.", interval = "[-180,180]", unit = "°")
-    private Double eastBound;
-    @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
-    private Double southBound;
-
-    @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
-    private PredefinedRegion predefinedRegion;
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -94,75 +76,75 @@ public class LcAggregationOp extends Operator implements Output {
 
     FormatterConfig formatterConfig;
     boolean outputTargetProduct;
+    private final HashMap<String, String> lcProperties;
+
+    public LcAggregationOp() {
+        lcProperties = new HashMap<String, String>();
+    }
 
     @Override
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
         validateParameters();
-        if (predefinedRegionIsSelected() || userDefinedRegionIsSelected()) {
-            String sourceDir = sourceProduct.getFileLocation().getParent();
-            // todo - extract into separate operator? or main?
-            // todo - support condition products
-            if (sourceDir == null) {
-                throw new OperatorException("Can not retrieve parent directory from source product");
+        final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
+        appendGridNameProperty(planetaryGrid);
+        BinningConfig binningConfig = createBinningConfig(planetaryGrid);
+        if (formatterConfig == null) {
+            formatterConfig = createDefaultFormatterConfig();
+        }
+
+
+        appendPFTProperty(lcProperties);
+
+        BinningOp binningOp;
+        try {
+            binningOp = new BinningOp();
+        } catch (Exception e) {
+            throw new OperatorException("Could not create binning operator.", e);
+        }
+        binningOp.setSourceProduct(sourceProduct);
+        binningOp.setOutputTargetProduct(outputTargetProduct);
+        binningOp.setParameter("outputBinnedData", true);
+        binningOp.setBinWriter(new LcBinWriter(lcProperties));
+        binningOp.setBinningConfig(binningConfig);
+        binningOp.setFormatterConfig(formatterConfig);
+
+        Product dummyTarget = binningOp.getTargetProduct();
+        setTargetProduct(dummyTarget);
+
+        // todo - useless code; Product is not written again
+        //        LCCS lccs = LCCS.getInstance();
+        //        int[] classValues = lccs.getClassValues();
+        //        String[] classDescriptions = lccs.getClassDescriptions();
+        //        for (int i = 0; i < classValues.length; i++) {
+        //            int classValue = classValues[i];
+        //            Band band = targetProduct.getBand("class_area_" + classValue);
+        //            band.setDescription(classDescriptions[i]);
+        //        }
+        //        setTargetProduct(targetProduct);
+    }
+
+    private void appendPFTProperty(HashMap<String, String> lcProperties) {
+        if (outputPFTClasses) {
+            if (userPFTConversionTable != null) {
+                lcProperties.put("pft_table", String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName())); // TODO
+            } else {
+                lcProperties.put("pft_table", "LCCCI conform PFT conversion table used.");
             }
-            Product productSubset = createProductSubset();
-            GPF.writeProduct(productSubset, targetFile, "NetCDF4-LC-Map", false, ProgressMonitor.NULL);
-            setTargetProduct(productSubset);
         } else {
-
-            BinningConfig binningConfig = createBinningConfig(sourceProduct);
-            if (formatterConfig == null) {
-                formatterConfig = createDefaultFormatterConfig();
-            }
-
-            BinningOp binningOp;
-            try {
-                binningOp = new BinningOp();
-            } catch (Exception e) {
-                throw new OperatorException("Could not create binning operator.", e);
-            }
-            binningOp.setSourceProduct(sourceProduct);
-            binningOp.setOutputTargetProduct(outputTargetProduct);
-            binningOp.setParameter("outputBinnedData", true);
-            binningOp.setBinWriter(new LcBinWriter());
-            binningOp.setBinningConfig(binningConfig);
-            binningOp.setFormatterConfig(formatterConfig);
-
-            Product dummyTarget = binningOp.getTargetProduct();
-            setTargetProduct(dummyTarget);
-
-            // todo - useless code; Product is not written again
-            //        LCCS lccs = LCCS.getInstance();
-            //        int[] classValues = lccs.getClassValues();
-            //        String[] classDescriptions = lccs.getClassDescriptions();
-            //        for (int i = 0; i < classValues.length; i++) {
-            //            int classValue = classValues[i];
-            //            Band band = targetProduct.getBand("class_area_" + classValue);
-            //            band.setDescription(classDescriptions[i]);
-            //        }
-            //        setTargetProduct(targetProduct);
+            lcProperties.put("pft_table", "No PFT computed.");
         }
     }
 
-    private Product createProductSubset() {
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-
-        final GeoPos ulGePo = new GeoPos(northBound.floatValue(), westBound.floatValue());
-        final GeoPos lrGePo = new GeoPos(southBound.floatValue(), eastBound.floatValue());
-        final PixelPos ulPiPo = geoCoding.getPixelPos(ulGePo, null);
-        final PixelPos lrPiPo = geoCoding.getPixelPos(lrGePo, null);
-
-        ProductSubsetDef subsetDef = new ProductSubsetDef();
-        final int x = (int) ulPiPo.x;
-        final int y = (int) ulPiPo.y;
-        final int width = (int) lrPiPo.x - x + 1;
-        final int height = (int) lrPiPo.y - y + 1;
-        subsetDef.setRegion(x, y, width, height);
-        try {
-            return sourceProduct.createSubset(subsetDef, "SubsetName", "SubsetDescription");
-        } catch (IOException e) {
-            throw new OperatorException(e);
+    private void appendGridNameProperty(PlanetaryGrid planetaryGrid) {
+        final String gridName;
+        if (planetaryGrid instanceof RegularGaussianGrid) {
+            gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
+            lcProperties.put("grid_name", gridName);
+        } else if (planetaryGrid instanceof PlateCarreeGrid) {
+            lcProperties.put("grid_name", String.format("Geographic lat lon grid (cell size: %3f°)", 180.0 / numRows));
+        } else {
+            throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
         }
     }
 
@@ -173,18 +155,7 @@ public class LcAggregationOp extends Operator implements Output {
         return formatterConfig;
     }
 
-    private BinningConfig createBinningConfig(Product product) {
-        PlanetaryGrid planetaryGrid;
-        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)) {
-            planetaryGrid = new PlateCarreeGrid(numRows);
-        } else if (ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
-            planetaryGrid = new RegularGaussianGrid(numRows);
-        } else if (ProjectionMethod.REDUCED_GAUSSIAN_GRID.equals(projectionMethod)) {
-            planetaryGrid = new ReducedGaussianGrid(numRows);
-        } else {
-            planetaryGrid = new SEAGrid(numRows);
-        }
-
+    private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
@@ -209,6 +180,20 @@ public class LcAggregationOp extends Operator implements Output {
         return binningConfig;
     }
 
+    private PlanetaryGrid createPlanetaryGrid() {
+        PlanetaryGrid planetaryGrid;
+        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)) {
+            planetaryGrid = new PlateCarreeGrid(numRows);
+        } else if (ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
+            planetaryGrid = new RegularGaussianGrid(numRows);
+        } else if (ProjectionMethod.REDUCED_GAUSSIAN_GRID.equals(projectionMethod)) {
+            planetaryGrid = new ReducedGaussianGrid(numRows);
+        } else {
+            planetaryGrid = new SEAGrid(numRows);
+        }
+        return planetaryGrid;
+    }
+
     File getTargetFile() {
         return targetFile;
     }
@@ -225,53 +210,21 @@ public class LcAggregationOp extends Operator implements Output {
         this.projectionMethod = projectionMethod;
     }
 
-    double getPixelSizeX() {
-        return pixelSizeX;
-    }
-
-    void setPixelSizeX(double pixelSizeX) {
-        this.pixelSizeX = pixelSizeX;
-    }
-
-    double getPixelSizeY() {
-        return pixelSizeY;
-    }
-
-    void setPixelSizeY(double pixelSizeY) {
-        this.pixelSizeY = pixelSizeY;
-    }
-
-    Double getWestBound() {
-        return westBound;
-    }
-
-    void setWestBound(double westBound) {
-        this.westBound = westBound;
-    }
-
-    Double getNorthBound() {
-        return northBound;
-    }
-
-    void setNorthBound(double northBound) {
-        this.northBound = northBound;
-    }
-
-    Double getEastBound() {
-        return eastBound;
-    }
-
-    void setEastBound(double eastBound) {
-        this.eastBound = eastBound;
-    }
-
-    Double getSouthBound() {
-        return southBound;
-    }
-
-    void setSouthBound(double southBound) {
-        this.southBound = southBound;
-    }
+//    double getPixelSizeX() {
+//        return pixelSizeX;
+//    }
+//
+//    void setPixelSizeX(double pixelSizeX) {
+//        this.pixelSizeX = pixelSizeX;
+//    }
+//
+//    double getPixelSizeY() {
+//        return pixelSizeY;
+//    }
+//
+//    void setPixelSizeY(double pixelSizeY) {
+//        this.pixelSizeY = pixelSizeY;
+//    }
 
     public boolean isOutputLCCSClasses() {
         return outputLCCSClasses;
@@ -309,9 +262,6 @@ public class LcAggregationOp extends Operator implements Output {
         if (targetFile == null) {
             throw new OperatorException("No target file specified");
         }
-        if (!onlyOneIsTrue(projetionIsWellDefined(), predefinedRegionIsSelected(), userDefinedRegionIsSelected())) {
-            throw new OperatorException("Either projection or a predefined region or user defined bounds must be selected.");
-        }
 
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
@@ -333,38 +283,6 @@ public class LcAggregationOp extends Operator implements Output {
         return count == 1;
     }
 
-    private boolean projetionIsWellDefined() {
-        if (projectionMethod == null) {
-            return false;
-        }
-        if (ProjectionMethod.GEOGRAPHIC_LAT_LON.equals(projectionMethod)
-            || ProjectionMethod.REGULAR_GAUSSIAN_GRID.equals(projectionMethod)) {
-            final double minPixelSizeInDegree = 180d / sourceProduct.getSceneRasterHeight();
-            boolean valid = pixelSizeX >= minPixelSizeInDegree && pixelSizeY >= minPixelSizeInDegree;
-            if (!valid) {
-                throw new OperatorException("Pixel size of the target product is smaller than the pixel size of the source product");
-            }
-            return valid;
-        }
-        return false;
-    }
-
-    private boolean predefinedRegionIsSelected() {
-        return predefinedRegion != null;
-    }
-
-    private boolean userDefinedRegionIsSelected() {
-        final boolean valid = northBound != null && eastBound != null && southBound != null && westBound != null;
-        if (valid) {
-            if (westBound >= eastBound) {
-                throw new OperatorException("West bound must be western of east bound.");
-            }
-            if (northBound <= southBound) {
-                throw new OperatorException("North bound must be northern of south bound.");
-            }
-        }
-        return valid;
-    }
 
     /**
      * The Service Provider Interface (SPI) for the operator.

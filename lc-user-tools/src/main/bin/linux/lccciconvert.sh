@@ -3,12 +3,9 @@
 
 if [ -z "$1" ]; then
     echo "Land Cover CCI Tiff to NetCDF 4 converter"
-    echo "call   : lccciconvert.sh <classification-tif-file>"
-    echo "example: lccciconvert.sh /data/lc-map-product/lc_classif_lccs_2010_v2.tif"
-    echo "pattern: lc_classif_lccs_<epoch>_<version>.tif"
-    echo "pattern: lc_flag<n>_<epoch>_<version>.tif  (for n in 1..5, optional files)"
-    echo "output : <map-netcdf-file>"
-    echo "example: ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
+    echo "call   : lccciconvert.sh <classification-tif-file>|<condition-tif-file>"
+    echo ""
+    echo "For further information take a look at the readme.txt file."
     exit 1
 fi
 

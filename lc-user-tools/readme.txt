@@ -1,25 +1,50 @@
-LC-CCI Aggregation Tool
-   v0.2 - 02.10.2012
+   LC-CCI User Tools
+   v0.5 - 13.05.2013
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+Summary
+~~~~~~~
+These set of tools (conversion tool, aggregation tool, subset tool) provides the possibilities
+to prepare data for model computation.
+
 
 Installation
 ~~~~~~~~~~~~
-1) Install the current snapshot version of BEAM. It can be downloaded from the BEAM web site at
-(http://www.brockmann-consult.de/beam-snapshots/beam-installers/).
-2) Copy the lc-aggregation-tool-0.2.jar file into the modules folder of the BEAM installation directory.
-3) For running the aggregation tool one of the batch files needs to be changed. In the <BEAM_INSTALLATION_DIR>\bin
-   folder you can find the gpt.bat file. Copy this file to your desktop and open it in a text editor.
-   Change the line
-        -Xmx1024M
-    to
-        -Xmx5000M
-   This allows the tool to consume more memory. Instead of 1GB, it can then use 5GB. If you can not specify such high
-   values (because your computer doesn't have enough memory installed) it can happen that the process takes very long or
-   brakes after a long time of computation. Therefore specify the highest possible value.
-   After changing and saving the file, copy it back to the original folder and replace the old batch file.
+1) Unzip the zip-file in a directory of your choice.
+2) Inside the unzipped directory you can find a folder which is named 'bin'.
+   Inside you can find the windows and unix start scripts for the LCCCI tools.
+
 
 Execution
 ~~~~~~~~~
+
+All start scripts are available in widows and unix versions.
+Use the scripts in the same manner.
+
+Convert map tif file example:
+   lccciconvert.sh <path to map tif file>
+
+Convert condition tif file example:
+   lccciconvert.sh <path to condition tif file>
+
+Map aggregation example:
+   lccciaggregation.sh -PprojectionMethod=<name> -PnumRows=<integer>
+                       -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
+                       -PoutputPFTClasses=<boolean> -PtargetFile=<filePath>
+                       -SsourceProduct=<filePath>
+
+Create subset example:
+   lcccisubset.sh -P todo
+
+
+
+PFT  todo
+Tree Broadleaf Evergreen|Tree Broadleaf Deciduous|Tree Needleleaf Evergreen|Tree Needleleaf Deciduous|Shrub Broadleaf Evergreen|Shrub Broadleaf Deciduous|Shrub Needleleaf Evergreen|Shrub Needleleaf Deciduous |Natural Grass|Managed Grass|Bare soil|Water|Snow/Ice|No data
+
+
+
+
+
 In the tools menu of VISAT a menu item named 'LC CCI Aggregation Tool...' can be found. This entry invokes the user
 interface for the aggregation tool. The parameters for defining the output (projection method, pixel size, bounds) are
 not considered in this version.

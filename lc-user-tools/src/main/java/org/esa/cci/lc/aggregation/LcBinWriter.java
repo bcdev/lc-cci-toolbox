@@ -31,12 +31,14 @@ import java.util.logging.Logger;
 class LcBinWriter implements BinWriter {
 
     private static final float FILL_VALUE = Float.NaN;
-    private String targetFilePath;
+    private final Map<String, String> lcProperties;
     private Logger logger;
+    private String targetFilePath;
     private BinningContext binningContext;
     private CoordinateEncoder coordinateEncoder;
 
-    LcBinWriter() {
+    LcBinWriter(Map<String, String> lcProperties) {
+        this.lcProperties = lcProperties;
         logger = BeamLogManager.getSystemLogger();
     }
 
@@ -55,7 +57,7 @@ class LcBinWriter implements BinWriter {
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
             Dimension tileSize = new Dimension(32, 32);
-            addGlobalAttributes(writeable);
+            addGlobalAttributes(writeable, metadataProperties);
             coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
             ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
@@ -94,7 +96,15 @@ class LcBinWriter implements BinWriter {
     }
 
 
-    private void addGlobalAttributes(NFileWriteable writeable) throws IOException {
+    private void addGlobalAttributes(NFileWriteable writeable, Map<String, String> metadataProperties) throws IOException {
+        writeable.addGlobalAttribute("Conventions", "CF-1.6");
+        writeable.addGlobalAttribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Standard Names version 21");
+        writeable.addGlobalAttribute("keywords", "land cover classification,satellite,observation");     // TODO
+        writeable.addGlobalAttribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords");
+        writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
+        writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
+        writeable.addGlobalAttribute("cdm_data_type", "grid"); // todo
+
         writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
         writeable.addGlobalAttribute("summary", "Fill in something meaningful."); // TODO
         writeable.addGlobalAttribute("project", "Climate Change Initiative - European Space Agency");
@@ -103,13 +113,13 @@ class LcBinWriter implements BinWriter {
         writeable.addGlobalAttribute("history", "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0, aggregation-tool-0.8");  // versions
         writeable.addGlobalAttribute("comment", ""); // TODO
 
-        writeable.addGlobalAttribute("Conventions", "CF-1.6");
-        writeable.addGlobalAttribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Standard Names version 21");
-        writeable.addGlobalAttribute("keywords", "land cover classification,satellite,observation");     // TODO
-        writeable.addGlobalAttribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords");
-        writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
-        writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
-        writeable.addGlobalAttribute("cdm_data_type", "grid"); // todo
+        for (Map.Entry<String, String> lcPropEentry : lcProperties.entrySet()) {
+            writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
+        }
+
+        for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
+            writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
+        }
     }
 
     private ArrayList<NVariable> addFeatureVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {
