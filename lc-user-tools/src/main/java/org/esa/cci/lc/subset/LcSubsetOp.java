@@ -30,13 +30,13 @@ public class LcSubsetOp extends Operator implements Output {
     private Product sourceProduct;
 
     @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
-    private Float westBound;
+    private Float west;
     @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
-    private Float northBound;
+    private Float north;
     @Parameter(description = "The eastern longitude.", interval = "[-180,180]", unit = "°")
-    private Float eastBound;
+    private Float east;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
-    private Float southBound;
+    private Float south;
 
     @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
     private PredefinedRegion predefinedRegion;
@@ -88,7 +88,7 @@ public class LcSubsetOp extends Operator implements Output {
             final PredefinedRegion r = predefinedRegion;
             pixelRect = getPixelBounds(r.getNorth(), r.getEast(), r.getSouth(), r.getWest());
         } else {
-            pixelRect = getPixelBounds(northBound, eastBound, southBound, westBound);
+            pixelRect = getPixelBounds(north, east, south, west);
         }
         final HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("region", pixelRect);
@@ -108,21 +108,21 @@ public class LcSubsetOp extends Operator implements Output {
         return new Rectangle(x, y, width, height);
     }
 
-    void setWestBound(float westBound) {
-        this.westBound = westBound;
+    void setWest(float west) {
+        this.west = west;
     }
 
 
-    void setNorthBound(float northBound) {
-        this.northBound = northBound;
+    void setNorth(float north) {
+        this.north = north;
     }
 
-    void setEastBound(float eastBound) {
-        this.eastBound = eastBound;
+    void setEast(float east) {
+        this.east = east;
     }
 
-    void setSouthBound(float southBound) {
-        this.southBound = southBound;
+    void setSouth(float south) {
+        this.south = south;
     }
 
     private boolean predefinedRegionIsSelected() {
@@ -130,12 +130,12 @@ public class LcSubsetOp extends Operator implements Output {
     }
 
     private boolean userDefinedRegionIsSelected() {
-        final boolean valid = northBound != null && eastBound != null && southBound != null && westBound != null;
+        final boolean valid = north != null && east != null && south != null && west != null;
         if (valid) {
-            if (westBound >= eastBound) {
+            if (west >= east) {
                 throw new OperatorException("West bound must be western of east bound.");
             }
-            if (northBound <= southBound) {
+            if (north <= south) {
                 throw new OperatorException("North bound must be northern of south bound.");
             }
         }

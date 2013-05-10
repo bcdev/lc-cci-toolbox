@@ -6,20 +6,20 @@ IF "%JAVA_HOME%"=="" GOTO JAVA_NO_SET
 
 set TOOL_HOME="%CD%"
 
-java ^
-    -Xmx2048M -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
-    -Dceres.context=lccci ^
+java -Xmx2G -Dceres.context=lccci ^
     -Dlccci.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
-    LCCCI.Convert %*
+    LCCCI.Subset %*
 
 exit /B %ERRORLEVEL%
 
 
 :HELP
 @echo off
-echo Land Cover CCI Conversion Tool (Tiff to NetCDF-4)
-echo call: lccciconvert.bat ^<classification-tif-file^>|^<condition-tif-file^>
+echo Land Cover CCI NetCDF 4 Subsetting Tool
+echo call: lcccisubset.bat -Pnorth=^<degree^> -Peast=^<degree^> -Psouth=^<degree^> -Pwest=^<degree^> ^<netcdf-file^>
+echo or
+echo call: lcccisubset.bat -PpredefinedRegion=^<EUROPE|ASIA^> ^<netcdf-file^>
 echo
 echo For further information see the readme.txt
 exit /B 1

@@ -20,8 +20,8 @@ exit /B %ERRORLEVEL%
 @echo off
 echo Land Cover CCI Aggregation Tool
 echo call   : lccciaggregation.bat ^<map-netcdf-file^>
-echo example: lccciaggregation.bat /data/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc
-echo output : ^<aggregated-netcdf-file^>
+echo
+echo For further information see the readme.txt
 exit /B 1
 
 :JAVA_NO_INSTALLED

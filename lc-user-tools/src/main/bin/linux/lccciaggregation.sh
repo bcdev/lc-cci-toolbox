@@ -1,11 +1,11 @@
 #!/bin/bash
-# lccciaggregation.sh /data/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc
+# lccciaggregation.sh /data/lc-map-example/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc
 
 if [ -z "$1" ]; then
     echo "Land Cover CCI Aggregation Tool"
     echo "call   : lccciaggregation.sh <map-netcdf-file>"
-    echo "example: lccciaggregation.sh /data/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
-    echo "output : <aggregated-netcdf-file>"
+    echo ""
+    echo "For further information see the readme.txt"
     exit 1
 fi
 

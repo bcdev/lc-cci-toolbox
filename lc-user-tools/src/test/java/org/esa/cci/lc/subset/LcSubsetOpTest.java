@@ -46,10 +46,10 @@ public class LcSubsetOpTest {
         // preparation
         LcSubsetOp lcSubsetOp = createLcSubsetOp();
         lcSubsetOp.writeProduct = false;
-        lcSubsetOp.setEastBound(14.95f);
-        lcSubsetOp.setWestBound(-14.95f);
-        lcSubsetOp.setSouthBound(-14.95f);
-        lcSubsetOp.setNorthBound(14.95f);
+        lcSubsetOp.setEast(14.95f);
+        lcSubsetOp.setWest(-14.95f);
+        lcSubsetOp.setSouth(-14.95f);
+        lcSubsetOp.setNorth(14.95f);
         final Product sourceProduct = createSourceProduct();
         final int sw = sourceProduct.getSceneRasterWidth();
         final int sh = sourceProduct.getSceneRasterHeight();
@@ -78,8 +78,8 @@ public class LcSubsetOpTest {
     public void testWestEastBound() {
         LcSubsetOp aggrOp = createLcSubsetOp();
         setDefaultBounds(aggrOp);
-        aggrOp.setWestBound(10);
-        aggrOp.setEastBound(3);
+        aggrOp.setWest(10);
+        aggrOp.setEast(3);
         try {
             aggrOp.initialize();
         } catch (OperatorException oe) {
@@ -94,8 +94,8 @@ public class LcSubsetOpTest {
     public void testNorthSouthBound() {
         LcSubsetOp aggrOp = createLcSubsetOp();
         setDefaultBounds(aggrOp);
-        aggrOp.setNorthBound(30);
-        aggrOp.setSouthBound(70);
+        aggrOp.setNorth(30);
+        aggrOp.setSouth(70);
         try {
             aggrOp.initialize();
         } catch (OperatorException oe) {
@@ -110,10 +110,10 @@ public class LcSubsetOpTest {
     }
 
     private void setDefaultBounds(LcSubsetOp subsetOp) {
-        subsetOp.setEastBound(15);
-        subsetOp.setWestBound(-15);
-        subsetOp.setSouthBound(-15);
-        subsetOp.setNorthBound(15);
+        subsetOp.setEast(15);
+        subsetOp.setWest(-15);
+        subsetOp.setSouth(-15);
+        subsetOp.setNorth(15);
     }
 
     private Product createSourceProduct() throws Exception {
