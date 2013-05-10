@@ -1,6 +1,8 @@
-                               LC-CCI User Tools
-                               v0.5 - 13.05.2013
-                            ~~~~~~~~~~~~~~~~~~~~~~~
+LC-CCI User Tools
+~~~~~~~~~~~~~~~~~
+Version: ${pom.version}
+Release: ${buildDate}
+
 
 Summary
 ~~~~~~~

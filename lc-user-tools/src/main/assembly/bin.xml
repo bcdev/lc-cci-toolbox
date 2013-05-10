@@ -12,8 +12,8 @@
 
     <dependencySets>
         <dependencySet>
-            <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>modules</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
             <unpack>false</unpack>
             <excludes>
                 <exclude>org.esa.beam:beam-ui</exclude>
@@ -54,6 +54,15 @@
             <lineEnding>dos</lineEnding>
             <includes>
                 <include>*.bat</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/bin/common</directory>
+            <outputDirectory>.</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>readme.txt</include>
             </includes>
             <filtered>true</filtered>
         </fileSet>

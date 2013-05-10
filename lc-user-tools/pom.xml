@@ -41,6 +41,11 @@
 
     </dependencies>
 
+    <properties>
+        <maven.build.timestamp.format>yyyy/MM/dd</maven.build.timestamp.format>
+        <buildDate>${maven.build.timestamp}</buildDate>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
