@@ -19,9 +19,11 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 import org.esa.cci.lc.conversion.LcMapTiffReader;
+import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -45,16 +47,13 @@ public class LcAggregationOp extends Operator implements Output {
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
 
-    @Parameter(description = "The target file location.")
-    private File targetFile;
+    @Parameter(description = "The target directory.")
+    private File targetDir;
 
     @Parameter(description = "Defines the grid for the target product.", notNull = true,
                valueSet = {"GEOGRAPHIC_LAT_LON", "REGULAR_GAUSSIAN_GRID"})
     private PlanetaryGridName gridName;
-//    @Parameter(description = "Size of a pixel in X-direction in degree.", defaultValue = "0.1", unit = "°")
-//    private double pixelSizeX;
-//    @Parameter(description = "Size of a pixel in Y-direction in degree.", defaultValue = "0.1", unit = "°")
-//    private double pixelSizeY;
+
     @Parameter(defaultValue = "2160")
     private int numRows;
 
@@ -86,14 +85,15 @@ public class LcAggregationOp extends Operator implements Output {
     @Override
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
+        ensureTargetDir();
         validateInputSettings();
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         appendGridNameProperty(planetaryGrid);
         BinningConfig binningConfig = createBinningConfig(planetaryGrid);
+
         if (formatterConfig == null) {
             formatterConfig = createDefaultFormatterConfig();
         }
-
 
         appendPFTProperty(lcProperties);
 
@@ -151,9 +151,21 @@ public class LcAggregationOp extends Operator implements Output {
 
     FormatterConfig createDefaultFormatterConfig() {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFile(targetFile.getAbsolutePath());
+        formatterConfig.setOutputFile(getTargetFilePath());
         formatterConfig.setOutputType("Product");
         return formatterConfig;
+    }
+
+    private String getTargetFilePath() {
+        return new File(targetDir, getTargetFileName()).getPath();
+    }
+
+    private String getTargetFileName() {
+        final String insertion = gridName.equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
+                                 ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
+                                 : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
+        final String sourceFileName = sourceProduct.getFileLocation().getName();
+        return LcHelper.getTargetFileName(insertion, sourceFileName);
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
@@ -195,12 +207,21 @@ public class LcAggregationOp extends Operator implements Output {
         return planetaryGrid;
     }
 
-    File getTargetFile() {
-        return targetFile;
+    void ensureTargetDir() {
+        if (targetDir == null) {
+            final File fileLocation = sourceProduct.getFileLocation();
+            if (fileLocation != null) {
+                targetDir = fileLocation.getParentFile();
+            }
+        }
     }
 
-    void setTargetFile(File targetFile) {
-        this.targetFile = targetFile;
+    public File getTargetDir() {
+        return targetDir;
+    }
+
+    public void setTargetDir(File targetDir) {
+        this.targetDir = targetDir;
     }
 
     PlanetaryGridName getGridName() {
@@ -210,22 +231,6 @@ public class LcAggregationOp extends Operator implements Output {
     void setGridName(PlanetaryGridName gridName) {
         this.gridName = gridName;
     }
-
-//    double getPixelSizeX() {
-//        return pixelSizeX;
-//    }
-//
-//    void setPixelSizeX(double pixelSizeX) {
-//        this.pixelSizeX = pixelSizeX;
-//    }
-//
-//    double getPixelSizeY() {
-//        return pixelSizeY;
-//    }
-//
-//    void setPixelSizeY(double pixelSizeY) {
-//        this.pixelSizeY = pixelSizeY;
-//    }
 
     public boolean isOutputLCCSClasses() {
         return outputLCCSClasses;
@@ -260,8 +265,11 @@ public class LcAggregationOp extends Operator implements Output {
     }
 
     private void validateInputSettings() {
-        if (targetFile == null) {
-            throw new OperatorException("No target file specified");
+        if (targetDir == null) {
+            throw new OperatorException("The parameter 'targetDir' must be given.");
+        }
+        if (!targetDir.isDirectory()) {
+            throw new OperatorException("The target directory does not exist or is not a directory.");
         }
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
@@ -277,7 +285,7 @@ public class LcAggregationOp extends Operator implements Output {
             numRows *= 2;
         }
         for (String variableName : LcMapTiffReader.LC_VARIABLE_NAMES) {
-            if(!sourceProduct.containsBand(variableName)) {
+            if (!sourceProduct.containsBand(variableName)) {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
             }
         }
@@ -303,4 +311,8 @@ public class LcAggregationOp extends Operator implements Output {
         }
     }
 
+    // for test cases only
+    void setSourceProd(Product sourceProduct) {
+        this.sourceProduct = sourceProduct;
+    }
 }

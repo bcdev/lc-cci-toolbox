@@ -46,6 +46,7 @@ public class LcSubsetOpTest {
         // preparation
         LcSubsetOp lcSubsetOp = createLcSubsetOp();
         lcSubsetOp.writeProduct = false;
+        lcSubsetOp.setTargetDir(new File("."));
         lcSubsetOp.setEast(14.95f);
         lcSubsetOp.setWest(-14.95f);
         lcSubsetOp.setSouth(-14.95f);
