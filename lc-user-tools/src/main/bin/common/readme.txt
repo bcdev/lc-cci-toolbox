@@ -42,7 +42,7 @@ Use the scripts in the same manner.
         aggregation.sh -PgridName=<name> -PnumRows=<integer>
                        -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
                        -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
-                       -PtargetFile=<filePath> <sourceFilePath>
+                       -PtargetDir=<dirPath> <sourceFilePath>
 
         Parameter Description:
             -PgridName=<name>
@@ -68,15 +68,16 @@ Use the scripts in the same manner.
             -PuserPFTConversionTable=<filePath>
                 Specifies the path to a user defined PFT conversion table. If not given the default
                 LCCCI conversion table will be used. For a description of the file format see further down.
-            -PtargetDire=<dirPath>
+            -PtargetDir=<dirPath>
                 Specifies the directory where the target will be written. It is written as NetCDF-4 file.
                 If already a file with the same name/path exists, it will be overwritten.
+                (see "Output File Naming Convention" )
             <sourceFilePath>
                 Is the path to the source NetCDF-4 file.
 
         A real example might look like the following:
         aggregation.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumberOfMajorityClasses=3
-                       -PtargetFile="/data/LCCCI/output/aggregated.nc" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
+                       -PtargetFile="/data/LCCCI/output/" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,7 +95,6 @@ Use the scripts in the same manner.
             Specifies one of the available predefined regions.
             Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS,
                               ASIA, AFRICA, SOUTH_EAST_ASIA, AUSTRALIA_AND_NEW_ZEALAND, GREENLAND
-
         -Pnorth=<degree>
             Specifies north bound of the regional subset.
         -Peast=<degree>
@@ -103,6 +103,10 @@ Use the scripts in the same manner.
             Specifies south bound of the regional subset.
         -Pwest=<degree>
             Specifies west bound of the regional subset.
+        -PtargetDir=<dirPath>
+            Specifies the directory where the target will be written. It is written as NetCDF-4 file.
+            If already a file with the same name/path exists, it will be overwritten.
+            (see "Output File Naming Convention" )
         <sourceFilePath>
             The source file to create a regional subset from.
 
