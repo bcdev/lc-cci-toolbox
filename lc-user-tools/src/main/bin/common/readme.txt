@@ -6,8 +6,7 @@ Release: ${buildDate}
 
 Summary
 ~~~~~~~
-These set of tools (conversion tool, aggregation tool, subset tool) provides the possibilities
-to prepare data for model computation.
+This set of tools (conversion tool, aggregation tool, subset tool) prepares data for model computation.
 
 
 General Note
@@ -25,15 +24,15 @@ Installation
 
 Execution
 ~~~~~~~~~
-All start scripts are available in widows and unix versions.
+All start scripts are available in windows and unix versions.
 Use the scripts in the same manner.
 
     Conversion Tool Usage (converts Tiff to NetCDF-4 files)
     ~~~~~~~~~~~~~~~~~~~~~~~~
         convert.sh <pathToMapTifFile|pathToConditionTifFile>
 
-        In case of a LCCCI Map file the corresponding flag files (must be in the same directory as the Map file)
-        are automatically detected and added to the output NetCDF-4 file.
+        In case of a LCCCI Map file the corresponding flag files must be in the same directory as the Map file.
+        They are automatically detected and added to the output NetCDF-4 file.
         If a condition product shall be converted the AggMean tif file must be provided as source. All the associated
         variables (AggMean, Std, Status and NYearObs) are considered and integrated into the output NetCDF-4 file if
         they reside in the same folder as the source tif file.
@@ -57,19 +56,20 @@ Use the scripts in the same manner.
                 For a REGULAR_GAUSSIAN_GRID onyl the following values are valid:
                     32, 48, 80, 128, 160, 200, 256, 320, 400, 512, 640
             -PoutputLCCSClasses=<boolean>
-                Specifies if the LCCS classes shall be added to the output. This parameter can be
+                Specifies whether the LCCS classes shall be added to the output. This parameter can be
                 omitted. The default is true.
             -PnumMajorityClasses=<integer>
                 Specifies the number of majority classes in the output. This parameter can be
-                omitted, in this case the default (5) is used.
+                omitted, in this case the default (5) is used. A value of 1 will produce an output with
+                just the majority class.
             -PoutputPFTClasses=<boolean>
                 Specifies if a conversion to PFT classes shall be performed and the result added to the
                 output. This parameter can be omitted. The default is true.
             -PuserPFTConversionTable=<filePath>
                 Specifies the path to a user defined PFT conversion table. If not given the default
                 LCCCI conversion table will be used. For a description of the file format see further down.
-            -PtargetFile=<filePath>
-                Specifies the file where the target will be written. It is written as NetCDF-4 file.
+            -PtargetDire=<dirPath>
+                Specifies the directory where the target will be written. It is written as NetCDF-4 file.
                 If already a file with the same name/path exists, it will be overwritten.
             <sourceFilePath>
                 Is the path to the source NetCDF-4 file.
@@ -86,13 +86,15 @@ Use the scripts in the same manner.
 
     Subset Tool Usage
     ~~~~~~~~~~~~~~~~~~
-        subset.sh -PpredefinedRegion=<EUROPE|ASIA> <sourceFilePath>
+        subset.sh -PpredefinedRegion=<regionName> <sourceFilePath>
                 or
         subset.sh -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> <sourceFilePath>
 
-        -PpredefinedRegion=<EUROPE|ASIA>
+        -PpredefinedRegion=<regionName>
             Specifies one of the available predefined regions.
-            Valid Values are: EUROPE, ASIA
+            Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS,
+                              ASIA, AFRICA, SOUTH_EAST_ASIA, AUSTRALIA_AND_NEW_ZEALAND, GREENLAND
+
         -Pnorth=<degree>
             Specifies north bound of the regional subset.
         -Peast=<degree>
@@ -110,4 +112,50 @@ Use the scripts in the same manner.
         the directory of the source file.
 
 
+
+Output File Naming Convention
+"""""""""""""""""""""""""""""
+
+    Conversion Tool Output:
+    ~~~~~~~~~~~~~~~~~~~~~~~
+        Map Product:        ESACCI-LC-L4-LCCS-Map-{sRes}m-P{tRes}Y-{epoch}-v{versNr}.nc
+
+        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}-{endY}-{weekNr}-v{versNr}.nc
+
+
+
+    Split Points:
+    ~~~~~~~~~~~~~
+        Map Product:        ESACCI-LC-L4-LCCS-Map-{sRes}m-P{tRes}Y-{epoch}-v{versNr}.nc
+                                                                  ^
+                                                                  |--- Split Position
+
+        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}-{endY}-{weekNr}-v{versNr}.nc
+                                                                          ^
+                                                                          |--- Split Position
+
+    Examples Map Result:
+    ~~~~~~~~~~~~~~~~~~~~
+        Aggregation:
+            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-2006-v4.nc
+
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v4.nc
+
+        Subset:
+            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v4.nc
+
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-EUROPE-2006-v4.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-ASIA-2006-v4.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-USER_REGION-2006-v4.nc
+
+
+
+    Examples Condition Result:
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Subset:
+            Input  :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-2001-2009-0101-v4.nc
+
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-EUROPE-2001-2009-0101-v4.nc
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-ASIA-2001-2009-0101-v4.nc
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-USER_REGION-2001-2009-0101-v4.nc
 
