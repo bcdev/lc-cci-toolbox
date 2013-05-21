@@ -47,7 +47,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
     //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
     //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
     //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
-    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-AggMean-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
+    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-Agg(Mean|Occ)-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
     private List<Product> bandProducts;
 
     public LcConditionTiffReader(LcConditionTiffReaderPlugin readerPlugin) {
@@ -65,15 +65,16 @@ public class LcConditionTiffReader extends AbstractProductReader {
         final String lcConditionFilename = lcConditionFile.getName();
         final Matcher m = lcConditionFileMatcher(lcConditionFilename);
         final String condition = m.group(1);
-        final String spatialResolution = m.group(2);
-        final String temporalResolution = m.group(3);
-        final String startYear = m.group(4);
-        final String endYear = m.group(5);
-        final String weekNumber = m.group(6);
-        final String majorVersion = m.group(7);
-        final String minorVersion = m.group(8);
+        final String mainVariable = m.group(2).toLowerCase();
+        final String spatialResolution = m.group(3);
+        final String temporalResolution = m.group(4);
+        final String startYear = m.group(5);
+        final String endYear = m.group(6);
+        final String weekNumber = m.group(7);
+        final String majorVersion = m.group(8);
+        final String minorVersion = m.group(9);
         final String version = majorVersion + "." + minorVersion;
-        final String extension = m.group(9);
+        final String extension = m.group(10);
 
         final Product lcConditionProduct = readProduct(productDir, lcConditionFilename, plugIn);
 
@@ -93,8 +94,8 @@ public class LcConditionTiffReader extends AbstractProductReader {
         result.getMetadataRoot().setAttributeString("version", version);
 
         bandProducts.add(lcConditionProduct);
-        Band band = addBand(condition.toLowerCase() + "_mean", lcConditionProduct, result);
-        band.setDescription(condition + "_mean");
+        Band band = addBand(condition.toLowerCase() + "_" + mainVariable, lcConditionProduct, result);
+        band.setDescription(condition + " " + mainVariable);
         //ESACCI-LC-L4-Cond-NDVI-AggMean-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
@@ -104,7 +105,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (stdProduct != null) {
             if (result.getSceneRasterWidth() != stdProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != stdProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of std band does not match dimensions of mean band");
+                throw new IllegalArgumentException("dimensions of std band does not match dimensions of " + mainVariable + " band");
             }
             bandProducts.add(stdProduct);
             band = addBand(condition.toLowerCase() + "_std", stdProduct, result);
@@ -115,7 +116,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (statusProduct != null) {
             if (result.getSceneRasterWidth() != statusProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != statusProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of status band does not match dimensions of mean band");
+                throw new IllegalArgumentException("dimensions of status band does not match dimensions of \" + mainVariable + \" band");
             }
             bandProducts.add(statusProduct);
             band = addBand(condition.toLowerCase() + "_status", statusProduct, result);
@@ -126,7 +127,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         if (nYearObsProduct != null) {
             if (result.getSceneRasterWidth() != nYearObsProduct.getSceneRasterWidth() ||
                 result.getSceneRasterHeight() != nYearObsProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of NYearObs band does not match dimensions of mean band");
+                throw new IllegalArgumentException("dimensions of NYearObs band does not match dimensions of \" + mainVariable + \" band");
             }
             bandProducts.add(nYearObsProduct);
             band = addBand(condition.toLowerCase() + "_nYearObs", nYearObsProduct, result);

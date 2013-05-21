@@ -171,8 +171,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
                     if ("ndvi_std".equals(band.getName()) ||
-                        "ndvi_nYearObs".equals(band.getName()) ||
-                        "ndvi_status".equals(band.getName())) {
+                            "ndvi_nYearObs".equals(band.getName()) ||
+                            "ba_nYearObs".equals(band.getName()) ||
+                            "snow_nYearObs".equals(band.getName()) ||
+                            "ndvi_status".equals(band.getName())) {
                         if (ancillaryVariables.length() > 0) {
                             ancillaryVariables.append(' ');
                         }
@@ -188,6 +190,14 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         addNdviNYearObsVariable(ncFile, band, tileSize);
                     } else if ("ndvi_status".equals(band.getName())) {
                         addNdviStatusVariable(ncFile, band, tileSize);
+                    } else if ("ba_occ".equals(band.getName())) {
+                        addBaOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
+                    } else if ("ba_nYearObs".equals(band.getName())) {
+                        addBaNYearObsVariable(ncFile, band, tileSize);
+                    } else if ("snow_occ".equals(band.getName())) {
+                        addSnowOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
+                    } else if ("snow_nYearObs".equals(band.getName())) {
+                        addSnowNYearObsVariable(ncFile, band, tileSize);
                     }
                 }
             }
@@ -201,7 +211,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", -100);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 255);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 255);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 255);
+                }
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
                 }
@@ -216,7 +230,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.BYTE) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                }
             }
 
             private void addNdviNYearObsVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -227,7 +245,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index number_of_observations");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 30);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.BYTE) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                }
             }
 
             private void addNdviStatusVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -246,7 +268,73 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", CONDITION_FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 5);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.BYTE) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                }
+            }
+
+            private void addBaOccVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 100);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
+            }
+
+            private void addBaNYearObsVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 30);
+                if (ncDataType == DataType.BYTE) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                }
+            }
+
+            private void addSnowOccVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 100);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
+            }
+
+            private void addSnowNYearObsVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 30);
+                if (ncDataType == DataType.BYTE) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                }
             }
         };
 

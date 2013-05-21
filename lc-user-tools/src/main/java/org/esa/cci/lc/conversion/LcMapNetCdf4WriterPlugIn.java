@@ -201,19 +201,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 final byte[] LCCS_CLASS_FLAG_VALUES = new byte[]{
-                        0,
-                        10,
-                        20,
-                        30,
-                        40,
-                        50,
-                        60,
-                        70,
-                        80,
-                        90,
-                        100,
-                        110,
-                        120,
+                        0, 10, 11,
+                        12, 20, 30,
+                        40, 50, 60,
+                        61, 62, 70,
+                        71, 72, 80,
+                        81, 82, 90,
+                        100, 110, 120,
                         (byte) 130,
                         (byte) 140,
                         (byte) 150,
@@ -227,7 +221,17 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         (byte) 230,
                         (byte) 240
                 };
-                final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed cropland_irrigated mosaic_cropland mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed mosaic_tree_and_shrub mosaic_herbaceous shrubland grassland sparse_vegetation tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded urban bare_areas water snow_and_ice";
+                final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed herbaceous_cover " +
+                        "tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
+                        "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
+                        "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
+                        "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
+                        "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
+                        "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
+                        "grassland lichens _and_mosses sparse_vegetation " +
+                        "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
+                        "urban bare_areas water " +
+                        "snow_and_ice";
                 final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
                 for (int i = 0; i < LCCS_CLASS_FLAG_VALUES.length; ++i) {
                     valids.set(i, LCCS_CLASS_FLAG_VALUES[i]);
@@ -243,7 +247,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
                 }
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
             }
 
             private void addProcessedFlagVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -262,7 +265,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
             }
 
             private void addCurrentPixelStateVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -281,7 +288,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 5);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
             }
 
             private void addObservationCountVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -292,7 +303,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "land_cover_lccs number_of_observations");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 32767);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
             }
 
             private void addAlgorithmicConfidenceLevelVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -304,7 +319,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
             }
 
             private void addOverallConfidenceLevelVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
@@ -323,7 +342,11 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_meanings", FLAG_MEANINGS);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
             }
         };
     }
