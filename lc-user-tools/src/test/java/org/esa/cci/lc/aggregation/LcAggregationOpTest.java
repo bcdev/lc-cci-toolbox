@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
@@ -23,6 +24,7 @@ import org.junit.*;
 import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 
 public class LcAggregationOpTest {
@@ -103,7 +105,6 @@ public class LcAggregationOpTest {
     @Test
     public void testDefaultValues() {
         LcAggregationOp aggrOp = (LcAggregationOp) aggregationSpi.createOperator();
-        aggrOp.setTargetFile(new File("dummy"));
         assertThat(aggrOp.getGridName(), isNull());
 //        assertThat(aggrOp.getPixelSizeX(), is(0.1));
 //        assertThat(aggrOp.getPixelSizeY(), is(0.1));
@@ -112,8 +113,14 @@ public class LcAggregationOpTest {
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
         assertThat(aggrOp.getNumRows(), is(2160));
 
+        final Product sourceProduct = new Product("dummy", "t", 20, 10);
+        sourceProduct.setFileLocation(new File(".", "a-b-c-d-e-f-g-h.nc"));
+        aggrOp.setSourceProd(sourceProduct);
+        aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
+        aggrOp.ensureTargetDir();
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
+        assertThat(formatterConfig.getOutputFile(), is(".\\a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
     }
 
     private IsNull isNull() {
@@ -217,7 +224,7 @@ public class LcAggregationOpTest {
 
     private LcAggregationOp createAggrOp() {
         LcAggregationOp aggregationOp = (LcAggregationOp) aggregationSpi.createOperator();
-        aggregationOp.setTargetFile(new File("test-target.nc"));
+        aggregationOp.setTargetDir(new File("."));
         return aggregationOp;
     }
 }

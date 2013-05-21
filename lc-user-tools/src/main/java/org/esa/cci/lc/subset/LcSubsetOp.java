@@ -13,6 +13,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
+import org.esa.cci.lc.util.LcHelper;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -29,6 +30,9 @@ public class LcSubsetOp extends Operator implements Output {
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
 
+    @Parameter(description = "The target directory.")
+    private File targetDir;
+
     @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
     private Float west;
     @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
@@ -38,8 +42,14 @@ public class LcSubsetOp extends Operator implements Output {
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
     private Float south;
 
-    @Parameter(description = "A predefined set of north, east, south and west bounds.", valueSet = {"EUROPE", "ASIA"})
+    @Parameter(description = "A predefined set of north, east, south and west bounds.",
+               valueSet = {
+                           "NORTH_AMERICA", "CENTRAL_AMERICA", "SOUTH_AMERICA",
+                           "WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS", "ASIA", "AFRICA",
+                           "SOUTH_EAST_ASIA", "AUSTRALIA_AND_NEW_ZEALAND", "GREENLAND"
+               })
     private PredefinedRegion predefinedRegion;
+
 
     // for test cases
     Product subsetProduct;
@@ -51,9 +61,14 @@ public class LcSubsetOp extends Operator implements Output {
             throw new OperatorException("Either predefined region or geographical bounds must be given.");
         }
         final File fileLocation = sourceProduct.getFileLocation();
-        String sourceDir = fileLocation.getParent();
-        if (sourceDir == null) {
-            throw new OperatorException("Can not retrieve parent directory from source product");
+        if (targetDir == null) {
+            targetDir = fileLocation.getParentFile();
+            if (targetDir == null) {
+                throw new OperatorException("Can not retrieve parent directory from source product");
+            }
+        }
+        if (!targetDir.isDirectory()) {
+            throw new OperatorException("The target directory does not exist or is not a directory.");
         }
         subsetProduct = createProductSubset();
         final String formatName;
@@ -64,7 +79,7 @@ public class LcSubsetOp extends Operator implements Output {
             formatName = "NetCDF4-LC-Map";
         }
 
-        final File targetFile = new File(sourceDir, getTargetFileName(fileName));
+        final File targetFile = new File(targetDir, getTargetFileName(fileName));
         if (writeProduct) {
             GPF.writeProduct(subsetProduct, targetFile, formatName, false, ProgressMonitor.NULL);
         }
@@ -72,14 +87,13 @@ public class LcSubsetOp extends Operator implements Output {
     }
 
     private String getTargetFileName(String fileName) {
-        final int splitPos = fileName.toLowerCase().lastIndexOf("v");
-        final String firstPart = fileName.substring(0, splitPos);
-        final String lastPart = fileName.substring(splitPos);
+        final String insertion;
         if (predefinedRegionIsSelected()) {
-            return firstPart + predefinedRegion + "-" + lastPart;
+            insertion = predefinedRegion.toString();
         } else {
-            return firstPart + "USER_REGION-" + fileName;
+            insertion = "USER_REGION";
         }
+        return LcHelper.getTargetFileName(insertion, fileName);
     }
 
     private Product createProductSubset() {
@@ -112,7 +126,6 @@ public class LcSubsetOp extends Operator implements Output {
         this.west = west;
     }
 
-
     void setNorth(float north) {
         this.north = north;
     }
@@ -123,6 +136,10 @@ public class LcSubsetOp extends Operator implements Output {
 
     void setSouth(float south) {
         this.south = south;
+    }
+
+    void setTargetDir(File targetDir) {
+        this.targetDir = targetDir;
     }
 
     private boolean predefinedRegionIsSelected() {

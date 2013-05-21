@@ -21,7 +21,7 @@ exit /B %ERRORLEVEL%
 echo Land Cover CCI NetCDF 4 Subsetting Tool
 echo call: subset.bat -Pnorth=^<degree^> -Peast=^<degree^> -Psouth=^<degree^> -Pwest=^<degree^> ^<netcdf-file^>
 echo or
-echo call: subset.bat -PpredefinedRegion=^<EUROPE|ASIA^> ^<netcdf-file^>
+echo call: subset.bat -PpredefinedRegion=^<EUROPE^|ASIA^> ^<netcdf-file^>
 echo
 echo For further information see the readme.txt
 exit /B 1
