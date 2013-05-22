@@ -43,7 +43,7 @@ public class LcConversionOp extends Operator implements Output {
         File sourceFile = sourceProduct.getFileLocation();
 
         String outputFormat;
-        if (sourceFile.getName().startsWith("ESACCI_LC_Map")) {
+        if (sourceFile.getName().startsWith("ESACCI-LC-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
             lcOutputFilename = MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
