@@ -73,10 +73,10 @@ public class LcSubsetOp extends Operator implements Output {
         subsetProduct = createProductSubset();
         final String formatName;
         final String fileName = fileLocation.getName();
-        if (fileName.startsWith("ESACCI-LC-L4-Cond-")) {
-            formatName = "NetCDF4-LC-Condition";
-        } else {
+        if (fileName.startsWith("ESACCI-LC-L4-LCCS-Map-")) {
             formatName = "NetCDF4-LC-Map";
+        } else {
+            formatName = "NetCDF4-LC-Condition";
         }
 
         final File targetFile = new File(targetDir, getTargetFileName(fileName));
