@@ -1,4 +1,4 @@
-LC-CCI User Tools
+CCI-LC User Tools
 ~~~~~~~~~~~~~~~~~
 Version: ${pom.version}
 Release: ${buildDate}
@@ -87,9 +87,9 @@ Use the scripts in the same manner.
 
     Subset Tool Usage
     ~~~~~~~~~~~~~~~~~~
-        subset.sh -PpredefinedRegion=<regionName> <sourceFilePath>
+        subset.sh -PpredefinedRegion=<regionName> -PtargetDir=<dirPath> <sourceFilePath>
                 or
-        subset.sh -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> <sourceFilePath>
+        subset.sh -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> -PtargetDir=<dirPath> <sourceFilePath>
 
         -PpredefinedRegion=<regionName>
             Specifies one of the available predefined regions.

@@ -22,6 +22,7 @@ import org.esa.cci.lc.conversion.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -284,7 +285,8 @@ public class LcAggregationOp extends Operator implements Output {
         if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
             numRows *= 2;
         }
-        for (String variableName : LcMapTiffReader.LC_VARIABLE_NAMES) {
+        final String[] lcVariableNames = Arrays.copyOf(LcMapTiffReader.LC_VARIABLE_NAMES, 5);
+        for (String variableName : lcVariableNames) {
             if (!sourceProduct.containsBand(variableName)) {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
             }
