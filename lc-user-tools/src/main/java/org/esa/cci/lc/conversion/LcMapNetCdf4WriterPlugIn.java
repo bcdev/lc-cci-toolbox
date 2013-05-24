@@ -228,7 +228,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
                         "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
                         "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
-                        "grassland lichens _and_mosses sparse_vegetation " +
+                        "grassland lichens_and_mosses sparse_vegetation " +
                         "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
                         "urban bare_areas water " +
                         "snow_and_ice";
