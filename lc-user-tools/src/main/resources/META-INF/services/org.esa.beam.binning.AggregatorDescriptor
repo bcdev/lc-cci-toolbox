@@ -1,3 +1,4 @@
 org.esa.cci.lc.aggregation.LcMapAggregatorDescriptor
-org.esa.cci.lc.aggregation.LcBinIndexAggregatorDescriptor
+org.esa.cci.lc.aggregation.LcCondAggregatorDescriptor
 org.esa.cci.lc.aggregation.LcAccuracyAggregatorDescriptor
+org.esa.cci.lc.aggregation.LcBinIndexAggregatorDescriptor

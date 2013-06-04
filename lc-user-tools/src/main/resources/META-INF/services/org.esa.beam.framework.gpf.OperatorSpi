@@ -1,3 +1,4 @@
 org.esa.cci.lc.aggregation.LcMapAggregationOp$Spi
+org.esa.cci.lc.aggregation.LcCondAggregationOp$Spi
 org.esa.cci.lc.conversion.LcConversionOp$Spi
 org.esa.cci.lc.subset.LcSubsetOp$Spi
