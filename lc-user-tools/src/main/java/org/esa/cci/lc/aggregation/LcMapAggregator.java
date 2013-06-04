@@ -14,10 +14,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
+ * This class implements the aggregation of LC-CCI Map products. The aggregation includes the computation
+ * of the fractional area covered by the different LCCS classes and the conversion of the areas into PFTs.
+ *
  * @author Marco Peters
  */
 @SuppressWarnings("FieldCanBeLocal")
-class LcAggregator extends AbstractAggregator {
+class LcMapAggregator extends AbstractAggregator {
 
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private FractionalAreaCalculator areaCalculator;
@@ -25,14 +28,14 @@ class LcAggregator extends AbstractAggregator {
     private int numMajorityClasses;
     private PftLut pftLut;
 
-    public LcAggregator(boolean outputLCCSClasses, int numMajorityClasses,
-                        FractionalAreaCalculator calculator, PftLut pftLut) {
+    public LcMapAggregator(boolean outputLCCSClasses, int numMajorityClasses,
+                           FractionalAreaCalculator calculator, PftLut pftLut) {
         this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, calculator, pftLut);
     }
 
-    private LcAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
-                         FractionalAreaCalculator calculator, PftLut pftLut) {
-        super(LcAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
+    private LcMapAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
+                            FractionalAreaCalculator calculator, PftLut pftLut) {
+        super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
               createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames));
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;

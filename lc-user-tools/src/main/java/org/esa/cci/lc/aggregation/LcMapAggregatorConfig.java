@@ -8,7 +8,7 @@ import java.io.File;
 /**
  * @author Marco Peters
  */
-class LcAggregatorConfig extends AggregatorConfig {
+class LcMapAggregatorConfig extends AggregatorConfig {
 
     @Parameter
     private String varName;
@@ -26,14 +26,14 @@ class LcAggregatorConfig extends AggregatorConfig {
     private FractionalAreaCalculator areaCalculator;
 
 
-    LcAggregatorConfig() {
-        super(LcAggregatorDescriptor.NAME);
+    LcMapAggregatorConfig() {
+        super(LcMapAggregatorDescriptor.NAME);
     }
 
-    LcAggregatorConfig(String varName, boolean outputLCCSClasses, int numMajorityClasses,
-                       boolean outputPFTClasses, File userPFTConversionTable,
-                       FractionalAreaCalculator areaCalculator) {
-        super(LcAggregatorDescriptor.NAME);
+    LcMapAggregatorConfig(String varName, boolean outputLCCSClasses, int numMajorityClasses,
+                          boolean outputPFTClasses, File userPFTConversionTable,
+                          FractionalAreaCalculator areaCalculator) {
+        super(LcMapAggregatorDescriptor.NAME);
         this.varName = varName;
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;

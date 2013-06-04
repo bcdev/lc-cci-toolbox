@@ -15,9 +15,9 @@ import java.io.InputStreamReader;
 /**
  * @author Marco Peters
  */
-public class LcAggregatorDescriptor implements AggregatorDescriptor {
+public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
 
-    public static final String NAME = "LC_AGGR";
+    public static final String NAME = "LC_MAP_AGGR";
 
     @Override
     public String getName() {
@@ -26,7 +26,7 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
 
     @Override
     public AggregatorConfig createConfig() {
-        return new LcAggregatorConfig();
+        return new LcMapAggregatorConfig();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
                 if (userPFTConversionTable != null) {
                     resourceAsStream = new FileInputStream(userPFTConversionTable);
                 } else {
-                    resourceAsStream = LcAggregator.class.getResourceAsStream("Default_LCCS2PFT_LUT.csv");
+                    resourceAsStream = LcMapAggregator.class.getResourceAsStream("Default_LCCS2PFT_LUT.csv");
                 }
                 InputStreamReader reader = new InputStreamReader(resourceAsStream);
                 pftLut = PftLut.load(reader);
@@ -54,6 +54,6 @@ public class LcAggregatorDescriptor implements AggregatorDescriptor {
                 throw new IllegalStateException(e);
             }
         }
-        return new LcAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut);
+        return new LcMapAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut);
     }
 }

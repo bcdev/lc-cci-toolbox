@@ -14,12 +14,12 @@ import java.util.Arrays;
 import static org.esa.cci.lc.aggregation.AggregatorTestUtils.*;
 import static org.junit.Assert.*;
 
-public class LcAggregatorTest {
+public class LcMapAggregatorTest {
 
     @Test
     public void testFeatureNames() throws Exception {
         int numMajorityClasses = 3;
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
+        LcMapAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         String[] outputFeatureNames = aggregator.getOutputFeatureNames();
@@ -41,7 +41,7 @@ public class LcAggregatorTest {
     @Test
     public void testInitSpatial() {
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, 2, false, null);
+        LcMapAggregator aggregator = createAggregator(true, 2, false, null);
 
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         float[] floats = new float[spatialFeatureNames.length];
@@ -57,7 +57,7 @@ public class LcAggregatorTest {
     public void testAggregation_WithoutPFTs() {
         int numMajorityClasses = 2;
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
+        LcMapAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -109,7 +109,7 @@ public class LcAggregatorTest {
     public void testAggregation_WithPFTs() {
         int numMajorityClasses = 0;
         BinContext ctx = createCtx();
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, true, null);
+        LcMapAggregator aggregator = createAggregator(true, numMajorityClasses, true, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -151,10 +151,10 @@ public class LcAggregatorTest {
     public void testAggregation_WithUserPFTs() throws URISyntaxException {
         int numMajorityClasses = 0;
         BinContext ctx = createCtx();
-        URL resource = LcAggregatorTest.class.getResource("Test_User_LCCS_2PFT.csv");
+        URL resource = LcMapAggregatorTest.class.getResource("Test_User_LCCS_2PFT.csv");
         File lccs2PFTFile = new File(resource.toURI());
 
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, true, lccs2PFTFile);
+        LcMapAggregator aggregator = createAggregator(true, numMajorityClasses, true, lccs2PFTFile);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -196,7 +196,7 @@ public class LcAggregatorTest {
     public void testMajorityClassesWhenHavingLessClassesObserved() {
         BinContext ctx = createCtx();
         int numMajorityClasses = 4;
-        LcAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
+        LcMapAggregator aggregator = createAggregator(true, numMajorityClasses, false, null);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
@@ -220,19 +220,19 @@ public class LcAggregatorTest {
         assertEquals(Float.NaN, outputVector.get(outputVector.size() - 1), 0.0f); // majority_4
     }
 
-    private LcAggregator createAggregator(boolean outputLCCSClasses, int numMajorityClasses, boolean outputPFTClasses,
-                                          File lccs2PFTFile) {
+    private LcMapAggregator createAggregator(boolean outputLCCSClasses, int numMajorityClasses, boolean outputPFTClasses,
+                                             File lccs2PFTFile) {
         VariableContextImpl varCtx = new VariableContextImpl();
-        LcAggregatorDescriptor lcAggregatorDescriptor = new LcAggregatorDescriptor();
+        LcMapAggregatorDescriptor lcMapAggregatorDescriptor = new LcMapAggregatorDescriptor();
 
         FractionalAreaCalculator areaCalculator = Mockito.mock(FractionalAreaCalculator.class);
         Mockito.when(
                 areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
                 1.0);
 
-        LcAggregatorConfig config = new LcAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses,
-                                                           outputPFTClasses, lccs2PFTFile, areaCalculator);
-        return (LcAggregator) lcAggregatorDescriptor.createAggregator(varCtx, config);
+        LcMapAggregatorConfig config = new LcMapAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses,
+                                                                 outputPFTClasses, lccs2PFTFile, areaCalculator);
+        return (LcMapAggregator) lcMapAggregatorDescriptor.createAggregator(varCtx, config);
     }
 
 }

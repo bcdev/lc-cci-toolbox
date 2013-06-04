@@ -27,14 +27,14 @@ import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
 
-public class LcAggregationOpTest {
+public class LcMapAggregationOpTest {
 
-    private static LcAggregationOp.Spi aggregationSpi;
+    private static LcMapAggregationOp.Spi aggregationSpi;
     private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
-        aggregationSpi = new LcAggregationOp.Spi();
+        aggregationSpi = new LcMapAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.addOperatorSpi(aggregationSpi);
         beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
@@ -51,7 +51,7 @@ public class LcAggregationOpTest {
     @Test()
     public void testTargetProductCreation_Binning() throws Exception {
         // preparation
-        LcAggregationOp aggregationOp = createAggrOp();
+        LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         int numMajorityClasses = 2;
@@ -78,7 +78,7 @@ public class LcAggregationOpTest {
     @Test()
     public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
         // preparation
-        LcAggregationOp aggregationOp = createAggrOp();
+        LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         aggregationOp.setSourceProduct(createSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
@@ -104,7 +104,7 @@ public class LcAggregationOpTest {
 
     @Test
     public void testDefaultValues() {
-        LcAggregationOp aggrOp = (LcAggregationOp) aggregationSpi.createOperator();
+        LcMapAggregationOp aggrOp = (LcMapAggregationOp) aggregationSpi.createOperator();
         assertThat(aggrOp.getGridName(), isNull());
 //        assertThat(aggrOp.getPixelSizeX(), is(0.1));
 //        assertThat(aggrOp.getPixelSizeY(), is(0.1));
@@ -115,7 +115,7 @@ public class LcAggregationOpTest {
 
         final Product sourceProduct = new Product("dummy", "t", 20, 10);
         sourceProduct.setFileLocation(new File(".", "a-b-c-d-e-f-g-h.nc"));
-        aggrOp.setSourceProd(sourceProduct);
+        aggrOp.setSourceProduct(sourceProduct);
         aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         aggrOp.ensureTargetDir();
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
@@ -129,7 +129,7 @@ public class LcAggregationOpTest {
 
     @Test
     public void testNumRows_LessThanTwo() {
-        LcAggregationOp aggrOp = createAggrOp();
+        LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(1);
         try {
             aggrOp.initialize();
@@ -141,7 +141,7 @@ public class LcAggregationOpTest {
 
     @Test
     public void testNumRows_OddValue() {
-        LcAggregationOp aggrOp = createAggrOp();
+        LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(23);
         try {
             aggrOp.initialize();
@@ -153,7 +153,7 @@ public class LcAggregationOpTest {
 
     @Test
     public void testNoOutputSelected() {
-        LcAggregationOp aggrOp = createAggrOp();
+        LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setOutputLCCSClasses(false);
         aggrOp.setOutputPFTClasses(false);
         aggrOp.setNumMajorityClasses(0);
@@ -172,14 +172,14 @@ public class LcAggregationOpTest {
         final boolean O = false;
         final boolean I = true;
 
-        assertThat(LcAggregationOp.onlyOneIsTrue(O, O, O), is(false));
-        assertThat(LcAggregationOp.onlyOneIsTrue(O, O, I), is(true));
-        assertThat(LcAggregationOp.onlyOneIsTrue(O, I, O), is(true));
-        assertThat(LcAggregationOp.onlyOneIsTrue(O, I, I), is(false));
-        assertThat(LcAggregationOp.onlyOneIsTrue(I, O, O), is(true));
-        assertThat(LcAggregationOp.onlyOneIsTrue(I, O, I), is(false));
-        assertThat(LcAggregationOp.onlyOneIsTrue(I, I, O), is(false));
-        assertThat(LcAggregationOp.onlyOneIsTrue(I, I, I), is(false));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, O, O), is(false));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, O, I), is(true));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, I, O), is(true));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, I, I), is(false));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, O, O), is(true));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, O, I), is(false));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, I, O), is(false));
+        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, I, I), is(false));
     }
 
     private FormatterConfig createFormatterConfig() throws IOException {
@@ -222,8 +222,8 @@ public class LcAggregationOpTest {
         return product;
     }
 
-    private LcAggregationOp createAggrOp() {
-        LcAggregationOp aggregationOp = (LcAggregationOp) aggregationSpi.createOperator();
+    private LcMapAggregationOp createAggrOp() {
+        LcMapAggregationOp aggregationOp = (LcMapAggregationOp) aggregationSpi.createOperator();
         aggregationOp.setTargetDir(new File("."));
         return aggregationOp;
     }

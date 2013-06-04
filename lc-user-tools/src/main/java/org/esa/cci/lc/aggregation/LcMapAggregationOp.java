@@ -10,12 +10,10 @@ import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 import org.esa.cci.lc.conversion.LcMapTiffReader;
@@ -35,28 +33,15 @@ import java.util.Locale;
  * @author Marco Peters
  */
 @OperatorMetadata(
-            alias = "LCCCI.Aggregate",
-            version = "0.5",
-            authors = "Marco Peters",
-            copyright = "(c) 2013 by Brockmann Consult",
-            description = "Allows to aggregate LC map and condition products.")
-public class LcAggregationOp extends Operator implements Output {
+        alias = "LCCCI.Aggregate.Map",
+        version = "0.6",
+        authors = "Marco Peters",
+        copyright = "(c) 2013 by Brockmann Consult",
+        description = "Allows to aggregate LC map products.")
+public class LcMapAggregationOp extends AbstractLcAggregationOp implements Output {
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
     private static final String CLASS_BAND_NAME = "lccs_class";
-
-    @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
-    private Product sourceProduct;
-
-    @Parameter(description = "The target directory.")
-    private File targetDir;
-
-    @Parameter(description = "Defines the grid for the target product.", notNull = true,
-               valueSet = {"GEOGRAPHIC_LAT_LON", "REGULAR_GAUSSIAN_GRID"})
-    private PlanetaryGridName gridName;
-
-    @Parameter(defaultValue = "2160")
-    private int numRows;
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -79,7 +64,7 @@ public class LcAggregationOp extends Operator implements Output {
     boolean outputTargetProduct;
     private final HashMap<String, String> lcProperties;
 
-    public LcAggregationOp() {
+    public LcMapAggregationOp() {
         lcProperties = new HashMap<String, String>();
     }
 
@@ -104,7 +89,7 @@ public class LcAggregationOp extends Operator implements Output {
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        binningOp.setSourceProduct(sourceProduct);
+        binningOp.setSourceProduct(getSourceProduct());
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties));
@@ -129,7 +114,8 @@ public class LcAggregationOp extends Operator implements Output {
     private void appendPFTProperty(HashMap<String, String> lcProperties) {
         if (outputPFTClasses) {
             if (userPFTConversionTable != null) {
-                lcProperties.put("pft_table", String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName())); // TODO
+                lcProperties.put("pft_table",
+                                 String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName())); // TODO
             } else {
                 lcProperties.put("pft_table", "LCCCI conform PFT conversion table used.");
             }
@@ -140,6 +126,7 @@ public class LcAggregationOp extends Operator implements Output {
 
     private void appendGridNameProperty(PlanetaryGrid planetaryGrid) {
         final String gridName;
+        int numRows = getNumRows();
         if (planetaryGrid instanceof RegularGaussianGrid) {
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
             lcProperties.put("grid_name", gridName);
@@ -158,26 +145,28 @@ public class LcAggregationOp extends Operator implements Output {
     }
 
     private String getTargetFilePath() {
-        return new File(targetDir, getTargetFileName()).getPath();
+        return new File(getTargetDir(), getTargetFileName()).getPath();
     }
 
     private String getTargetFileName() {
-        final String insertion = gridName.equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
+        int numRows = getNumRows();
+        final String insertion = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
                                  ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
                                  : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
-        final String sourceFileName = sourceProduct.getFileLocation().getName();
+        final String sourceFileName = getSourceProduct().getFileLocation().getName();
         return LcHelper.getTargetFileName(insertion, sourceFileName);
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
+        Product sourceProduct = getSourceProduct();
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
-        LcAggregatorConfig lcAggregatorConfig = new LcAggregatorConfig(CLASS_BAND_NAME,
-                                                                       outputLCCSClasses, numMajorityClasses,
-                                                                       outputPFTClasses, userPFTConversionTable,
-                                                                       areaCalculator);
+        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(CLASS_BAND_NAME,
+                                                                                outputLCCSClasses, numMajorityClasses,
+                                                                                outputPFTClasses, userPFTConversionTable,
+                                                                                areaCalculator);
         final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
 
         BinningConfig binningConfig = new BinningConfig();
@@ -186,9 +175,9 @@ public class LcAggregationOp extends Operator implements Output {
         int clearWater = 2;
         String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater);
         binningConfig.setMaskExpr(validExpr);
-        binningConfig.setNumRows(numRows);
+        binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(lcAggregatorConfig, lcAccuracyAggregatorConfig);
+        binningConfig.setAggregatorConfigs(lcMapAggregatorConfig, lcAccuracyAggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
@@ -196,6 +185,8 @@ public class LcAggregationOp extends Operator implements Output {
 
     private PlanetaryGrid createPlanetaryGrid() {
         PlanetaryGrid planetaryGrid;
+        PlanetaryGridName gridName = getGridName();
+        int numRows = getNumRows();
         if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             planetaryGrid = new PlateCarreeGrid(numRows);
         } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
@@ -206,31 +197,6 @@ public class LcAggregationOp extends Operator implements Output {
             planetaryGrid = new SEAGrid(numRows);
         }
         return planetaryGrid;
-    }
-
-    void ensureTargetDir() {
-        if (targetDir == null) {
-            final File fileLocation = sourceProduct.getFileLocation();
-            if (fileLocation != null) {
-                targetDir = fileLocation.getParentFile();
-            }
-        }
-    }
-
-    public File getTargetDir() {
-        return targetDir;
-    }
-
-    public void setTargetDir(File targetDir) {
-        this.targetDir = targetDir;
-    }
-
-    PlanetaryGridName getGridName() {
-        return gridName;
-    }
-
-    void setGridName(PlanetaryGridName gridName) {
-        this.gridName = gridName;
     }
 
     public boolean isOutputLCCSClasses() {
@@ -257,21 +223,8 @@ public class LcAggregationOp extends Operator implements Output {
         this.outputPFTClasses = outputPFTClasses;
     }
 
-    int getNumRows() {
-        return numRows;
-    }
-
-    void setNumRows(int numRows) {
-        this.numRows = numRows;
-    }
-
-    private void validateInputSettings() {
-        if (targetDir == null) {
-            throw new OperatorException("The parameter 'targetDir' must be given.");
-        }
-        if (!targetDir.isDirectory()) {
-            throw new OperatorException("The target directory does not exist or is not a directory.");
-        }
+    protected void validateInputSettings() {
+        super.validateInputSettings();
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
         }
@@ -279,15 +232,9 @@ public class LcAggregationOp extends Operator implements Output {
         if (numMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
         }
-        if (numRows < 2 || numRows % 2 != 0) {
-            throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
-        }
-        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            numRows *= 2;
-        }
         final String[] lcVariableNames = Arrays.copyOf(LcMapTiffReader.LC_VARIABLE_NAMES, 5);
         for (String variableName : lcVariableNames) {
-            if (!sourceProduct.containsBand(variableName)) {
+            if (!getSourceProduct().containsBand(variableName)) {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
             }
         }
@@ -309,12 +256,8 @@ public class LcAggregationOp extends Operator implements Output {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(LcAggregationOp.class);
+            super(LcMapAggregationOp.class);
         }
     }
 
-    // for test cases only
-    void setSourceProd(Product sourceProduct) {
-        this.sourceProduct = sourceProduct;
-    }
 }

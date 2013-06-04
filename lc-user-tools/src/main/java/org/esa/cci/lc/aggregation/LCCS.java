@@ -25,7 +25,7 @@ class LCCS {
 
     public static LCCS getInstance() {
         try {
-            return LCCS.load(new InputStreamReader(LcAggregator.class.getResourceAsStream(CLASS_DEFINTIONS_FILE)));
+            return LCCS.load(new InputStreamReader(LcMapAggregator.class.getResourceAsStream(CLASS_DEFINTIONS_FILE)));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
