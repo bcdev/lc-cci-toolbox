@@ -33,11 +33,11 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
 
         PropertySet propertySet = aggregatorConfig.asPropertySet();
-        boolean outputLCCSClasses = (Boolean) propertySet.getValue("outputLCCSClasses");
-        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
-        File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
-        FractionalAreaCalculator areaCalculator = (FractionalAreaCalculator) propertySet.getValue("areaCalculator");
+        boolean outputLCCSClasses = propertySet.getValue("outputLCCSClasses");
+        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
+        boolean outputPFTClasses = propertySet.getValue("outputPFTClasses");
+        File userPFTConversionTable = propertySet.getValue("userPFTConversionTable");
+        FractionalAreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
 
         PftLut pftLut = null;
         if (outputPFTClasses) {
