@@ -1,10 +1,5 @@
 package org.esa.cci.lc.aggregation;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
-
 import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
@@ -19,12 +14,17 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
+
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
 
 
 public class LcAggregationOpTest {
@@ -120,7 +120,7 @@ public class LcAggregationOpTest {
         aggrOp.ensureTargetDir();
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
-        assertThat(formatterConfig.getOutputFile(), is(".\\a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
+        assertThat(formatterConfig.getOutputFile(), is("." + File.separator + "a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
     }
 
     private IsNull isNull() {
@@ -208,13 +208,13 @@ public class LcAggregationOpTest {
                                                                    new Byte[]{1}, null));
         final Band observationBand = product.addBand("observation_count", ProductData.TYPE_INT8);
         observationBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                            new Float[]{10f}, null));
+                                                                 new Float[]{10f}, null));
         final Band algoConfidBand = product.addBand("algorithmic_confidence_level", ProductData.TYPE_FLOAT32);
         algoConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                            new Float[]{10f}, null));
+                                                                new Float[]{10f}, null));
         final Band overallConfidBand = product.addBand("overall_confidence_level", ProductData.TYPE_INT8);
         overallConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                            new Float[]{10f}, null));
+                                                                   new Float[]{10f}, null));
         product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2"), true));
