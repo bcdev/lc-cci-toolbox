@@ -7,7 +7,7 @@ import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
 /**
- * A simple aggregator adding bini indices to the output.
+ * A simple aggregator adding bin indices to the output.
  * Mainly intended for debugging.
  *
  * @author Marco Peters
