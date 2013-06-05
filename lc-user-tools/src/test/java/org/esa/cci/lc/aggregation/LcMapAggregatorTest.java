@@ -230,7 +230,7 @@ public class LcMapAggregatorTest {
                 areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
                 1.0);
 
-        LcMapAggregatorConfig config = new LcMapAggregatorConfig("classes", outputLCCSClasses, numMajorityClasses,
+        LcMapAggregatorConfig config = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
                                                                  outputPFTClasses, lccs2PFTFile, areaCalculator);
         return (LcMapAggregator) lcMapAggregatorDescriptor.createAggregator(varCtx, config);
     }
