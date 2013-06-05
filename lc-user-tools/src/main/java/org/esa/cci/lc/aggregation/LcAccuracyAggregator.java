@@ -7,10 +7,10 @@ import org.esa.beam.binning.VariableContext;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.GrowableVector;
-//import org.esa.beam.util.logging.BeamLogManager;
 
 import java.util.Arrays;
-//import java.util.logging.Logger;
+
+//import org.esa.beam.util.logging.BeamLogManager;
 
 /**
  * This class implements a median average to aggregate the accuracy.
@@ -21,7 +21,6 @@ class LcAccuracyAggregator extends AbstractAggregator {
 
     private final int varIndex;
     private final String contextNameSpace;
-//    private final Logger logger;
 
 
     LcAccuracyAggregator(VariableContext varCtx, String[] varNames) {
@@ -31,7 +30,6 @@ class LcAccuracyAggregator extends AbstractAggregator {
               featureNames);
         varIndex = varCtx.getVariableIndex(varNames[0]);
         contextNameSpace = featureNames[0] + hashCode();
-//        logger = BeamLogManager.getSystemLogger();
     }
 
     @Override
@@ -64,8 +62,6 @@ class LcAccuracyAggregator extends AbstractAggregator {
             lcMedian = elements[length / 2];
         }
         spatialVector.set(0, lcMedian);
-//        System.out.println("Bin idx: " + ctx.getIndex() + "    length: " + length + "    lcMedian: " + lcMedian);
-//        logger.info("Bin idx: " + ctx.getIndex() + "    length: " + length +"    lcMedian: " + lcMedian);
     }
 
     @Override
