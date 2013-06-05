@@ -10,8 +10,7 @@ import java.io.File;
  */
 class LcMapAggregatorConfig extends AggregatorConfig {
 
-    @Parameter
-    private String varName;
+    private static final String CLASS_BAND_NAME = "lccs_class";
 
     @Parameter
     private boolean outputLCCSClasses;
@@ -30,11 +29,10 @@ class LcMapAggregatorConfig extends AggregatorConfig {
         super(LcMapAggregatorDescriptor.NAME);
     }
 
-    LcMapAggregatorConfig(String varName, boolean outputLCCSClasses, int numMajorityClasses,
+    LcMapAggregatorConfig(boolean outputLCCSClasses, int numMajorityClasses,
                           boolean outputPFTClasses, File userPFTConversionTable,
                           FractionalAreaCalculator areaCalculator) {
         super(LcMapAggregatorDescriptor.NAME);
-        this.varName = varName;
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.outputPFTClasses = outputPFTClasses;
@@ -44,6 +42,6 @@ class LcMapAggregatorConfig extends AggregatorConfig {
 
     @Override
     public String[] getVarNames() {
-        return new String[]{varName};
+        return new String[]{CLASS_BAND_NAME};
     }
 }

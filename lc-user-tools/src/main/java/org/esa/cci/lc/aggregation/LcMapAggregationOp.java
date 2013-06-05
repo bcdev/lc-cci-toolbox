@@ -41,7 +41,6 @@ import java.util.Locale;
 public class LcMapAggregationOp extends AbstractLcAggregationOp implements Output {
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
-    private static final String CLASS_BAND_NAME = "lccs_class";
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -163,8 +162,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
-        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(CLASS_BAND_NAME,
-                                                                                outputLCCSClasses, numMajorityClasses,
+        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
                                                                                 outputPFTClasses, userPFTConversionTable,
                                                                                 areaCalculator);
         final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
