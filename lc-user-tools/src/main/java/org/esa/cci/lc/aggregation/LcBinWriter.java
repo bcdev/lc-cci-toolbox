@@ -153,7 +153,6 @@ class LcBinWriter implements BinWriter {
             final WritableVector resultVector = temporalBin.toVector();
             if (binY != lineY) {
                 lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
-                initDataLines(variables, sceneWidth, dataLines);
                 lineY = writeEmptyLines(variables, sceneWidth, dataLines, lineY, binY);
             }
             for (int i = 0; i < variables.size(); i++) {
@@ -165,6 +164,7 @@ class LcBinWriter implements BinWriter {
     }
 
     private int writeEmptyLines(ArrayList<NVariable> variables, int sceneWidth, ProductData.Float[] dataLines, int lastY, int y) throws IOException {
+        initDataLines(variables, sceneWidth, dataLines);
         for (; lastY < y; lastY++) {
             writeDataLine(variables, sceneWidth, dataLines, lastY);
         }
