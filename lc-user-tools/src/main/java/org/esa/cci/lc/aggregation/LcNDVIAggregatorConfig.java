@@ -6,27 +6,23 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 /**
  * @author Marco Peters
  */
-class LcCondAggregatorConfig extends AggregatorConfig {
-
-    @Parameter
-    private String varName;
+class LcNDVIAggregatorConfig extends AggregatorConfig {
 
     @Parameter
     private FractionalAreaCalculator areaCalculator;
 
 
-    LcCondAggregatorConfig() {
-        super(LcCondAggregatorDescriptor.NAME);
+    LcNDVIAggregatorConfig() {
+        super(LcNDVIAggregatorDescriptor.NAME);
     }
 
-    LcCondAggregatorConfig(String varName, FractionalAreaCalculator areaCalculator) {
+    LcNDVIAggregatorConfig(FractionalAreaCalculator areaCalculator) {
         super(LcMapAggregatorDescriptor.NAME);
-        this.varName = varName;
         this.areaCalculator = areaCalculator;
     }
 
     @Override
     public String[] getVarNames() {
-        return new String[]{varName};
+        return new String[]{"ndvi_mean", "ndvi_std", "ndvi_nYearObs"};
     }
 }
