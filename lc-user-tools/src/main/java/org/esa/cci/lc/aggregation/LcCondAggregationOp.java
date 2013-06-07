@@ -37,9 +37,6 @@ import java.util.Locale;
         description = "Allows to aggregate LC cond products.")
 public class LcCondAggregationOp extends AbstractLcAggregationOp implements Output {
 
-    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
-
-
     FormatterConfig formatterConfig;
     boolean outputTargetProduct;
     private final HashMap<String, String> lcProperties;
@@ -76,17 +73,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
-
-        // todo - useless code; Product is not written again
-        //        LCCS lccs = LCCS.getInstance();
-        //        int[] classValues = lccs.getClassValues();
-        //        String[] classDescriptions = lccs.getClassDescriptions();
-        //        for (int i = 0; i < classValues.length; i++) {
-        //            int classValue = classValues[i];
-        //            Band band = targetProduct.getBand("class_area_" + classValue);
-        //            band.setDescription(classDescriptions[i]);
-        //        }
-        //        setTargetProduct(targetProduct);
     }
 
 
@@ -124,26 +110,12 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
-        Product sourceProduct = getSourceProduct();
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
-        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
-                                                                               sceneWidth, sceneHeight);
-//        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(CLASS_BAND_NAME,
-//                                                                                outputLCCSClasses, numMajorityClasses,
-//                                                                                outputPFTClasses, userPFTConversionTable,
-//                                                                                areaCalculator);
-        final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
+        LcNDVIAggregatorConfig ndviAggregatorConfig = new LcNDVIAggregatorConfig();
 
         BinningConfig binningConfig = new BinningConfig();
-        int processed = 1;
-        int clearLand = 1;
-        int clearWater = 2;
-        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater);
-        binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
-//        binningConfig.setAggregatorConfigs(lcMapAggregatorConfig, lcAccuracyAggregatorConfig);
+        binningConfig.setAggregatorConfigs(ndviAggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
