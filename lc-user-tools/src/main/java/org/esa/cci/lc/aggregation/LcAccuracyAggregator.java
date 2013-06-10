@@ -62,6 +62,7 @@ class LcAccuracyAggregator extends AbstractAggregator {
             lcMedian = elements[length / 2];
         }
         spatialVector.set(0, lcMedian);
+        ctx.put(contextNameSpace, null);
     }
 
     @Override

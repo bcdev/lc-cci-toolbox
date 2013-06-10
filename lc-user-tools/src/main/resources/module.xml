@@ -8,17 +8,18 @@
         LC map and condition products.
     </description>
 
-    <!--<changelog>-->
-    <!--<![CDATA[-->
-    <!--]]>-->
-    <!--</changelog>-->
+    <changelog>
+        <![CDATA[
+    Changes in 3.1:
+    - fixed to high memory consumption
+    <!--]]>
+    </changelog>
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
     <copyright>(C) 2013 by Brockmann Consult GmbH</copyright>
 
     <url>http://www.esa-landcover-cci.org/</url>
-    <!--<licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>-->
 
 
     <dependency>
