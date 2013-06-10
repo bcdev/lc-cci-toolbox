@@ -13,7 +13,8 @@ fi
 
 export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
 
-exec java -Xmx2G -Dceres.context=lccci \
-    -Dlccci.mainClass=org.esa.beam.framework.gpf.main.GPT \
+exec java -Xmx2G -Dceres.context=beam \
+    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
+    -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
     LCCCI.Subset $@

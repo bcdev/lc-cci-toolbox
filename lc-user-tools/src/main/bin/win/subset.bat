@@ -9,8 +9,9 @@ if %JAVA_LOCATION%.==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 
-java -Xmx2G -Dceres.context=lccci ^
-    -Dlccci.mainClass=org.esa.beam.framework.gpf.main.GPT ^
+java -Xmx2G -Dceres.context=beam ^
+    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
+    -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
     LCCCI.Subset %*
 
