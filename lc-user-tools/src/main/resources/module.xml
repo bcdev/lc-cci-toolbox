@@ -11,7 +11,7 @@
     <changelog>
         <![CDATA[
     Changes in 3.1:
-    - fixed to high memory consumption
+    - fixed to high memory consumption when doing aggregation
     <!--]]>
     </changelog>
 
