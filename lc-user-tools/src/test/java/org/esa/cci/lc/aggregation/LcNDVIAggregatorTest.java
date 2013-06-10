@@ -4,7 +4,6 @@ import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.binning.support.VectorImpl;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.Arrays;
 
@@ -81,12 +80,7 @@ public class LcNDVIAggregatorTest {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcNDVIAggregatorDescriptor lcNDVIAggregatorDescriptor = new LcNDVIAggregatorDescriptor();
 
-        FractionalAreaCalculator areaCalculator = Mockito.mock(FractionalAreaCalculator.class);
-        Mockito.when(
-                areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
-                1.0);
-
-        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig(areaCalculator);
+        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig();
         varCtx.defineVariable(config.getVarNames()[0]);
         varCtx.defineVariable(config.getVarNames()[1]);
         varCtx.defineVariable(config.getVarNames()[2]);
