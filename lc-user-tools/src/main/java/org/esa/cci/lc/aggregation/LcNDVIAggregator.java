@@ -15,7 +15,7 @@ import org.esa.beam.binning.WritableVector;
  */
 class LcNDVIAggregator extends AbstractAggregator {
 
-    private static final String[] featureNames = {"mean_ndvi_mean", "mean_ndvi_std", "sum_ndvi_nYearObs"};
+    private static final String[] featureNameTemplates = {"%s_mean", "%s_mean", "%s_sum"};
 
     private final int ndviMeanIndex;
     private final int ndviStdIndex;
@@ -25,7 +25,7 @@ class LcNDVIAggregator extends AbstractAggregator {
     private final String nYearObsInvCountName;
 
     LcNDVIAggregator(VariableContext varCtx, String[] varNames) {
-        super(LcMapAggregatorDescriptor.NAME, featureNames, featureNames, featureNames);
+        super(LcMapAggregatorDescriptor.NAME, createFeatureNames(varNames), createFeatureNames(varNames), createFeatureNames(varNames));
 
         ndviMeanIndex = varCtx.getVariableIndex(varNames[0]);
         ndviMeanInvCountName = "invCount." + varNames[0];
@@ -33,6 +33,14 @@ class LcNDVIAggregator extends AbstractAggregator {
         ndviStdInvCountName = "invCount." + varNames[1];
         nYearObsIndex = varCtx.getVariableIndex((varNames[2]));
         nYearObsInvCountName = "invCount." + varNames[2];
+    }
+
+    private static String[] createFeatureNames(String[] varNames) {
+        String[] featureNames = new String[featureNameTemplates.length];
+        featureNames[0] = String.format(featureNameTemplates[0], varNames[0]);
+        featureNames[1] = String.format(featureNameTemplates[1], varNames[1]);
+        featureNames[2] = String.format(featureNameTemplates[2], varNames[2]);
+        return featureNames;
     }
 
     @Override

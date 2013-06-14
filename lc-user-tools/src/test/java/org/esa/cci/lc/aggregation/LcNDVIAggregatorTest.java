@@ -20,7 +20,7 @@ public class LcNDVIAggregatorTest {
         String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
         String[] temporalFeatureNames = aggregator.getOutputFeatureNames();
         String[] outputFeatureNames = aggregator.getOutputFeatureNames();
-        assertThat(spatialFeatureNames, is(new String[]{"mean_ndvi_mean", "mean_ndvi_std", "sum_ndvi_nYearObs"}));
+        assertThat(spatialFeatureNames, is(new String[]{"ndvi_mean_mean", "ndvi_std_mean", "ndvi_nYearObs_sum"}));
         assertThat(temporalFeatureNames, is(spatialFeatureNames));
         assertThat(outputFeatureNames, is(spatialFeatureNames));
     }
@@ -80,7 +80,7 @@ public class LcNDVIAggregatorTest {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcNDVIAggregatorDescriptor lcNDVIAggregatorDescriptor = new LcNDVIAggregatorDescriptor();
 
-        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig();
+        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig(new String[]{"ndvi_mean", "ndvi_std", "ndvi_nYearObs"});
         varCtx.defineVariable(config.getVarNames()[0]);
         varCtx.defineVariable(config.getVarNames()[1]);
         varCtx.defineVariable(config.getVarNames()[2]);
