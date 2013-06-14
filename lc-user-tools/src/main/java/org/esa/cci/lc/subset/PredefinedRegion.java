@@ -1,7 +1,5 @@
 package org.esa.cci.lc.subset;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
-
 // Defines a set of predefined regions.
 public enum PredefinedRegion {
     NORTH_AMERICA(-180, 85, -50, 19),
@@ -10,9 +8,9 @@ public enum PredefinedRegion {
     WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS(-26, 83, 53, 25),
     ASIA(53, 83, 180, 0),
     AFRICA(-26, 40, 53, -40),
-    SOUTH_EAST_ASIA( 90, 29, 163, -12),
-    AUSTRALIA_AND_NEW_ZEALAND( 95, 0, 180, -53),
-    GREENLAND( -74, 84, -11, 59);
+    SOUTH_EAST_ASIA(90, 29, 163, -12),
+    AUSTRALIA_AND_NEW_ZEALAND(95, 0, 180, -53),
+    GREENLAND(-74, 84, -11, 59);
 
     private float north;
     private float east;
