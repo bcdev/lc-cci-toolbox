@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.CompositingType;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
@@ -18,6 +19,7 @@ import org.esa.beam.util.Debug;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -110,12 +112,21 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
-        LcNDVIAggregatorConfig ndviAggregatorConfig = new LcNDVIAggregatorConfig();
+        String sourceFileName = getSourceProduct().getFileLocation().getName();
+        AggregatorConfig aggregatorConfig;
+        Product sourceProduct = getSourceProduct();
+        if (sourceFileName.toUpperCase().contains("NDVI")) {
+            String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 3);
+            aggregatorConfig = new LcNDVIAggregatorConfig(variableNames);
+        } else {
+            String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 2);
+            aggregatorConfig = new LcCondOccAggregatorConfig(variableNames);
+        }
 
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(ndviAggregatorConfig);
+        binningConfig.setAggregatorConfigs(aggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
