@@ -22,6 +22,7 @@ import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.ProductUtils;
@@ -61,6 +62,7 @@ public class LcMapTiffReader extends AbstractProductReader {
             "LC map confidence level based on product validation"
     };
     private List<Product> bandProducts;
+
     public LcMapTiffReader(LcMapTiffReaderPlugin readerPlugin) {
         super(readerPlugin);
     }
@@ -91,10 +93,11 @@ public class LcMapTiffReader extends AbstractProductReader {
         result.setPreferredTileSize(new Dimension(1024, 1024));
         result.setFileLocation(lcClassifLccsFile);
         ProductUtils.copyGeoCoding(lcClassifLccsProduct, result);
-        result.getMetadataRoot().setAttributeString("epoch", epoch);
-        result.getMetadataRoot().setAttributeString("version", version);
-        result.getMetadataRoot().setAttributeString("spatialResolution", "300");
-        result.getMetadataRoot().setAttributeString("temporalResolution", "5");
+        MetadataElement metadataRoot = result.getMetadataRoot();
+        metadataRoot.setAttributeString("epoch", epoch);
+        metadataRoot.setAttributeString("version", version);
+        metadataRoot.setAttributeString("spatialResolution", "300");
+        metadataRoot.setAttributeString("temporalResolution", "5");
 
         bandProducts.add(lcClassifLccsProduct);
         Band band = addBand(0, lcClassifLccsProduct, result);
