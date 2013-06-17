@@ -26,10 +26,6 @@ import ucar.ma2.DataType;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
 
 /**
  * @author Martin Boettcher
@@ -51,16 +47,16 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             (byte) 220
     };
     public static final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed cropland_rainfed_herbaceous_cover " +
-            "cropland_rainfed_tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
-            "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
-            "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
-            "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
-            "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
-            "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
-            "grassland lichens_and_mosses sparse_vegetation " +
-            "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
-            "urban bare_areas water " +
-            "snow_and_ice";
+                                                          "cropland_rainfed_tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
+                                                          "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
+                                                          "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
+                                                          "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
+                                                          "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
+                                                          "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
+                                                          "grassland lichens_and_mosses sparse_vegetation " +
+                                                          "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
+                                                          "urban bare_areas water " +
+                                                          "snow_and_ice";
 
     @Override
     public String[] getFormatNames() {
@@ -79,7 +75,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     @Override
     public ProfileInitPartWriter createInitialisationPartWriter() {
-        return new LcSrInitialisationPart();
+        return new LcMapInitialisationPart();
     }
 
     @Override
@@ -87,13 +83,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         return new NullProfilePartWriter();
     }
 
-    class LcSrInitialisationPart extends BeamInitialisationPart {
-
-        private final SimpleDateFormat COMPACT_ISO_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-
-        LcSrInitialisationPart() {
-            COMPACT_ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-        }
+    class LcMapInitialisationPart extends BeamInitialisationPart {
 
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
@@ -103,9 +93,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String temporalResolution = lcMapMetadata.getTemporalResolution();
             final String epoch = lcMapMetadata.getEpoch();
             final String version = lcMapMetadata.getVersion();
-            final String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
-            final String startTime = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2) + "0101";
-            final String endTime = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2) + "1231";
 
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
@@ -121,55 +108,39 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
-            writeable.addGlobalAttribute("project", "Climate Change Initiative - European Space Agency");
-            writeable.addGlobalAttribute("references", "http://www.esa-landcover-cci.org/");
-            writeable.addGlobalAttribute("institution", "Universite catholique de Louvain");
-            writeable.addGlobalAttribute("contact", "landcover-cci@uclouvain.be");
-            writeable.addGlobalAttribute("source", "MERIS FR L1B version 5.05, MERIS RR L1B version 8.0, SPOT VGT P");
-            writeable.addGlobalAttribute("history", "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0");  // versions
-            writeable.addGlobalAttribute("comment", "");
-
-            writeable.addGlobalAttribute("Conventions", "CF-1.6");
-            writeable.addGlobalAttribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Standard Names version 21");
-            writeable.addGlobalAttribute("keywords", "land cover classification,satellite,observation");
-            writeable.addGlobalAttribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords");
-            writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
-            writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
-            writeable.addGlobalAttribute("cdm_data_type", "grid");
+            LcWriterUtils.addGenericGlobalAttributes(writeable);
 
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
-            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y",
+            // we use the name in order to transfer the identifier from the LcSubsetOp to this class
+            String regionIdentifier = product.getName();
+            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}",
                                                                       spatialResolution,
-                                                                      temporalResolution));
-            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}",
+                                                                      temporalResolution,
+                                                                      regionIdentifier));
+            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{4}-{2}-v{3}",
                                                                     spatialResolution,
                                                                     temporalResolution,
                                                                     epoch,
-                                                                    version));
-            writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
-            writeable.addGlobalAttribute("product_version", version);
-            writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
-            writeable.addGlobalAttribute("creator_name", "University catholique de Louvain");
-            writeable.addGlobalAttribute("creator_url", "http://www.uclouvain.be/");
-            writeable.addGlobalAttribute("creator_email", "landcover-cci@uclouvain.be");
+                                                                    version,
+                                                                    regionIdentifier));
 
-//            writeable.addGlobalAttribute("time_coverage_start", COMPACT_ISO_FORMAT.format(product.getStartTime().getAsDate()));
-//            writeable.addGlobalAttribute("time_coverage_end", COMPACT_ISO_FORMAT.format(product.getEndTime().getAsDate()));
-            writeable.addGlobalAttribute("time_coverage_start", startTime);
-            writeable.addGlobalAttribute("time_coverage_end", endTime);
-            writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalResolution + "Y");
-            writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + "Y");
+            String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
+            String startYear = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2);
+            String startTime = startYear + "0101";
+            String endYear = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2);
+            String endTime = endYear + "1231";
+            final int temporalCoverageYears;
+            try {
+                temporalCoverageYears = Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1;
+            } catch (NumberFormatException ex) {
+                throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
+            }
 
-            writeable.addGlobalAttribute("geospatial_lat_min", String.valueOf(latMin));
-            writeable.addGlobalAttribute("geospatial_lat_max", String.valueOf(latMax));
-            writeable.addGlobalAttribute("geospatial_lon_min", String.valueOf(lonMin));
-            writeable.addGlobalAttribute("geospatial_lon_max", String.valueOf(lonMax));
-            writeable.addGlobalAttribute("spatial_resolution", spatialResolution + "m");
-            writeable.addGlobalAttribute("geospatial_lat_units", "degrees_north");
-            writeable.addGlobalAttribute("geospatial_lat_resolution", spatialResolutionDegrees);
-            writeable.addGlobalAttribute("geospatial_lon_units", "degrees_east");
-            writeable.addGlobalAttribute("geospatial_lon_resolution", spatialResolutionDegrees);
+            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution, temporalCoverageYears, temporalResolution,
+                                                     startTime, endTime,
+                                                     version, latMax, latMin, lonMin, lonMax, writeable
+            );
 
             final Dimension tileSize = ImageManager.getPreferredTileSize(product);
             writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
@@ -177,6 +148,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
         }
+
     }
 
     @Override

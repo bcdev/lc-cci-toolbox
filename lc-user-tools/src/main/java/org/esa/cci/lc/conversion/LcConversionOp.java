@@ -60,7 +60,7 @@ public class LcConversionOp extends Operator implements Output {
                                                     metadata.getTemporalResolution(),
                                                     metadata.getStartYear(),
                                                     metadata.getEndYear(),
-                                                    metadata.getWeekNumber(),
+                                                    metadata.getStartDate(),
                                                     metadata.getVersion());
         }
 

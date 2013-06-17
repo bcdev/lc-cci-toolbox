@@ -70,7 +70,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         final String temporalResolution = m.group(4);
         final String startYear = m.group(5);
         final String endYear = m.group(6);
-        final String weekNumber = m.group(7);
+        final String startDate = m.group(7);
         final String majorVersion = m.group(8);
         final String minorVersion = m.group(9);
         final String version = majorVersion + "." + minorVersion;
@@ -82,7 +82,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
             throw new IllegalStateException("Could not read product file: " + lcConditionFile.getAbsolutePath());
         }
 
-        Product result = new Product("LC_Cond_" + condition + "_" + startYear + "_" + endYear + "_" + weekNumber + "_v" + version,
+        Product result = new Product("LC_Cond_" + condition + "_" + startYear + "_" + endYear + "_" + startDate + "_v" + version,
                                      "LC_Cond",
                                      lcConditionProduct.getSceneRasterWidth(),
                                      lcConditionProduct.getSceneRasterHeight());
@@ -94,7 +94,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
         result.getMetadataRoot().setAttributeString("temporalResolution", temporalResolution);
         result.getMetadataRoot().setAttributeString("startYear", startYear);
         result.getMetadataRoot().setAttributeString("endYear", endYear);
-        result.getMetadataRoot().setAttributeString("weekNumber", weekNumber);
+        result.getMetadataRoot().setAttributeString("startDate", startDate);
         result.getMetadataRoot().setAttributeString("version", version);
 
         bandProducts.add(lcConditionProduct);
@@ -105,17 +105,17 @@ public class LcConditionTiffReader extends AbstractProductReader {
         //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
         final String stdFilename = createFileName("Std", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                  weekNumber, majorVersion, minorVersion, extension);
+                                                  startDate, majorVersion, minorVersion, extension);
         final Product stdProduct = readProduct(productDir, stdFilename, plugIn);
         addVariableToConditionResult(condition, "std", stdProduct, result);
 
         final String statusFilename = createFileName("Status", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                     weekNumber, majorVersion, minorVersion, extension);
+                                                     startDate, majorVersion, minorVersion, extension);
         final Product statusProduct = readProduct(productDir, statusFilename, plugIn);
         addVariableToConditionResult(condition, "status", statusProduct, result);
 
         final String nYearObsFilename = createFileName("NYearObs", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                       weekNumber, majorVersion, minorVersion, extension);
+                                                       startDate, majorVersion, minorVersion, extension);
         final Product nYearObsProduct = readProduct(productDir, nYearObsFilename, plugIn);
         addVariableToConditionResult(condition, "nYearObs", nYearObsProduct, result);
 

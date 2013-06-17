@@ -89,13 +89,17 @@ public class LcSubsetOp extends Operator implements Output {
     }
 
     private String getTargetFileName(String fileName) {
-        final String insertion;
+        return LcHelper.getTargetFileName(getRegionIdentifier(), fileName);
+    }
+
+    private String getRegionIdentifier() {
+        String insertion;
         if (predefinedRegionIsSelected()) {
             insertion = predefinedRegion.toString();
         } else {
             insertion = "USER_REGION";
         }
-        return LcHelper.getTargetFileName(insertion, fileName);
+        return insertion;
     }
 
     private Product createProductSubset() {
@@ -108,7 +112,9 @@ public class LcSubsetOp extends Operator implements Output {
         }
         final HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("region", pixelRect);
-        return GPF.createProduct("Subset", parameters, sourceProduct);
+        Product subset = GPF.createProduct("Subset", parameters, sourceProduct);
+        subset.setName(getRegionIdentifier());
+        return subset;
     }
 
     private Rectangle getPixelBounds(float north, float east, float south, float west) {
