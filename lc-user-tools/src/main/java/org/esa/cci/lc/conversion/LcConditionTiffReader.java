@@ -78,6 +78,10 @@ public class LcConditionTiffReader extends AbstractProductReader {
 
         final Product lcConditionProduct = readProduct(productDir, lcConditionFilename, plugIn);
 
+        if (lcConditionProduct == null) {
+            throw new IllegalStateException("Could not read product file: " + lcConditionFile.getAbsolutePath());
+        }
+
         Product result = new Product("LC_Cond_" + condition + "_" + startYear + "_" + endYear + "_" + weekNumber + "_v" + version,
                                      "LC_Cond",
                                      lcConditionProduct.getSceneRasterWidth(),
