@@ -13,6 +13,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
+import org.esa.cci.lc.conversion.LcConditionNetCdf4WriterPlugIn;
+import org.esa.cci.lc.conversion.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.awt.Rectangle;
@@ -20,11 +22,11 @@ import java.io.File;
 import java.util.HashMap;
 
 @OperatorMetadata(
-            alias = "LCCCI.Subset",
-            version = "0.5",
-            authors = "Marco Peters",
-            copyright = "(c) 2012 by Brockmann Consult",
-            description = "Allows to subset LC map and condition products.")
+        alias = "LCCCI.Subset",
+        version = "0.5",
+        authors = "Marco Peters",
+        copyright = "(c) 2012 by Brockmann Consult",
+        description = "Allows to subset LC map and condition products.")
 public class LcSubsetOp extends Operator implements Output {
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
@@ -44,9 +46,9 @@ public class LcSubsetOp extends Operator implements Output {
 
     @Parameter(description = "A predefined set of north, east, south and west bounds.",
                valueSet = {
-                           "NORTH_AMERICA", "CENTRAL_AMERICA", "SOUTH_AMERICA",
-                           "WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS", "ASIA", "AFRICA",
-                           "SOUTH_EAST_ASIA", "AUSTRALIA_AND_NEW_ZEALAND", "GREENLAND"
+                       "NORTH_AMERICA", "CENTRAL_AMERICA", "SOUTH_AMERICA",
+                       "WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS", "ASIA", "AFRICA",
+                       "SOUTH_EAST_ASIA", "AUSTRALIA_AND_NEW_ZEALAND", "GREENLAND"
                })
     private PredefinedRegion predefinedRegion;
 
@@ -74,9 +76,9 @@ public class LcSubsetOp extends Operator implements Output {
         final String formatName;
         final String fileName = fileLocation.getName();
         if (fileName.startsWith("ESACCI-LC-L4-LCCS-Map-")) {
-            formatName = "NetCDF4-LC-Map";
+            formatName = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
         } else {
-            formatName = "NetCDF4-LC-Condition";
+            formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
         }
 
         final File targetFile = new File(targetDir, getTargetFileName(fileName));

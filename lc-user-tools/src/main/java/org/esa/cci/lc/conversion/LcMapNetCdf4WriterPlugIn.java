@@ -20,7 +20,6 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
-import org.esa.beam.util.ProductUtils;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -33,13 +32,11 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * TODO add API doc
- *
  * @author Martin Boettcher
  */
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
-    static final String FORMAT_NAME = "NetCDF4-LC-Map";
+    public static final String FORMAT_NAME = "NetCDF4-LC-Map";
 
     @Override
     public String[] getFormatNames() {
@@ -222,16 +219,16 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         (byte) 240
                 };
                 final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed herbaceous_cover " +
-                        "tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
-                        "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
-                        "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
-                        "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
-                        "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
-                        "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
-                        "grassland lichens_and_mosses sparse_vegetation " +
-                        "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
-                        "urban bare_areas water " +
-                        "snow_and_ice";
+                                                        "tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
+                                                        "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
+                                                        "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
+                                                        "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
+                                                        "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
+                                                        "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
+                                                        "grassland lichens_and_mosses sparse_vegetation " +
+                                                        "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
+                                                        "urban bare_areas water " +
+                                                        "snow_and_ice";
                 final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
                 for (int i = 0; i < LCCS_CLASS_FLAG_VALUES.length; ++i) {
                     valids.set(i, LCCS_CLASS_FLAG_VALUES[i]);

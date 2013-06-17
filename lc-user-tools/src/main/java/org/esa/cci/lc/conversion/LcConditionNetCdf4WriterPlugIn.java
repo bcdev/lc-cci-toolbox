@@ -29,13 +29,11 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * TODO add API doc
- *
  * @author Martin Boettcher
  */
 public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
-    static final String FORMAT_NAME = "NetCDF4-LC-Condition";
+    public static final String FORMAT_NAME = "NetCDF4-LC-Condition";
 
     @Override
     public String[] getFormatNames() {
@@ -171,10 +169,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
                     if ("ndvi_std".equals(band.getName()) ||
-                            "ndvi_nYearObs".equals(band.getName()) ||
-                            "ba_nYearObs".equals(band.getName()) ||
-                            "snow_nYearObs".equals(band.getName()) ||
-                            "ndvi_status".equals(band.getName())) {
+                        "ndvi_nYearObs".equals(band.getName()) ||
+                        "ba_nYearObs".equals(band.getName()) ||
+                        "snow_nYearObs".equals(band.getName()) ||
+                        "ndvi_status".equals(band.getName())) {
                         if (ancillaryVariables.length() > 0) {
                             ancillaryVariables.append(' ');
                         }
