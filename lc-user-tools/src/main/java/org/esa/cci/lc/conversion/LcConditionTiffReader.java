@@ -104,39 +104,20 @@ public class LcConditionTiffReader extends AbstractProductReader {
         //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
-        final String stdFilename = "ESACCI-LC-L4-Cond-" + condition + "-Std-" + spatialResolution + "m-" + temporalResolution + "d-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "-" + minorVersion + "." + extension;
+        final String stdFilename = createFileName("Std", condition, spatialResolution, temporalResolution, startYear, endYear,
+                                                  weekNumber, majorVersion, minorVersion, extension);
         final Product stdProduct = readProduct(productDir, stdFilename, plugIn);
-        if (stdProduct != null) {
-            if (result.getSceneRasterWidth() != stdProduct.getSceneRasterWidth() ||
-                result.getSceneRasterHeight() != stdProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of std band does not match dimensions of " + mainVariable + " band");
-            }
-            bandProducts.add(stdProduct);
-            band = addBand(condition.toLowerCase() + "_std", stdProduct, result);
-            band.setDescription(condition + "_std");
-        }
-        final String statusFilename = "ESACCI-LC-L4-Cond-" + condition + "-Status-" + spatialResolution + "m-" + temporalResolution + "d-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "-" + minorVersion + "." + extension;
+        addVariableToConditionResult(condition, "std", stdProduct, result);
+
+        final String statusFilename = createFileName("Status", condition, spatialResolution, temporalResolution, startYear, endYear,
+                                                     weekNumber, majorVersion, minorVersion, extension);
         final Product statusProduct = readProduct(productDir, statusFilename, plugIn);
-        if (statusProduct != null) {
-            if (result.getSceneRasterWidth() != statusProduct.getSceneRasterWidth() ||
-                result.getSceneRasterHeight() != statusProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of status band does not match dimensions of \" + mainVariable + \" band");
-            }
-            bandProducts.add(statusProduct);
-            band = addBand(condition.toLowerCase() + "_status", statusProduct, result);
-            band.setDescription(condition + "_status");
-        }
-        final String nYearObsFilename = "ESACCI-LC-L4-Cond-" + condition + "-NYearObs-" + spatialResolution + "m-" + temporalResolution + "d-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "-" + minorVersion + "." + extension;
+        addVariableToConditionResult(condition, "status", statusProduct, result);
+
+        final String nYearObsFilename = createFileName("NYearObs", condition, spatialResolution, temporalResolution, startYear, endYear,
+                                                       weekNumber, majorVersion, minorVersion, extension);
         final Product nYearObsProduct = readProduct(productDir, nYearObsFilename, plugIn);
-        if (nYearObsProduct != null) {
-            if (result.getSceneRasterWidth() != nYearObsProduct.getSceneRasterWidth() ||
-                result.getSceneRasterHeight() != nYearObsProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of NYearObs band does not match dimensions of \" + mainVariable + \" band");
-            }
-            bandProducts.add(nYearObsProduct);
-            band = addBand(condition.toLowerCase() + "_nYearObs", nYearObsProduct, result);
-            band.setDescription(condition + "_nYearObs");
-        }
+        addVariableToConditionResult(condition, "nYearObs", nYearObsProduct, result);
 
         return result;
     }
@@ -149,6 +130,24 @@ public class LcConditionTiffReader extends AbstractProductReader {
         throw new IllegalStateException();
     }
 
+
+    private String createFileName(String variable, String condition, String spatialResolution, String temporalResolution, String startYear,
+                                  String endYear, String weekNumber, String majorVersion, String minorVersion, String extension) {
+        return "ESACCI-LC-L4-Cond-" + condition + "-" + variable + "-" + spatialResolution + "m-" + temporalResolution + "d-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "-" + minorVersion + "." + extension;
+    }
+
+    private void addVariableToConditionResult(String conditionName, String variableName, Product variableProduct, Product result) {
+        Band band;
+        if (variableProduct != null) {
+            if (result.getSceneRasterWidth() != variableProduct.getSceneRasterWidth() ||
+                result.getSceneRasterHeight() != variableProduct.getSceneRasterHeight()) {
+                throw new IllegalArgumentException("dimensions of " + variableName + " band does not match dimensions of 'mainVariable' band");
+            }
+            bandProducts.add(variableProduct);
+            band = addBand(conditionName.toLowerCase() + "_" + variableName, variableProduct, result);
+            band.setDescription(conditionName + "_" + variableName);
+        }
+    }
 
     private static File getFileInput(Object input) {
         if (input instanceof String) {
