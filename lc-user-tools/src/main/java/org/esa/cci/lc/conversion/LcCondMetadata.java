@@ -1,5 +1,6 @@
 package org.esa.cci.lc.conversion;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 
 /**
@@ -16,13 +17,14 @@ class LcCondMetadata {
     private String version;
 
     public LcCondMetadata(Product product) {
-        condition = product.getMetadataRoot().getAttributeString("condition");
-        spatialResolution = product.getMetadataRoot().getAttributeString("spatialResolution");
-        temporalResolution = product.getMetadataRoot().getAttributeString("temporalResolution");
-        startYear = product.getMetadataRoot().getAttributeString("startYear");
-        endYear = product.getMetadataRoot().getAttributeString("endYear");
-        weekNumber = product.getMetadataRoot().getAttributeString("weekNumber");
-        version = product.getMetadataRoot().getAttributeString("version");
+        MetadataElement metadataRoot = product.getMetadataRoot();
+        condition = metadataRoot.getAttributeString("condition");
+        spatialResolution = metadataRoot.getAttributeString("spatialResolution");
+        temporalResolution = metadataRoot.getAttributeString("temporalResolution");
+        startYear = metadataRoot.getAttributeString("startYear");
+        endYear = metadataRoot.getAttributeString("endYear");
+        weekNumber = metadataRoot.getAttributeString("weekNumber");
+        version = metadataRoot.getAttributeString("version");
     }
 
     public String getCondition() {
