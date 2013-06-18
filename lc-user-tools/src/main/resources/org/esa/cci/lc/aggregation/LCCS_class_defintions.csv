@@ -1,7 +1,7 @@
 0 | No data
 10 | Cropland, rainfed
-11 | Herbaceous cover
-12 | Tree or shrub cover
+11 | Cropland, rainfed, Herbaceous cover
+12 | Cropland, rainfed, Tree or shrub cover
 20 | Cropland, irrigated or post-flooding
 30 | Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%)
 40 | Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%) 
