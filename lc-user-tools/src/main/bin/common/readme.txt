@@ -29,13 +29,20 @@ Use the scripts in the same manner.
 
     Conversion Tool Usage (converts Tiff to NetCDF-4 files)
     ~~~~~~~~~~~~~~~~~~~~~~~~
-        convert.sh <pathToMapTifFile|pathToConditionTifFile>
+        convert.sh -PtargetDir=<dirPath> <pathToMapTifFile|pathToConditionTifFile>
 
         In case of a LCCCI Map file the corresponding flag files must be in the same directory as the Map file.
         They are automatically detected and added to the output NetCDF-4 file.
         If a condition product shall be converted the AggMean tif file must be provided as source. All the associated
         variables (AggMean, Std, Status and NYearObs) are considered and integrated into the output NetCDF-4 file if
         they reside in the same folder as the source tif file.
+
+        Parameter Description:
+            -PtargetDir=<dirPath>
+                Specifies the directory where the target will be written. If this parameter is omitted the directory
+                of the source file is used. The target is written as NetCDF-4 file.
+                If already a file with the same name/path exists, it will be overwritten.
+                (see "Output File Naming Convention" )
 
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~

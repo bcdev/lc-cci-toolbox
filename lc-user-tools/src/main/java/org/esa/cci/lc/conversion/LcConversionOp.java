@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.gpf.operators.standard.WriteOp;
@@ -38,6 +39,8 @@ public class LcConversionOp extends Operator implements Output {
 
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
     private Product sourceProduct;
+    @Parameter(description = "The target directory. Default is the directory of the source product.")
+    private File targetDir;
 
     @Override
     public void initialize() throws OperatorException {
@@ -68,7 +71,11 @@ public class LcConversionOp extends Operator implements Output {
                                                     metadata.getVersion());
         }
 
-        File targetFile = new File(sourceFile.getParent(), lcOutputFilename);
+        if (targetDir == null) {
+            targetDir = sourceFile.getParentFile();
+        }
+
+        File targetFile = new File(targetDir, lcOutputFilename);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
