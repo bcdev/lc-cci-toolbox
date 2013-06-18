@@ -73,7 +73,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
-            LcCondMetadata metadata = new LcCondMetadata(product);
+            final LcCondMetadata metadata = new LcCondMetadata(product);
             final String condition = metadata.getCondition();
             final String startYear = metadata.getStartYear();
             final String endYear = metadata.getEndYear();
@@ -84,13 +84,13 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             final String startTime = startYear + startDate;
             final String endTime = endYear + startDate;
-            GeoCoding geoCoding = product.getGeoCoding();
-            GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0.0f, 0.0f), null);
-            GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
-            float latMax = upperLeft.getLat();
-            float latMin = lowerRight.getLat();
-            float lonMin = upperLeft.getLon();
-            float lonMax = lowerRight.getLon();
+            final GeoCoding geoCoding = product.getGeoCoding();
+            final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0.0f, 0.0f), null);
+            final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
+            final String latMax = String.valueOf(upperLeft.getLat());
+            final String latMin = String.valueOf(lowerRight.getLat());
+            final String lonMin = String.valueOf(upperLeft.getLon());
+            final String lonMax = String.valueOf(lowerRight.getLon());
 
             NFileWriteable writeable = ctx.getNetcdfFileWriteable();
 
@@ -140,7 +140,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
-            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution, temporalCoverageYears, temporalResolution,
+            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution,
+                                                     String.valueOf(temporalCoverageYears), temporalResolution,
                                                      startTime, endTime,
                                                      version, latMax, latMin, lonMin, lonMax, writeable
             );

@@ -8,10 +8,10 @@ import static org.junit.Assert.*;
 
 public class PftLutTest {
 
-    private static final String TEST_STRING = "PFT_1|PFT_2|PFT_3|PFT_4\n" +
-                                              "7.6| 90  |     |  2.4\n" +
-                                              "   |  60 |   40|     \n" +
-                                              "   |     | 100 |     ";
+    private static final String TEST_STRING = "class|PFT_1|PFT_2|PFT_3|PFT_4\n" +
+                                              "0|7.6| 90  |     |  2.4\n" +
+                                              "10|   |  60 |   40|     \n" +
+                                              "20|   |     | 100 |     ";
 
 
     @Test

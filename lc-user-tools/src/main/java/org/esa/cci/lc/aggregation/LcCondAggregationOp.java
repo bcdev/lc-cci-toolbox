@@ -10,12 +10,14 @@ import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
+import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
@@ -41,11 +43,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
 
     FormatterConfig formatterConfig;
     boolean outputTargetProduct;
-    private final HashMap<String, String> lcProperties;
-
-    public LcCondAggregationOp() {
-        lcProperties = new HashMap<String, String>();
-    }
 
     @Override
     public void initialize() throws OperatorException {
@@ -59,6 +56,12 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         if (formatterConfig == null) {
             formatterConfig = createDefaultFormatterConfig();
         }
+
+        HashMap<String, Object> lcProperties = getLcProperties();
+        lcProperties.put("aggregationType", "Condition");
+
+        MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
+        addMetadataToLcProperties(globalAttributes);
 
         BinningOp binningOp;
         try {
@@ -83,9 +86,9 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         int numRows = getNumRows();
         if (planetaryGrid instanceof RegularGaussianGrid) {
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
-            lcProperties.put("grid_name", gridName);
+            getLcProperties().put("grid_name", gridName);
         } else if (planetaryGrid instanceof PlateCarreeGrid) {
-            lcProperties.put("grid_name", String.format("Geographic lat lon grid (cell size: %3f°)", 180.0 / numRows));
+            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f°)", 180.0 / numRows));
         } else {
             throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
         }

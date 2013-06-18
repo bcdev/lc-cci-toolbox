@@ -9,6 +9,7 @@ import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -16,6 +17,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
+import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
 
@@ -61,11 +63,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     FormatterConfig formatterConfig;
     boolean outputTargetProduct;
-    private final HashMap<String, String> lcProperties;
-
-    public LcMapAggregationOp() {
-        lcProperties = new HashMap<String, String>();
-    }
 
     @Override
     public void initialize() throws OperatorException {
@@ -80,7 +77,12 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
             formatterConfig = createDefaultFormatterConfig();
         }
 
+        HashMap<String, Object> lcProperties = getLcProperties();
         appendPFTProperty(lcProperties);
+        lcProperties.put("aggregationType", "Map");
+
+        MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
+        addMetadataToLcProperties(globalAttributes);
 
         BinningOp binningOp;
         try {
@@ -98,19 +100,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
 
-        // todo - useless code; Product is not written again
-        //        LCCS lccs = LCCS.getInstance();
-        //        int[] classValues = lccs.getClassValues();
-        //        String[] classDescriptions = lccs.getClassDescriptions();
-        //        for (int i = 0; i < classValues.length; i++) {
-        //            int classValue = classValues[i];
-        //            Band band = targetProduct.getBand("class_area_" + classValue);
-        //            band.setDescription(classDescriptions[i]);
-        //        }
-        //        setTargetProduct(targetProduct);
     }
 
-    private void appendPFTProperty(HashMap<String, String> lcProperties) {
+    private void appendPFTProperty(HashMap<String, Object> lcProperties) {
         if (outputPFTClasses) {
             if (userPFTConversionTable != null) {
                 lcProperties.put("pft_table",
@@ -128,9 +120,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         int numRows = getNumRows();
         if (planetaryGrid instanceof RegularGaussianGrid) {
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
-            lcProperties.put("grid_name", gridName);
+            getLcProperties().put("grid_name", gridName);
         } else if (planetaryGrid instanceof PlateCarreeGrid) {
-            lcProperties.put("grid_name", String.format("Geographic lat lon grid (cell size: %3f°)", 180.0 / numRows));
+            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f°)", 180.0 / numRows));
         } else {
             throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
         }

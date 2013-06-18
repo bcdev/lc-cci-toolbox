@@ -1,4 +1,4 @@
-package org.esa.cci.lc.aggregation;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
@@ -8,7 +8,7 @@ import ucar.ma2.DataType;
 
 import java.io.IOException;
 
-public class RegularCoordinateEncoder implements CoordinateEncoder {
+class RegularCoordinateEncoder implements CoordinateEncoder {
 
     protected final PlanetaryGrid planetaryGrid;
     protected NVariable latVar;

@@ -1,4 +1,4 @@
-package org.esa.cci.lc.aggregation;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 

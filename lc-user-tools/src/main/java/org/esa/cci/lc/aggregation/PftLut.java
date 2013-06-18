@@ -19,16 +19,17 @@ class PftLut {
         try {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
+            byte[] classValues = new byte[records.size()];
             float[][] conversionFactors = new float[records.size()][pftNames.length];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
-                for (int j = 0; j < record.length; j++) {
+                for (int j = 1; j < record.length; j++) {
                     float pftFactor = Float.NaN;
                     String stringValue = record[j];
                     if (!stringValue.isEmpty()) {
                         pftFactor = Float.parseFloat(stringValue) / 100.0f;
                     }
-                    conversionFactors[i][j] = pftFactor;
+                    conversionFactors[i][j - 1] = pftFactor;
                 }
             }
             return new PftLut(pftNames, conversionFactors);
@@ -43,10 +44,12 @@ class PftLut {
     }
 
     private static String[] ensureValidNames(String[] pftNames) {
-        for (int i = 0; i < pftNames.length; i++) {
-            pftNames[i] = pftNames[i].replaceAll("[ /]", "_");
+        String[] newPftNames = new String[pftNames.length - 1];
+        // start at 1 to skip lccci class column
+        for (int i = 1; i < pftNames.length; i++) {
+            newPftNames[i - 1] = pftNames[i].replaceAll("[ /]", "_");
         }
-        return pftNames;
+        return newPftNames;
     }
 
     public String[] getPFTNames() {

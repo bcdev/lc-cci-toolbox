@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -7,11 +8,14 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * @author Marco Peters
  */
 public abstract class AbstractLcAggregationOp extends Operator {
+
+    private static final int METER_PER_DEGREE = 111300;
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
@@ -22,6 +26,12 @@ public abstract class AbstractLcAggregationOp extends Operator {
     private PlanetaryGridName gridName;
     @Parameter(defaultValue = "2160")
     private int numRows;
+
+    private final HashMap<String, Object> lcProperties;
+
+    protected AbstractLcAggregationOp() {
+        this.lcProperties = new HashMap<String, Object>();
+    }
 
     void ensureTargetDir() {
         if (targetDir == null) {
@@ -56,6 +66,10 @@ public abstract class AbstractLcAggregationOp extends Operator {
         this.gridName = gridName;
     }
 
+    public HashMap<String, Object> getLcProperties() {
+        return lcProperties;
+    }
+
     protected void validateInputSettings() {
         if (targetDir == null) {
             throw new OperatorException("The parameter 'targetDir' must be given.");
@@ -70,5 +84,20 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
             setNumRows(numRows * 2);
         }
+    }
+
+    protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
+        float resolutionDegree = 180.0f / getNumRows();
+        lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
+        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE * resolutionDegree)));
+        lcProperties.put("temporalCoverageYears", String.valueOf(globalAttributes.getAttributeString("time_coverage_duration").charAt(1)));
+        lcProperties.put("temporalResolution", String.valueOf(globalAttributes.getAttributeString("time_coverage_resolution").charAt(1)));
+        lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
+        lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));
+        lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
+        lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
+        lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
+        lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
+        lcProperties.put("lonMax", globalAttributes.getAttributeString("geospatial_lon_max"));
     }
 }

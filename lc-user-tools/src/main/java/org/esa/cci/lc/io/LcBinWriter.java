@@ -1,4 +1,4 @@
-package org.esa.cci.lc.aggregation;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.BinningContext;
@@ -28,16 +28,15 @@ import java.util.logging.Logger;
 /**
  * @author Marco Peters
  */
-class LcBinWriter implements BinWriter {
+public class LcBinWriter implements BinWriter {
 
     private static final float FILL_VALUE = Float.NaN;
-    private final Map<String, String> lcProperties;
+    private final Map<String, Object> lcProperties;
     private Logger logger;
     private String targetFilePath;
     private BinningContext binningContext;
-    private CoordinateEncoder coordinateEncoder;
 
-    LcBinWriter(Map<String, String> lcProperties) {
+    public LcBinWriter(Map<String, Object> lcProperties) {
         this.lcProperties = lcProperties;
         logger = BeamLogManager.getSystemLogger();
     }
@@ -58,7 +57,7 @@ class LcBinWriter implements BinWriter {
             writeable.addDimension("lon", sceneWidth);
             Dimension tileSize = new Dimension(32, 32);
             addGlobalAttributes(writeable, metadataProperties);
-            coordinateEncoder = createCoordinateEncoder();
+            CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
             ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
             writeable.create();
@@ -97,26 +96,32 @@ class LcBinWriter implements BinWriter {
 
 
     private void addGlobalAttributes(NFileWriteable writeable, Map<String, String> metadataProperties) throws IOException {
-        writeable.addGlobalAttribute("Conventions", "CF-1.6");
-        writeable.addGlobalAttribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Standard Names version 21");
-        writeable.addGlobalAttribute("keywords", "land cover classification,satellite,observation");     // TODO
-        writeable.addGlobalAttribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords");
-        writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
-        writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
-        writeable.addGlobalAttribute("cdm_data_type", "grid"); // todo
+        String aggregationType = String.valueOf(lcProperties.remove("aggregationType"));
+        writeable.addGlobalAttribute("title", String.format("ESA CCI Land Cover %s Aggregated", aggregationType));
+        writeable.addGlobalAttribute("summary",
+                                     "This dataset contains the global ESA CCI land cover products " +
+                                     "which are spatially aggregated by the lc-user-tool.");
 
-        writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
-        writeable.addGlobalAttribute("summary", "Fill in something meaningful."); // TODO
-        writeable.addGlobalAttribute("project", "Climate Change Initiative - European Space Agency");
-        writeable.addGlobalAttribute("references", "http://www.esa-landcover-cci.org/");
-        writeable.addGlobalAttribute("source", "ESA CCI Land Cover Map product"); // TODO epoch, version, resolution
-        writeable.addGlobalAttribute("history", "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0, aggregation-tool-0.8");  // versions
-        writeable.addGlobalAttribute("comment", ""); // TODO
+        LcWriterUtils.addGenericGlobalAttributes(writeable);
+        LcWriterUtils.addSpecificGlobalAttribute(String.valueOf(lcProperties.remove("spatialResolutionDegrees")),
+                                                 String.valueOf(lcProperties.remove("spatialResolution")),
+                                                 String.valueOf(lcProperties.remove("temporalCoverageYears")),
+                                                 String.valueOf(lcProperties.remove("temporalResolution")),
+                                                 String.valueOf(lcProperties.remove("startTime")),
+                                                 String.valueOf(lcProperties.remove("endTime")),
+                                                 String.valueOf(lcProperties.remove("version")),
+                                                 String.valueOf(lcProperties.remove("latMax")),
+                                                 String.valueOf(lcProperties.remove("latMin")),
+                                                 String.valueOf(lcProperties.remove("lonMin")),
+                                                 String.valueOf(lcProperties.remove("lonMax")),
+                                                 writeable);
 
-        for (Map.Entry<String, String> lcPropEentry : lcProperties.entrySet()) {
-            writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
+        // LC specific way of metadata provision
+        for (Map.Entry<String, Object> lcPropEentry : lcProperties.entrySet()) {
+            writeable.addGlobalAttribute(lcPropEentry.getKey(), String.valueOf(lcPropEentry.getValue()));
         }
 
+        // generic way of metadata provision
         for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
             writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
         }

@@ -58,7 +58,7 @@ class LcMapAggregator extends AbstractAggregator {
         final double obsLongitude = observation.getLongitude();
         final float areaFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
 
-        final int index = LCCS_CLASSES.getClassIndex((int) observation.get(0));
+        final int index = LCCS_CLASSES.getClassIndex((short) observation.get(0));
         final float oldValue = spatialVector.get(index);
         if (Float.isNaN(oldValue)) {
             spatialVector.set(index, areaFraction);
@@ -96,7 +96,7 @@ class LcMapAggregator extends AbstractAggregator {
         initVector(outputVector, Float.NaN);
         SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
         int outputVectorIndex = 0;
-        for (int i = 0; i < temporalVector.size(); i++) {
+        for (short i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
             if (!Float.isNaN(classArea)) {
                 sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
@@ -146,7 +146,7 @@ class LcMapAggregator extends AbstractAggregator {
 
     private static String[] createSpatialFeatureNames() {
         String[] spatialFeatureNames = new String[LCCS_CLASSES.getNumClasses()];
-        int[] classValues = LCCS_CLASSES.getClassValues();
+        short[] classValues = LCCS_CLASSES.getClassValues();
         for (int i = 0; i < spatialFeatureNames.length; i++) {
             spatialFeatureNames[i] = "class_area_" + classValues[i];
         }

@@ -13,15 +13,18 @@ import java.util.TreeMap;
 /**
  * @author Marco Peters
  */
-class LCCS {
+public class LCCS {
 
+    /*
+    classValue | description | flag meaning
+     */
     private static final String CLASS_DEFINTIONS_FILE = "LCCS_class_defintions.csv";
-
-    private int[] classValues;
-    private String[] classDescriptions;
-    private int noDataClassValue;
-    private Map<Integer, Integer> classValueToIndexMap;
-    private Map<Integer, Integer> indexToClassValueMap;
+    private final short[] classValues;
+    private final String[] classDescriptions;
+    private final String[] flagMeanings;
+    private final short noDataClassValue;
+    private final Map<Short, Short> classValueToIndexMap;
+    private final Map<Short, Short> indexToClassValueMap;
 
     public static LCCS getInstance() {
         try {
@@ -31,19 +34,22 @@ class LCCS {
         }
     }
 
-    LCCS(int[] classValues, String[] classDescriptions) {
+    LCCS(short[] classValues, String[] classDescriptions, String[] flagMeanings) {
         Guardian.assertEquals("classValues.length == classDescriptions.length",
                               classValues.length == classDescriptions.length, true);
+        Guardian.assertEquals("classValues.length == flagMeaning.length",
+                              classValues.length == flagMeanings.length, true);
         this.classValues = classValues;
         this.classDescriptions = classDescriptions;
+        this.flagMeanings = flagMeanings;
         this.noDataClassValue = classValues[0];
-        this.classValueToIndexMap = new TreeMap<Integer, Integer>();
-        this.indexToClassValueMap = new TreeMap<Integer, Integer>();
-        for (int i = 0; i < classValues.length; i++) {
-            int classValue = classValues[i];
+        this.classValueToIndexMap = new TreeMap<Short, Short>();
+        this.indexToClassValueMap = new TreeMap<Short, Short>();
+        for (short i = 0; i < classValues.length; i++) {
+            short classValue = classValues[i];
             classValueToIndexMap.put(classValue, i);
         }
-        for (Map.Entry<Integer, Integer> entry : classValueToIndexMap.entrySet()) {
+        for (Map.Entry<Short, Short> entry : classValueToIndexMap.entrySet()) {
             indexToClassValueMap.put(entry.getValue(), entry.getKey());
         }
 
@@ -53,14 +59,16 @@ class LCCS {
         CsvReader csvReader = new CsvReader(reader, new char[]{'|'});
         try {
             List<String[]> records = csvReader.readStringRecords();
-            int[] classValues = new int[records.size()];
+            short[] classValues = new short[records.size()];
             String[] classDescriptions = new String[records.size()];
+            String[] flagMeaning = new String[records.size()];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
-                classValues[i] = Integer.parseInt(record[0]);
+                classValues[i] = Short.parseShort(record[0]);
                 classDescriptions[i] = record[1];
+                flagMeaning[i] = record[2];
             }
-            return new LCCS(classValues, classDescriptions);
+            return new LCCS(classValues, classDescriptions, flagMeaning);
         } finally {
             csvReader.close();
         }
@@ -70,7 +78,7 @@ class LCCS {
         return classValues.length;
     }
 
-    public int[] getClassValues() {
+    public short[] getClassValues() {
         return classValues;
     }
 
@@ -78,14 +86,18 @@ class LCCS {
         return classDescriptions;
     }
 
-    int getClassIndex(int classValue) {
+    public String[] getFlagMeanings() {
+        return flagMeanings;
+    }
+
+    int getClassIndex(short classValue) {
         if (!classValueToIndexMap.containsKey(classValue)) {
             classValue = noDataClassValue;
         }
         return classValueToIndexMap.get(classValue);
     }
 
-    int getClassValue(int classIndex) {
+    int getClassValue(short classIndex) {
         return indexToClassValueMap.get(classIndex);
     }
 }

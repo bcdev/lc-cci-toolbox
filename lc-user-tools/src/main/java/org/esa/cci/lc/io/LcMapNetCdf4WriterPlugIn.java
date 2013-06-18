@@ -21,6 +21,8 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.StringUtils;
+import org.esa.cci.lc.aggregation.LCCS;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -34,30 +36,8 @@ import java.text.MessageFormat;
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Map";
-    public static final byte[] LCCS_CLASS_FLAG_VALUES = new byte[]{
-            0, 10, 11,
-            12, 20, 30,
-            40, 50, 60,
-            61, 62, 70,
-            71, 72, 80,
-            81, 82, 90,
-            100, 110, 120,
-            (byte) 130, (byte) 140, (byte) 150,
-            (byte) 160, (byte) 170, (byte) 180,
-            (byte) 190, (byte) 200, (byte) 210,
-            (byte) 220
-    };
-    public static final String LCCS_CLASS_FLAG_MEANINGS = "no_data cropland_rainfed cropland_rainfed_herbaceous_cover " +
-                                                          "cropland_rainfed_tree_or_shrub_cover cropland_irrigated mosaic_cropland " +
-                                                          "mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open " +
-                                                          "tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open " +
-                                                          "tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open " +
-                                                          "tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed " +
-                                                          "mosaic_tree_and_shrub mosaic_herbaceous shrubland " +
-                                                          "grassland lichens_and_mosses sparse_vegetation " +
-                                                          "tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded " +
-                                                          "urban bare_areas water " +
-                                                          "snow_and_ice";
+    public static final short[] LCCS_CLASS_FLAG_VALUES = LCCS.getInstance().getClassValues();
+    public static final String[] LCCS_CLASS_FLAG_MEANINGS = LCCS.getInstance().getFlagMeanings();
 
     @Override
     public String[] getFormatNames() {
@@ -98,10 +78,10 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
-            final float latMax = upperLeft.getLat();
-            final float latMin = lowerRight.getLat();
-            final float lonMin = upperLeft.getLon();
-            final float lonMax = lowerRight.getLon();
+            final String latMax = String.valueOf(upperLeft.getLat());
+            final String latMin = String.valueOf(lowerRight.getLat());
+            final String lonMin = String.valueOf(upperLeft.getLon());
+            final String lonMax = String.valueOf(lowerRight.getLon());
 
             final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
 
@@ -143,14 +123,15 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             String startTime = startYear + "0101";
             String endYear = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2);
             String endTime = endYear + "1231";
-            final int temporalCoverageYears;
+            final String temporalCoverageYears;
             try {
-                temporalCoverageYears = Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1;
+                temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
 
-            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution, temporalCoverageYears, temporalResolution,
+            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution,
+                                                     temporalCoverageYears, temporalResolution,
                                                      startTime, endTime,
                                                      version, latMax, latMin, lonMin, lonMax, writeable
             );
@@ -208,12 +189,12 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
                 for (int i = 0; i < LCCS_CLASS_FLAG_VALUES.length; ++i) {
-                    valids.set(i, LCCS_CLASS_FLAG_VALUES[i]);
+                    valids.set(i, (byte) LCCS_CLASS_FLAG_VALUES[i]);
                 }
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", LCCS_CLASS_FLAG_MEANINGS);
+                variable.addAttribute("flag_meanings", StringUtils.arrayToString(LCCS_CLASS_FLAG_MEANINGS, " "));
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 240);
                 variable.addAttribute("_Unsigned", "true");

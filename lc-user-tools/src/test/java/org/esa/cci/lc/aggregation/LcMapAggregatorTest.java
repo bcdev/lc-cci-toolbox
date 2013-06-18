@@ -70,7 +70,7 @@ public class LcMapAggregatorTest {
         int class82 = 82;
         int class8Index = 16;
         int class170 = 170;
-        int class17Index = 30;
+        int class17Index = 25;
 
         aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);

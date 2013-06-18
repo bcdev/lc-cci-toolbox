@@ -55,8 +55,8 @@ public class LcWriterUtils {
     }
 
     static void addSpecificGlobalAttribute(String spatialResolutionDegrees, String spatialResolution,
-                                           int temporalCoverageYears, String temporalResolution, String startTime, String endTime, String version,
-                                           float latMax, float latMin, float lonMin, float lonMax, NFileWriteable writeable) throws IOException {
+                                           String temporalCoverageYears, String temporalResolution, String startTime, String endTime, String version,
+                                           String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
         writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
         writeable.addGlobalAttribute("product_version", version);
         writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
@@ -71,10 +71,10 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalCoverageYears + "Y");
         writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + "D");
 
-        writeable.addGlobalAttribute("geospatial_lat_min", String.valueOf(latMin));
-        writeable.addGlobalAttribute("geospatial_lat_max", String.valueOf(latMax));
-        writeable.addGlobalAttribute("geospatial_lon_min", String.valueOf(lonMin));
-        writeable.addGlobalAttribute("geospatial_lon_max", String.valueOf(lonMax));
+        writeable.addGlobalAttribute("geospatial_lat_min", latMin);
+        writeable.addGlobalAttribute("geospatial_lat_max", latMax);
+        writeable.addGlobalAttribute("geospatial_lon_min", lonMin);
+        writeable.addGlobalAttribute("geospatial_lon_max", lonMax);
         writeable.addGlobalAttribute("spatial_resolution", spatialResolution + "m");
         writeable.addGlobalAttribute("geospatial_lat_units", "degrees_north");
         writeable.addGlobalAttribute("geospatial_lat_resolution", spatialResolutionDegrees);
