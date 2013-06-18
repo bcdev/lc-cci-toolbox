@@ -1,4 +1,4 @@
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;

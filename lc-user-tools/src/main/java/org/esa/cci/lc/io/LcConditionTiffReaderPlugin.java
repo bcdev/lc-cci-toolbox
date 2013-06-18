@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.Locale;
 
 /**
- * Plugin class for the {@link org.esa.cci.lc.conversion.LcMapTiffReader} reader.
+ * Plugin class for the {@link LcMapTiffReader} reader.
  *
  * @author Olaf Danne
  */

@@ -13,8 +13,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
-import org.esa.cci.lc.conversion.LcConditionNetCdf4WriterPlugIn;
-import org.esa.cci.lc.conversion.LcMapNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.awt.Rectangle;

@@ -1,4 +1,4 @@
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.dataio.netcdf.DefaultNetCdfWriter;
 import org.esa.beam.dataio.netcdf.NullProfilePartWriter;

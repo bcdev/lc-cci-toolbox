@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;

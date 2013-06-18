@@ -1,4 +1,4 @@
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * @author Marco Peters
  */
-class LcCondMetadata {
+public class LcCondMetadata {
 
     public static final String LC_CONDITION_TYPE_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*)m-P(.*)D-(....)-(....)-(....)-v(.*)";
 
@@ -46,18 +46,13 @@ class LcCondMetadata {
         }
     }
 
-    static Matcher lcConditionTypeMatcher(String lcConditionFilename) {
+    public static Matcher lcConditionTypeMatcher(String lcConditionFilename) {
         Pattern p = Pattern.compile(LC_CONDITION_TYPE_PATTERN);
         final Matcher m = p.matcher(lcConditionFilename);
         if (!m.matches()) {
             throw new IllegalArgumentException("input file name " + lcConditionFilename + " does not match pattern " + LC_CONDITION_TYPE_PATTERN);
         }
         return m;
-    }
-
-    static String parseConditionFromTypeAttribute(String type) {
-        type = type.substring("ESACCI-LC-L4-".length());
-        return type.substring(0, type.indexOf("-"));
     }
 
     public String getCondition() {

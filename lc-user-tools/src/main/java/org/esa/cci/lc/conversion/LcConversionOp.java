@@ -10,6 +10,10 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.Debug;
+import org.esa.cci.lc.io.LcCondMetadata;
+import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcMapMetadata;
+import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 
 import java.io.File;
 import java.text.MessageFormat;

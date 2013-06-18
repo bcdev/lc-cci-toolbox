@@ -1,2 +1,2 @@
-org.esa.cci.lc.conversion.LcMapTiffReaderPlugin
-org.esa.cci.lc.conversion.LcConditionTiffReaderPlugin
+org.esa.cci.lc.io.LcMapTiffReaderPlugin
+org.esa.cci.lc.io.LcConditionTiffReaderPlugin

@@ -1,6 +1,7 @@
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -9,6 +10,7 @@ import static org.junit.Assert.*;
  * @author Martin Boettcher
  */
 public class LcMapNetCdf4WriterPlugInTest {
+
     @Test
     public void testFlagMeanings() throws Exception {
         assertEquals("number of flag values and meanings",

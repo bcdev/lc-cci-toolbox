@@ -1,4 +1,4 @@
-package org.esa.cci.lc.conversion;
+package org.esa.cci.lc.io;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.Product;
 /**
  * @author Marco Peters
  */
-class LcMapMetadata {
+public class LcMapMetadata {
 
     private static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 

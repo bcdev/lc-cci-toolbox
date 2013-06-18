@@ -16,7 +16,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
-import org.esa.cci.lc.conversion.LcMapTiffReader;
+import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;

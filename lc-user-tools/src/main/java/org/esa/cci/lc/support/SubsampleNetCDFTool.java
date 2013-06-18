@@ -4,7 +4,7 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.cci.lc.conversion.LcMapNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 
 import java.io.IOException;
 
