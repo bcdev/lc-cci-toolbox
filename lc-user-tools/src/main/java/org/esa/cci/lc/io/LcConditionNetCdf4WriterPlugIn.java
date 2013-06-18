@@ -17,6 +17,7 @@ import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
@@ -101,21 +102,37 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
-            // we use the name in order to transfer the identifier from the LcSubsetOp to this class
-            String regionIdentifier = product.getName();
-            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}",
-                                                                      condition,
-                                                                      spatialResolution,
-                                                                      temporalResolution,
-                                                                      regionIdentifier));
-            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{7}-{3}-{4}-{5}-v{6}",
-                                                                    condition,
-                                                                    spatialResolution,
-                                                                    temporalResolution,
-                                                                    startYear,
-                                                                    endYear,
-                                                                    startDate,
-                                                                    version));
+            MetadataElement metadataRoot = product.getMetadataRoot();
+            if (metadataRoot.containsAttribute("regionIdentifier")) {
+                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
+                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}",
+                                                                          condition,
+                                                                          spatialResolution,
+                                                                          temporalResolution,
+                                                                          regionIdentifier));
+                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{7}-{3}-{4}-{5}-v{6}",
+                                                                        condition,
+                                                                        spatialResolution,
+                                                                        temporalResolution,
+                                                                        startYear,
+                                                                        endYear,
+                                                                        startDate,
+                                                                        version));
+            } else {
+                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D",
+                                                                          condition,
+                                                                          spatialResolution,
+                                                                          temporalResolution));
+                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}",
+                                                                        condition,
+                                                                        spatialResolution,
+                                                                        temporalResolution,
+                                                                        startYear,
+                                                                        endYear,
+                                                                        startDate,
+                                                                        version));
+
+            }
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
             final int temporalCoverageYears;
             try {

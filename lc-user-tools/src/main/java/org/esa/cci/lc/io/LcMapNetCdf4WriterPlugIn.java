@@ -17,6 +17,7 @@ import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
@@ -112,18 +113,30 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
-            // we use the name in order to transfer the identifier from the LcSubsetOp to this class
-            String regionIdentifier = product.getName();
-            writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}",
-                                                                      spatialResolution,
-                                                                      temporalResolution,
-                                                                      regionIdentifier));
-            writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{4}-{2}-v{3}",
-                                                                    spatialResolution,
-                                                                    temporalResolution,
-                                                                    epoch,
-                                                                    version,
-                                                                    regionIdentifier));
+            MetadataElement metadataRoot = product.getMetadataRoot();
+            if (metadataRoot.containsAttribute("subsetRegion")) {
+                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
+                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}",
+                                                                          spatialResolution,
+                                                                          temporalResolution,
+                                                                          regionIdentifier));
+                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{4}-{2}-v{3}",
+                                                                        spatialResolution,
+                                                                        temporalResolution,
+                                                                        epoch,
+                                                                        version,
+                                                                        regionIdentifier));
+
+            } else {
+                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y",
+                                                                          spatialResolution,
+                                                                          temporalResolution));
+                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}",
+                                                                        spatialResolution,
+                                                                        temporalResolution,
+                                                                        epoch,
+                                                                        version));
+            }
 
             String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
             String startYear = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2);

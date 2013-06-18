@@ -113,7 +113,7 @@ public class LcSubsetOp extends Operator implements Output {
         final HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("region", pixelRect);
         Product subset = GPF.createProduct("Subset", parameters, sourceProduct);
-        subset.setName(getRegionIdentifier());
+        subset.getMetadataRoot().setAttributeString("regionIdentifier", getRegionIdentifier());
         return subset;
     }
 
