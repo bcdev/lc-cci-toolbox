@@ -131,11 +131,11 @@ public class LcBinWriter implements BinWriter {
                                                              condition,
                                                              spatialResolution,
                                                              temporalResolution,
+                                                             "aggregated",
                                                              startYear,
                                                              endYear,
                                                              startDate,
-                                                             version,
-                                                             "aggregated"));
+                                                             version));
         }
 
         LcWriterUtils.addGenericGlobalAttributes(writeable);
