@@ -6,10 +6,11 @@ import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
- * Creates a subsampled LC-NetCDF file from the given LC-NetCDF file.
+ * Creates a sub-sampled LC-NetCDF file from the given LC-NetCDF file.
  * Just a tool used during development.
  *
  * @author Marco Peters
@@ -28,6 +29,6 @@ public class SubsampleNetCDFTool {
         LcMapNetCdf4WriterPlugIn lcMapNetCdf4WriterPlugIn = new LcMapNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
         String formatName = lcMapNetCdf4WriterPlugIn.getFormatNames()[0];
-        ProductIO.writeProduct(subsetProduct, "./" + productName, formatName);
+        ProductIO.writeProduct(subsetProduct, new File(product.getFileLocation().getParentFile(), productName + ".nc"), formatName, false);
     }
 }
