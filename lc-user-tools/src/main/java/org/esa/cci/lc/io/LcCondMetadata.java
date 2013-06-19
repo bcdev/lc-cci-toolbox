@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class LcCondMetadata {
 
-    public static final String LC_CONDITION_TYPE_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*)m-P(.*)D-(....)-(....)-(....)-v(.*)";
+    private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*)m-P(.*)D-?(aggregated)?-(....)-(....)-(....)-v(.*)";
 
     private String condition;
     private String spatialResolution;
@@ -39,18 +39,18 @@ public class LcCondMetadata {
             condition = idMatcher.group(1);
             spatialResolution = idMatcher.group(2);
             temporalResolution = idMatcher.group(3);
-            startYear = idMatcher.group(4);
-            endYear = idMatcher.group(5);
-            startDate = idMatcher.group(6);
-            version = idMatcher.group(7);
+            startYear = idMatcher.group(5);
+            endYear = idMatcher.group(6);
+            startDate = idMatcher.group(7);
+            version = idMatcher.group(8);
         }
     }
 
-    public static Matcher lcConditionTypeMatcher(String lcConditionFilename) {
-        Pattern p = Pattern.compile(LC_CONDITION_TYPE_PATTERN);
-        final Matcher m = p.matcher(lcConditionFilename);
+    static Matcher lcConditionTypeMatcher(String id) {
+        Pattern p = Pattern.compile(LC_CONDITION_ID_PATTERN);
+        final Matcher m = p.matcher(id);
         if (!m.matches()) {
-            throw new IllegalArgumentException("input file name " + lcConditionFilename + " does not match pattern " + LC_CONDITION_TYPE_PATTERN);
+            throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_CONDITION_ID_PATTERN);
         }
         return m;
     }

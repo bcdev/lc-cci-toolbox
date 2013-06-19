@@ -3,10 +3,15 @@ package org.esa.cci.lc.io;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Marco Peters
  */
 public class LcMapMetadata {
+
+    private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*)m-P(.*)Y-?(aggregated)?-(....)-v(.*)";
 
     private static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
@@ -20,19 +25,27 @@ public class LcMapMetadata {
         if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
             final String id = globalAttributes.getAttributeString("id");
-            int mpPos = id.indexOf("m-P");
-            int yPos = id.indexOf("Y-");
-            int vPos = id.indexOf("-v");
-            spatialResolution = id.substring(17, mpPos);
-            temporalResolution = id.substring(mpPos + 3, yPos);
-            epoch = id.substring(yPos + 2, vPos);
-            version = id.substring(vPos + 2);
+            Matcher idMatcher = lcMapTypeMatcher(id);
+
+            spatialResolution = idMatcher.group(1);
+            temporalResolution = idMatcher.group(2);
+            epoch = idMatcher.group(4);
+            version = idMatcher.group(5);
         } else {
             epoch = metadataRoot.getAttributeString("epoch");
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
         }
+    }
+
+    private static Matcher lcMapTypeMatcher(String id) {
+        Pattern p = Pattern.compile(LC_MAP_ID_PATTERN);
+        final Matcher m = p.matcher(id);
+        if (!m.matches()) {
+            throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_MAP_ID_PATTERN);
+        }
+        return m;
     }
 
     public String getEpoch() {
