@@ -93,13 +93,13 @@ public class LcSubsetOp extends Operator implements Output {
     }
 
     private String getRegionIdentifier() {
-        String insertion;
+        String regionIdentifier;
         if (predefinedRegionIsSelected()) {
-            insertion = predefinedRegion.toString();
+            regionIdentifier = predefinedRegion.toString();
         } else {
-            insertion = "USER_REGION";
+            regionIdentifier = "USER_REGION";
         }
-        return insertion;
+        return regionIdentifier;
     }
 
     private Product createProductSubset() {
