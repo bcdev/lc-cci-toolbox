@@ -27,10 +27,10 @@ public abstract class AbstractLcAggregationOp extends Operator {
     @Parameter(defaultValue = "2160")
     private int numRows;
 
-    private final HashMap<String, Object> lcProperties;
+    private final HashMap<String, String> lcProperties;
 
     protected AbstractLcAggregationOp() {
-        this.lcProperties = new HashMap<String, Object>();
+        this.lcProperties = new HashMap<String, String>();
     }
 
     void ensureTargetDir() {
@@ -66,7 +66,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         this.gridName = gridName;
     }
 
-    public HashMap<String, Object> getLcProperties() {
+    public HashMap<String, String> getLcProperties() {
         return lcProperties;
     }
 

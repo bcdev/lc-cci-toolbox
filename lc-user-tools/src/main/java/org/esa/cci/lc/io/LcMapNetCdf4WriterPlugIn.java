@@ -28,7 +28,6 @@ import ucar.ma2.DataType;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.text.MessageFormat;
 
 /**
  * @author Martin Boettcher
@@ -96,26 +95,26 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             MetadataElement metadataRoot = product.getMetadataRoot();
             if (metadataRoot.containsAttribute("subsetRegion")) {
                 String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
-                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}",
-                                                                          spatialResolution,
-                                                                          temporalResolution,
-                                                                          regionIdentifier));
-                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{4}-{2}-v{3}",
-                                                                        spatialResolution,
-                                                                        temporalResolution,
-                                                                        epoch,
-                                                                        version,
-                                                                        regionIdentifier));
+                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s",
+                                                                   spatialResolution,
+                                                                   temporalResolution,
+                                                                   regionIdentifier));
+                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-%s-v%s",
+                                                                 spatialResolution,
+                                                                 temporalResolution,
+                                                                 regionIdentifier,
+                                                                 epoch,
+                                                                 version));
 
             } else {
-                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y",
-                                                                          spatialResolution,
-                                                                          temporalResolution));
-                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}",
-                                                                        spatialResolution,
-                                                                        temporalResolution,
-                                                                        epoch,
-                                                                        version));
+                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY",
+                                                                   spatialResolution,
+                                                                   temporalResolution));
+                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-v%s",
+                                                                 spatialResolution,
+                                                                 temporalResolution,
+                                                                 epoch,
+                                                                 version));
             }
 
             String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";

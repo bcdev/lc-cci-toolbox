@@ -26,7 +26,6 @@ import ucar.ma2.DataType;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
@@ -105,32 +104,33 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             MetadataElement metadataRoot = product.getMetadataRoot();
             if (metadataRoot.containsAttribute("regionIdentifier")) {
                 String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
-                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}",
-                                                                          condition,
-                                                                          spatialResolution,
-                                                                          temporalResolution,
-                                                                          regionIdentifier));
-                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{7}-{3}-{4}-{5}-v{6}",
-                                                                        condition,
-                                                                        spatialResolution,
-                                                                        temporalResolution,
-                                                                        startYear,
-                                                                        endYear,
-                                                                        startDate,
-                                                                        version));
+                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s",
+                                                                   condition,
+                                                                   spatialResolution,
+                                                                   temporalResolution,
+                                                                   regionIdentifier));
+                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-%s-v%s",
+                                                                 condition,
+                                                                 spatialResolution,
+                                                                 temporalResolution,
+                                                                 regionIdentifier,
+                                                                 startYear,
+                                                                 endYear,
+                                                                 startDate,
+                                                                 version));
             } else {
-                writeable.addGlobalAttribute("type", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D",
-                                                                          condition,
-                                                                          spatialResolution,
-                                                                          temporalResolution));
-                writeable.addGlobalAttribute("id", MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}",
-                                                                        condition,
-                                                                        spatialResolution,
-                                                                        temporalResolution,
-                                                                        startYear,
-                                                                        endYear,
-                                                                        startDate,
-                                                                        version));
+                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD",
+                                                                   condition,
+                                                                   spatialResolution,
+                                                                   temporalResolution));
+                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-v%s",
+                                                                 condition,
+                                                                 spatialResolution,
+                                                                 temporalResolution,
+                                                                 startYear,
+                                                                 endYear,
+                                                                 startDate,
+                                                                 version));
 
             }
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";

@@ -17,7 +17,6 @@ import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 
 import java.io.File;
-import java.text.MessageFormat;
 
 /**
  * This operator converts the LC CCI GeoTIFF files of a map product or a condition product
@@ -53,22 +52,22 @@ public class LcConversionOp extends Operator implements Output {
         if (sourceFile.getName().startsWith("ESACCI-LC-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
-            lcOutputFilename = MessageFormat.format("ESACCI-LC-L4-LCCS-Map-{0}m-P{1}Y-{2}-v{3}.nc",
-                                                    metadata.getSpatialResolution(),
-                                                    metadata.getTemporalResolution(),
-                                                    metadata.getEpoch(),
-                                                    metadata.getVersion());
+            lcOutputFilename = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-v%s.nc",
+                                             metadata.getSpatialResolution(),
+                                             metadata.getTemporalResolution(),
+                                             metadata.getEpoch(),
+                                             metadata.getVersion());
         } else {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
-            lcOutputFilename = MessageFormat.format("ESACCI-LC-L4-{0}-Cond-{1}m-P{2}D-{3}-{4}-{5}-v{6}.nc",
-                                                    metadata.getCondition(),
-                                                    metadata.getSpatialResolution(),
-                                                    metadata.getTemporalResolution(),
-                                                    metadata.getStartYear(),
-                                                    metadata.getEndYear(),
-                                                    metadata.getStartDate(),
-                                                    metadata.getVersion());
+            lcOutputFilename = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-v%s.nc",
+                                             metadata.getCondition(),
+                                             metadata.getSpatialResolution(),
+                                             metadata.getTemporalResolution(),
+                                             metadata.getStartYear(),
+                                             metadata.getEndYear(),
+                                             metadata.getStartDate(),
+                                             metadata.getVersion());
         }
 
         if (targetDir == null) {

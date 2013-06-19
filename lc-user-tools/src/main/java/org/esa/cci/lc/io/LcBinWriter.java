@@ -31,12 +31,12 @@ import java.util.logging.Logger;
 public class LcBinWriter implements BinWriter {
 
     private static final float FILL_VALUE = Float.NaN;
-    private final Map<String, Object> lcProperties;
+    private final Map<String, String> lcProperties;
     private Logger logger;
     private String targetFilePath;
     private BinningContext binningContext;
 
-    public LcBinWriter(Map<String, Object> lcProperties) {
+    public LcBinWriter(Map<String, String> lcProperties) {
         this.lcProperties = lcProperties;
         logger = BeamLogManager.getSystemLogger();
     }
@@ -102,23 +102,59 @@ public class LcBinWriter implements BinWriter {
                                      "This dataset contains the global ESA CCI land cover products " +
                                      "which are spatially aggregated by the lc-user-tool.");
 
+        String spatialResolution = lcProperties.remove("spatialResolution");
+        String temporalResolution = lcProperties.remove("temporalResolution");
+        String version = lcProperties.remove("version");
+        if (aggregationType.equals("Map")) {
+            String epoch = lcProperties.remove("epoch");
+            writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s",
+                                                               spatialResolution,
+                                                               temporalResolution,
+                                                               "aggregated"));
+            writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-%s-v%s",
+                                                             spatialResolution,
+                                                             temporalResolution,
+                                                             "aggregated",
+                                                             epoch,
+                                                             version));
+        } else {
+            String condition = lcProperties.remove("condition");
+            String startYear = lcProperties.remove("startYear");
+            String endYear = lcProperties.remove("endYear");
+            String startDate = lcProperties.remove("startDate");
+            writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s",
+                                                               condition,
+                                                               spatialResolution,
+                                                               temporalResolution,
+                                                               "aggregated"));
+            writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-%s-v%s",
+                                                             condition,
+                                                             spatialResolution,
+                                                             temporalResolution,
+                                                             startYear,
+                                                             endYear,
+                                                             startDate,
+                                                             version,
+                                                             "aggregated"));
+        }
+
         LcWriterUtils.addGenericGlobalAttributes(writeable);
-        LcWriterUtils.addSpecificGlobalAttribute(String.valueOf(lcProperties.remove("spatialResolutionDegrees")),
-                                                 String.valueOf(lcProperties.remove("spatialResolution")),
-                                                 String.valueOf(lcProperties.remove("temporalCoverageYears")),
-                                                 String.valueOf(lcProperties.remove("temporalResolution")),
-                                                 String.valueOf(lcProperties.remove("startTime")),
-                                                 String.valueOf(lcProperties.remove("endTime")),
-                                                 String.valueOf(lcProperties.remove("version")),
-                                                 String.valueOf(lcProperties.remove("latMax")),
-                                                 String.valueOf(lcProperties.remove("latMin")),
-                                                 String.valueOf(lcProperties.remove("lonMin")),
-                                                 String.valueOf(lcProperties.remove("lonMax")),
+        LcWriterUtils.addSpecificGlobalAttribute(lcProperties.remove("spatialResolutionDegrees"),
+                                                 spatialResolution,
+                                                 lcProperties.remove("temporalCoverageYears"),
+                                                 temporalResolution,
+                                                 lcProperties.remove("startTime"),
+                                                 lcProperties.remove("endTime"),
+                                                 version,
+                                                 lcProperties.remove("latMax"),
+                                                 lcProperties.remove("latMin"),
+                                                 lcProperties.remove("lonMin"),
+                                                 lcProperties.remove("lonMax"),
                                                  writeable);
 
         // LC specific way of metadata provision
-        for (Map.Entry<String, Object> lcPropEentry : lcProperties.entrySet()) {
-            writeable.addGlobalAttribute(lcPropEentry.getKey(), String.valueOf(lcPropEentry.getValue()));
+        for (Map.Entry<String, String> lcPropEentry : lcProperties.entrySet()) {
+            writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
         }
 
         // generic way of metadata provision

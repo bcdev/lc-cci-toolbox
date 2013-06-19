@@ -18,6 +18,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 import org.esa.cci.lc.io.LcBinWriter;
+import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
 
@@ -77,12 +78,14 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
             formatterConfig = createDefaultFormatterConfig();
         }
 
-        HashMap<String, Object> lcProperties = getLcProperties();
+        HashMap<String, String> lcProperties = getLcProperties();
         appendPFTProperty(lcProperties);
         lcProperties.put("aggregationType", "Map");
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
+        LcMapMetadata lcMapMetadata = new LcMapMetadata(getSourceProduct());
+        lcProperties.put("epoch", lcMapMetadata.getEpoch());
 
         BinningOp binningOp;
         try {
@@ -102,11 +105,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     }
 
-    private void appendPFTProperty(HashMap<String, Object> lcProperties) {
+    private void appendPFTProperty(HashMap<String, String> lcProperties) {
         if (outputPFTClasses) {
             if (userPFTConversionTable != null) {
                 lcProperties.put("pft_table",
-                                 String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName())); // TODO
+                                 String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName()));
             } else {
                 lcProperties.put("pft_table", "LCCCI conform PFT conversion table used.");
             }

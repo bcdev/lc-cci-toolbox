@@ -18,6 +18,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.util.Debug;
 import org.esa.cci.lc.io.LcBinWriter;
+import org.esa.cci.lc.io.LcCondMetadata;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
@@ -57,11 +58,17 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
             formatterConfig = createDefaultFormatterConfig();
         }
 
-        HashMap<String, Object> lcProperties = getLcProperties();
+        HashMap<String, String> lcProperties = getLcProperties();
         lcProperties.put("aggregationType", "Condition");
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
+        LcCondMetadata lcCondMetadata = new LcCondMetadata(getSourceProduct());
+        lcProperties.put("condition", lcCondMetadata.getCondition());
+        lcProperties.put("startYear", lcCondMetadata.getStartYear());
+        lcProperties.put("endYear", lcCondMetadata.getEndYear());
+        lcProperties.put("startDate", lcCondMetadata.getStartDate());
+
 
         BinningOp binningOp;
         try {
