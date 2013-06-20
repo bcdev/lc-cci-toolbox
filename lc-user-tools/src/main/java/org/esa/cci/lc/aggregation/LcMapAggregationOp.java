@@ -125,7 +125,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
             getLcProperties().put("grid_name", gridName);
         } else if (planetaryGrid instanceof PlateCarreeGrid) {
-            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f°)", 180.0 / numRows));
+            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f degree)", 180.0 / numRows));
         } else {
             throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
         }
