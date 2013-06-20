@@ -143,12 +143,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution,
                                                      temporalCoverageYears, temporalResolution,
                                                      startTime, endTime,
-                                                     version, latMax, latMin, lonMin, lonMax, writeable
-            );
+                                                     version, latMax, latMin, lonMin, lonMax, writeable);
 
             final Dimension tileSize = ImageManager.getPreferredTileSize(product);
             writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
-            //TODO writeable.addDimension("time", 1);
+
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
         }
