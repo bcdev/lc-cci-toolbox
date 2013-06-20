@@ -35,8 +35,6 @@ import java.io.IOException;
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Map";
-    public static final short[] LCCS_CLASS_FLAG_VALUES = LCCS.getInstance().getClassValues();
-    public static final String[] LCCS_CLASS_FLAG_MEANINGS = LCCS.getInstance().getFlagMeanings();
 
     @Override
     public String[] getFormatNames() {
@@ -160,6 +158,9 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         addAlgorithmicConfidenceLevelVariable(ncFile, band, tileSize);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addOverallConfidenceLevelVariable(ncFile, band, tileSize);
+                    } else {
+                        // this branch is passed if an aggregated product is subsetted
+                        addGeneralVariable(ncFile, band, tileSize);
                     }
                 }
             }
@@ -190,16 +191,17 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                final ArrayByte.D1 valids = new ArrayByte.D1(LCCS_CLASS_FLAG_VALUES.length);
-                for (int i = 0; i < LCCS_CLASS_FLAG_VALUES.length; ++i) {
-                    valids.set(i, (byte) LCCS_CLASS_FLAG_VALUES[i]);
+                short[] lccsClassFlagValues = LCCS.getInstance().getClassValues();
+                final ArrayByte.D1 valids = new ArrayByte.D1(lccsClassFlagValues.length);
+                for (int i = 0; i < lccsClassFlagValues.length; ++i) {
+                    valids.set(i, (byte) lccsClassFlagValues[i]);
                 }
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", StringUtils.arrayToString(LCCS_CLASS_FLAG_MEANINGS, " "));
+                variable.addAttribute("flag_meanings", StringUtils.arrayToString(LCCS.getInstance().getFlagMeanings(), " "));
                 variable.addAttribute("valid_min", 1);
-                variable.addAttribute("valid_max", 240);
+                variable.addAttribute("valid_max", 220);
                 variable.addAttribute("_Unsigned", "true");
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
                 if (ancillaryVariables.length() > 0) {
@@ -306,6 +308,17 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
                 }
             }
+
+            private void addGeneralVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", band.getName());
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
+
+            }
+
         };
     }
 
