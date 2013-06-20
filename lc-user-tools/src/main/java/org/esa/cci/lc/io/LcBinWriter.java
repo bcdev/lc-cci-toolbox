@@ -158,9 +158,11 @@ public class LcBinWriter implements BinWriter {
         }
 
         // generic way of metadata provision
-        for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
-            writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
-        }
+        // don't write these metadata; we don't want to have
+        // processing_time, product_name, software_name, software_qualified_name, software_version
+//        for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
+//            writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
+//        }
     }
 
     private ArrayList<NVariable> addFeatureVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {
