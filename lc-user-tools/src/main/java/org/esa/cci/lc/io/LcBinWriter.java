@@ -105,52 +105,21 @@ public class LcBinWriter implements BinWriter {
         String spatialResolution = lcProperties.remove("spatialResolution");
         String temporalResolution = lcProperties.remove("temporalResolution");
         String version = lcProperties.remove("version");
-        if (aggregationType.equals("Map")) {
-            String epoch = lcProperties.remove("epoch");
-            writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s",
-                                                               spatialResolution,
-                                                               temporalResolution,
-                                                               "aggregated"));
-            writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-%s-v%s",
-                                                             spatialResolution,
-                                                             temporalResolution,
-                                                             "aggregated",
-                                                             epoch,
-                                                             version));
-        } else {
-            String condition = lcProperties.remove("condition");
-            String startYear = lcProperties.remove("startYear");
-            String endYear = lcProperties.remove("endYear");
-            String startDate = lcProperties.remove("startDate");
-            writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s",
-                                                               condition,
-                                                               spatialResolution,
-                                                               temporalResolution,
-                                                               "aggregated"));
-            writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-%s-v%s",
-                                                             condition,
-                                                             spatialResolution,
-                                                             temporalResolution,
-                                                             "aggregated",
-                                                             startYear,
-                                                             endYear,
-                                                             startDate,
-                                                             version));
-        }
+        addTypeAndIdAttribute(aggregationType, spatialResolution, temporalResolution, version, writeable);
 
         LcWriterUtils.addGenericGlobalAttributes(writeable);
-        LcWriterUtils.addSpecificGlobalAttribute(lcProperties.remove("spatialResolutionDegrees"),
-                                                 spatialResolution,
-                                                 lcProperties.remove("temporalCoverageYears"),
-                                                 temporalResolution,
-                                                 lcProperties.remove("startTime"),
-                                                 lcProperties.remove("endTime"),
-                                                 version,
-                                                 lcProperties.remove("latMax"),
-                                                 lcProperties.remove("latMin"),
-                                                 lcProperties.remove("lonMin"),
-                                                 lcProperties.remove("lonMax"),
-                                                 writeable);
+        LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("spatialResolutionDegrees"),
+                                                  spatialResolution,
+                                                  lcProperties.remove("temporalCoverageYears"),
+                                                  temporalResolution,
+                                                  lcProperties.remove("startTime"),
+                                                  lcProperties.remove("endTime"),
+                                                  version,
+                                                  lcProperties.remove("latMax"),
+                                                  lcProperties.remove("latMin"),
+                                                  lcProperties.remove("lonMin"),
+                                                  lcProperties.remove("lonMax"),
+                                                  writeable);
 
         // LC specific way of metadata provision
         for (Map.Entry<String, String> lcPropEentry : lcProperties.entrySet()) {
@@ -163,6 +132,28 @@ public class LcBinWriter implements BinWriter {
 //        for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
 //            writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
 //        }
+    }
+
+    private void addTypeAndIdAttribute(String aggregationType, String spatialResolution, String temporalResolution, String version,
+                                       NFileWriteable writeable) throws IOException {
+        String typeString;
+        String idString;
+        if (aggregationType.equals("Map")) {
+            String epoch = lcProperties.remove("epoch");
+            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, "aggregated");
+            idString = String.format("%s-%s-v%s", typeString, epoch, version);
+            writeable.addGlobalAttribute("type", typeString);
+            writeable.addGlobalAttribute("id", idString);
+        } else {
+            String condition = lcProperties.remove("condition");
+            String startYear = lcProperties.remove("startYear");
+            String endYear = lcProperties.remove("endYear");
+            String startDate = lcProperties.remove("startDate");
+            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, "aggregated");
+            idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
+        }
+        writeable.addGlobalAttribute("type", typeString);
+        writeable.addGlobalAttribute("id", idString);
     }
 
     private ArrayList<NVariable> addFeatureVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {

@@ -140,10 +140,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
-            LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution,
-                                                     temporalCoverageYears, temporalResolution,
-                                                     startTime, endTime,
-                                                     version, latMax, latMin, lonMin, lonMax, writeable);
+            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
+                                                      temporalCoverageYears, temporalResolution,
+                                                      startTime, endTime,
+                                                      version, latMax, latMin, lonMin, lonMax, writeable);
 
             final Dimension tileSize = ImageManager.getPreferredTileSize(product);
             writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);

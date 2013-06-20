@@ -54,9 +54,9 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("cdm_data_type", "grid");
     }
 
-    static void addSpecificGlobalAttribute(String spatialResolutionDegrees, String spatialResolution,
-                                           String temporalCoverageYears, String temporalResolution, String startTime, String endTime, String version,
-                                           String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
+    static void addSpecificGlobalAttributes(String spatialResolutionDegrees, String spatialResolution,
+                                            String temporalCoverageYears, String temporalResolution, String startTime, String endTime, String version,
+                                            String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
         writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
         writeable.addGlobalAttribute("product_version", version);
         writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
