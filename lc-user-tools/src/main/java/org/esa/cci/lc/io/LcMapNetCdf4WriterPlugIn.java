@@ -137,7 +137,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             final Dimension tileSize = ImageManager.getPreferredTileSize(product);
             writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
-            //TODO writeable.addDimension("time", 1);
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
         }
@@ -147,39 +146,55 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
     @Override
     public ProfilePartWriter createBandPartWriter() {
         return new BeamBandPart() {
+            private static final String PROCESSED_FLAG_BAND_NAME = "processed_flag";
+            private static final String CURRENT_PIXEL_STATE_BAND_NAME = "current_pixel_state";
+            private static final String OBSERVATION_COUNT_BAND_NAME = "observation_count";
+            private static final String ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME = "algorithmic_confidence_level";
+            private static final String OVERALL_CONFIDENCE_LEVEL_BAND_NAME = "overall_confidence_level";
+
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                StringBuilder ancillaryVariables = new StringBuilder();
-                for (Band band : p.getBands()) {
-                    if ("processed_flag".equals(band.getName()) ||
-                        "current_pixel_state".equals(band.getName()) ||
-                        "observation_count".equals(band.getName()) ||
-                        "algorithmic_confidence_level".equals(band.getName()) ||
-                        "overall_confidence_level".equals(band.getName())) {
-                        if (ancillaryVariables.length() > 0) {
-                            ancillaryVariables.append(' ');
-                        }
-                        ancillaryVariables.append(band.getName());
-                    }
-                }
+                String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
                     if ("lccs_class".equals(band.getName())) {
-                        addLccsClassVariable(ncFile, band, tileSize, ancillaryVariables.toString());
-                    } else if ("processed_flag".equals(band.getName())) {
+                        addLccsClassVariable(ncFile, band, tileSize, ancillaryVariableString);
+                    } else if (PROCESSED_FLAG_BAND_NAME.equals(band.getName())) {
                         addProcessedFlagVariable(ncFile, band, tileSize);
-                    } else if ("current_pixel_state".equals(band.getName())) {
+                    } else if (CURRENT_PIXEL_STATE_BAND_NAME.equals(band.getName())) {
                         addCurrentPixelStateVariable(ncFile, band, tileSize);
-                    } else if ("observation_count".equals(band.getName())) {
+                    } else if (OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
                         addObservationCountVariable(ncFile, band, tileSize);
-                    } else if ("algorithmic_confidence_level".equals(band.getName())) {
+                    } else if (ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addAlgorithmicConfidenceLevelVariable(ncFile, band, tileSize);
-                    } else if ("overall_confidence_level".equals(band.getName())) {
+                    } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addOverallConfidenceLevelVariable(ncFile, band, tileSize);
                     }
                 }
+            }
+
+            private String getAncillaryVariableString(Product p) {
+                StringBuilder ancillaryVariables = new StringBuilder();
+                for (Band band : p.getBands()) {
+                    String bandName = band.getName();
+                    if (isAncillaryVariable(bandName)) {
+                        if (ancillaryVariables.length() > 0) {
+                            ancillaryVariables.append(' ');
+                        }
+                        ancillaryVariables.append(bandName);
+                    }
+                }
+                return ancillaryVariables.toString();
+            }
+
+            private boolean isAncillaryVariable(String bandName) {
+                return PROCESSED_FLAG_BAND_NAME.equals(bandName) ||
+                       CURRENT_PIXEL_STATE_BAND_NAME.equals(bandName) ||
+                       OBSERVATION_COUNT_BAND_NAME.equals(bandName) ||
+                       ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
+                       OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName);
             }
 
             private void addLccsClassVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
