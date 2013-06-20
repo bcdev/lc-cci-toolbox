@@ -51,7 +51,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         ensureTargetDir();
         validateInputSettings();
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
-        appendGridNameProperty(planetaryGrid);
         BinningConfig binningConfig = createBinningConfig(planetaryGrid);
 
         if (formatterConfig == null) {
@@ -59,7 +58,8 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         }
 
         HashMap<String, String> lcProperties = getLcProperties();
-        lcProperties.put("aggregationType", "Condition");
+        addAggregationTypeToLcProperties("Condition");
+        addGridNameToLcProperties(planetaryGrid);
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
@@ -85,20 +85,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
-    }
-
-
-    private void appendGridNameProperty(PlanetaryGrid planetaryGrid) {
-        final String gridName;
-        int numRows = getNumRows();
-        if (planetaryGrid instanceof RegularGaussianGrid) {
-            gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
-            getLcProperties().put("grid_name", gridName);
-        } else if (planetaryGrid instanceof PlateCarreeGrid) {
-            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f degree)", 180.0 / numRows));
-        } else {
-            throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
-        }
     }
 
     FormatterConfig createDefaultFormatterConfig() {

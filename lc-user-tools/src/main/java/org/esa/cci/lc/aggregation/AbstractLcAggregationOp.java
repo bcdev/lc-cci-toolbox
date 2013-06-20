@@ -1,5 +1,8 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
@@ -99,5 +102,22 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
         lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
         lcProperties.put("lonMax", globalAttributes.getAttributeString("geospatial_lon_max"));
+    }
+
+    protected void addGridNameToLcProperties(PlanetaryGrid planetaryGrid) {
+        final String gridName;
+        int numRows = getNumRows();
+        if (planetaryGrid instanceof RegularGaussianGrid) {
+            gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
+            getLcProperties().put("grid_name", gridName);
+        } else if (planetaryGrid instanceof PlateCarreeGrid) {
+            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f degree)", 180.0 / numRows));
+        } else {
+            throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
+        }
+    }
+
+    protected void addAggregationTypeToLcProperties(String type) {
+        lcProperties.put("aggregationType", type);
     }
 }

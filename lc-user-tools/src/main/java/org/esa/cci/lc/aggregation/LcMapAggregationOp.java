@@ -71,7 +71,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         ensureTargetDir();
         validateInputSettings();
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
-        appendGridNameProperty(planetaryGrid);
         BinningConfig binningConfig = createBinningConfig(planetaryGrid);
 
         if (formatterConfig == null) {
@@ -79,8 +78,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         }
 
         HashMap<String, String> lcProperties = getLcProperties();
-        appendPFTProperty(lcProperties);
-        lcProperties.put("aggregationType", "Map");
+        addPFTTable(lcProperties);
+        addAggregationTypeToLcProperties("Map");
+        addGridNameToLcProperties(planetaryGrid);
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
@@ -105,7 +105,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     }
 
-    private void appendPFTProperty(HashMap<String, String> lcProperties) {
+    private void addPFTTable(HashMap<String, String> lcProperties) {
         if (outputPFTClasses) {
             if (userPFTConversionTable != null) {
                 lcProperties.put("pft_table",
@@ -115,19 +115,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
             }
         } else {
             lcProperties.put("pft_table", "No PFT computed.");
-        }
-    }
-
-    private void appendGridNameProperty(PlanetaryGrid planetaryGrid) {
-        final String gridName;
-        int numRows = getNumRows();
-        if (planetaryGrid instanceof RegularGaussianGrid) {
-            gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
-            getLcProperties().put("grid_name", gridName);
-        } else if (planetaryGrid instanceof PlateCarreeGrid) {
-            getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f degree)", 180.0 / numRows));
-        } else {
-            throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
         }
     }
 
