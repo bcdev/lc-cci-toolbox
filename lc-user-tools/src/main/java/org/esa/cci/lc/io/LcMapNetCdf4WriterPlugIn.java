@@ -93,29 +93,18 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
             MetadataElement metadataRoot = product.getMetadataRoot();
+            String typeString;
+            String idString;
             if (metadataRoot.containsAttribute("subsetRegion")) {
                 String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
-                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s",
-                                                                   spatialResolution,
-                                                                   temporalResolution,
-                                                                   regionIdentifier));
-                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-%s-v%s",
-                                                                 spatialResolution,
-                                                                 temporalResolution,
-                                                                 regionIdentifier,
-                                                                 epoch,
-                                                                 version));
-
+                typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, regionIdentifier);
+                idString = String.format("%s-%s-v%s", typeString, epoch, version);
             } else {
-                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY",
-                                                                   spatialResolution,
-                                                                   temporalResolution));
-                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-v%s",
-                                                                 spatialResolution,
-                                                                 temporalResolution,
-                                                                 epoch,
-                                                                 version));
+                typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolution, temporalResolution);
+                idString = String.format("%s-%s-v%s", typeString, epoch, version);
             }
+            writeable.addGlobalAttribute("type", typeString);
+            writeable.addGlobalAttribute("id", idString);
 
             String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
             String startYear = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2);

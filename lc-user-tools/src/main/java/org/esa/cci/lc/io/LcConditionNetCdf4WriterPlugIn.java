@@ -102,37 +102,19 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             //writeable.addGlobalAttribute("platform", platform);
             //writeable.addGlobalAttribute("sensor", sensor);
             MetadataElement metadataRoot = product.getMetadataRoot();
+            String typeString;
+            String idString;
             if (metadataRoot.containsAttribute("regionIdentifier")) {
                 String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
-                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s",
-                                                                   condition,
-                                                                   spatialResolution,
-                                                                   temporalResolution,
-                                                                   regionIdentifier));
-                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-%s-v%s",
-                                                                 condition,
-                                                                 spatialResolution,
-                                                                 temporalResolution,
-                                                                 regionIdentifier,
-                                                                 startYear,
-                                                                 endYear,
-                                                                 startDate,
-                                                                 version));
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, regionIdentifier);
+                idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
             } else {
-                writeable.addGlobalAttribute("type", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD",
-                                                                   condition,
-                                                                   spatialResolution,
-                                                                   temporalResolution));
-                writeable.addGlobalAttribute("id", String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-v%s",
-                                                                 condition,
-                                                                 spatialResolution,
-                                                                 temporalResolution,
-                                                                 startYear,
-                                                                 endYear,
-                                                                 startDate,
-                                                                 version));
-
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD", condition, spatialResolution, temporalResolution);
+                idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
             }
+            writeable.addGlobalAttribute("type", typeString);
+            writeable.addGlobalAttribute("id", idString);
+
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
             final String temporalCoverageYears;
             try {
