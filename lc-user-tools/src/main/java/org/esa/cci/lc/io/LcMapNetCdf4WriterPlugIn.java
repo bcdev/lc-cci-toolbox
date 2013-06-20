@@ -23,6 +23,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.StringUtils;
 import org.esa.cci.lc.aggregation.LCCS;
+import ucar.ma2.Array;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -66,12 +67,17 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
+            final MetadataElement metadataRoot = product.getMetadataRoot();
+            final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
+
             final LcMapMetadata lcMapMetadata = new LcMapMetadata(product);
             final String spatialResolution = lcMapMetadata.getSpatialResolution();
             final String temporalResolution = lcMapMetadata.getTemporalResolution();
             final String epoch = lcMapMetadata.getEpoch();
             final String version = lcMapMetadata.getVersion();
 
+            final String typeString = getTypeString(spatialResolution, temporalResolution, metadataRoot);
+            final String idString = String.format("%s-%s-v%s", typeString, epoch, version);
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
@@ -80,52 +86,54 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String lonMin = String.valueOf(upperLeft.getLon());
             final String lonMax = String.valueOf(lowerRight.getLon());
 
-            final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
+            final String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
+            int epochInt = Integer.parseInt(epoch);
+            int temporalResolutionInt = Integer.parseInt(temporalResolution);
+            final String startYear = String.valueOf(epochInt - temporalResolutionInt / 2);
+            final String startTime = startYear + "0101";
+            final String endYear = String.valueOf(epochInt + temporalResolutionInt / 2);
+            final String endTime = endYear + "1231";
+            final String temporalCoverageYears = getTemporalCoverage(startYear, endYear);
+
+            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
+
 
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
+            writeable.addGlobalAttribute("type", typeString);
+            writeable.addGlobalAttribute("id", idString);
+            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
             LcWriterUtils.addGenericGlobalAttributes(writeable);
+            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
+                                                      temporalCoverageYears, temporalResolution,
+                                                      startTime, endTime,
+                                                      version, latMax, latMin, lonMin, lonMax, writeable);
 
-            //writeable.addGlobalAttribute("platform", platform);
-            //writeable.addGlobalAttribute("sensor", sensor);
-            MetadataElement metadataRoot = product.getMetadataRoot();
+            writeable.addDimension("lat", product.getSceneRasterHeight());
+            writeable.addDimension("lon", product.getSceneRasterWidth());
+        }
+
+        private String getTypeString(String spatialResolution, String temporalResolution, MetadataElement metadataRoot) {
             String typeString;
-            String idString;
             if (metadataRoot.containsAttribute("subsetRegion")) {
                 String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
                 typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, regionIdentifier);
-                idString = String.format("%s-%s-v%s", typeString, epoch, version);
             } else {
                 typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolution, temporalResolution);
-                idString = String.format("%s-%s-v%s", typeString, epoch, version);
             }
-            writeable.addGlobalAttribute("type", typeString);
-            writeable.addGlobalAttribute("id", idString);
+            return typeString;
+        }
 
-            String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
-            String startYear = String.valueOf(Integer.parseInt(epoch) - Integer.parseInt(temporalResolution) / 2);
-            String startTime = startYear + "0101";
-            String endYear = String.valueOf(Integer.parseInt(epoch) + Integer.parseInt(temporalResolution) / 2);
-            String endTime = endYear + "1231";
+        private String getTemporalCoverage(String startYear, String endYear) {
             final String temporalCoverageYears;
             try {
                 temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
-
-            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
-                                                      temporalCoverageYears, temporalResolution,
-                                                      startTime, endTime,
-                                                      version, latMax, latMin, lonMin, lonMax, writeable
-            );
-
-            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
-            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
-            writeable.addDimension("lat", product.getSceneRasterHeight());
-            writeable.addDimension("lon", product.getSceneRasterWidth());
+            return temporalCoverageYears;
         }
 
     }
@@ -214,16 +222,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
-                final byte[] FLAG_VALUES = new byte[]{0, 1};
-                final String FLAG_MEANINGS = "not_processed processed";
-                final ArrayByte.D1 valids = new ArrayByte.D1(FLAG_VALUES.length);
-                for (int i = 0; i < FLAG_VALUES.length; ++i) {
-                    valids.set(i, FLAG_VALUES[i]);
-                }
+                final byte[] flagValues = new byte[]{0, 1};
+                final String flagMeanings = "not_processed processed";
+                final Array valids = Array.factory(flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs status_flag");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", FLAG_MEANINGS);
+                variable.addAttribute("flag_meanings", flagMeanings);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
                 if (ncDataType == DataType.SHORT) {
@@ -237,16 +242,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
-                final byte[] FLAG_VALUES = new byte[]{0, 1, 2, 3, 4, 5};
-                final String FLAG_MEANINGS = "invalid clear_land clear_water clear_snow_ice cloud cloud_shadow";
-                final ArrayByte.D1 valids = new ArrayByte.D1(FLAG_VALUES.length);
-                for (int i = 0; i < FLAG_VALUES.length; ++i) {
-                    valids.set(i, FLAG_VALUES[i]);
-                }
+                final byte[] flagValues = new byte[]{0, 1, 2, 3, 4, 5};
+                final String flagMeanings = "invalid clear_land clear_water clear_snow_ice cloud cloud_shadow";
+                final Array valids = Array.factory(flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs status_flag");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", FLAG_MEANINGS);
+                variable.addAttribute("flag_meanings", flagMeanings);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 5);
                 if (ncDataType == DataType.SHORT) {
@@ -276,7 +278,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "land_cover_lccs status_flag");
+                variable.addAttribute("standard_name", "land_cover_lccs algorithmic_confidence");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
@@ -291,16 +293,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
-                final byte[] FLAG_VALUES = new byte[]{0, 1, 2};
-                final String FLAG_MEANINGS = "doubtful reasonable certain";
-                final ArrayByte.D1 valids = new ArrayByte.D1(FLAG_VALUES.length);
-                for (int i = 0; i < FLAG_VALUES.length; ++i) {
-                    valids.set(i, FLAG_VALUES[i]);
-                }
+                final byte[] flagValues = new byte[]{0, 1, 2};
+                final String flagMeanings = "doubtful reasonable certain";
+                final Array valids = Array.factory(flagValues);
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", "land_cover_lccs status_flag");
+                variable.addAttribute("standard_name", "land_cover_lccs overall_confidence");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", FLAG_MEANINGS);
+                variable.addAttribute("flag_meanings", flagMeanings);
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 1);
                 if (ncDataType == DataType.SHORT) {
@@ -317,7 +316,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", band.getName());
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
-
             }
 
         };

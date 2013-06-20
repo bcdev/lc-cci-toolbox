@@ -21,7 +21,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.jai.ImageManager;
-import ucar.ma2.ArrayByte;
+import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
@@ -72,7 +72,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
+            final MetadataElement metadataRoot = product.getMetadataRoot();
+            final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
             final LcCondMetadata metadata = new LcCondMetadata(product);
+
             final String condition = metadata.getCondition();
             final String startYear = metadata.getStartYear();
             final String endYear = metadata.getEndYear();
@@ -80,6 +83,9 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String spatialResolution = metadata.getSpatialResolution();
             final String temporalResolution = metadata.getTemporalResolution();
             final String version = metadata.getVersion();
+
+            final String typeString = getTypeString(metadataRoot, condition, spatialResolution, temporalResolution);
+            final String idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
 
             final String startTime = startYear + startDate;
             final String endTime = endYear + startDate;
@@ -91,47 +97,48 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String lonMin = String.valueOf(upperLeft.getLon());
             final String lonMax = String.valueOf(lowerRight.getLon());
 
-            NFileWriteable writeable = ctx.getNetcdfFileWriteable();
+            final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
+            final String temporalCoverageYears = getTemporalCoverageYears(startYear, endYear);
+
+            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
 
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Condition " + condition);
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover condition derived from satellite data of a range of years.");
-            LcWriterUtils.addGenericGlobalAttributes(writeable);
-
-            //writeable.addGlobalAttribute("platform", platform);
-            //writeable.addGlobalAttribute("sensor", sensor);
-            MetadataElement metadataRoot = product.getMetadataRoot();
-            String typeString;
-            String idString;
-            if (metadataRoot.containsAttribute("regionIdentifier")) {
-                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
-                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, regionIdentifier);
-                idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
-            } else {
-                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD", condition, spatialResolution, temporalResolution);
-                idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
-            }
             writeable.addGlobalAttribute("type", typeString);
             writeable.addGlobalAttribute("id", idString);
+            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
 
-            final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
+            LcWriterUtils.addGenericGlobalAttributes(writeable);
+            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
+                                                      temporalCoverageYears, temporalResolution,
+                                                      startTime, endTime,
+                                                      version, latMax, latMin, lonMin, lonMax, writeable);
+
+            writeable.addDimension("lat", product.getSceneRasterHeight());
+            writeable.addDimension("lon", product.getSceneRasterWidth());
+        }
+
+        private String getTemporalCoverageYears(String startYear, String endYear) {
             final String temporalCoverageYears;
             try {
                 temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
-            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
-                                                      temporalCoverageYears, temporalResolution,
-                                                      startTime, endTime,
-                                                      version, latMax, latMin, lonMin, lonMax, writeable);
+            return temporalCoverageYears;
+        }
 
-            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
-            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
-
-            writeable.addDimension("lat", product.getSceneRasterHeight());
-            writeable.addDimension("lon", product.getSceneRasterWidth());
+        private String getTypeString(MetadataElement metadataRoot, String condition, String spatialResolution, String temporalResolution) {
+            String typeString;
+            if (metadataRoot.containsAttribute("regionIdentifier")) {
+                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, regionIdentifier);
+            } else {
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD", condition, spatialResolution, temporalResolution);
+            }
+            return typeString;
         }
 
     }
@@ -181,7 +188,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         addSnowNYearObsVariable(ncFile, band, tileSize);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralVariable(ncFile, band, tileSize);
+                        addGeneralAggregatedVariable(ncFile, band, tileSize);
 
                     }
                 }
@@ -250,16 +257,13 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                final byte[] CONDITION_FLAG_VALUES = new byte[]{0, 1, 2, 3, 4, 5, 6};
-                final String CONDITION_FLAG_MEANINGS = "no_data land water snow cloud cloud_shadow invalid";
-                final ArrayByte.D1 valids = new ArrayByte.D1(CONDITION_FLAG_VALUES.length);
-                for (int i = 0; i < CONDITION_FLAG_VALUES.length; ++i) {
-                    valids.set(i, CONDITION_FLAG_VALUES[i]);
-                }
+                final byte[] conditionFlagValues = new byte[]{0, 1, 2, 3, 4, 5, 6};
+                final String conditionFlagMeanings = "no_data land water snow cloud cloud_shadow invalid";
+                final Array valids = Array.factory(conditionFlagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index status_flag");
                 variable.addAttribute("flag_values", valids);
-                variable.addAttribute("flag_meanings", CONDITION_FLAG_MEANINGS);
+                variable.addAttribute("flag_meanings", conditionFlagMeanings);
                 variable.addAttribute("valid_min", 1);
                 variable.addAttribute("valid_max", 5);
                 if (ncDataType == DataType.BYTE) {
@@ -331,13 +335,15 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 }
             }
 
-            private void addGeneralVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+            private void addGeneralAggregatedVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", band.getName());
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
+                if (!band.getName().endsWith("nYearObs_sum")) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
+                }
             }
         };
 

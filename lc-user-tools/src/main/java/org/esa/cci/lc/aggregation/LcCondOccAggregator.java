@@ -42,7 +42,7 @@ class LcCondOccAggregator extends AbstractAggregator {
     public void aggregateSpatial(BinContext ctx, Observation observation, WritableVector spatialVector) {
         float occurrence = observation.get(condOccIndex);
 
-        if (!Float.isNaN(occurrence)) {
+        if (!Float.isNaN(occurrence) && occurrence > 0) {
             spatialVector.set(0, spatialVector.get(0) + 1); // count valid occurrences
             spatialVector.set(1, spatialVector.get(1) + occurrence); // sum valid occurrences
             spatialVector.set(2, spatialVector.get(2) + observation.get(condNYearObsIndex)); // sum nYearObs
