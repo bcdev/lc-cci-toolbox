@@ -134,14 +134,14 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             }
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
-            final int temporalCoverageYears;
+            final String temporalCoverageYears;
             try {
-                temporalCoverageYears = Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1;
+                temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
             } catch (NumberFormatException ex) {
                 throw new RuntimeException("cannot parse " + startYear + " and " + endYear + " as year numbers", ex);
             }
             LcWriterUtils.addSpecificGlobalAttribute(spatialResolutionDegrees, spatialResolution,
-                                                     String.valueOf(temporalCoverageYears), temporalResolution,
+                                                     temporalCoverageYears, temporalResolution,
                                                      startTime, endTime,
                                                      version, latMax, latMin, lonMin, lonMax, writeable
             );
