@@ -56,7 +56,7 @@ public class LcBinWriter implements BinWriter {
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
             Dimension tileSize = new Dimension(32, 32);
-            addGlobalAttributes(writeable, metadataProperties);
+            addGlobalAttributes(writeable);
             CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
             ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
@@ -95,7 +95,7 @@ public class LcBinWriter implements BinWriter {
     }
 
 
-    private void addGlobalAttributes(NFileWriteable writeable, Map<String, String> metadataProperties) throws IOException {
+    private void addGlobalAttributes(NFileWriteable writeable) throws IOException {
         String aggregationType = String.valueOf(lcProperties.remove("aggregationType"));
         writeable.addGlobalAttribute("title", String.format("ESA CCI Land Cover %s Aggregated", aggregationType));
         writeable.addGlobalAttribute("summary",
@@ -126,12 +126,6 @@ public class LcBinWriter implements BinWriter {
             writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
         }
 
-        // generic way of metadata provision
-        // don't write these metadata; we don't want to have
-        // processing_time, product_name, software_name, software_qualified_name, software_version
-//        for (Map.Entry<String, String> metaEntry : metadataProperties.entrySet()) {
-//            writeable.addGlobalAttribute(metaEntry.getKey(), metaEntry.getValue());
-//        }
     }
 
     private void addTypeAndIdAttribute(String aggregationType, String spatialResolution, String temporalResolution, String version,
