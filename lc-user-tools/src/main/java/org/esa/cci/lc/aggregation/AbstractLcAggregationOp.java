@@ -91,10 +91,12 @@ public abstract class AbstractLcAggregationOp extends Operator {
 
     protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
         float resolutionDegree = 180.0f / getNumRows();
+        String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
+        String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
         lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE * resolutionDegree)));
-        lcProperties.put("temporalCoverageYears", String.valueOf(globalAttributes.getAttributeString("time_coverage_duration").charAt(1)));
-        lcProperties.put("temporalResolution", String.valueOf(globalAttributes.getAttributeString("time_coverage_resolution").charAt(1)));
+        lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
+        lcProperties.put("temporalResolution", timeCoverageResolution.substring(1, timeCoverageResolution.length() - 1));
         lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
         lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));
         lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
