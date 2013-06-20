@@ -133,6 +133,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
     @Override
     public ProfilePartWriter createBandPartWriter() {
         return new BeamBandPart() {
+            private static final String LCCS_CLASS_BAND_NAME = "lccs_class";
             private static final String PROCESSED_FLAG_BAND_NAME = "processed_flag";
             private static final String CURRENT_PIXEL_STATE_BAND_NAME = "current_pixel_state";
             private static final String OBSERVATION_COUNT_BAND_NAME = "observation_count";
@@ -146,7 +147,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
-                    if ("lccs_class".equals(band.getName())) {
+                    if (LCCS_CLASS_BAND_NAME.equals(band.getName())) {
                         addLccsClassVariable(ncFile, band, tileSize, ancillaryVariableString);
                     } else if (PROCESSED_FLAG_BAND_NAME.equals(band.getName())) {
                         addProcessedFlagVariable(ncFile, band, tileSize);

@@ -139,6 +139,15 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
     @Override
     public ProfilePartWriter createBandPartWriter() {
         return new BeamBandPart() {
+            private static final String NDVI_MEAN_BAND_NAME = "ndvi_mean";
+            private static final String NDVI_STD_BAND_NAME = "ndvi_std";
+            private static final String NDVI_STATUS_BAND_NAME = "ndvi_status";
+            private static final String NDVI_N_YEAR_OBS_BAND_NAME = "ndvi_nYearObs";
+            private static final String BA_OCC_BAND_NAME = "ba_occ";
+            private static final String BA_N_YEAR_OBS_BAND_NAME = "ba_nYearObs";
+            private static final String SNOW_OCC_BAND_NAME = "snow_occ";
+            private static final String SNOW_N_YEAR_OBS_BAND_NAME = "snow_nYearObs";
+
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
@@ -146,11 +155,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 Dimension tileSize = ImageManager.getPreferredTileSize(p);
                 StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
-                    if ("ndvi_std".equals(band.getName()) ||
-                        "ndvi_nYearObs".equals(band.getName()) ||
-                        "ba_nYearObs".equals(band.getName()) ||
-                        "snow_nYearObs".equals(band.getName()) ||
-                        "ndvi_status".equals(band.getName())) {
+                    if (isAncillaryBand(band)) {
                         if (ancillaryVariables.length() > 0) {
                             ancillaryVariables.append(' ');
                         }
@@ -158,24 +163,37 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     }
                 }
                 for (Band band : p.getBands()) {
-                    if ("ndvi_mean".equals(band.getName())) {
+                    if (NDVI_MEAN_BAND_NAME.equals(band.getName())) {
                         addNdviMeanVariable(ncFile, band, tileSize, ancillaryVariables.toString());
-                    } else if ("ndvi_std".equals(band.getName())) {
+                    } else if (NDVI_STD_BAND_NAME.equals(band.getName())) {
                         addNdviStdVariable(ncFile, band, tileSize);
-                    } else if ("ndvi_nYearObs".equals(band.getName())) {
-                        addNdviNYearObsVariable(ncFile, band, tileSize);
-                    } else if ("ndvi_status".equals(band.getName())) {
+                    } else if (NDVI_STATUS_BAND_NAME.equals(band.getName())) {
                         addNdviStatusVariable(ncFile, band, tileSize);
-                    } else if ("ba_occ".equals(band.getName())) {
+                    } else if (NDVI_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
+                        addNdviNYearObsVariable(ncFile, band, tileSize);
+                    } else if (BA_OCC_BAND_NAME.equals(band.getName())) {
                         addBaOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
-                    } else if ("ba_nYearObs".equals(band.getName())) {
+                    } else if (BA_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
                         addBaNYearObsVariable(ncFile, band, tileSize);
-                    } else if ("snow_occ".equals(band.getName())) {
+                    } else if (SNOW_OCC_BAND_NAME.equals(band.getName())) {
                         addSnowOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
-                    } else if ("snow_nYearObs".equals(band.getName())) {
+                    } else if (SNOW_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
                         addSnowNYearObsVariable(ncFile, band, tileSize);
+                    } else {
+                        // this branch is passed if an aggregated product is subsetted
+                        addGeneralVariable(ncFile, band, tileSize);
+
                     }
                 }
+            }
+
+            private boolean isAncillaryBand(Band band) {
+                String name = band.getName();
+                return NDVI_STD_BAND_NAME.equals(name) ||
+                       NDVI_STATUS_BAND_NAME.equals(name) ||
+                       NDVI_N_YEAR_OBS_BAND_NAME.equals(name) ||
+                       BA_N_YEAR_OBS_BAND_NAME.equals(name) ||
+                       SNOW_N_YEAR_OBS_BAND_NAME.equals(name);
             }
 
             private void addNdviMeanVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
@@ -311,6 +329,15 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
                 }
+            }
+
+            private void addGeneralVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", band.getName());
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
             }
         };
 
