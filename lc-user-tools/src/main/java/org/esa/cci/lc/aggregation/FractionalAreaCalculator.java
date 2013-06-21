@@ -3,6 +3,8 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.PlanetaryGrid;
 
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Marco Peters
@@ -13,17 +15,14 @@ class FractionalAreaCalculator {
     private final double deltaMapLat;
     private final double deltaMapLon;
     private final PlanetaryGrid planetaryGrid;
-    private final Rectangle2D.Double[][] binRectangles;
+    private final Map<Long, Rectangle2D.Double> binRectanglesMap;
 
     public FractionalAreaCalculator(PlanetaryGrid planetaryGrid, int mapWidth, int mapHeight) {
         this.planetaryGrid = planetaryGrid;
         deltaGridLat = 180.0 / planetaryGrid.getNumRows();
         deltaMapLat = 180.0 / mapHeight;
         deltaMapLon = 360.0 / mapWidth;
-        binRectangles = new Rectangle2D.Double[planetaryGrid.getNumRows()][];
-        for (int i = 0; i < binRectangles.length; i++) {
-            binRectangles[i] = new Rectangle2D.Double[planetaryGrid.getNumCols(i)];
-        }
+        binRectanglesMap = new HashMap<Long, Rectangle2D.Double>();
     }
 
     public double calculate(double longitude, double latitude, long binIndex) {
@@ -33,26 +32,31 @@ class FractionalAreaCalculator {
     }
 
     private Rectangle2D.Double getBinRect(long binIndex) {
-        int rowIndex = planetaryGrid.getRowIndex(binIndex);
-        final int colIndex = (int) (binIndex - planetaryGrid.getFirstBinIndex(rowIndex));
-        final Rectangle2D.Double binRect = binRectangles[rowIndex][colIndex];
-        if (binRect != null) {
-            return binRect;
+        clearMapIfToBig(binRectanglesMap);
+        Rectangle2D.Double binRect = binRectanglesMap.get(binIndex);
+        if (binRect == null) {
+            double[] binCenterLatLon = planetaryGrid.getCenterLatLon(binIndex);
+            double binCenterLon = binCenterLatLon[1];
+            double binCenterLat = binCenterLatLon[0];
+            int rowIndex = planetaryGrid.getRowIndex(binIndex);
+            double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
+            binRect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
+            binRectanglesMap.put(binIndex, binRect);
         }
-        double[] binCenterLatLon = planetaryGrid.getCenterLatLon(binIndex);
-        double binCenterLon = binCenterLatLon[1];
-        double binCenterLat = binCenterLatLon[0];
-        double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
-        final Rectangle2D.Double rect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
-        binRectangles[rowIndex][colIndex] = rect;
-        return rect;
+        return binRect;
+    }
+
+    private void clearMapIfToBig(Map<Long, Rectangle2D.Double> binRectanglesMap) {
+        if (binRectanglesMap.size() > 5000) { // this test could be cleverer, but works right now
+            binRectanglesMap.clear();
+        }
     }
 
     private Rectangle2D.Double createRect(double binCenterLon, double binCenterLat, double deltaGridLon,
-                                          double deltaGridLat1) {
+                                          double deltaGridLat) {
         Rectangle2D.Double binRect = new Rectangle2D.Double();
         binRect.setFrameFromCenter(binCenterLon, binCenterLat, binCenterLon + deltaGridLon / 2.0,
-                                   binCenterLat + deltaGridLat1 / 2.0);
+                                   binCenterLat + deltaGridLat / 2.0);
         return binRect;
     }
 
