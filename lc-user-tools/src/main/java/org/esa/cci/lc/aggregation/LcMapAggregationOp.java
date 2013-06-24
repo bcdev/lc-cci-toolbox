@@ -210,7 +210,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         }
         LCCS lccs = LCCS.getInstance();
         if (numMajorityClasses > lccs.getNumClasses()) {
-            throw new OperatorException("Number of Majority classes exceeds number of LC classes.");
+            throw new OperatorException("Number of majority classes exceeds number of LC classes.");
         }
         final String[] lcVariableNames = Arrays.copyOf(LcMapTiffReader.LC_VARIABLE_NAMES, 5);
         for (String variableName : lcVariableNames) {
