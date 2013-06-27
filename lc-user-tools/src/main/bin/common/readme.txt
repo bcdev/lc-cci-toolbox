@@ -44,12 +44,16 @@ Use the scripts in the same manner.
                 If already a file with the same name/path exists, it will be overwritten.
                 (see "Output File Naming Convention" )
 
+
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~
-        aggregation.sh -PgridName=<name> -PnumRows=<integer>
-                       -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
-                       -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
-                       -PtargetDir=<dirPath> <sourceFilePath>
+
+      LC-CCI Map Products
+      ~~~~~~~~~~~~~~~~~~~
+        aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
+                         -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
+                         -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
+                         -PtargetDir=<dirPath> <sourceFilePath>
 
         Parameter Description:
             -PgridName=<name>
@@ -91,6 +95,14 @@ Use the scripts in the same manner.
             The file starts with a table header. Each column of the header defines one PFT.
             The subsequent rows, one for each LCCS class, define the conversion from corresponding class to the PFTs.
             Columns are separated with the pipe ('|') symbol and the column header names are used as band names.
+
+
+      LC-CCI Condition Products
+      ~~~~~~~~~~~~~~~~~~~~~~~~~
+        aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
+
+        For a description of the parameter please have a look into the above section for the LC-CCI Map Products.
+
 
     Subset Tool Usage
     ~~~~~~~~~~~~~~~~~~
