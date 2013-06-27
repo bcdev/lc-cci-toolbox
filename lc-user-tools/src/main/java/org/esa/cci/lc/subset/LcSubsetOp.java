@@ -23,9 +23,9 @@ import java.util.HashMap;
 
 @OperatorMetadata(
         alias = "LCCCI.Subset",
-        version = "0.5",
+        version = "0.8",
         authors = "Marco Peters",
-        copyright = "(c) 2012 by Brockmann Consult",
+        copyright = "(c) 2013 by Brockmann Consult",
         description = "Allows to subset LC map and condition products.")
 public class LcSubsetOp extends Operator implements Output {
 

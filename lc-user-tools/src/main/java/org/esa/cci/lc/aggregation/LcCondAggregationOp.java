@@ -36,10 +36,10 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Cond",
-        version = "0.6",
+        version = "0.8",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
-        description = "Allows to aggregate LC cond products.")
+        description = "Allows to aggregate LC condition products.")
 public class LcCondAggregationOp extends AbstractLcAggregationOp implements Output {
 
     FormatterConfig formatterConfig;
