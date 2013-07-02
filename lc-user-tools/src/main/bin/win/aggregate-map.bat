@@ -13,7 +13,7 @@ java -Xmx4G -Dceres.context=beam ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
-    LCCCI.Aggregate.Map %*
+    LCCCI.Aggregate.Map -c 1024M %*
 
 exit /B %ERRORLEVEL%
 
