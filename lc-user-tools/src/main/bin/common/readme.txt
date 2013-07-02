@@ -92,9 +92,10 @@ Use the scripts in the same manner.
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            The file starts with a table header. Each column of the header defines one PFT.
-            The subsequent rows, one for each LCCS class, define the conversion from corresponding class to the PFTs.
-            Columns are separated with the pipe ('|') symbol and the column header names are used as band names.
+            The file starts with a table header. Each column of the header defines one PFT except the first. The first
+            column must contain the value of each LCCS class index. The subsequent rows, one for each LCCS class, define
+            the conversion from corresponding class to the PFTs. Columns are separated with the pipe ('|') symbol and
+            the column header names are used as band names.
 
 
       LC-CCI Condition Products
