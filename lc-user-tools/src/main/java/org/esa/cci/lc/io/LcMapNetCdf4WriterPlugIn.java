@@ -20,7 +20,6 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.StringUtils;
 import org.esa.cci.lc.aggregation.LCCS;
 import ucar.ma2.Array;
@@ -36,6 +35,7 @@ import java.io.IOException;
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Map";
+    private static final Dimension TILE_SIZE = new Dimension(512, 512);
 
     @Override
     public String[] getFormatNames() {
@@ -95,16 +95,13 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String endTime = endYear + "1231";
             final String temporalCoverageYears = getTemporalCoverage(startYear, endYear);
 
-            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
-
-
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
             writeable.addGlobalAttribute("type", typeString);
             writeable.addGlobalAttribute("id", idString);
-            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
+            writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution,
@@ -152,24 +149,23 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-                java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
                     if (LCCS_CLASS_BAND_NAME.equals(band.getName())) {
-                        addLccsClassVariable(ncFile, band, tileSize, ancillaryVariableString);
+                        addLccsClassVariable(ncFile, band, TILE_SIZE, ancillaryVariableString);
                     } else if (PROCESSED_FLAG_BAND_NAME.equals(band.getName())) {
-                        addProcessedFlagVariable(ncFile, band, tileSize);
+                        addProcessedFlagVariable(ncFile, band, TILE_SIZE);
                     } else if (CURRENT_PIXEL_STATE_BAND_NAME.equals(band.getName())) {
-                        addCurrentPixelStateVariable(ncFile, band, tileSize);
+                        addCurrentPixelStateVariable(ncFile, band, TILE_SIZE);
                     } else if (OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
-                        addObservationCountVariable(ncFile, band, tileSize);
+                        addObservationCountVariable(ncFile, band, TILE_SIZE);
                     } else if (ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addAlgorithmicConfidenceLevelVariable(ncFile, band, tileSize);
+                        addAlgorithmicConfidenceLevelVariable(ncFile, band, TILE_SIZE);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addOverallConfidenceLevelVariable(ncFile, band, tileSize);
+                        addOverallConfidenceLevelVariable(ncFile, band, TILE_SIZE);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralVariable(ncFile, band, tileSize);
+                        addGeneralVariable(ncFile, band, TILE_SIZE);
                     }
                 }
             }

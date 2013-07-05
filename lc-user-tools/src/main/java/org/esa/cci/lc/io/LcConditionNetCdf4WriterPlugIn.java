@@ -20,7 +20,6 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.jai.ImageManager;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
@@ -35,6 +34,7 @@ import java.util.TimeZone;
 public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Condition";
+    private static final Dimension TILE_SIZE = new Dimension(512, 512);
 
     @Override
     public String[] getFormatNames() {
@@ -100,15 +100,13 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
             final String temporalCoverageYears = getTemporalCoverageYears(startYear, endYear);
 
-            final Dimension tileSize = ImageManager.getPreferredTileSize(product);
-
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Condition " + condition);
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover condition derived from satellite data of a range of years.");
             writeable.addGlobalAttribute("type", typeString);
             writeable.addGlobalAttribute("id", idString);
-            writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
+            writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
 
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
@@ -159,7 +157,6 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-                Dimension tileSize = ImageManager.getPreferredTileSize(p);
                 StringBuilder ancillaryVariables = new StringBuilder();
                 for (Band band : p.getBands()) {
                     if (isAncillaryBand(band)) {
@@ -171,24 +168,24 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 }
                 for (Band band : p.getBands()) {
                     if (NDVI_MEAN_BAND_NAME.equals(band.getName())) {
-                        addNdviMeanVariable(ncFile, band, tileSize, ancillaryVariables.toString());
+                        addNdviMeanVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
                     } else if (NDVI_STD_BAND_NAME.equals(band.getName())) {
-                        addNdviStdVariable(ncFile, band, tileSize);
+                        addNdviStdVariable(ncFile, band, TILE_SIZE);
                     } else if (NDVI_STATUS_BAND_NAME.equals(band.getName())) {
-                        addNdviStatusVariable(ncFile, band, tileSize);
+                        addNdviStatusVariable(ncFile, band, TILE_SIZE);
                     } else if (NDVI_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addNdviNYearObsVariable(ncFile, band, tileSize);
+                        addNdviNYearObsVariable(ncFile, band, TILE_SIZE);
                     } else if (BA_OCC_BAND_NAME.equals(band.getName())) {
-                        addBaOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
+                        addBaOccVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
                     } else if (BA_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addBaNYearObsVariable(ncFile, band, tileSize);
+                        addBaNYearObsVariable(ncFile, band, TILE_SIZE);
                     } else if (SNOW_OCC_BAND_NAME.equals(band.getName())) {
-                        addSnowOccVariable(ncFile, band, tileSize, ancillaryVariables.toString());
+                        addSnowOccVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
                     } else if (SNOW_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addSnowNYearObsVariable(ncFile, band, tileSize);
+                        addSnowNYearObsVariable(ncFile, band, TILE_SIZE);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralAggregatedVariable(ncFile, band, tileSize);
+                        addGeneralAggregatedVariable(ncFile, band, TILE_SIZE);
 
                     }
                 }
