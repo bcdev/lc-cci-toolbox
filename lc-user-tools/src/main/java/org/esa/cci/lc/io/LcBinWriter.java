@@ -55,7 +55,7 @@ public class LcBinWriter implements BinWriter {
             int sceneHeight = planetaryGrid.getNumRows();
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
-            Dimension tileSize = new Dimension(32, 32);
+            Dimension tileSize = new Dimension(128, 128);
             addGlobalAttributes(writeable);
             CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
