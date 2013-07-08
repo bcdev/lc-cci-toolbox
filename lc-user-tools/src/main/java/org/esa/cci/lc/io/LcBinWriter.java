@@ -171,6 +171,7 @@ public class LcBinWriter implements BinWriter {
         initDataLines(variables, sceneWidth, dataLines);
 
         int lineY = 0;
+        int hundredthHeight = sceneHeight / 100;
         while (iterator.hasNext()) {
             final TemporalBin temporalBin = iterator.next();
             final long binIndex = temporalBin.getIndex();
@@ -180,7 +181,11 @@ public class LcBinWriter implements BinWriter {
             if (binY != lineY) {
                 lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
                 lineY = writeEmptyLines(variables, sceneWidth, dataLines, lineY, binY);
+                if (lineY % hundredthHeight == 0) {
+                    logger.info(String.format("Written line %d of %d", lineY, sceneHeight));
+                }
             }
+
             for (int i = 0; i < variables.size(); i++) {
                 dataLines[i].setElemFloatAt(binX, resultVector.get(i));
             }
