@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.CompositingType;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningConfig;
@@ -61,6 +62,10 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
                              "If not given, the standard LC-CCI table is used.",
                label = "User defined PFT conversion table")
     private File userPFTConversionTable;
+
+    @Parameter(description = "Whether or not to add the accuracy variable to the output.",
+               label = "Output accuracy value", defaultValue = "true")
+    private boolean outputAccuracy;
 
     FormatterConfig formatterConfig;
     boolean outputTargetProduct;
@@ -144,10 +149,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
                                                                                sceneWidth, sceneHeight);
-        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
-                                                                                outputPFTClasses, userPFTConversionTable,
-                                                                                areaCalculator);
-        final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
 
         BinningConfig binningConfig = new BinningConfig();
         int processed = 1;
@@ -157,7 +158,17 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
-        binningConfig.setAggregatorConfigs(lcMapAggregatorConfig, lcAccuracyAggregatorConfig);
+        LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
+                                                                                outputPFTClasses, userPFTConversionTable,
+                                                                                areaCalculator);
+        AggregatorConfig[] aggregatorConfigs;
+        if (outputAccuracy) {
+            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level");
+            aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcAccuracyAggregatorConfig};
+        } else {
+            aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig};
+        }
+        binningConfig.setAggregatorConfigs(aggregatorConfigs);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
