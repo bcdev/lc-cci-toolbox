@@ -147,8 +147,10 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         Product sourceProduct = getSourceProduct();
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
+        final double sourceMapResolutionX = 180.0 / sceneHeight;
+        final double sourceMapResolutionY = 360.0 / sceneWidth;
         FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
-                                                                               sceneWidth, sceneHeight);
+                                                                               sourceMapResolutionX, sourceMapResolutionY);
 
         BinningConfig binningConfig = new BinningConfig();
         int processed = 1;
