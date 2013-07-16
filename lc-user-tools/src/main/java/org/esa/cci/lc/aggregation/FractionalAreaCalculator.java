@@ -18,12 +18,17 @@ class FractionalAreaCalculator {
     private final Map<Long, Rectangle2D.Double> binRectanglesMap;
 
     public FractionalAreaCalculator(PlanetaryGrid planetaryGrid, int mapWidth, int mapHeight) {
+        this(planetaryGrid, 180.0 / mapHeight, 360.0 / mapWidth);
+    }
+
+    public FractionalAreaCalculator(PlanetaryGrid planetaryGrid, double mapResolutionX, double mapResolutionY) {
         this.planetaryGrid = planetaryGrid;
         deltaGridLat = 180.0 / planetaryGrid.getNumRows();
-        deltaMapLat = 180.0 / mapHeight;
-        deltaMapLon = 360.0 / mapWidth;
         binRectanglesMap = new HashMap<Long, Rectangle2D.Double>();
+        deltaMapLat = mapResolutionX;
+        deltaMapLon = mapResolutionY;
     }
+
 
     public double calculate(double longitude, double latitude, long binIndex) {
         Rectangle2D.Double binRect = getBinRect(binIndex);
