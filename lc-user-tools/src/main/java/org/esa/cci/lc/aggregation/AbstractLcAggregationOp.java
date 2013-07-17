@@ -3,14 +3,12 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.opengis.referencing.crs.GeographicCRS;
 
 import java.io.File;
 import java.util.HashMap;
@@ -76,13 +74,6 @@ public abstract class AbstractLcAggregationOp extends Operator {
     }
 
     protected void validateInputSettings() {
-        final GeoCoding sourceGC = sourceProduct.getGeoCoding();
-        if (sourceGC == null) {
-            throw new OperatorException("The source product must have a geo-coding.");
-        }
-        if (!(sourceGC.getMapCRS() instanceof GeographicCRS)) {
-            throw new OperatorException("The geo-coding of the source product must be of type geographic.");
-        }
         if (targetDir == null) {
             throw new OperatorException("The parameter 'targetDir' must be given.");
         }
