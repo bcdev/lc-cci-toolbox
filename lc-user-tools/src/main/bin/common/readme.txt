@@ -79,6 +79,9 @@ Use the scripts in the same manner.
             -PuserPFTConversionTable=<filePath>
                 Specifies the path to a user defined PFT conversion table. If not given the default
                 LCCCI conversion table will be used. For a description of the file format see further down.
+            -PoutputAccuracy=<boolean>
+                Specifies the computation of the accuracy shall be performed and the result added to the
+                output. This parameter can be omitted. The default is true.
             -PtargetDir=<dirPath>
                 Specifies the directory where the target will be written. It is written as NetCDF-4 file.
                 If already a file with the same name/path exists, it will be overwritten.

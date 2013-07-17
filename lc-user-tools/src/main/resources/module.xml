@@ -10,6 +10,18 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.2:
+    - added parameter for cache size to shell scripts
+    - added parameter 'targetDir' to conversion tool
+    - LUT for PFTs requires now LCCS class as first column
+    - support for subsetting condition products
+    - consolidated metadata
+    - added more logging information
+    - improved speed of writing to NetCDF
+    - introduced property for slice height
+    - reduced even more memory consumption
+    - support for aggregating ba and snow condition
+    - adapted names of aggregated condition variables
     Changes in 3.1:
     - fixed to high memory consumption when doing aggregation
     <!--]]>
