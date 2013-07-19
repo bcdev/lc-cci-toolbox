@@ -7,10 +7,10 @@ public enum PredefinedRegion {
     SOUTH_AMERICA(-105, 19, -34, -57),
     WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS(-26, 83, 53, 25),
     ASIA(53, 83, 180, 0),
-    AFRICA(-26, 40, 53, -40),
+    AFRICA(53, 40, 26, -40),
     SOUTH_EAST_ASIA(90, 29, 163, -12),
     AUSTRALIA_AND_NEW_ZEALAND(95, 0, 180, -53),
-    GREENLAND(-74, 84, -11, 59);
+    GREENLAND(-11, 84, -74, 59);
 
     private float north;
     private float east;
