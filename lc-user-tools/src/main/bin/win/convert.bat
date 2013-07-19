@@ -10,7 +10,7 @@ if %JAVA_LOCATION%.==. GOTO JAVA_NO_INSTALLED
 set TOOL_HOME="%CD%"
 
 java ^
-    -Xmx2G -Dceres.context=beam ^
+    -Xmx4G -Dceres.context=beam ^
     -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
