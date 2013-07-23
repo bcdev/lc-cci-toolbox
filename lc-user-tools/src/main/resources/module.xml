@@ -50,17 +50,17 @@
 
     <categories>VISAT,Processing,Landcover,CCI</categories>
 
-    <extension point="beam-ui:actions">
-        <action>
-            <parent>tool</parent>
-            <id>lc_cci_aggregation</id>
-            <class>org.esa.cci.lc.aggregation.ui.LCAggregationAction</class>
-            <helpId>lc_cci_aggregation</helpId>
-            <text>LC CCI Aggregation Tool...</text>
-            <description>Re-project, aggregate and subset LC map and conditions products.</description>
-            <mnemonic>A</mnemonic>
-        </action>
-    </extension>
+    <!--<extension point="beam-ui:actions">-->
+    <!--<action>-->
+    <!--<parent>tool</parent>-->
+    <!--<id>lc_cci_aggregation</id>-->
+    <!--<class>org.esa.cci.lc.aggregation.ui.LCAggregationAction</class>-->
+    <!--<helpId>lc_cci_aggregation</helpId>-->
+    <!--<text>LC CCI Aggregation Tool...</text>-->
+    <!--<description>Re-project, aggregate and subset LC map and conditions products.</description>-->
+    <!--<mnemonic>A</mnemonic>-->
+    <!--</action>-->
+    <!--</extension>-->
 
     <extension point="beam-ui:helpSets">
         <helpSet>
