@@ -30,7 +30,7 @@ public class LcCondMetadata {
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
             startYear = metadataRoot.getAttributeString("startYear");
             endYear = metadataRoot.getAttributeString("endYear");
-            startDate = metadataRoot.getAttributeString("weekNumber");
+            startDate = metadataRoot.getAttributeString("startDate");
             version = metadataRoot.getAttributeString("version");
         } else {
             // NetCdf
