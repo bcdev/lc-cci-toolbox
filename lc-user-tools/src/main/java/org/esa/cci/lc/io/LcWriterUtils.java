@@ -16,6 +16,8 @@ import java.util.UUID;
  */
 public class LcWriterUtils {
 
+    public static final String ATTRIBUTE_NAME_REGION_IDENTIFIER = "regionIdentifier";
+
     final static SimpleDateFormat COMPACT_ISO_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 
     static {

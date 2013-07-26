@@ -130,8 +130,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
         private String getTypeString(MetadataElement metadataRoot, String condition, String spatialResolution, String temporalResolution) {
             String typeString;
-            if (metadataRoot.containsAttribute("regionIdentifier")) {
-                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
+            if (metadataRoot.containsAttribute(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER)) {
+                String regionIdentifier = metadataRoot.getAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER);
                 typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, regionIdentifier);
             } else {
                 typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD", condition, spatialResolution, temporalResolution);

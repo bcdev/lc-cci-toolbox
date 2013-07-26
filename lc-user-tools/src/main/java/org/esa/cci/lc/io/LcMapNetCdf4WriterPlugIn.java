@@ -114,8 +114,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
         private String getTypeString(String spatialResolution, String temporalResolution, MetadataElement metadataRoot) {
             String typeString;
-            if (metadataRoot.containsAttribute("subsetRegion")) {
-                String regionIdentifier = metadataRoot.getAttributeString("regionIdentifier");
+            if (metadataRoot.containsAttribute(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER)) {
+                String regionIdentifier = metadataRoot.getAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER);
                 typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, regionIdentifier);
             } else {
                 typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolution, temporalResolution);
