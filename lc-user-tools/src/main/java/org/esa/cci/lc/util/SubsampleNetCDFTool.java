@@ -1,4 +1,4 @@
-package org.esa.cci.lc.support;
+package org.esa.cci.lc.util;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
