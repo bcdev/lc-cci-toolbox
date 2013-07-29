@@ -1,9 +1,6 @@
 package org.esa.cci.lc.subset;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
@@ -17,9 +14,7 @@ import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.util.LcHelper;
 
-import java.awt.Rectangle;
 import java.io.File;
-import java.util.HashMap;
 
 @OperatorMetadata(
         alias = "LCCCI.Subset",
@@ -63,16 +58,14 @@ public class LcSubsetOp extends Operator implements Output {
             throw new OperatorException("Either predefined region or geographical bounds must be given.");
         }
         final File fileLocation = sourceProduct.getFileLocation();
-        if (targetDir == null) {
-            targetDir = fileLocation.getParentFile();
-            if (targetDir == null) {
-                throw new OperatorException("Can not retrieve parent directory from source product");
-            }
+        targetDir = LcHelper.ensureTargetDir(targetDir, getSourceProduct());
+
+        if (predefinedRegionIsSelected()) {
+            final PredefinedRegion r = predefinedRegion;
+            subsetProduct = LcHelper.createProductSubset(sourceProduct, r.getNorth(), r.getEast(), r.getSouth(), r.getWest(), getRegionIdentifier());
+        } else {
+            subsetProduct = LcHelper.createProductSubset(sourceProduct, north, east, south, west, getRegionIdentifier());
         }
-        if (!targetDir.isDirectory()) {
-            throw new OperatorException("The target directory does not exist or is not a directory.");
-        }
-        subsetProduct = createProductSubset();
         final String formatName;
         final String fileName = fileLocation.getName();
         if (fileName.startsWith("ESACCI-LC-L4-LCCS-Map-")) {
@@ -89,45 +82,15 @@ public class LcSubsetOp extends Operator implements Output {
     }
 
     private String getTargetFileName(String fileName) {
-        return LcHelper.getTargetFileName(getRegionIdentifier(), fileName);
+        return LcHelper.getTargetFileName(fileName, getRegionIdentifier());
     }
 
     private String getRegionIdentifier() {
-        String regionIdentifier;
         if (predefinedRegionIsSelected()) {
-            regionIdentifier = predefinedRegion.toString();
+            return predefinedRegion.toString();
         } else {
-            regionIdentifier = "USER_REGION";
+            return "USER_REGION";
         }
-        return regionIdentifier;
-    }
-
-    private Product createProductSubset() {
-        final Rectangle pixelRect;
-        if (predefinedRegionIsSelected()) {
-            final PredefinedRegion r = predefinedRegion;
-            pixelRect = getPixelBounds(r.getNorth(), r.getEast(), r.getSouth(), r.getWest());
-        } else {
-            pixelRect = getPixelBounds(north, east, south, west);
-        }
-        final HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("region", pixelRect);
-        Product subset = GPF.createProduct("Subset", parameters, sourceProduct);
-        subset.getMetadataRoot().setAttributeString("regionIdentifier", getRegionIdentifier());
-        return subset;
-    }
-
-    private Rectangle getPixelBounds(float north, float east, float south, float west) {
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        final GeoPos ulGePo = new GeoPos(north, west);
-        final GeoPos lrGePo = new GeoPos(south, east);
-        final PixelPos ulPiPo = geoCoding.getPixelPos(ulGePo, null);
-        final PixelPos lrPiPo = geoCoding.getPixelPos(lrGePo, null);
-        final int x = (int) ulPiPo.x;
-        final int y = (int) ulPiPo.y;
-        final int width = (int) lrPiPo.x - x + 1;
-        final int height = (int) lrPiPo.y - y + 1;
-        return new Rectangle(x, y, width, height);
     }
 
     void setWest(float west) {

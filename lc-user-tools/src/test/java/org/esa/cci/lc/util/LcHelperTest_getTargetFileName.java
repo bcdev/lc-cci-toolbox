@@ -1,7 +1,8 @@
 package org.esa.cci.lc.util;
 
 import org.hamcrest.core.Is;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LcHelperTest_getTargetFileName {
 
@@ -10,7 +11,7 @@ public class LcHelperTest_getTargetFileName {
         final String sourceFileName = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-2016-v4.nc";
         final String insertion = "TextToBeInserted";
 
-        final String targetFileName = LcHelper.getTargetFileName(insertion, sourceFileName);
+        final String targetFileName = LcHelper.getTargetFileName(sourceFileName, insertion);
 
         Assert.assertThat(targetFileName, Is.is("ESACCI-LC-L4-LCCS-Map-300m-P5Y-TextToBeInserted-2016-v4.nc"));
     }
@@ -20,7 +21,7 @@ public class LcHelperTest_getTargetFileName {
         final String sourceFileName = "ESACCI-LC-L4-NDVI-Cond-300m-P7D-2001-2009-0101-v4.nc";
         final String insertion = "TextToBeInserted";
 
-        final String targetFileName = LcHelper.getTargetFileName(insertion, sourceFileName);
+        final String targetFileName = LcHelper.getTargetFileName(sourceFileName, insertion);
 
         Assert.assertThat(targetFileName, Is.is("ESACCI-LC-L4-NDVI-Cond-300m-P7D-TextToBeInserted-2001-2009-0101-v4.nc"));
     }
@@ -30,7 +31,7 @@ public class LcHelperTest_getTargetFileName {
         final String sourceFileName = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2016-v4.nc";
         final String insertion = "Subset";
 
-        final String targetFileName = LcHelper.getTargetFileName(insertion, sourceFileName);
+        final String targetFileName = LcHelper.getTargetFileName(sourceFileName, insertion);
 
         Assert.assertThat(targetFileName, Is.is("ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-Subset-2016-v4.nc"));
     }

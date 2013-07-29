@@ -43,9 +43,12 @@ class RegularCoordinateEncoder implements CoordinateEncoder {
 
         int sceneWidth = planetaryGrid.getNumCols(0);
         final float[] lons = new float[sceneWidth];
+
+        final int firstBinIndex = (int) planetaryGrid.getFirstBinIndex(0);
         for (int i = 0; i < sceneWidth; i++) {
-            lons[i] = (float) planetaryGrid.getCenterLatLon(i)[1];
+            lons[i] = (float) planetaryGrid.getCenterLatLon(firstBinIndex + i)[1];
         }
         lonVar.writeFully(Array.factory(lons));
     }
+
 }

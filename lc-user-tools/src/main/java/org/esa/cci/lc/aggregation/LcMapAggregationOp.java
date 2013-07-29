@@ -17,16 +17,15 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.experimental.Output;
-import org.esa.beam.util.Debug;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -72,11 +71,10 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     @Override
     public void initialize() throws OperatorException {
-        Debug.setEnabled(true);
-        ensureTargetDir();
+        super.initialize();
         validateInputSettings();
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
-        BinningConfig binningConfig = createBinningConfig(planetaryGrid);
+        final BinningConfig binningConfig = createBinningConfig(planetaryGrid);
 
         if (formatterConfig == null) {
             formatterConfig = createDefaultFormatterConfig();
@@ -86,7 +84,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         addPFTTable(lcProperties);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGrid);
-
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
         LcMapMetadata lcMapMetadata = new LcMapMetadata(getSourceProduct());
@@ -98,10 +95,20 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        binningOp.setSourceProduct(getSourceProduct());
+        Product source = getSourceProduct();
+        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (regionEnvelope != null) {
+            double north = regionEnvelope.getMaximum(1);
+            double east = regionEnvelope.getMaximum(0);
+            double south = regionEnvelope.getMinimum(1);
+            double west = regionEnvelope.getMinimum(0);
+            source = LcHelper.createProductSubset(source, north, east, south, west, getRegionIdentifier());
+        }
+
+        binningOp.setSourceProduct(source);
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
-        binningOp.setBinWriter(new LcBinWriter(lcProperties));
+        binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
 
@@ -121,26 +128,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         } else {
             lcProperties.put("pft_table", "No PFT computed.");
         }
-    }
-
-    FormatterConfig createDefaultFormatterConfig() {
-        final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFile(getTargetFilePath());
-        formatterConfig.setOutputType("Product");
-        return formatterConfig;
-    }
-
-    private String getTargetFilePath() {
-        return new File(getTargetDir(), getTargetFileName()).getPath();
-    }
-
-    private String getTargetFileName() {
-        int numRows = getNumRows();
-        final String insertion = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
-                                 ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
-                                 : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
-        final String sourceFileName = getSourceProduct().getFileLocation().getName();
-        return LcHelper.getTargetFileName(insertion, sourceFileName);
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {

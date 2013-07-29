@@ -14,6 +14,7 @@ import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import ucar.ma2.DataType;
 
 import java.awt.Dimension;
@@ -35,22 +36,29 @@ public class LcBinWriter implements BinWriter {
     private Logger logger;
     private String targetFilePath;
     private BinningContext binningContext;
+    private PlanetaryGrid planetaryGrid;
+    private ReferencedEnvelope region;
 
-    public LcBinWriter(Map<String, String> lcProperties) {
+    public LcBinWriter(Map<String, String> lcProperties, ReferencedEnvelope region) {
         this.lcProperties = lcProperties;
         logger = BeamLogManager.getSystemLogger();
+        this.region = region;
     }
 
     @Override
     public void setBinningContext(BinningContext binningContext) {
         this.binningContext = binningContext;
+        if (region != null) {
+            this.planetaryGrid = new RegionalPlanetaryGrid(binningContext.getPlanetaryGrid(), region);
+        } else {
+            this.planetaryGrid = binningContext.getPlanetaryGrid();
+        }
     }
 
     @Override
     public void write(Map<String, String> metadataProperties, List<TemporalBin> temporalBins) throws IOException {
         NFileWriteable writeable = NWritableFactory.create(targetFilePath, "netcdf4");
         try {
-            PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
             int sceneWidth = planetaryGrid.getNumCols(0);
             int sceneHeight = planetaryGrid.getNumRows();
             writeable.addDimension("lat", sceneHeight);
@@ -71,11 +79,10 @@ public class LcBinWriter implements BinWriter {
     }
 
     private CoordinateEncoder createCoordinateEncoder() {
-        final PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
-        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof RegularGaussianGrid) {
+        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof RegularGaussianGrid || planetaryGrid instanceof RegionalPlanetaryGrid) {
             return new RegularCoordinateEncoder(planetaryGrid);
         } else {
-            throw new IllegalStateException("Unknown projection method");
+            throw new IllegalStateException("Unknown planetary grid");
         }
     }
 
@@ -172,11 +179,25 @@ public class LcBinWriter implements BinWriter {
 
         int lineY = 0;
         int hundredthHeight = sceneHeight / 100;
+        int binX;
+        int binY;
         while (iterator.hasNext()) {
             final TemporalBin temporalBin = iterator.next();
-            final long binIndex = temporalBin.getIndex();
-            final int binX = (int) (binIndex % sceneWidth);
-            final int binY = (int) (binIndex / sceneWidth);
+            long binIndex = temporalBin.getIndex();
+            if (planetaryGrid instanceof RegionalPlanetaryGrid) {
+                final RegionalPlanetaryGrid regionalGrid = (RegionalPlanetaryGrid) planetaryGrid;
+                if (!regionalGrid.isBinIndexInRegionalGrid(binIndex)) {
+                    continue;
+                }
+                int baseGridWidth = regionalGrid.getGlobalGrid().getNumCols(0);
+                binX = (int) (binIndex % baseGridWidth);
+                binY = (int) (binIndex / baseGridWidth);
+                binX = binX - regionalGrid.getColumnOffset();
+                binY = binY - regionalGrid.getRowOffset();
+            } else {
+                binX = (int) (binIndex % sceneWidth);
+                binY = (int) (binIndex / sceneWidth);
+            }
             final WritableVector resultVector = temporalBin.toVector();
             if (binY != lineY) {
                 lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);

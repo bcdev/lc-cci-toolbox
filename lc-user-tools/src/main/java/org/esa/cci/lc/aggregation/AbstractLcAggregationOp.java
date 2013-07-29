@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -9,9 +10,14 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.util.LcHelper;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * @author Marco Peters
@@ -30,19 +36,33 @@ public abstract class AbstractLcAggregationOp extends Operator {
     @Parameter(defaultValue = "2160")
     private int numRows;
 
+    @Parameter(description = "The western longitude.", interval = "[-180,180]", unit = "°")
+    private Float west;
+    @Parameter(description = "The northern latitude.", interval = "[-90,90]", unit = "°")
+    private Float north;
+    @Parameter(description = "The eastern longitude.", interval = "[-180,180]", unit = "°")
+    private Float east;
+    @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
+    private Float south;
+
+    @Parameter(description = "A predefined set of north, east, south and west bounds.",
+               valueSet = {
+                       "NORTH_AMERICA", "CENTRAL_AMERICA", "SOUTH_AMERICA",
+                       "WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS", "ASIA", "AFRICA",
+                       "SOUTH_EAST_ASIA", "AUSTRALIA_AND_NEW_ZEALAND", "GREENLAND"
+               })
+    private PredefinedRegion predefinedRegion;
+
+
     private final HashMap<String, String> lcProperties;
 
     protected AbstractLcAggregationOp() {
         this.lcProperties = new HashMap<String, String>();
     }
 
-    void ensureTargetDir() {
-        if (targetDir == null) {
-            final File fileLocation = getSourceProduct().getFileLocation();
-            if (fileLocation != null) {
-                targetDir = fileLocation.getParentFile();
-            }
-        }
+    @Override
+    public void initialize() throws OperatorException {
+        targetDir = LcHelper.ensureTargetDir(targetDir, getSourceProduct());
     }
 
     public File getTargetDir() {
@@ -69,6 +89,88 @@ public abstract class AbstractLcAggregationOp extends Operator {
         this.gridName = gridName;
     }
 
+    PredefinedRegion getPredefinedRegion() {
+        return predefinedRegion;
+    }
+
+    void setPredefinedRegion(PredefinedRegion predefinedRegion) {
+        this.predefinedRegion = predefinedRegion;
+    }
+
+    Float getWest() {
+        return west;
+    }
+
+    void setWest(Float west) {
+        this.west = west;
+    }
+
+    Float getNorth() {
+        return north;
+    }
+
+    void setNorth(Float north) {
+        this.north = north;
+    }
+
+    Float getEast() {
+        return east;
+    }
+
+    void setEast(Float east) {
+        this.east = east;
+    }
+
+    Float getSouth() {
+        return south;
+    }
+
+    void setSouth(Float south) {
+        this.south = south;
+    }
+
+    String getRegionIdentifier() {
+        if (isPredefinedRegionSet()) {
+            return predefinedRegion.toString();
+        } else if (isUserDefinedRegionSet()) {
+            return "USER_REGION";
+        } else {
+            return null;
+        }
+    }
+
+    public ReferencedEnvelope getRegionEnvelope() {
+        if (isPredefinedRegionSet()) {
+            return createEnvelope(predefinedRegion.getNorth(), predefinedRegion.getEast(),
+                                  predefinedRegion.getSouth(), predefinedRegion.getWest());
+        } else if (isUserDefinedRegionSet()) {
+            return createEnvelope(north, east, south, west);
+        }
+        return null;
+    }
+
+    private ReferencedEnvelope createEnvelope(float north, float east, float south, float west) {
+        return new ReferencedEnvelope(east, west, north, south, DefaultGeographicCRS.WGS84);
+    }
+
+    private boolean isPredefinedRegionSet() {
+        return predefinedRegion != null;
+    }
+
+    private boolean isUserDefinedRegionSet() {
+        final boolean valid = north != null && east != null && south != null && west != null;
+        if (valid) {
+            if (west >= east) {
+                throw new OperatorException("West bound must be western of east bound.");
+            }
+            if (north <= south) {
+                throw new OperatorException("North bound must be northern of south bound.");
+            }
+        }
+        return valid;
+    }
+
+
     public HashMap<String, String> getLcProperties() {
         return lcProperties;
     }
@@ -90,20 +192,34 @@ public abstract class AbstractLcAggregationOp extends Operator {
     }
 
     protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
-        float resolutionDegree = 180.0f / getNumRows();
         String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
         String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
-        lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
-        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
         lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
         lcProperties.put("temporalResolution", timeCoverageResolution.substring(1, timeCoverageResolution.length() - 1));
         lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
         lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));
         lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
-        lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
-        lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
-        lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
-        lcProperties.put("lonMax", globalAttributes.getAttributeString("geospatial_lon_max"));
+        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (regionEnvelope != null) {
+            final double latMin = regionEnvelope.getMinimum(1);
+            final double latMax = regionEnvelope.getMaximum(1);
+            float resolutionDegree = (float) ((latMax - latMin) / getNumRows());
+            lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
+            lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
+            lcProperties.put("latMin", String.valueOf(latMin));
+            lcProperties.put("latMax", String.valueOf(latMax));
+            lcProperties.put("lonMin", String.valueOf(regionEnvelope.getMinimum(0)));
+            lcProperties.put("lonMax", String.valueOf(regionEnvelope.getMaximum(0)));
+
+        } else {
+            float resolutionDegree = 180.0f / getNumRows();
+            lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
+            lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
+            lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
+            lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
+            lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
+            lcProperties.put("lonMax", globalAttributes.getAttributeString("geospatial_lon_max"));
+        }
     }
 
     protected void addGridNameToLcProperties(PlanetaryGrid planetaryGrid) {
@@ -121,5 +237,29 @@ public abstract class AbstractLcAggregationOp extends Operator {
 
     protected void addAggregationTypeToLcProperties(String type) {
         lcProperties.put("aggregationType", type);
+    }
+
+    protected String getTargetFileName() {
+        int numRows = getNumRows();
+        String insertion = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
+                           ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
+                           : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
+        final String regionIdentifier = getRegionIdentifier();
+        if (regionIdentifier != null) {
+            insertion = insertion + "-" + regionIdentifier;
+        }
+        final String sourceFileName = getSourceProduct().getFileLocation().getName();
+        return LcHelper.getTargetFileName(sourceFileName, insertion);
+    }
+
+    protected String getTargetFilePath() {
+        return new File(getTargetDir(), getTargetFileName()).getPath();
+    }
+
+    FormatterConfig createDefaultFormatterConfig() {
+        final FormatterConfig formatterConfig = new FormatterConfig();
+        formatterConfig.setOutputFile(getTargetFilePath());
+        formatterConfig.setOutputType("Product");
+        return formatterConfig;
     }
 }

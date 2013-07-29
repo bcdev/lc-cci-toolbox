@@ -12,6 +12,9 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.util.LcHelper;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
@@ -117,7 +120,7 @@ public class LcMapAggregationOpTest {
         sourceProduct.setFileLocation(new File(".", "a-b-c-d-e-f-g-h.nc"));
         aggrOp.setSourceProduct(sourceProduct);
         aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        aggrOp.ensureTargetDir();
+        LcHelper.ensureTargetDir(aggrOp.getTargetDir(), aggrOp.getSourceProduct());
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
         assertThat(formatterConfig.getOutputFile(), is("." + File.separator + "a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
@@ -165,6 +168,34 @@ public class LcMapAggregationOpTest {
             assertThat(message, containsString("majority"));
             assertThat(message, containsString("PFT"));
         }
+    }
+
+
+    @Test
+    public void testRegionEnvelope_WithPredefinedRegion() throws Exception {
+        LcMapAggregationOp aggrOp = createAggrOp();
+        aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
+
+        final ReferencedEnvelope region = aggrOp.getRegionEnvelope();
+        assertEquals(PredefinedRegion.GREENLAND.getEast(), region.getMaximum(0), 1.0e-6);
+        assertEquals(PredefinedRegion.GREENLAND.getNorth(), region.getMaximum(1), 1.0e-6);
+        assertEquals(PredefinedRegion.GREENLAND.getWest(), region.getMinimum(0), 1.0e-6);
+        assertEquals(PredefinedRegion.GREENLAND.getSouth(), region.getMinimum(1), 1.0e-6);
+    }
+
+    @Test
+    public void testRegionEnvelope_WithUserdefinedRegion() throws Exception {
+        LcMapAggregationOp aggrOp = createAggrOp();
+        aggrOp.setNorth(88.8f);
+        aggrOp.setEast(10.4f);
+        aggrOp.setSouth(54.4f);
+        aggrOp.setWest(-36.63f);
+
+        final ReferencedEnvelope region = aggrOp.getRegionEnvelope();
+        assertEquals(-36.63f, region.getMinimum(0), 1.0e-6);
+        assertEquals(88.8f, region.getMaximum(1), 1.0e-6);
+        assertEquals(10.4f, region.getMaximum(0), 1.0e-6);
+        assertEquals(54.4f, region.getMinimum(1), 1.0e-6);
     }
 
     @Test
