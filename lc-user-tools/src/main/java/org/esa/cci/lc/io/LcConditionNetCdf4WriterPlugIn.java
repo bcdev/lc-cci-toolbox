@@ -34,7 +34,6 @@ import java.util.TimeZone;
 public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Condition";
-    private static final Dimension TILE_SIZE = new Dimension(512, 512);
 
     @Override
     public String[] getFormatNames() {
@@ -106,7 +105,6 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                          "This dataset contains the global ESA CCI land cover condition derived from satellite data of a range of years.");
             writeable.addGlobalAttribute("type", typeString);
             writeable.addGlobalAttribute("id", idString);
-            writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
 
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
@@ -168,24 +166,24 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 }
                 for (Band band : p.getBands()) {
                     if (NDVI_MEAN_BAND_NAME.equals(band.getName())) {
-                        addNdviMeanVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
+                        addNdviMeanVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariables.toString());
                     } else if (NDVI_STD_BAND_NAME.equals(band.getName())) {
-                        addNdviStdVariable(ncFile, band, TILE_SIZE);
+                        addNdviStdVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (NDVI_STATUS_BAND_NAME.equals(band.getName())) {
-                        addNdviStatusVariable(ncFile, band, TILE_SIZE);
+                        addNdviStatusVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (NDVI_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addNdviNYearObsVariable(ncFile, band, TILE_SIZE);
+                        addNdviNYearObsVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (BA_OCC_BAND_NAME.equals(band.getName())) {
-                        addBaOccVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
+                        addBaOccVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariables.toString());
                     } else if (BA_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addBaNYearObsVariable(ncFile, band, TILE_SIZE);
+                        addBaNYearObsVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (SNOW_OCC_BAND_NAME.equals(band.getName())) {
-                        addSnowOccVariable(ncFile, band, TILE_SIZE, ancillaryVariables.toString());
+                        addSnowOccVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariables.toString());
                     } else if (SNOW_N_YEAR_OBS_BAND_NAME.equals(band.getName())) {
-                        addSnowNYearObsVariable(ncFile, band, TILE_SIZE);
+                        addSnowNYearObsVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralAggregatedVariable(ncFile, band, TILE_SIZE);
+                        addGeneralAggregatedVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
 
                     }
                 }

@@ -35,7 +35,6 @@ import java.io.IOException;
 public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
     public static final String FORMAT_NAME = "NetCDF4-LC-Map";
-    private static final Dimension TILE_SIZE = new Dimension(512, 512);
 
     @Override
     public String[] getFormatNames() {
@@ -101,7 +100,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
             writeable.addGlobalAttribute("type", typeString);
             writeable.addGlobalAttribute("id", idString);
-            writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution,
@@ -152,20 +150,20 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
                     if (LCCS_CLASS_BAND_NAME.equals(band.getName())) {
-                        addLccsClassVariable(ncFile, band, TILE_SIZE, ancillaryVariableString);
+                        addLccsClassVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariableString);
                     } else if (PROCESSED_FLAG_BAND_NAME.equals(band.getName())) {
-                        addProcessedFlagVariable(ncFile, band, TILE_SIZE);
+                        addProcessedFlagVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (CURRENT_PIXEL_STATE_BAND_NAME.equals(band.getName())) {
-                        addCurrentPixelStateVariable(ncFile, band, TILE_SIZE);
+                        addCurrentPixelStateVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
-                        addObservationCountVariable(ncFile, band, TILE_SIZE);
+                        addObservationCountVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addAlgorithmicConfidenceLevelVariable(ncFile, band, TILE_SIZE);
+                        addAlgorithmicConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addOverallConfidenceLevelVariable(ncFile, band, TILE_SIZE);
+                        addOverallConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralVariable(ncFile, band, TILE_SIZE);
+                        addGeneralVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     }
                 }
             }

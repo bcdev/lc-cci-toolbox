@@ -5,6 +5,7 @@ import com.bc.ceres.core.runtime.internal.ModuleImpl;
 import com.bc.ceres.core.runtime.internal.ModuleManifestParser;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +24,8 @@ public class LcWriterUtils {
     static {
         LcWriterUtils.COMPACT_ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    static final Dimension TILE_SIZE = new Dimension(512, 512);
 
 
     static String getModuleVersion() throws IOException {
@@ -54,6 +57,8 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
         writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
         writeable.addGlobalAttribute("cdm_data_type", "grid");
+        writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
+
     }
 
     static void addSpecificGlobalAttributes(String spatialResolutionDegrees, String spatialResolution,
