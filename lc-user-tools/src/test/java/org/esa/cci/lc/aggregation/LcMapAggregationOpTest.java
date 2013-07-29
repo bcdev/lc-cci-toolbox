@@ -123,7 +123,7 @@ public class LcMapAggregationOpTest {
         LcHelper.ensureTargetDir(aggrOp.getTargetDir(), aggrOp.getSourceProduct());
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
-        assertThat(formatterConfig.getOutputFile(), is("." + File.separator + "a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
+        assertThat(formatterConfig.getOutputFile(), is("a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
     }
 
     private IsNull isNull() {
