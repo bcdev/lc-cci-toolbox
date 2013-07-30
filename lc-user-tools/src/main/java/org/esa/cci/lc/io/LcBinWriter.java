@@ -203,7 +203,7 @@ public class LcBinWriter implements BinWriter {
                 lineY = writeDataLine(variables, sceneWidth, dataLines, lineY);
                 lineY = writeEmptyLines(variables, sceneWidth, dataLines, lineY, binY);
                 if (lineY % hundredthHeight == 0) {
-                    logger.info(String.format("Written line %d of %d", lineY, sceneHeight));
+                    logger.info(String.format("Line %d of %d done", lineY, sceneHeight));
                 }
             }
 
