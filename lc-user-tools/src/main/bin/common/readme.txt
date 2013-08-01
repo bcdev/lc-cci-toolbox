@@ -48,12 +48,9 @@ Use the scripts in the same manner.
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~
 
-      LC-CCI Map Products
-      ~~~~~~~~~~~~~~~~~~~
-        aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
-                         -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
-                         -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
-                         -PtargetDir=<dirPath> <sourceFilePath>
+      LC-CCI Condition Products
+      ~~~~~~~~~~~~~~~~~~~~~~~~~
+        aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
 
         Parameter Description:
             -PgridName=<name>
@@ -64,8 +61,39 @@ Use the scripts in the same manner.
                 Specifies the number of rows for the specified grid.
                 Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
                 ~9.8km/pixel in the target product.
-                For a REGULAR_GAUSSIAN_GRID onyl the following values are valid:
+                For a REGULAR_GAUSSIAN_GRID only the following values are valid:
                     32, 48, 80, 128, 160, 200, 256, 320, 400, 512, 640
+            -PpredefinedRegion=<regionName>
+                Specifies one of the available predefined regions.
+                Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS,
+                                  ASIA, AFRICA, SOUTH_EAST_ASIA, AUSTRALIA_AND_NEW_ZEALAND, GREENLAND
+            -Pnorth=<degree>
+                Specifies north bound of the regional subset.
+            -Peast=<degree>
+                Specifies east bound of the regional subset.
+            -Psouth=<degree>
+                Specifies south bound of the regional subset.
+            -Pwest=<degree>
+                Specifies west bound of the regional subset.
+            -PtargetDir=<dirPath>
+                Specifies the directory where the target will be written. It is written as NetCDF-4 file.
+                If already a file with the same name/path exists, it will be overwritten.
+                (see "Output File Naming Convention" )
+            <sourceFilePath>
+                Is the path to the source NetCDF-4 file.
+
+      LC-CCI Map Products
+      ~~~~~~~~~~~~~~~~~~~
+        aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
+                         -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
+                         -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
+                         -PtargetDir=<dirPath> <sourceFilePath>
+
+        Parameter Description:
+            For a description of the common aggregation parameters please have a look into the above section
+            for the LC-CCI Condition Products. In addition for the aggregation of the LC.CCI Map Products the
+            following parameters exist:
+
             -PoutputLCCSClasses=<boolean>
                 Specifies whether the LCCS classes shall be added to the output. This parameter can be
                 omitted. The default is true.
@@ -82,16 +110,10 @@ Use the scripts in the same manner.
             -PoutputAccuracy=<boolean>
                 Specifies the computation of the accuracy shall be performed and the result added to the
                 output. This parameter can be omitted. The default is true.
-            -PtargetDir=<dirPath>
-                Specifies the directory where the target will be written. It is written as NetCDF-4 file.
-                If already a file with the same name/path exists, it will be overwritten.
-                (see "Output File Naming Convention" )
-            <sourceFilePath>
-                Is the path to the source NetCDF-4 file.
 
         A real example might look like the following:
-        aggregation.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
-                       -PtargetDir="/data/LCCCI/output/" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
+        aggregation-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
+                           -PtargetDir="/data/LCCCI/output/" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,13 +121,6 @@ Use the scripts in the same manner.
             column must contain the value of each LCCS class index. The subsequent rows, one for each LCCS class, define
             the conversion from corresponding class to the PFTs. Columns are separated with the pipe ('|') symbol and
             the column header names are used as band names.
-
-
-      LC-CCI Condition Products
-      ~~~~~~~~~~~~~~~~~~~~~~~~~
-        aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
-
-        For a description of the parameter please have a look into the above section for the LC-CCI Map Products.
 
 
     Subset Tool Usage
