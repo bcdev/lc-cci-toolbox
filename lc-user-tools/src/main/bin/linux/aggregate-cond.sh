@@ -16,4 +16,4 @@ exec java -Xmx4G -Dceres.context=beam \
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
     -Dbeam.binning.sliceHeight=64 \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
-    LCCCI.Aggregate.Cond -c 1024M $@
+    LCCCI.Aggregate.Cond -e -c 1024M $@
