@@ -15,7 +15,7 @@ java ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
-    LCCCI.Convert %*
+    LCCCI.Convert -e %*
 
 exit /B %ERRORLEVEL%
 
