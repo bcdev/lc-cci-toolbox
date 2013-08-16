@@ -1,10 +1,5 @@
 package org.esa.cci.lc.subset;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
-
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
@@ -19,10 +14,17 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.gpf.operators.standard.SubsetOp;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
+
+import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsEqual.*;
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
 
 public class LcSubsetOpTest {
 
@@ -73,6 +75,30 @@ public class LcSubsetOpTest {
         assertThat(tw, is(300));
         assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15.0f, -15.0f)));
         assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15.0f, 15.0f)));
+    }
+
+    @Test
+    public void testTargetProductCreation_PredefinedRegion() throws Exception {
+        // preparation
+        LcSubsetOp lcSubsetOp = createLcSubsetOp();
+        lcSubsetOp.writeProduct = false;
+        lcSubsetOp.setTargetDir(new File("."));
+        lcSubsetOp.setPredefinedRegion(PredefinedRegion.ASIA);
+        final Product sourceProduct = createSourceProduct();
+        lcSubsetOp.setSourceProduct(sourceProduct);
+
+        // execution
+        lcSubsetOp.getTargetProduct();
+
+        //verification
+        final Product subsetProduct = lcSubsetOp.subsetProduct;
+        final int th = subsetProduct.getSceneRasterHeight();
+        final int tw = subsetProduct.getSceneRasterWidth();
+        assertThat(th, is(831));
+        assertThat(tw, is(1271));
+//        final GeoCoding targetGC = subsetProduct.getGeoCoding();
+//        assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15.0f, -15.0f)));
+//        assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15.0f, 15.0f)));
     }
 
     @Test

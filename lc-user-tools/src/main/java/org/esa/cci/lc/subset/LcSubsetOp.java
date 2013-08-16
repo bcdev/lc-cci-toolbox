@@ -117,6 +117,10 @@ public class LcSubsetOp extends Operator implements Output {
         return predefinedRegion != null;
     }
 
+    void setPredefinedRegion(PredefinedRegion predefinedRegion) {
+        this.predefinedRegion = predefinedRegion;
+    }
+
     private boolean userDefinedRegionIsSelected() {
         final boolean valid = north != null && east != null && south != null && west != null;
         if (valid) {
