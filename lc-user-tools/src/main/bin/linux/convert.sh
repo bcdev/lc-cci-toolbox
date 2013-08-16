@@ -16,4 +16,4 @@ exec java -Xmx4G -Dceres.context=beam \
     -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 \
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
-    LCCCI.Convert $@
+    LCCCI.Convert -e $@
