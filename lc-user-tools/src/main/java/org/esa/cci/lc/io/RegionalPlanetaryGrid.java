@@ -108,8 +108,8 @@ public class RegionalPlanetaryGrid implements PlanetaryGrid {
         final int numColsParent = globalGrid.getNumCols(0); // OK to use one value for all rows, cause we assume rectangular grids for now
         for (int i = 0; i < getNumRows(); i++) {
             final long startBinIndex = getFirstBinIndex(i);
-            final long endBinIndex = startBinIndex + numCols;
-            final long endParentRowBinIndex = globalGrid.getFirstBinIndex(i + rowOffset) + numColsParent;
+            final long endBinIndex = startBinIndex + numCols - 1;
+            final long endParentRowBinIndex = globalGrid.getFirstBinIndex(i + rowOffset) + numColsParent - 1;
             if (bin >= startBinIndex && bin <= endBinIndex) {
                 return true;
             } else if (bin < startBinIndex || (bin > endBinIndex && bin <= endParentRowBinIndex)) {
