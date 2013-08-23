@@ -2,6 +2,7 @@ package org.esa.cci.lc.io;
 
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
@@ -15,7 +16,8 @@ import static org.junit.Assert.*;
  */
 public class RegionalPlanetaryGridTest {
 
-    private static final Rectangle2D.Double GEO_REGION = new Rectangle2D.Double(-3.4, 61.7, 20, -40);
+    private static final Rectangle2D.Double GEO_REGION = new Rectangle2D.Double(-3.4, 61.7, 20, -40); // height: minus because lat is upside-down
+    private static final Rectangle2D.Double CENTRAL_AMERICA = new Rectangle2D.Double(-93, 28, 34, -21);
     private static final Rectangle2D.Double GLOBAL_REGION = new Rectangle2D.Double(-180, 90, 360, -180);
 
     @Test
@@ -57,9 +59,18 @@ public class RegionalPlanetaryGridTest {
         assertEquals(((900 - (454 + 1)) * 3600) + (1800 + 67), regionalGrid.getBinIndex(45.4, 6.7));
     }
 
-    private RegionalPlanetaryGrid createRegionalPlanetaryGrid(Rectangle2D.Double rectangle) {
-        final ReferencedEnvelope region = new ReferencedEnvelope(rectangle,    // minus because lat is upside-down
+    @Test
+    public void testThatCertainIndexIsnotInGrid_WithCentralAmerica() throws Exception {
+        final ReferencedEnvelope region = new ReferencedEnvelope(CENTRAL_AMERICA,    // minus because lat is upside-down
                                                                  DefaultGeographicCRS.WGS84);
+
+        final RegionalPlanetaryGrid grid = new RegionalPlanetaryGrid(new RegularGaussianGrid(1280), region);
+        final int binIndex = 1127261;
+        assertFalse(grid.isBinIndexInRegionalGrid(binIndex));
+    }
+
+    private RegionalPlanetaryGrid createRegionalPlanetaryGrid(Rectangle2D.Double rectangle) {
+        final ReferencedEnvelope region = new ReferencedEnvelope(rectangle, DefaultGeographicCRS.WGS84);
         final PlanetaryGrid globalGrid = new PlateCarreeGrid(1800);
         return new RegionalPlanetaryGrid(globalGrid, region);
     }
