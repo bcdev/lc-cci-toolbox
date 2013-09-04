@@ -11,7 +11,7 @@
     <changelog>
         <![CDATA[
     Changes in 3.3:
-    - Allow subsetting while aggregation
+    - Allow subsetting when aggregating map and condition products
     Changes in 3.2:
     - added parameter for cache size to shell scripts
     - added parameter 'targetDir' to conversion tool
