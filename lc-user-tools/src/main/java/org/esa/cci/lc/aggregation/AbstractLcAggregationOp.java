@@ -262,4 +262,13 @@ public abstract class AbstractLcAggregationOp extends Operator {
         formatterConfig.setOutputType("Product");
         return formatterConfig;
     }
+
+    protected Product createSubset(Product source, ReferencedEnvelope regionEnvelope) {
+        double north = regionEnvelope.getMaximum(1);
+        double east = regionEnvelope.getMaximum(0);
+        double south = regionEnvelope.getMinimum(1);
+        double west = regionEnvelope.getMinimum(0);
+        source = LcHelper.createProductSubset(source, north, east, south, west, getRegionIdentifier());
+        return source;
+    }
 }
