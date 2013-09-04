@@ -19,10 +19,14 @@ class PftLut {
         try {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
-            byte[] classValues = new byte[records.size()];
             float[][] conversionFactors = new float[records.size()][pftNames.length];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
+                if (record.length - 1 != pftNames.length) {
+                    final String format = String.format("Error reading the PFT conversion table. In row %d the number of conversion factors " +
+                                                        "should be %d.", i, pftNames.length);
+                    throw new IOException(format);
+                }
                 for (int j = 1; j < record.length; j++) {
                     float pftFactor = Float.NaN;
                     String stringValue = record[j];
