@@ -87,7 +87,11 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         AggregatorConfig aggregatorConfig;
         Product sourceProduct = getSourceProduct();
         if (sourceFileName.toUpperCase().contains("NDVI")) {
-            String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 3);
+            final String[] ndviBandNames = sourceProduct.getBandNames();
+            String[] variableNames = new String[3];
+            variableNames[0] = ndviBandNames[0]; // ndvi_mean
+            variableNames[1] = ndviBandNames[1]; // ndvi_std
+            variableNames[2] = ndviBandNames[3]; // ndvi_nYearObs
             aggregatorConfig = new LcNDVIAggregatorConfig(variableNames);
         } else {
             String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 2);
