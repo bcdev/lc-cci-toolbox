@@ -50,10 +50,18 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                 }
                 InputStreamReader reader = new InputStreamReader(resourceAsStream);
                 pftLut = PftLut.load(reader);
+                final int numLccsClasses = LCCS.getInstance().getNumClasses();
+                final int numConversionFactors = pftLut.getConversionFactors().length;
+                if (numConversionFactors != numLccsClasses) {
+                    final String msg = String.format("PFT conversion table not valid. Should have %d conversion factors but has %d",
+                                                     numLccsClasses, numConversionFactors);
+                    throw new IllegalStateException(msg);
+                }
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         }
+
         return new LcMapAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut);
     }
 }
