@@ -164,6 +164,7 @@ public class LcMapAggregatorTest {
         int class10 = 10;
         int class11 = 11;
         int class12 = 12;
+        int class220 = 220;
 
         aggregator.aggregateSpatial(ctx, obs(class12), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class12), spatialVector);
@@ -173,8 +174,9 @@ public class LcMapAggregatorTest {
         aggregator.aggregateSpatial(ctx, obs(class11), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
+        aggregator.aggregateSpatial(ctx, obs(class220), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class0), spatialVector);
-        int numObs = 9;
+        int numObs = 10;
         aggregator.completeSpatial(ctx, numObs, spatialVector);
         VectorImpl temporalVector = vec(new float[numSpatialFeatures]);
         aggregator.aggregateTemporal(ctx, spatialVector, numObs, temporalVector);
@@ -185,10 +187,10 @@ public class LcMapAggregatorTest {
         VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + numPFTs]);
         aggregator.computeOutput(temporalVector, outputVector);
         int startIndex = outputVector.size() - numPFTs;
-        assertEquals(1.0, outputVector.get(startIndex + 0), 1.0e-6); // Bare Soil: 1 * 100% class11
-        assertEquals(1.5, outputVector.get(startIndex + 1), 1.0e-6);  // Water: 5 * 10% class0 + 1 * 100% class10
+        assertEquals(1.1, outputVector.get(startIndex + 0), 1.0e-6); // Bare Soil: 1 * 100% class11  + 1 * 10% class220
+        assertEquals(2.0, outputVector.get(startIndex + 1), 1.0e-6);  // Water: 5 * 10% class0 + 1 * 100% class10 + 1 * 50% class220
         assertEquals(4.4, outputVector.get(startIndex + 2), 1.0e-6);  // Snow/Ice: 5 * 52% class0 + 2 * 90% class12
-        assertEquals(2.1, outputVector.get(startIndex + 3), 1.0e-6);  // No data: 5 * 38% class0 + 2 * 10% class12
+        assertEquals(2.5, outputVector.get(startIndex + 3), 1.0e-6);  // No data: 5 * 38% class0 + 2 * 10% class12 + 1 * 40% class220
 
     }
 
