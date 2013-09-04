@@ -18,6 +18,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcCondMetadata;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,10 +72,16 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        binningOp.setSourceProduct(getSourceProduct());
+        Product source = getSourceProduct();
+        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (regionEnvelope != null) {
+            source = createSubset(source, regionEnvelope);
+        }
+
+        binningOp.setSourceProduct(source);
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
-        binningOp.setBinWriter(new LcBinWriter(lcProperties, getRegionEnvelope()));
+        binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
         binningOp.setBinningConfig(binningConfig);
         binningOp.setFormatterConfig(formatterConfig);
 

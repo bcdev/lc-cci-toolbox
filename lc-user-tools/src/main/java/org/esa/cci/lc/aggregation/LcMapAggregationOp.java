@@ -20,7 +20,6 @@ import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
-import org.esa.cci.lc.util.LcHelper;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -98,11 +97,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         Product source = getSourceProduct();
         final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
-            double north = regionEnvelope.getMaximum(1);
-            double east = regionEnvelope.getMaximum(0);
-            double south = regionEnvelope.getMinimum(1);
-            double west = regionEnvelope.getMinimum(0);
-            source = LcHelper.createProductSubset(source, north, east, south, west, getRegionIdentifier());
+            source = createSubset(source, regionEnvelope);
         }
 
         binningOp.setSourceProduct(source);
