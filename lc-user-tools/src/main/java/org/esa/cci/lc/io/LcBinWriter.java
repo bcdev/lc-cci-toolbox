@@ -178,7 +178,7 @@ public class LcBinWriter implements BinWriter {
         initDataLines(variables, sceneWidth, dataLines);
 
         int lineY = 0;
-        int hundredthHeight = sceneHeight / 100;
+        int hundredthHeight = Math.max(sceneHeight / 100, sceneHeight);
         int binX;
         int binY;
         while (iterator.hasNext()) {
