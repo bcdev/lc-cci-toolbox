@@ -2,6 +2,7 @@ package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.util.io.CsvReader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
@@ -11,11 +12,17 @@ import java.util.List;
  */
 class PftLut {
 
+    private static final String COMMENT_PREFIX = "#";
+    private static final char[] SEPARATORS = new char[]{'|'};
+
+    private String comment;
     private final String[] pftNames;
     private final float[][] conversionFactors;
 
     public static PftLut load(Reader reader) throws IOException {
-        CsvReader csvReader = new CsvReader(reader, new char[]{'|'});
+        BufferedReader bufReader = new BufferedReader(reader);
+        String comment = readComment(bufReader);
+        CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX);
         try {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
@@ -36,15 +43,28 @@ class PftLut {
                     conversionFactors[i][j - 1] = pftFactor;
                 }
             }
-            return new PftLut(pftNames, conversionFactors);
+            return new PftLut(pftNames, conversionFactors, comment);
         } finally {
             csvReader.close();
         }
     }
 
-    private PftLut(String[] pftNames, float[][] conversionFactors) {
+    private PftLut(String[] pftNames, float[][] conversionFactors, String comment) {
         this.pftNames = pftNames;
         this.conversionFactors = conversionFactors;
+        this.comment = comment;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public String[] getPFTNames() {
+        return pftNames;
+    }
+
+    public float[][] getConversionFactors() {
+        return conversionFactors;
     }
 
     private static String[] ensureValidNames(String[] pftNames) {
@@ -56,11 +76,14 @@ class PftLut {
         return newPftNames;
     }
 
-    public String[] getPFTNames() {
-        return pftNames;
-    }
-
-    public float[][] getConversionFactors() {
-        return conversionFactors;
+    private static String readComment(BufferedReader reader) throws IOException {
+        reader.mark(512);
+        String line = reader.readLine();
+        reader.reset();
+        String comment = null;
+        if (line.startsWith(COMMENT_PREFIX)) {
+            comment = line.substring(1).trim();
+        }
+        return comment;
     }
 }

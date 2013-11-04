@@ -8,15 +8,31 @@ import static org.junit.Assert.*;
 
 public class PftLutTest {
 
-    private static final String TEST_STRING = "class|PFT_1|PFT_2|PFT_3|PFT_4\n" +
-                                              "0|7.6| 90  |     |  2.4\n" +
-                                              "10|   |  60 |   40|     \n" +
-                                              "20|   |     | 100 |     ";
+    private static final String TEST_PFT_WITHOUT_COMMENT = "class|PFT_1|PFT_2|PFT_3|PFT_4\n" +
+                                                           "0|7.6| 90  |     |  2.4\n" +
+                                                           "10|   |  60 |   40|     \n" +
+                                                           "20|   |     | 100 |     ";
 
+    private static final String TEST_PFT_WITH_COMMENT = "# This ia a comment\n" +
+                                                        "class|PFT_1|PFT_2|PFT_3|PFT_4\n" +
+                                                        "0|7.6| 90  |     |  2.4\n" +
+                                                        "10|   |  60 |   40|     \n" +
+                                                        "20|   |     | 100 |     ";
 
     @Test
-    public void testLut() throws Exception {
-        PftLut pftLut = PftLut.load(new StringReader(TEST_STRING));
+    public void testLutWithoutComment() throws Exception {
+        PftLut pftLut = PftLut.load(new StringReader(TEST_PFT_WITHOUT_COMMENT));
+        checkLUT(pftLut);
+    }
+
+    @Test
+    public void testLutWithComment() throws Exception {
+        PftLut pftLut = PftLut.load(new StringReader(TEST_PFT_WITH_COMMENT));
+        checkLUT(pftLut);
+        assertEquals("This ia a comment", pftLut.getComment());
+    }
+
+    private void checkLUT(PftLut pftLut) {
         assertNotNull(pftLut);
 
         String[] pftNames = pftLut.getPFTNames();
