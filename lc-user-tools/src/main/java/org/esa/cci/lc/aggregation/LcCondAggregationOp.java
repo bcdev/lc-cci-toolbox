@@ -33,7 +33,7 @@ import java.util.HashMap;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Cond",
-        version = "0.8",
+        version = "3.3",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
         description = "Allows to aggregate LC condition products.")
