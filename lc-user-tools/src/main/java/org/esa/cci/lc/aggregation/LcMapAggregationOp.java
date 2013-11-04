@@ -44,7 +44,7 @@ import java.util.HashMap;
         description = "Allows to aggregate LC map products.")
 public class LcMapAggregationOp extends AbstractLcAggregationOp implements Output {
 
-    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
+    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d || current_pixel_state == %d)";
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -148,7 +148,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         int processed = 1;
         int clearLand = 1;
         int clearWater = 2;
-        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater);
+        int clearSnowIce = 3;
+        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater, clearSnowIce);
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
