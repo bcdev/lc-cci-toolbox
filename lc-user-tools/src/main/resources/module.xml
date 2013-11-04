@@ -11,6 +11,9 @@
     <changelog>
         <![CDATA[
     Changes in 3.3:
+    - include pixel state clear_snow_ice in valid expression (rule) for map aggregation
+    - Renamed accuracy to confidence
+    - Supporting comment line in user PFT table
     - Allow subsetting when aggregating map and condition products
     Changes in 3.2:
     - added parameter for cache size to shell scripts

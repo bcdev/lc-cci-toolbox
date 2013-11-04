@@ -17,7 +17,7 @@ import java.util.Arrays;
  */
 class LcAccuracyAggregator extends AbstractAggregator {
 
-    private final static String[] featureNames = new String[]{"accuracy"};
+    private final static String[] featureNames = new String[]{"confidence"};
 
     private final int varIndex;
     private final String contextNameSpace;

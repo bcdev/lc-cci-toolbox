@@ -1,7 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.operator.FormatterConfig;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
@@ -12,6 +11,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.LcHelper;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -33,22 +33,22 @@ import static org.junit.matchers.JUnitMatchers.*;
 public class LcMapAggregationOpTest {
 
     private static LcMapAggregationOp.Spi aggregationSpi;
-    private static BeamNetCdf4WriterPlugIn beamNetCdf4WriterPlugIn;
+    private static LcMapNetCdf4WriterPlugIn lcMapNetCdf4WriterPlugIn;
 
     @BeforeClass
     public static void beforeClass() {
         aggregationSpi = new LcMapAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.addOperatorSpi(aggregationSpi);
-        beamNetCdf4WriterPlugIn = new BeamNetCdf4WriterPlugIn();
-        ProductIOPlugInManager.getInstance().addWriterPlugIn(beamNetCdf4WriterPlugIn);
+        lcMapNetCdf4WriterPlugIn = new LcMapNetCdf4WriterPlugIn();
+        ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
     }
 
     @AfterClass
     public static void afterClass() {
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.removeOperatorSpi(aggregationSpi);
-        ProductIOPlugInManager.getInstance().removeWriterPlugIn(beamNetCdf4WriterPlugIn);
+        ProductIOPlugInManager.getInstance().removeWriterPlugIn(lcMapNetCdf4WriterPlugIn);
     }
 
     @Test()

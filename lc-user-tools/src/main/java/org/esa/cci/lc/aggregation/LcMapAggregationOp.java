@@ -23,6 +23,8 @@ import org.esa.cci.lc.io.LcMapTiffReader;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -36,13 +38,13 @@ import java.util.HashMap;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Map",
-        version = "0.8",
+        version = "3.3",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
         description = "Allows to aggregate LC map products.")
 public class LcMapAggregationOp extends AbstractLcAggregationOp implements Output {
 
-    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d)";
+    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d || current_pixel_state == %d)";
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
@@ -80,7 +82,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         }
 
         HashMap<String, String> lcProperties = getLcProperties();
-        addPFTTable(lcProperties);
+        addPFTTableToLcProperties(lcProperties);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGrid);
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
@@ -112,11 +114,19 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     }
 
-    private void addPFTTable(HashMap<String, String> lcProperties) {
+    private void addPFTTableToLcProperties(HashMap<String, String> lcProperties) {
         if (outputPFTClasses) {
             if (userPFTConversionTable != null) {
                 lcProperties.put("pft_table",
                                  String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName()));
+                try {
+                    PftLut pftLut = PftLut.load(new FileReader(userPFTConversionTable));
+                    if (pftLut.getComment() != null) {
+                        lcProperties.put("pft_table_comment", pftLut.getComment());
+                    }
+                } catch (IOException e) {
+                    throw new OperatorException("Could not reade specified PFT table.", e);
+                }
             } else {
                 lcProperties.put("pft_table", "LCCCI conform PFT conversion table used.");
             }
@@ -138,7 +148,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         int processed = 1;
         int clearLand = 1;
         int clearWater = 2;
-        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater);
+        int clearSnowIce = 3;
+        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater, clearSnowIce);
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
