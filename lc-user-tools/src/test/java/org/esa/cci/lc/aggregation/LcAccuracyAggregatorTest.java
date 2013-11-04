@@ -34,6 +34,21 @@ public class LcAccuracyAggregatorTest {
     }
 
     @Test
+    public void testFeatureNames() {
+        String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
+        assertEquals(1, spatialFeatureNames.length);
+        assertEquals("confidence", spatialFeatureNames[0]);
+
+        String[] temporalFeatureNames = aggregator.getTemporalFeatureNames();
+        assertEquals(1, temporalFeatureNames.length);
+        assertEquals("confidence", temporalFeatureNames[0]);
+
+        String[] outputFeatureNames = aggregator.getOutputFeatureNames();
+        assertEquals(1, outputFeatureNames.length);
+        assertEquals("confidence", outputFeatureNames[0]);
+    }
+
+    @Test
     public void testThatZeroObservationsResolvesTo_NaN() {
 
         // execution
