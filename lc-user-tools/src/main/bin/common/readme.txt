@@ -64,19 +64,21 @@ Use the scripts in the same manner.
                 For a REGULAR_GAUSSIAN_GRID only the following values are valid:
                     32, 48, 80, 128, 160, 200, 256, 320, 400, 512, 640
             -PpredefinedRegion=<regionName>
-                Specifies one of the available predefined regions.
-                Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS,
+                Specifies one of the available predefined regions. This is an optional value.
+                If a predefined region is given it has precedence over the user defined region (north, east, ...)
+                Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN,
                                   ASIA, AFRICA, SOUTH_EAST_ASIA, AUSTRALIA_AND_NEW_ZEALAND, GREENLAND
             -Pnorth=<degree>
-                Specifies north bound of the regional subset.
+                Specifies north bound of the regional subset. This is an optional value
             -Peast=<degree>
-                Specifies east bound of the regional subset.
+                Specifies east bound of the regional subset. This is an optional value
             -Psouth=<degree>
-                Specifies south bound of the regional subset.
+                Specifies south bound of the regional subset. This is an optional value
             -Pwest=<degree>
-                Specifies west bound of the regional subset.
+                Specifies west bound of the regional subset. This is an optional value
             -PtargetDir=<dirPath>
-                Specifies the directory where the target will be written. It is written as NetCDF-4 file.
+                Specifies the directory where the target will be written. If this parameter is omitted the directory
+                of the source file is used. It is written as NetCDF-4 file.
                 If already a file with the same name/path exists, it will be overwritten.
                 (see "Output File Naming Convention" )
             <sourceFilePath>
@@ -113,6 +115,7 @@ Use the scripts in the same manner.
 
         A real example might look like the following:
         aggregation-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
+                           -PpredefinedRegion=AUSTRALIA_AND_NEW_ZEALAND
                            -PtargetDir="/data/LCCCI/output/" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
         The PFT (Plant Functional Type) conversion table
@@ -134,7 +137,7 @@ Use the scripts in the same manner.
 
         -PpredefinedRegion=<regionName>
             Specifies one of the available predefined regions.
-            Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS,
+            Valid Values are: NORTH_AMERICA, CENTRAL_AMERICA, SOUTH_AMERICA, WESTERN_EUROPE_AND_MEDITERRANEAN,
                               ASIA, AFRICA, SOUTH_EAST_ASIA, AUSTRALIA_AND_NEW_ZEALAND, GREENLAND
         -Pnorth=<degree>
             Specifies north bound of the regional subset.

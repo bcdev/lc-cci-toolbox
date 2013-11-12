@@ -42,7 +42,7 @@ public class LcSubsetOp extends Operator implements Output {
     @Parameter(description = "A predefined set of north, east, south and west bounds.",
                valueSet = {
                        "NORTH_AMERICA", "CENTRAL_AMERICA", "SOUTH_AMERICA",
-                       "WESTERN_EUROPE_AND_MEDITERRANEAN_BASIS", "ASIA", "AFRICA",
+                       "WESTERN_EUROPE_AND_MEDITERRANEAN", "ASIA", "AFRICA",
                        "SOUTH_EAST_ASIA", "AUSTRALIA_AND_NEW_ZEALAND", "GREENLAND"
                })
     private PredefinedRegion predefinedRegion;
