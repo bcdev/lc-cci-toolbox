@@ -26,7 +26,7 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Convert",
-        version = "0.8",
+        version = "1.1",
         internal = true,
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
@@ -60,12 +60,10 @@ public class LcConversionOp extends Operator implements Output {
         } else {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
-            lcOutputFilename = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s-%s-%s-v%s.nc",
+            lcOutputFilename = String.format("ESACCI-LC-L4-%s-Cond-%sm-%s-%s-v%s.nc",
                                              metadata.getCondition(),
                                              metadata.getSpatialResolution(),
                                              metadata.getTemporalResolution(),
-                                             metadata.getStartYear(),
-                                             metadata.getEndYear(),
                                              metadata.getStartDate(),
                                              metadata.getVersion());
         }
