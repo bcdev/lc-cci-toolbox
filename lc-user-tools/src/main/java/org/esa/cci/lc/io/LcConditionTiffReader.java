@@ -47,7 +47,9 @@ public class LcConditionTiffReader extends AbstractProductReader {
     //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
     //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
     //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
-    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-Agg(Mean|Occ)-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
+    //public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-Agg(Mean|Occ)-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
+    //ESACCI-LC-L4-Snow-Cond-AggOcc-500m-P13Y7D-2000-2012-20000402-v2.0.tif
+    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*)m-(P.*Y.*D)-(....)-(....)-(........)-v(.*)\\.(.*)\\.(tiff?)";
     private List<Product> bandProducts;
 
     public LcConditionTiffReader(LcConditionTiffReaderPlugin readerPlugin) {
@@ -133,7 +135,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
 
     private String createFileName(String variable, String condition, String spatialResolution, String temporalResolution, String startYear,
                                   String endYear, String weekNumber, String majorVersion, String minorVersion, String extension) {
-        return "ESACCI-LC-L4-Cond-" + condition + "-" + variable + "-" + spatialResolution + "m-" + temporalResolution + "d-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "-" + minorVersion + "." + extension;
+        return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "m-" + temporalResolution + "-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "." + minorVersion + "." + extension;
     }
 
     private void addVariableToConditionResult(String conditionName, String variableName, Product variableProduct, Product result) {
