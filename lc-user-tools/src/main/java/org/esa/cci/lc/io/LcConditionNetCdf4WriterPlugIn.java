@@ -83,8 +83,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String temporalResolution = metadata.getTemporalResolution();
             final String version = metadata.getVersion();
 
-            final String typeString = getTypeString(metadataRoot, condition, spatialResolution, temporalResolution);
-            final String idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
+            final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
+            final String temporalCoverageYears = getTemporalCoverageYears(startYear, endYear);
+
+            final String typeString = getTypeString(metadataRoot, condition, spatialResolution, temporalCoverageYears, temporalResolution);
+            final String idString = String.format("%s-%s-v%s", typeString, startDate, version);
 
             final String startTime = startYear + startDate;
             final String endTime = endYear + startDate;
@@ -95,9 +98,6 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String latMin = String.valueOf(lowerRight.getLat());
             final String lonMin = String.valueOf(upperLeft.getLon());
             final String lonMax = String.valueOf(lowerRight.getLon());
-
-            final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
-            final String temporalCoverageYears = getTemporalCoverageYears(startYear, endYear);
 
             // global attributes
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Condition " + condition);
@@ -126,13 +126,13 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             return temporalCoverageYears;
         }
 
-        private String getTypeString(MetadataElement metadataRoot, String condition, String spatialResolution, String temporalResolution) {
+        private String getTypeString(MetadataElement metadataRoot, String condition, String spatialResolution, String temporalCoverageYears, String temporalResolution) {
             String typeString;
             if (metadataRoot.containsAttribute(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER)) {
                 String regionIdentifier = metadataRoot.getAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER);
-                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-%s-%s", condition, spatialResolution, temporalResolution, regionIdentifier);
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD-%s", condition, spatialResolution, temporalCoverageYears, temporalResolution, regionIdentifier);
             } else {
-                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-%s", condition, spatialResolution, temporalResolution);
+                typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD", condition, spatialResolution, temporalCoverageYears, temporalResolution);
             }
             return typeString;
         }
