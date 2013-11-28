@@ -62,7 +62,8 @@ public class LcWriterUtils {
     }
 
     static void addSpecificGlobalAttributes(String spatialResolutionDegrees, String spatialResolution,
-                                            String temporalCoverageYears, String temporalResolution, String startTime, String endTime, String version,
+                                            String temporalCoverageYears, String temporalResolution, String unit,
+                                            String startTime, String endTime, String version,
                                             String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
         writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
         writeable.addGlobalAttribute("product_version", version);
@@ -76,7 +77,7 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("time_coverage_start", startTime);
         writeable.addGlobalAttribute("time_coverage_end", endTime);
         writeable.addGlobalAttribute("time_coverage_duration", "P" + temporalCoverageYears + "Y");
-        writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + "D");
+        writeable.addGlobalAttribute("time_coverage_resolution", "P" + temporalResolution + unit);
 
         writeable.addGlobalAttribute("geospatial_lat_min", latMin);
         writeable.addGlobalAttribute("geospatial_lat_max", latMax);

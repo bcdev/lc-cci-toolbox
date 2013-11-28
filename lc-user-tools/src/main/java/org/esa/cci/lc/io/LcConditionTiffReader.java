@@ -49,7 +49,8 @@ public class LcConditionTiffReader extends AbstractProductReader {
     //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
     //public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-Agg(Mean|Occ)-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
     //ESACCI-LC-L4-Snow-Cond-AggOcc-500m-P13Y7D-2000-2012-20000402-v2.0.tif
-    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*)m-P.*Y(.*)D-(....)-(....)-(........)-v(.*)\\.(.*)\\.(tiff?)";
+    //ESACCI-LC-L4-BA-Cond-AggOcc-500m-P13Y7D-20001022-v2.0.tif
+    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*)m-P(.*)Y(.*)D-(........)-v(.*)\\.(tiff?)";
     private List<Product> bandProducts;
 
     public LcConditionTiffReader(LcConditionTiffReaderPlugin readerPlugin) {
@@ -69,14 +70,13 @@ public class LcConditionTiffReader extends AbstractProductReader {
         final String condition = m.group(1);
         final String mainVariable = m.group(2).toLowerCase();
         final String spatialResolution = m.group(3);
-        final String temporalResolution = m.group(4);
-        final String startYear = m.group(5);
-        final String endYear = m.group(6);
-        final String startDate = m.group(7);
-        final String majorVersion = m.group(8);
-        final String minorVersion = m.group(9);
-        final String version = majorVersion + "." + minorVersion;
-        final String extension = m.group(10);
+        final String temporalCoverageYears = m.group(4);
+        final String temporalResolution = m.group(5);
+        final String startDate = m.group(6);
+        final String startYear = startDate.substring(0, 4);
+        final String endYear = String.valueOf(Integer.parseInt(startYear) + Integer.parseInt(temporalCoverageYears) - 1);
+        final String version = m.group(7);
+        final String extension = m.group(8);
 
         final Product lcConditionProduct = readProduct(productDir, lcConditionFilename, plugIn);
 
@@ -106,18 +106,18 @@ public class LcConditionTiffReader extends AbstractProductReader {
         //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
         //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
-        final String stdFilename = createFileName("Std", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                  startDate, majorVersion, minorVersion, extension);
+        final String stdFilename = createFileName("Std", condition, spatialResolution, temporalCoverageYears, temporalResolution,
+                                                  startDate, version, extension);
         final Product stdProduct = readProduct(productDir, stdFilename, plugIn);
         addVariableToConditionResult(condition, "std", stdProduct, result);
 
-        final String statusFilename = createFileName("Status", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                     startDate, majorVersion, minorVersion, extension);
+        final String statusFilename = createFileName("Status", condition, spatialResolution, temporalCoverageYears, temporalResolution,
+                                                     startDate, version, extension);
         final Product statusProduct = readProduct(productDir, statusFilename, plugIn);
         addVariableToConditionResult(condition, "status", statusProduct, result);
 
-        final String nYearObsFilename = createFileName("NYearObs", condition, spatialResolution, temporalResolution, startYear, endYear,
-                                                       startDate, majorVersion, minorVersion, extension);
+        final String nYearObsFilename = createFileName("NYearObs", condition, spatialResolution, temporalCoverageYears, temporalResolution,
+                                                       startDate, version, extension);
         final Product nYearObsProduct = readProduct(productDir, nYearObsFilename, plugIn);
         addVariableToConditionResult(condition, "nYearObs", nYearObsProduct, result);
 
@@ -133,9 +133,9 @@ public class LcConditionTiffReader extends AbstractProductReader {
     }
 
 
-    private String createFileName(String variable, String condition, String spatialResolution, String temporalResolution, String startYear,
-                                  String endYear, String weekNumber, String majorVersion, String minorVersion, String extension) {
-        return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "m-" + temporalResolution + "-" + startYear + "-" + endYear + "-" + weekNumber + "-v" + majorVersion + "." + minorVersion + "." + extension;
+    private String createFileName(String variable, String condition, String spatialResolution, String temporalCoverageYears, String temporalResolution,
+                                  String startDate, String version, String extension) {
+        return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "m-P" + temporalCoverageYears + "Y" + temporalResolution + "D-" + startDate + "-v" + version + "." + extension;
     }
 
     private void addVariableToConditionResult(String conditionName, String variableName, Product variableProduct, Product result) {

@@ -102,7 +102,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("id", idString);
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
-                                                      temporalCoverageYears, temporalResolution,
+                                                      temporalCoverageYears, temporalResolution, "Y",
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable);
 

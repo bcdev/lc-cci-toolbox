@@ -89,8 +89,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String typeString = getTypeString(metadataRoot, condition, spatialResolution, temporalCoverageYears, temporalResolution);
             final String idString = String.format("%s-%s-v%s", typeString, startDate, version);
 
-            final String startTime = startYear + startDate;
-            final String endTime = endYear + startDate;
+            final String startTime = startDate;
+            final String endTime = endYear + startDate.substring(4);
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0.0f, 0.0f), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
@@ -108,7 +108,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
-                                                      temporalCoverageYears, temporalResolution,
+                                                      temporalCoverageYears, temporalResolution, "D",
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable);
 

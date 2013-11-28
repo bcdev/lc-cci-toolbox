@@ -119,6 +119,7 @@ public class LcBinWriter implements BinWriter {
                                                   spatialResolution,
                                                   lcProperties.remove("temporalCoverageYears"),
                                                   temporalResolution,
+                                                  "Map".equals(aggregationType) ? "Y" : "D",
                                                   lcProperties.remove("startTime"),
                                                   lcProperties.remove("endTime"),
                                                   version,

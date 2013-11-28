@@ -43,8 +43,8 @@ import java.util.regex.Pattern;
  * @author Martin Böttcher
  */
 public class LcMapTiffReader extends AbstractProductReader {
-
-    public static final String LC_CLASSIF_FILENAME_PATTERN = "ESACCI-LC-Map-...m-(....)-V(.\\..)\\.(tiff?)";
+    // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2000-v1.1.tif
+    public static final String LC_CLASSIF_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)\\.(tiff?)";
     public static final String[] LC_VARIABLE_NAMES = {
             "lccs_class",
             "processed_flag",
@@ -104,7 +104,7 @@ public class LcMapTiffReader extends AbstractProductReader {
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
 
         for (int i = 1; i <= 5; ++i) {
-            String lcFlagFilename = "ESACCI-LC-Map-300m-" + epoch + "-V" + version + "-qualityflag" + i + "." + extension;
+            String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map-qualityflag" + i + "-300m-P5Y-" + epoch + "-v" + version + "." + extension;
             final Product lcFlagProduct = readProduct(productDir, lcFlagFilename, plugIn);
             if (lcFlagProduct == null) {
                 continue;
