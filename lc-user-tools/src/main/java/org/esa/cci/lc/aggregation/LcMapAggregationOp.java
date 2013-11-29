@@ -18,7 +18,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcBinWriter;
-import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
@@ -27,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -77,18 +77,19 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         final BinningConfig binningConfig = createBinningConfig(planetaryGrid);
 
-        if (formatterConfig == null) {
-            formatterConfig = createDefaultFormatterConfig();
-        }
-
         HashMap<String, String> lcProperties = getLcProperties();
         addPFTTableToLcProperties(lcProperties);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGrid);
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
-        LcMapMetadata lcMapMetadata = new LcMapMetadata(getSourceProduct());
-        lcProperties.put("epoch", lcMapMetadata.getEpoch());
+
+        String id = createTypeAndID(lcProperties);
+
+        if (formatterConfig == null) {
+            formatterConfig = createDefaultFormatterConfig(id);
+        }
+
 
         BinningOp binningOp;
         try {
@@ -111,6 +112,32 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
+
+    }
+
+    private String createTypeAndID(HashMap<String, String> lcProperties) {
+        String spatialResolutionNominal = lcProperties.get("spatialResolutionNominal");
+        String temporalResolution = lcProperties.get("temporalResolution");
+        String version = lcProperties.get("version");
+        String typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolutionNominal, temporalResolution);
+        int startYear = Integer.parseInt(lcProperties.get("startTime").substring(0, 4));
+        int endYear = Integer.parseInt(lcProperties.get("endTime").substring(0, 4));
+        String epoch = String.valueOf((endYear + startYear) / 2);
+
+        int numRows = getNumRows();
+        String aggrResolution = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
+                                ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
+                                : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
+        final String regionIdentifier = getRegionIdentifier();
+        lcProperties.put("type", typeString);
+        String id;
+        if (regionIdentifier != null) {
+            id = String.format("%s-%s-%s-%s-v%s", typeString, aggrResolution, regionIdentifier, epoch, version);
+        } else {
+            id = String.format("%s-%s-%s-v%s", typeString, aggrResolution, epoch, version);
+        }
+        lcProperties.put("id", id);
+        return id;
 
     }
 

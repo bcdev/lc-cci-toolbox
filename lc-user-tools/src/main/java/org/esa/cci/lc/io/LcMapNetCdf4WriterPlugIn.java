@@ -75,8 +75,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String epoch = lcMapMetadata.getEpoch();
             final String version = lcMapMetadata.getVersion();
 
-            final String typeString = getTypeString(spatialResolution, temporalResolution, metadataRoot);
-            final String idString = String.format("%s-%s-v%s", typeString, epoch, version);
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
@@ -98,8 +96,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
-            writeable.addGlobalAttribute("type", typeString);
-            writeable.addGlobalAttribute("id", idString);
+            writeable.addGlobalAttribute("type", metadataRoot.getAttributeString("type"));
+            writeable.addGlobalAttribute("id", metadataRoot.getAttributeString("id"));
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "Y",
@@ -108,17 +106,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
-        }
-
-        private String getTypeString(String spatialResolution, String temporalResolution, MetadataElement metadataRoot) {
-            String typeString;
-            if (metadataRoot.containsAttribute(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER)) {
-                String regionIdentifier = metadataRoot.getAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER);
-                typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, regionIdentifier);
-            } else {
-                typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolution, temporalResolution);
-            }
-            return typeString;
         }
 
         private String getTemporalCoverage(String startYear, String endYear) {

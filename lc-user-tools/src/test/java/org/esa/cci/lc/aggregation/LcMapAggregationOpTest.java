@@ -121,7 +121,7 @@ public class LcMapAggregationOpTest {
         aggrOp.setSourceProduct(sourceProduct);
         aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         LcHelper.ensureTargetDir(aggrOp.getTargetDir(), aggrOp.getSourceProduct());
-        FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
+        FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig("a-b-c-d-aggregated-0.083333Deg-g-h");
         assertThat(formatterConfig.getOutputType(), is("Product"));
         assertThat(formatterConfig.getOutputFile(), is("a-b-c-d-aggregated-0.083333Deg-g-h.nc"));
     }

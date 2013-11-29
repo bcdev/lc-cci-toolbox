@@ -13,7 +13,7 @@ public class LcMapMetadata {
 
     private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*)m-P(.*)Y-?(aggregated)?-(....)-v(.*)";
 
-    private static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
+    public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
     private String epoch;
     private String version;

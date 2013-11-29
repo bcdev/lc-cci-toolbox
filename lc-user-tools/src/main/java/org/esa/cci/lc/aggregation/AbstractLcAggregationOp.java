@@ -17,7 +17,6 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Locale;
 
 /**
  * @author Marco Peters
@@ -240,26 +239,9 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("aggregationType", type);
     }
 
-    protected String getTargetFileName() {
-        int numRows = getNumRows();
-        String insertion = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
-                           ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
-                           : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
-        final String regionIdentifier = getRegionIdentifier();
-        if (regionIdentifier != null) {
-            insertion = insertion + "-" + regionIdentifier;
-        }
-        final String sourceFileName = getSourceProduct().getFileLocation().getName();
-        return LcHelper.getTargetFileName(sourceFileName, insertion);
-    }
-
-    protected String getTargetFilePath() {
-        return new File(getTargetDir(), getTargetFileName()).getPath();
-    }
-
-    FormatterConfig createDefaultFormatterConfig() {
+    FormatterConfig createDefaultFormatterConfig(String id) {
         final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFile(getTargetFilePath());
+        formatterConfig.setOutputFile(new File(getTargetDir(), id + ".nc").getPath());
         formatterConfig.setOutputType("Product");
         return formatterConfig;
     }

@@ -109,21 +109,18 @@ public class LcBinWriter implements BinWriter {
                                      "This dataset contains the global ESA CCI land cover products " +
                                      "which are spatially aggregated by the lc-user-tool.");
 
-        String spatialResolution = lcProperties.remove("spatialResolution");
-        String spatialResolutionNominal = lcProperties.remove("spatialResolutionNominal");
-        String temporalResolution = lcProperties.remove("temporalResolution");
-        String version = lcProperties.remove("version");
-        addTypeAndIdAttribute(aggregationType, spatialResolutionNominal, temporalResolution, version, writeable);
+        writeable.addGlobalAttribute("type", lcProperties.remove("type"));
+        writeable.addGlobalAttribute("id", lcProperties.remove("id"));
 
         LcWriterUtils.addGenericGlobalAttributes(writeable);
         LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("spatialResolutionDegrees"),
-                                                  spatialResolution,
+                                                  lcProperties.remove("spatialResolution"),
                                                   lcProperties.remove("temporalCoverageYears"),
-                                                  temporalResolution,
+                                                  lcProperties.remove("temporalResolution"),
                                                   "Map".equals(aggregationType) ? "Y" : "D",
                                                   lcProperties.remove("startTime"),
                                                   lcProperties.remove("endTime"),
-                                                  version,
+                                                  lcProperties.remove("version"),
                                                   lcProperties.remove("latMax"),
                                                   lcProperties.remove("latMin"),
                                                   lcProperties.remove("lonMin"),
@@ -135,28 +132,6 @@ public class LcBinWriter implements BinWriter {
             writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
         }
 
-    }
-
-    private void addTypeAndIdAttribute(String aggregationType, String spatialResolutionNominal, String temporalResolution, String version,
-                                       NFileWriteable writeable) throws IOException {
-        String typeString;
-        String idString;
-        if (aggregationType.equals("Map")) {
-            String epoch = lcProperties.remove("epoch");
-            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolutionNominal, temporalResolution, "aggregated");
-            idString = String.format("%s-%s-v%s", typeString, epoch, version);
-        } else {
-            String condition = lcProperties.remove("condition");
-            String startYear = lcProperties.remove("startYear");
-            String endYear = lcProperties.remove("endYear");
-            String startDate = lcProperties.remove("startDate");
-            String temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
-            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD-%s", condition, spatialResolutionNominal,
-                                       temporalCoverageYears, temporalResolution, "aggregated");
-            idString = String.format("%s-%s-v%s", typeString, startDate, version);
-        }
-        writeable.addGlobalAttribute("type", typeString);
-        writeable.addGlobalAttribute("id", idString);
     }
 
     private ArrayList<NVariable> addFeatureVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {

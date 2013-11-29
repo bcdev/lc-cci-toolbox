@@ -45,36 +45,46 @@ public class LcConversionOp extends Operator implements Output {
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
 
-        final String lcOutputFilename;
         File sourceFile = sourceProduct.getFileLocation();
 
+
+        String typeString;
+        String id;
         String outputFormat;
         if (sourceFile.getName().startsWith("ESACCI-LC-L4-LCCS-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
-            lcOutputFilename = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s-v%s.nc",
-                                             metadata.getSpatialResolution(),
-                                             metadata.getTemporalResolution(),
-                                             metadata.getEpoch(),
-                                             metadata.getVersion());
+            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY",
+                                       metadata.getSpatialResolution(),
+                                       metadata.getTemporalResolution());
+            id = String.format("%s-%s-v%s",
+                               typeString,
+                               metadata.getEpoch(),
+                               metadata.getVersion());
         } else {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
             String temporalCoverageYears = String.valueOf(Integer.parseInt(metadata.getEndYear()) - Integer.parseInt(metadata.getStartYear()) + 1);
-            lcOutputFilename = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD-%s-v%s.nc",
-                                             metadata.getCondition(),
-                                             metadata.getSpatialResolution(),
-                                             temporalCoverageYears,
-                                             metadata.getTemporalResolution(),
-                                             metadata.getStartDate(),
-                                             metadata.getVersion());
+            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD",
+                                       metadata.getCondition(),
+                                       metadata.getSpatialResolution(),
+                                       temporalCoverageYears,
+                                       metadata.getTemporalResolution());
+            id = String.format("%s-%s-v%s",
+                               typeString,
+                               metadata.getStartDate(),
+                               metadata.getVersion());
         }
+
+        // setting the id in order to hand over to the writer
+        sourceProduct.getMetadataRoot().setAttributeString("type", typeString);
+        sourceProduct.getMetadataRoot().setAttributeString("id", id);
 
         if (targetDir == null) {
             targetDir = sourceFile.getParentFile();
         }
 
-        File targetFile = new File(targetDir, lcOutputFilename);
+        File targetFile = new File(targetDir, String.format(id + ".nc"));
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times

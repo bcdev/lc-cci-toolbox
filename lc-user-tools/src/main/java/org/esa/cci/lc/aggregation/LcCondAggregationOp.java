@@ -22,6 +22,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * The LC map and conditions products are delivered in a full spatial resolution version, both as global
@@ -49,10 +50,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         BinningConfig binningConfig = createBinningConfig(planetaryGrid);
 
-        if (formatterConfig == null) {
-            formatterConfig = createDefaultFormatterConfig();
-        }
-
         HashMap<String, String> lcProperties = getLcProperties();
         addAggregationTypeToLcProperties("Condition");
         addGridNameToLcProperties(planetaryGrid);
@@ -64,6 +61,11 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         lcProperties.put("startYear", lcCondMetadata.getStartYear());
         lcProperties.put("endYear", lcCondMetadata.getEndYear());
         lcProperties.put("startDate", lcCondMetadata.getStartDate());
+
+        String id = createId(lcProperties);
+        if (formatterConfig == null) {
+            formatterConfig = createDefaultFormatterConfig(id);
+        }
 
 
         BinningOp binningOp;
@@ -87,6 +89,35 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
+    }
+
+    private String createId(HashMap<String, String> lcProperties) {
+
+        String condition = lcProperties.remove("condition");
+        String startYear = lcProperties.remove("startYear");
+        String endYear = lcProperties.remove("endYear");
+        String startDate = lcProperties.remove("startDate");
+        String spatialResolutionNominal = lcProperties.get("spatialResolutionNominal");
+        String temporalResolution = lcProperties.get("temporalResolution");
+        String version = lcProperties.get("version");
+
+        String temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
+        String typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD", condition, spatialResolutionNominal,
+                                          temporalCoverageYears, temporalResolution);
+        int numRows = getNumRows();
+        String aggrResolution = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
+                                ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
+                                : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
+        lcProperties.put("type", typeString);
+        String id;
+        final String regionIdentifier = getRegionIdentifier();
+        if (regionIdentifier != null) {
+            id = String.format("%s-%s-%s-%s-v%s", typeString, aggrResolution, regionIdentifier, startDate, version);
+        } else {
+            id = String.format("%s-%s-%s-v%s", typeString, aggrResolution, startDate, version);
+        }
+        lcProperties.put("id", id);
+        return id;
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
