@@ -195,6 +195,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
         String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
         lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
+        lcProperties.put("spatialResolutionNominal", globalAttributes.getAttributeString("spatial_resolution"));
         lcProperties.put("temporalResolution", timeCoverageResolution.substring(1, timeCoverageResolution.length() - 1));
         lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
         lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));

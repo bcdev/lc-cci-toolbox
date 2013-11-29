@@ -110,9 +110,10 @@ public class LcBinWriter implements BinWriter {
                                      "which are spatially aggregated by the lc-user-tool.");
 
         String spatialResolution = lcProperties.remove("spatialResolution");
+        String spatialResolutionNominal = lcProperties.remove("spatialResolutionNominal");
         String temporalResolution = lcProperties.remove("temporalResolution");
         String version = lcProperties.remove("version");
-        addTypeAndIdAttribute(aggregationType, spatialResolution, temporalResolution, version, writeable);
+        addTypeAndIdAttribute(aggregationType, spatialResolutionNominal, temporalResolution, version, writeable);
 
         LcWriterUtils.addGenericGlobalAttributes(writeable);
         LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("spatialResolutionDegrees"),
@@ -136,21 +137,23 @@ public class LcBinWriter implements BinWriter {
 
     }
 
-    private void addTypeAndIdAttribute(String aggregationType, String spatialResolution, String temporalResolution, String version,
+    private void addTypeAndIdAttribute(String aggregationType, String spatialResolutionNominal, String temporalResolution, String version,
                                        NFileWriteable writeable) throws IOException {
         String typeString;
         String idString;
         if (aggregationType.equals("Map")) {
             String epoch = lcProperties.remove("epoch");
-            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolution, temporalResolution, "aggregated");
+            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY-%s", spatialResolutionNominal, temporalResolution, "aggregated");
             idString = String.format("%s-%s-v%s", typeString, epoch, version);
         } else {
             String condition = lcProperties.remove("condition");
             String startYear = lcProperties.remove("startYear");
             String endYear = lcProperties.remove("endYear");
             String startDate = lcProperties.remove("startDate");
-            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, "aggregated");
-            idString = String.format("%s-%s%s-v%s", typeString, startYear, startDate, version);
+            String temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
+            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD-%s", condition, spatialResolutionNominal,
+                                       temporalCoverageYears, temporalResolution, "aggregated");
+            idString = String.format("%s-%s-v%s", typeString, startDate, version);
         }
         writeable.addGlobalAttribute("type", typeString);
         writeable.addGlobalAttribute("id", idString);
