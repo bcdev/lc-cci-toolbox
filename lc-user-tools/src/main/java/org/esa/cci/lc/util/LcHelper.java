@@ -14,10 +14,14 @@ import java.util.HashMap;
 
 public class LcHelper {
 
+    // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2005-v1.1.nc
+    // ESACCI-LC-L4-NDVI-Cond-1000m-P14Y7D-19991224-v2.0.nc
+    // ESACCI-LC-L4-NDVI-Cond-1000m-P14Y7D-aggregated-subsetted-19991224-v2.0.nc
+
     public static String getTargetFileName(String sourceFileName, String insertion) {
         final String sep = "-";
         final String[] strings = sourceFileName.split(sep);
-        final int insertionPos = sourceFileName.startsWith("ESACCI-LC-L4-LCCS-Map-") ? strings.length - 2 : strings.length - 4;
+        final int insertionPos = strings.length - 2;
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < strings.length - 1; i++) {
             String string = strings[i];

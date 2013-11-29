@@ -18,12 +18,12 @@ public class LcHelperTest_getTargetFileName {
 
     @Test
     public void testGetTargetFileName_ConditionFile() throws Exception {
-        final String sourceFileName = "ESACCI-LC-L4-NDVI-Cond-300m-P7D-2001-2009-0101-v4.nc";
+        final String sourceFileName = "ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-20010101-v4.nc";
         final String insertion = "TextToBeInserted";
 
         final String targetFileName = LcHelper.getTargetFileName(sourceFileName, insertion);
 
-        Assert.assertThat(targetFileName, Is.is("ESACCI-LC-L4-NDVI-Cond-300m-P7D-TextToBeInserted-2001-2009-0101-v4.nc"));
+        Assert.assertThat(targetFileName, Is.is("ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-TextToBeInserted-20010101-v4.nc"));
     }
 
     @Test

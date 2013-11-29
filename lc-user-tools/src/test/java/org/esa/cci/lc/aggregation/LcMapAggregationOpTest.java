@@ -117,13 +117,13 @@ public class LcMapAggregationOpTest {
         assertThat(aggrOp.getNumRows(), is(2160));
 
         final Product sourceProduct = new Product("dummy", "t", 20, 10);
-        sourceProduct.setFileLocation(new File(".", "a-b-c-d-e-f-g-h.nc"));
+        sourceProduct.setFileLocation(new File(".", "a-b-c-d-g-h.nc"));
         aggrOp.setSourceProduct(sourceProduct);
         aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
         LcHelper.ensureTargetDir(aggrOp.getTargetDir(), aggrOp.getSourceProduct());
         FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig();
         assertThat(formatterConfig.getOutputType(), is("Product"));
-        assertThat(formatterConfig.getOutputFile(), is("a-b-c-d-aggregated-0.083333Deg-e-f-g-h.nc"));
+        assertThat(formatterConfig.getOutputFile(), is("a-b-c-d-aggregated-0.083333Deg-g-h.nc"));
     }
 
     private IsNull isNull() {

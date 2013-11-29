@@ -150,7 +150,7 @@ public class LcBinWriter implements BinWriter {
             String endYear = lcProperties.remove("endYear");
             String startDate = lcProperties.remove("startDate");
             typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sD-%s", condition, spatialResolution, temporalResolution, "aggregated");
-            idString = String.format("%s-%s-%s-%s-v%s", typeString, startYear, endYear, startDate, version);
+            idString = String.format("%s-%s%s-v%s", typeString, startYear, startDate, version);
         }
         writeable.addGlobalAttribute("type", typeString);
         writeable.addGlobalAttribute("id", idString);
