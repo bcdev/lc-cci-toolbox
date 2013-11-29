@@ -43,12 +43,11 @@ import java.util.regex.Pattern;
  */
 public class LcConditionTiffReader extends AbstractProductReader {
 
-    //ESACCI-LC-L4-Cond-NDVI-AggMean-1000m-7d-1999-2011-0101-v1-0.tif
-    //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
-    //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
-    //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
-    //public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-Cond-(.*)-Agg(Mean|Occ)-(.*)m-(.*)d-(....)-(....)-(....)-v(.*)-(.*)\\.(tiff?)";
-    //ESACCI-LC-L4-Snow-Cond-AggOcc-500m-P13Y7D-2000-2012-20000402-v2.0.tif
+    //ESACCI-LC-L4-Cond-NDVI-AggMean-1000m-P13Y7D-19990101-v1.0.tif
+    //ESACCI-LC-L4-Cond-NDVI-Std-1000m-P13Y7D-19990101-v1.0.tif
+    //ESACCI-LC-L4-Cond-NDVI-Status-1000m-P13Y7D-19990101-v1.0.tif
+    //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-P13Y7D-19990101-v1.0.tif
+    //ESACCI-LC-L4-Snow-Cond-AggOcc-500m-P13Y7D-20000402-v2.0.tif
     //ESACCI-LC-L4-BA-Cond-AggOcc-500m-P13Y7D-20001022-v2.0.tif
     public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*)m-P(.*)Y(.*)D-(........)-v(.*)\\.(tiff?)";
     private List<Product> bandProducts;
@@ -102,10 +101,10 @@ public class LcConditionTiffReader extends AbstractProductReader {
         bandProducts.add(lcConditionProduct);
         Band band = addBand(condition.toLowerCase() + "_" + mainVariable, lcConditionProduct, result);
         band.setDescription(condition + " " + mainVariable);
-        //ESACCI-LC-L4-Cond-NDVI-AggMean-1000m-7d-1999-2011-0101-v1-0.tif
-        //ESACCI-LC-L4-Cond-NDVI-Std-1000m-7d-1999-2011-0101-v1-0.tif
-        //ESACCI-LC-L4-Cond-NDVI-Status-1000m-7d-1999-2011-0101-v1-0.tif
-        //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-7d-1999-2011-0101-v1-0.tif
+        //ESACCI-LC-L4-Cond-NDVI-AggMean-1000m-P13Y7D-19990101-v1.0.tif
+        //ESACCI-LC-L4-Cond-NDVI-Std-1000m-P13Y7D-19990101-v1.0.tif
+        //ESACCI-LC-L4-Cond-NDVI-Status-1000m-P13Y7D-19990101-v1.0.tif
+        //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-P13Y7D-19990101-v1.0.tif
         final String stdFilename = createFileName("Std", condition, spatialResolution, temporalCoverageYears, temporalResolution,
                                                   startDate, version, extension);
         final Product stdProduct = readProduct(productDir, stdFilename, plugIn);
@@ -133,7 +132,8 @@ public class LcConditionTiffReader extends AbstractProductReader {
     }
 
 
-    private String createFileName(String variable, String condition, String spatialResolution, String temporalCoverageYears, String temporalResolution,
+    private String createFileName(String variable, String condition, String spatialResolution, String temporalCoverageYears,
+                                  String temporalResolution,
                                   String startDate, String version, String extension) {
         return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "m-P" + temporalCoverageYears + "Y" + temporalResolution + "D-" + startDate + "-v" + version + "." + extension;
     }

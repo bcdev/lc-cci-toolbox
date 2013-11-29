@@ -168,7 +168,7 @@ Output File Naming Convention
     ~~~~~~~~~~~~~~~~~~~~~~~
         Map Product:        ESACCI-LC-L4-LCCS-Map-{sRes}m-P{tRes}Y-{epoch}-v{versNr}.nc
 
-        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}-{endY}-{weekNr}-v{versNr}.nc
+        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}{MonthDay}-v{versNr}.nc
 
 
 
@@ -178,32 +178,32 @@ Output File Naming Convention
                                                                   ^
                                                                   |--- Split Position
 
-        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}-{endY}-{weekNr}-v{versNr}.nc
+        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}{MonthDay}-v{versNr}.nc
                                                                           ^
                                                                           |--- Split Position
 
     Examples Map Result:
     ~~~~~~~~~~~~~~~~~~~~
         Aggregation:
-            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-2006-v4.nc
+            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-2006-v2.nc
 
-            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v4.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v2.nc
 
         Subset:
-            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v4.nc
+            Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-2006-v2.nc
 
-            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-EUROPE-2006-v4.nc
-            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-ASIA-2006-v4.nc
-            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-USER_REGION-2006-v4.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-EUROPE-2006-v2.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-ASIA-2006-v2.nc
+            Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-USER_REGION-2006-v2.nc
 
 
 
     Examples Condition Result:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
         Subset:
-            Input  :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-2001-2009-0101-v4.nc
+            Input  :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-20010101-v2.nc
 
-            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-EUROPE-2001-2009-0101-v4.nc
-            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-ASIA-2001-2009-0101-v4.nc
-            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P7D-USER_REGION-2001-2009-0101-v4.nc
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-EUROPE-20010101-v2.nc
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-ASIA-20010101-v2.nc
+            Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-USER_REGION-20010101-v2.nc
 
