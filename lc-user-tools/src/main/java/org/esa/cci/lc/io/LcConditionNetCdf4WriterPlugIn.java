@@ -188,11 +188,11 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index");
-                variable.addAttribute("valid_min", -100);
-                variable.addAttribute("valid_max", 100);
-                variable.addAttribute("scale_factor", 0.01f);
+                variable.addAttribute("valid_min", -10000);
+                variable.addAttribute("valid_max", 10000);
+                variable.addAttribute("scale_factor", 0.0001f);
                 if (ncDataType == DataType.SHORT) {
-                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 255);
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 32767);
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 255);
                 }
@@ -208,10 +208,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index standard_error");
                 variable.addAttribute("valid_min", 0);
-                variable.addAttribute("valid_max", 100);
-                variable.addAttribute("scale_factor", 0.01f);
+                variable.addAttribute("valid_max", 10000);
+                variable.addAttribute("scale_factor", 0.0001f);
                 if (ncDataType == DataType.BYTE) {
-                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 32767);
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
                 }
