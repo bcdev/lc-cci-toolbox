@@ -15,6 +15,8 @@ public class LcMapMetadata {
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
+    private String type;
+    private String id;
     private String epoch;
     private String version;
     private String spatialResolution;
@@ -24,7 +26,8 @@ public class LcMapMetadata {
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
         if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
-            final String id = globalAttributes.getAttributeString("id");
+            type = globalAttributes.getAttributeString("type");
+            id = globalAttributes.getAttributeString("id");
             Matcher idMatcher = lcMapTypeMatcher(id);
 
             spatialResolution = idMatcher.group(1);
@@ -32,6 +35,8 @@ public class LcMapMetadata {
             epoch = idMatcher.group(4);
             version = idMatcher.group(5);
         } else {
+            type = metadataRoot.getAttributeString("type");
+            id = metadataRoot.getAttributeString("id");
             epoch = metadataRoot.getAttributeString("epoch");
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
@@ -46,6 +51,14 @@ public class LcMapMetadata {
             throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_MAP_ID_PATTERN);
         }
         return m;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getEpoch() {

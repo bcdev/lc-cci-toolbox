@@ -17,7 +17,6 @@ import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StringUtils;
@@ -66,7 +65,6 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
 
-            final MetadataElement metadataRoot = product.getMetadataRoot();
             final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
 
             final LcMapMetadata lcMapMetadata = new LcMapMetadata(product);
@@ -96,8 +94,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("title", "ESA CCI Land Cover Map");
             writeable.addGlobalAttribute("summary",
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
-            writeable.addGlobalAttribute("type", metadataRoot.getAttributeString("type"));
-            writeable.addGlobalAttribute("id", metadataRoot.getAttributeString("id"));
+            writeable.addGlobalAttribute("type", lcMapMetadata.getType());
+            writeable.addGlobalAttribute("id", lcMapMetadata.getId());
             LcWriterUtils.addGenericGlobalAttributes(writeable);
             LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "Y",

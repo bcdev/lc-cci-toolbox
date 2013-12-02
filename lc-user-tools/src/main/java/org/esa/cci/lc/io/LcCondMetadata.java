@@ -14,6 +14,8 @@ public class LcCondMetadata {
     // ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20001224-v2.0
     private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*m)-P(.*)Y(.*)D-?(aggregated)?-(....)(....)-v(.*)";
 
+    private String type;
+    private String id;
     private String condition;
     private String spatialResolution;
     private String temporalResolution;
@@ -26,6 +28,8 @@ public class LcCondMetadata {
     public LcCondMetadata(Product product) {
         if (product.getProductReader() instanceof LcConditionTiffReader) {
             MetadataElement metadataRoot = product.getMetadataRoot();
+            type = metadataRoot.getAttributeString("type");
+            id = metadataRoot.getAttributeString("id");
             condition = metadataRoot.getAttributeString("condition");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
@@ -33,10 +37,13 @@ public class LcCondMetadata {
             endYear = metadataRoot.getAttributeString("endYear");
             startDate = metadataRoot.getAttributeString("startDate");
             version = metadataRoot.getAttributeString("version");
+
         } else {
             // NetCdf
             MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
-            Matcher idMatcher = lcConditionTypeMatcher(globalAttributes.getAttributeString("id"));
+            type = globalAttributes.getAttributeString("type");
+            id = globalAttributes.getAttributeString("id");
+            Matcher idMatcher = lcConditionTypeMatcher(id);
             condition = idMatcher.group(1);
             spatialResolution = idMatcher.group(2);
             temporalResolution = idMatcher.group(4);
@@ -54,6 +61,14 @@ public class LcCondMetadata {
             return m;
         }
         throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_CONDITION_ID_PATTERN);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getCondition() {
