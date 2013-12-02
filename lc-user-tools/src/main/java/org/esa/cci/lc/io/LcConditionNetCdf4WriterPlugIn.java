@@ -83,7 +83,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String temporalResolution = metadata.getTemporalResolution();
             final String version = metadata.getVersion();
 
-            final String spatialResolutionDegrees = "500".equals(spatialResolution) ? "0.005556" : "0.011112";
+            final String spatialResolutionDegrees = "500m".equals(spatialResolution) ? "0.005556" : "0.011112";
             final String temporalCoverageYears = getTemporalCoverageYears(startYear, endYear);
 
             final String startTime = startDate;

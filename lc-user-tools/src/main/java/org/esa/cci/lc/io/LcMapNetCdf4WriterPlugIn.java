@@ -83,7 +83,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String lonMin = String.valueOf(upperLeft.getLon());
             final String lonMax = String.valueOf(lowerRight.getLon());
 
-            final String spatialResolutionDegrees = "300".equals(spatialResolution) ? "0.002778" : "0.011112";
+            final String spatialResolutionDegrees = "300m".equals(spatialResolution) ? "0.002778" : "0.011112";
             int epochInt = Integer.parseInt(epoch);
             int temporalResolutionInt = Integer.parseInt(temporalResolution);
             final String startYear = String.valueOf(epochInt - temporalResolutionInt / 2);

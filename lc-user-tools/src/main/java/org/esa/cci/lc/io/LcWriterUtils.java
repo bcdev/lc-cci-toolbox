@@ -83,7 +83,7 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("geospatial_lat_max", latMax);
         writeable.addGlobalAttribute("geospatial_lon_min", lonMin);
         writeable.addGlobalAttribute("geospatial_lon_max", lonMax);
-        writeable.addGlobalAttribute("spatial_resolution", spatialResolution + "m");
+        writeable.addGlobalAttribute("spatial_resolution", spatialResolution);
         writeable.addGlobalAttribute("geospatial_lat_units", "degrees_north");
         writeable.addGlobalAttribute("geospatial_lat_resolution", spatialResolutionDegrees);
         writeable.addGlobalAttribute("geospatial_lon_units", "degrees_east");

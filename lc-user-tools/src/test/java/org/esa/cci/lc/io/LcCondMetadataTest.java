@@ -16,7 +16,7 @@ public class LcCondMetadataTest {
     public void testParseTypeAttribute() throws Exception {
         Matcher idMatcher = LcCondMetadata.lcConditionTypeMatcher("ESACCI-LC-L4-BA-Cond-500m-P13Y7D-20000604-v1.0");
         assertThat("BA", is(idMatcher.group(1)));
-        assertThat("500", is(idMatcher.group(2)));
+        assertThat("500m", is(idMatcher.group(2)));
         assertThat("7", is(idMatcher.group(4)));
         assertThat(null, is(idMatcher.group(5)));
         assertThat("2000", is(idMatcher.group(6)));
@@ -25,7 +25,7 @@ public class LcCondMetadataTest {
 
         idMatcher = LcCondMetadata.lcConditionTypeMatcher("ESACCI-LC-L4-BA-Cond-500m-P13Y7D-aggregated-20000604-v1.0");
         assertThat("BA", is(idMatcher.group(1)));
-        assertThat("500", is(idMatcher.group(2)));
+        assertThat("500m", is(idMatcher.group(2)));
         assertThat("7", is(idMatcher.group(4)));
         assertThat("aggregated", is(idMatcher.group(5)));
         assertThat("2000", is(idMatcher.group(6)));

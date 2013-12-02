@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class LcCondMetadata {
 
     // ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20001224-v2.0
-    private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*)m-P(.*)Y(.*)D-?(aggregated)?-(....)(....)-v(.*)";
+    private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*m)-P(.*)Y(.*)D-?(aggregated)?-(....)(....)-v(.*)";
 
     private String condition;
     private String spatialResolution;

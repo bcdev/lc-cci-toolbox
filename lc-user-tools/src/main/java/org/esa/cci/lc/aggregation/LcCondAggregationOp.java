@@ -102,7 +102,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         String version = lcProperties.get("version");
 
         String temporalCoverageYears = String.valueOf(Integer.parseInt(endYear) - Integer.parseInt(startYear) + 1);
-        String typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD", condition, spatialResolutionNominal,
+        String typeString = String.format("ESACCI-LC-L4-%s-Cond-%s-P%sY%sD", condition, spatialResolutionNominal,
                                           temporalCoverageYears, temporalResolution);
         int numRows = getNumRows();
         String aggrResolution = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)

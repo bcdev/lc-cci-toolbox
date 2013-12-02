@@ -54,7 +54,7 @@ public class LcConversionOp extends Operator implements Output {
         if (sourceFile.getName().startsWith("ESACCI-LC-L4-LCCS-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
-            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY",
+            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%s-P%sY",
                                        metadata.getSpatialResolution(),
                                        metadata.getTemporalResolution());
             id = String.format("%s-%s-v%s",
@@ -65,7 +65,7 @@ public class LcConversionOp extends Operator implements Output {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
             String temporalCoverageYears = String.valueOf(Integer.parseInt(metadata.getEndYear()) - Integer.parseInt(metadata.getStartYear()) + 1);
-            typeString = String.format("ESACCI-LC-L4-%s-Cond-%sm-P%sY%sD",
+            typeString = String.format("ESACCI-LC-L4-%s-Cond-%s-P%sY%sD",
                                        metadata.getCondition(),
                                        metadata.getSpatialResolution(),
                                        temporalCoverageYears,

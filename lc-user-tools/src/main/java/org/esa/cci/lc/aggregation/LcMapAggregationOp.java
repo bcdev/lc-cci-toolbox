@@ -119,7 +119,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         String spatialResolutionNominal = lcProperties.get("spatialResolutionNominal");
         String temporalResolution = lcProperties.get("temporalResolution");
         String version = lcProperties.get("version");
-        String typeString = String.format("ESACCI-LC-L4-LCCS-Map-%sm-P%sY", spatialResolutionNominal, temporalResolution);
+        String typeString = String.format("ESACCI-LC-L4-LCCS-Map-%s-P%sY", spatialResolutionNominal, temporalResolution);
         int startYear = Integer.parseInt(lcProperties.get("startTime").substring(0, 4));
         int endYear = Integer.parseInt(lcProperties.get("endTime").substring(0, 4));
         String epoch = String.valueOf((endYear + startYear) / 2);
