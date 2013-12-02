@@ -49,7 +49,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
     //ESACCI-LC-L4-Cond-NDVI-NYearObs-1000m-P13Y7D-19990101-v1.0.tif
     //ESACCI-LC-L4-Snow-Cond-AggOcc-500m-P13Y7D-20000402-v2.0.tif
     //ESACCI-LC-L4-BA-Cond-AggOcc-500m-P13Y7D-20001022-v2.0.tif
-    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*)m-P(.*)Y(.*)D-(........)-v(.*)\\.(tiff?)";
+    public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*m)-P(.*)Y(.*)D-(........)-v(.*)\\.(tiff?)";
     private List<Product> bandProducts;
 
     public LcConditionTiffReader(LcConditionTiffReaderPlugin readerPlugin) {
