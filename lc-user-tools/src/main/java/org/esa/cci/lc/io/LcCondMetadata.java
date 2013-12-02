@@ -28,8 +28,12 @@ public class LcCondMetadata {
     public LcCondMetadata(Product product) {
         if (product.getProductReader() instanceof LcConditionTiffReader) {
             MetadataElement metadataRoot = product.getMetadataRoot();
-            type = metadataRoot.getAttributeString("type");
-            id = metadataRoot.getAttributeString("id");
+            if (metadataRoot.containsAttribute("type")) {
+                type = metadataRoot.getAttributeString("type");
+            }
+            if (metadataRoot.containsAttribute("id")) {
+                id = metadataRoot.getAttributeString("id");
+            }
             condition = metadataRoot.getAttributeString("condition");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");

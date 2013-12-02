@@ -35,8 +35,12 @@ public class LcMapMetadata {
             epoch = idMatcher.group(3);
             version = idMatcher.group(4);
         } else {
-            type = metadataRoot.getAttributeString("type");
-            id = metadataRoot.getAttributeString("id");
+            if (metadataRoot.containsAttribute("type")) {
+                type = metadataRoot.getAttributeString("type");
+            }
+            if (metadataRoot.containsAttribute("id")) {
+                id = metadataRoot.getAttributeString("id");
+            }
             epoch = metadataRoot.getAttributeString("epoch");
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
