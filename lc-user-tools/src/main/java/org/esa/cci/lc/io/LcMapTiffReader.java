@@ -96,7 +96,7 @@ public class LcMapTiffReader extends AbstractProductReader {
         MetadataElement metadataRoot = result.getMetadataRoot();
         metadataRoot.setAttributeString("epoch", epoch);
         metadataRoot.setAttributeString("version", version);
-        metadataRoot.setAttributeString("spatialResolution", "300");
+        metadataRoot.setAttributeString("spatialResolution", "300m");
         metadataRoot.setAttributeString("temporalResolution", "5");
 
         bandProducts.add(lcClassifLccsProduct);

@@ -135,7 +135,7 @@ public class LcConditionTiffReader extends AbstractProductReader {
     private String createFileName(String variable, String condition, String spatialResolution, String temporalCoverageYears,
                                   String temporalResolution,
                                   String startDate, String version, String extension) {
-        return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "m-P" + temporalCoverageYears + "Y" + temporalResolution + "D-" + startDate + "-v" + version + "." + extension;
+        return "ESACCI-LC-L4-" + condition + "-Cond-" + variable + "-" + spatialResolution + "-P" + temporalCoverageYears + "Y" + temporalResolution + "D-" + startDate + "-v" + version + "." + extension;
     }
 
     private void addVariableToConditionResult(String conditionName, String variableName, Product variableProduct, Product result) {
