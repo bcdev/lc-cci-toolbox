@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class LcMapMetadata {
 
-    private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-?(aggregated)?-(....)-v(.*)";
+    private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
@@ -32,8 +32,8 @@ public class LcMapMetadata {
 
             spatialResolution = idMatcher.group(1);
             temporalResolution = idMatcher.group(2);
-            epoch = idMatcher.group(4);
-            version = idMatcher.group(5);
+            epoch = idMatcher.group(3);
+            version = idMatcher.group(4);
         } else {
             type = metadataRoot.getAttributeString("type");
             id = metadataRoot.getAttributeString("id");
@@ -44,7 +44,7 @@ public class LcMapMetadata {
         }
     }
 
-    private static Matcher lcMapTypeMatcher(String id) {
+    static Matcher lcMapTypeMatcher(String id) {
         Pattern p = Pattern.compile(LC_MAP_ID_PATTERN);
         final Matcher m = p.matcher(id);
         if (!m.matches()) {

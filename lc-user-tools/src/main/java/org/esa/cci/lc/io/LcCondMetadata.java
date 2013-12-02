@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
  */
 public class LcCondMetadata {
 
-    // ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20001224-v2.0
-    private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*m)-P(.*)Y(.*)D-?(aggregated)?-(....)(....)-v(.*)";
+    // ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-(aggregated)(-)(N640)(-)20001224-v2.0
+    private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*m)-P(.*)Y(.*)D-[aggregated]?-?.*?-?(....)(....)-v(.*)";
 
     private String type;
     private String id;
@@ -46,11 +46,12 @@ public class LcCondMetadata {
             Matcher idMatcher = lcConditionTypeMatcher(id);
             condition = idMatcher.group(1);
             spatialResolution = idMatcher.group(2);
+            int temporalCoverage = Integer.parseInt(idMatcher.group(3));
             temporalResolution = idMatcher.group(4);
-            startYear = idMatcher.group(6);
-            endYear = String.valueOf(Integer.parseInt(startYear) + Integer.parseInt(idMatcher.group(3)) - 1);
-            startDate = startYear + idMatcher.group(7);
-            version = idMatcher.group(8);
+            startYear = idMatcher.group(5);
+            endYear = String.valueOf(Integer.parseInt(startYear) + temporalCoverage - 1);
+            startDate = startYear + idMatcher.group(6);
+            version = idMatcher.group(7);
         }
     }
 
