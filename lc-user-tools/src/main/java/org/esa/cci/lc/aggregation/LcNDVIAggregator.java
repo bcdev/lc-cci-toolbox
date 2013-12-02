@@ -9,19 +9,17 @@ import org.esa.beam.binning.WritableVector;
 
 /**
  * This class implements the aggregation of LC-CCI NDVI Condition products.
- * Input variables are: ndvi_mean, ndvi_std, ndvi_nYearObs
+ * Input variables are: ndvi_mean, ndvi_nYearObs
  *
  * @author Marco Peters
  */
 class LcNDVIAggregator extends AbstractAggregator {
 
-    private static final String[] featureNameTemplates = {"%s_mean", "%s_mean", "%s_sum"};
+    private static final String[] featureNameTemplates = {"%s_mean", "%s_sum"};
 
     private final int ndviMeanIndex;
-    private final int ndviStdIndex;
     private final int nYearObsIndex;
     private final String ndviMeanInvCountName;
-    private final String ndviStdInvCountName;
     private final String nYearObsInvCountName;
 
     LcNDVIAggregator(VariableContext varCtx, String[] varNames) {
@@ -29,17 +27,14 @@ class LcNDVIAggregator extends AbstractAggregator {
 
         ndviMeanIndex = varCtx.getVariableIndex(varNames[0]);
         ndviMeanInvCountName = "invCount." + varNames[0];
-        ndviStdIndex = varCtx.getVariableIndex(varNames[1]);
-        ndviStdInvCountName = "invCount." + varNames[1];
-        nYearObsIndex = varCtx.getVariableIndex((varNames[2]));
-        nYearObsInvCountName = "invCount." + varNames[2];
+        nYearObsIndex = varCtx.getVariableIndex((varNames[1]));
+        nYearObsInvCountName = "invCount." + varNames[1];
     }
 
     private static String[] createFeatureNames(String[] varNames) {
         String[] featureNames = new String[featureNameTemplates.length];
         featureNames[0] = String.format(featureNameTemplates[0], varNames[0]);
         featureNames[1] = String.format(featureNameTemplates[1], varNames[1]);
-        featureNames[2] = String.format(featureNameTemplates[2], varNames[2]);
         return featureNames;
     }
 
@@ -47,15 +42,13 @@ class LcNDVIAggregator extends AbstractAggregator {
     public void initSpatial(BinContext ctx, WritableVector vector) {
         initVector(vector, 0.0f);
         ctx.put(ndviMeanInvCountName, new int[1]);
-        ctx.put(ndviStdInvCountName, new int[1]);
         ctx.put(nYearObsInvCountName, new int[1]);
     }
 
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observationVector, WritableVector spatialVector) {
         aggregateSpatialVar(ctx, observationVector, spatialVector, ndviMeanIndex, 0, ndviMeanInvCountName);
-        aggregateSpatialVar(ctx, observationVector, spatialVector, ndviStdIndex, 1, ndviStdInvCountName);
-        aggregateSpatialVar(ctx, observationVector, spatialVector, nYearObsIndex, 2, nYearObsInvCountName);
+        aggregateSpatialVar(ctx, observationVector, spatialVector, nYearObsIndex, 1, nYearObsInvCountName);
     }
 
     private void aggregateSpatialVar(BinContext ctx, Observation observationVector, WritableVector spatialVector,
@@ -71,8 +64,7 @@ class LcNDVIAggregator extends AbstractAggregator {
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
         completeSpatialVar(ctx, numSpatialObs, spatialVector, 0, ndviMeanInvCountName);
-        completeSpatialVar(ctx, numSpatialObs, spatialVector, 1, ndviStdInvCountName);
-        completeSpatialVar(ctx, numSpatialObs, spatialVector, 2, nYearObsInvCountName);
+        completeSpatialVar(ctx, numSpatialObs, spatialVector, 1, nYearObsInvCountName);
     }
 
     private void completeSpatialVar(BinContext ctx, int numSpatialObs, WritableVector spatialVector, int spatialVectorIndex, String invCountName) {
