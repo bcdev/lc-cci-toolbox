@@ -278,10 +278,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_max", 30);
                 if (ncDataType == DataType.BYTE) {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
-                    variable.addAttribute("_WaterValue", (byte) -2);
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
-                    variable.addAttribute("_WaterValue", (short) -2);
                 }
             }
 
@@ -294,8 +292,10 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_max", 100);
                 if (ncDataType == DataType.SHORT) {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                    variable.addAttribute("_WaterValue", (byte) -2);
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                    variable.addAttribute("_WaterValue", (short) -2);
                 }
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
