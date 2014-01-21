@@ -236,8 +236,8 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                final byte[] conditionFlagValues = new byte[]{0, 1, 2, 3, 4, 5, 6};
-                final String conditionFlagMeanings = "no_data land water snow cloud cloud_shadow invalid";
+                final byte[] conditionFlagValues = new byte[]{0, 1, 2, 3, 4, 5};
+                final String conditionFlagMeanings = "invalid land water snow cloud filled_ice";
                 final Array valids = Array.factory(conditionFlagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index status_flag");
