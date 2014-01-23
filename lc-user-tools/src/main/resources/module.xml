@@ -11,6 +11,8 @@
     <changelog>
         <![CDATA[
     Changes in 3.3:
+    - added aggregation rules for ndvi, ba and snow
+    - updated flags with filled_ice for ndvi
     - include pixel state clear_snow_ice in valid expression (rule) for map aggregation
     - Renamed accuracy to confidence
     - Supporting comment line in user PFT table

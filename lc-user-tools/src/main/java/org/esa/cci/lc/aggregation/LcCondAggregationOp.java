@@ -124,7 +124,9 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         String sourceFileName = getSourceProduct().getFileLocation().getName();
         AggregatorConfig aggregatorConfig;
         Product sourceProduct = getSourceProduct();
-        if (sourceFileName.toUpperCase().contains("NDVI")) {
+        String maskExpression = null;
+        if (isSourceNDVI(sourceFileName)) {
+            maskExpression = "ndvi_status == 1";
             final String[] ndviBandNames = sourceProduct.getBandNames();
             String[] variableNames = new String[2];
             variableNames[0] = ndviBandNames[0]; // ndvi_mean
@@ -135,13 +137,34 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
             aggregatorConfig = new LcCondOccAggregatorConfig(variableNames);
         }
 
+        if (isSourceSnow(sourceFileName)) {
+            maskExpression = "snow_occ >= 0 && snow_occ <= 100";
+        }
+
+        if (isSourceBA(sourceFileName)) {
+            maskExpression = "ba_occ >= 0 && ba_occ <= 100";
+        }
+
         BinningConfig binningConfig = new BinningConfig();
+        binningConfig.setMaskExpr(maskExpression);
         binningConfig.setNumRows(getNumRows());
         binningConfig.setSuperSampling(1);
         binningConfig.setAggregatorConfigs(aggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
         return binningConfig;
+    }
+
+    private boolean isSourceBA(String sourceFileName) {
+        return sourceFileName.toUpperCase().contains("BA");
+    }
+
+    private boolean isSourceSnow(String sourceFileName) {
+        return sourceFileName.toUpperCase().contains("SNOW");
+    }
+
+    private boolean isSourceNDVI(String sourceFileName) {
+        return sourceFileName.toUpperCase().contains("NDVI");
     }
 
     private PlanetaryGrid createPlanetaryGrid() {
