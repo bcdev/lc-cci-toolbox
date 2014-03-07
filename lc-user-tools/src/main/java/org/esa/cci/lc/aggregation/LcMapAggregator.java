@@ -23,18 +23,18 @@ import java.util.TreeMap;
 class LcMapAggregator extends AbstractAggregator {
 
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
-    private FractionalAreaCalculator areaCalculator;
+    private AreaCalculator areaCalculator;
     private boolean outputLCCSClasses;
     private int numMajorityClasses;
     private PftLut pftLut;
 
     public LcMapAggregator(boolean outputLCCSClasses, int numMajorityClasses,
-                           FractionalAreaCalculator calculator, PftLut pftLut) {
+                           AreaCalculator calculator, PftLut pftLut) {
         this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, calculator, pftLut);
     }
 
     private LcMapAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
-                            FractionalAreaCalculator calculator, PftLut pftLut) {
+                            AreaCalculator calculator, PftLut pftLut) {
         super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
               createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames));
         this.outputLCCSClasses = outputLCCSClasses;

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * @author Marco Peters
  */
-class FractionalAreaCalculator {
+class FractionalAreaCalculator implements AreaCalculator {
 
     private final double deltaGridLat;
     private final double deltaMapLat;
@@ -30,6 +30,7 @@ class FractionalAreaCalculator {
     }
 
 
+    @Override
     public double calculate(double longitude, double latitude, long binIndex) {
         Rectangle2D.Double binRect = getBinRect(binIndex);
         Rectangle2D.Double obsRect = createRect(longitude, latitude, deltaMapLon, deltaMapLat);
@@ -65,7 +66,7 @@ class FractionalAreaCalculator {
         return binRect;
     }
 
-    public static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
+    static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
         Rectangle2D intersection = binRect.createIntersection(obsRect);
         double intersectionArea = intersection.getWidth() * intersection.getHeight();
         double binArea = binRect.getWidth() * binRect.getHeight();

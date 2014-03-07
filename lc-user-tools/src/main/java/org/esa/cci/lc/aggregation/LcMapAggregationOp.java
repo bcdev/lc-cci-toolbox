@@ -163,13 +163,16 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
     }
 
     private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
-        Product sourceProduct = getSourceProduct();
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
-        final double sourceMapResolutionX = 180.0 / sceneHeight;
-        final double sourceMapResolutionY = 360.0 / sceneWidth;
-        FractionalAreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid,
-                                                                               sourceMapResolutionX, sourceMapResolutionY);
+
+        AreaCalculator areaCalculator = new ConstantAreaCalculator();
+        // The following implementation is more accurate (especially when using no super-sampling) but is slower
+        // for this use case a super-sampling of 3 is sufficient that's why we can use the constant area calculator
+//        Product sourceProduct = getSourceProduct();
+//        int sceneWidth = sourceProduct.getSceneRasterWidth();
+//        int sceneHeight = sourceProduct.getSceneRasterHeight();
+//        final double sourceMapResolutionX = 180.0 / sceneHeight;
+//        final double sourceMapResolutionY = 360.0 / sceneWidth;
+//        AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
         BinningConfig binningConfig = new BinningConfig();
         int processed = 1;

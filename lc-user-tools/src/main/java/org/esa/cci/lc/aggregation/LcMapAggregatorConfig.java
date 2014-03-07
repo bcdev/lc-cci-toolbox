@@ -22,7 +22,7 @@ class LcMapAggregatorConfig extends AggregatorConfig {
     private File userPFTConversionTable;
 
     @Parameter
-    private FractionalAreaCalculator areaCalculator;
+    private AreaCalculator areaCalculator;
 
 
     LcMapAggregatorConfig() {
@@ -31,7 +31,7 @@ class LcMapAggregatorConfig extends AggregatorConfig {
 
     LcMapAggregatorConfig(boolean outputLCCSClasses, int numMajorityClasses,
                           boolean outputPFTClasses, File userPFTConversionTable,
-                          FractionalAreaCalculator areaCalculator) {
+                          AreaCalculator areaCalculator) {
         super(LcMapAggregatorDescriptor.NAME);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
