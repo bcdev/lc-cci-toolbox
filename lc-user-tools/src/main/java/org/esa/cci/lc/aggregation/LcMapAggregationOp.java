@@ -179,7 +179,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater, clearSnowIce);
         binningConfig.setMaskExpr(validExpr);
         binningConfig.setNumRows(getNumRows());
-        binningConfig.setSuperSampling(1);
+        binningConfig.setSuperSampling(3);
         LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
                                                                                 outputPFTClasses, userPFTConversionTable,
                                                                                 areaCalculator);

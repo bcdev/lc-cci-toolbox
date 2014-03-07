@@ -148,7 +148,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         BinningConfig binningConfig = new BinningConfig();
         binningConfig.setMaskExpr(maskExpression);
         binningConfig.setNumRows(getNumRows());
-        binningConfig.setSuperSampling(1);
+        binningConfig.setSuperSampling(3);
         binningConfig.setAggregatorConfigs(aggregatorConfig);
         binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
         binningConfig.setCompositingType(CompositingType.BINNING);
