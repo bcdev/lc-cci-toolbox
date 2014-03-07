@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.3</version>
+    <version>3.4</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,8 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.4:
+    - set super sampling value correctly
     Changes in 3.3:
     - added aggregation rules for ndvi, ba and snow
     - updated flags with filled_ice for ndvi
