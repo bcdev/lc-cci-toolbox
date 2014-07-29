@@ -1,0 +1,48 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>lc-cci-compare-spot-meris</symbolicName>
+    <name>SpotVgtMerisCompareOperator</name>
+    <version>1.0</version>
+
+    <!-- TODO - As needed, adapt metadata elements here -->
+    <description>BEAM SpotVgtMerisCompareOperator</description>
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <changelog>
+        <![CDATA[ ]]>
+    </changelog>
+
+    <categories>Processor,VISAT</categories>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+
+            <!-- TODO - Adapt the following action elements -->
+            <parent>tools</parent>
+            <id>SpotVgtMerisCompareOperator-MultiTileOp</id>
+            <helpId>SpotVgtMerisCompareOperator_BC</helpId>
+            <operatorName>SPOTVGTMERISCOMPOp</operatorName>
+            <text>SpotVgtMerisCompareOperator</text>
+            <dialogTitle>SpotVgtMerisCompareOp</dialogTitle>
+            <nameSuffix>SpotVgtMerisCompareOp</nameSuffix>
+        </action>
+
+    </extension>
+
+</module>

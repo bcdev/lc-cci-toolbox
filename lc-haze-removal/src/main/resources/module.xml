@@ -1,0 +1,47 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>lc-haze-removal</symbolicName>
+    <name>LC-CCI Haze Removal</name>
+    <version>1.1</version>
+
+    <!-- TODO - As needed, adapt metadata elements here -->
+    <description>LC-CCI Haze Removal</description>
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <changelog>
+        <![CDATA[ ]]>
+    </changelog>
+
+    <categories>Processor,VISAT</categories>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <parent>tools</parent>
+            <id>lc-cci_haze_removal-MultiTileOp</id>
+            <helpId>lc-cci_haze_removal</helpId>
+            <operatorName>HazeOp</operatorName>
+            <text>HazeRemoval</text>
+            <dialogTitle>HazeRemovalOp</dialogTitle>
+            <nameSuffix>_HazeRemovalOp</nameSuffix>
+        </action>
+
+    </extension>
+
+
+</module>

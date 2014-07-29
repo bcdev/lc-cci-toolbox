@@ -1,0 +1,56 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>lc-cci-point-selection-tool</symbolicName>
+    <name>lc-cci-point-selection-tool</name>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- TODO - As needed, adapt metadata elements here -->
+    <description>lc-cci-point-selection-tool</description>
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <changelog>
+        <![CDATA[ ]]>
+    </changelog>
+
+    <categories>Processor,VISAT</categories>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+
+            <!-- TODO - Adapt the following action elements -->
+            <parent>tools</parent>
+            <id>lc-cci-point-selection-tool-MultiTileOp</id>
+            <helpId>lc-cci-point-selection-tool</helpId>
+            <operatorName>VaPoSeOp</operatorName>
+            <text>lc-cci-point-selection-tool</text>
+            <dialogTitle>Validation_Point_Selection_Operator</dialogTitle>
+            <nameSuffix>_swin_comp</nameSuffix>
+        </action>
+
+    </extension>
+
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/__artifactId__.hs</path>
+        </helpSet>
+    </extension>
+
+</module>
