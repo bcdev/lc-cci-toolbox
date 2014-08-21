@@ -178,6 +178,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private void addLccsClassVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
+                //nccopy does not support reading ubyte variables, therefore preliminarily commented out
+                //final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 short[] lccsClassFlagValues = LCCS.getInstance().getClassValues();
                 final ArrayByte.D1 valids = new ArrayByte.D1(lccsClassFlagValues.length);

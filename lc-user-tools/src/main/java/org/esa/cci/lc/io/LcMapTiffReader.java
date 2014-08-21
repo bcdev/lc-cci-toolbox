@@ -104,7 +104,8 @@ public class LcMapTiffReader extends AbstractProductReader {
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
 
         for (int i = 1; i <= 5; ++i) {
-            String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map-qualityflag" + i + "-300m-P5Y-" + epoch + "-v" + version + "." + extension;
+            //String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map-qualityflag" + i + "-300m-P5Y-" + epoch + "-v" + version + "." + extension;
+            String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
             final Product lcFlagProduct = readProduct(productDir, lcFlagFilename, plugIn);
             if (lcFlagProduct == null) {
                 continue;
