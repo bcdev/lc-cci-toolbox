@@ -160,6 +160,30 @@ Use the scripts in the same manner.
         the directory of the source file.
 
 
+    Classes Remapping Tool Usage
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        remap.sh <map-netcdf-file> [classes_LUT]
+
+        This tool splits up the information found in the band "lccs_class" into the classes given via a CSV file.
+
+        Either such a file is provided as second parameter, or a default classification will be used.
+        The input CSV needs to adhere to the following format:
+            <Source Name>|<target band name 1>|<target band name 2>| ...
+            120|20|30| ...
+            150|10|| ...
+
+        Such a file would be interpreted as follows: It applies to each pixel that if the source band has the value 120,
+        the target band 1 is assigned the value 20 and the target band 2 the value 30. If the source band has the value
+        150, the target band 1 is assigned the value 10 and the target band 2 the no-data-value.
+        Note that the separator character is expected to be '|'.
+
+        Parameter Description:
+            <map-netcdf-file>
+                Specifies the input file.
+
+            [classes_LUT] (optional)
+                Points to the LUT file that will be used for remapping.
+
 
 Output File Naming Convention
 """""""""""""""""""""""""""""
