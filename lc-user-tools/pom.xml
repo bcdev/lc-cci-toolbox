@@ -11,7 +11,7 @@
 
     <artifactId>lc-user-tools</artifactId>
     <name>LC CCI User Tools</name>
-    <version>3.5</version>
+    <version>3.6</version>
 
     <dependencies>
         <dependency>
@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
-            <artifactId>beam-binning2</artifactId>
+            <artifactId>beam-binning</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>

@@ -88,9 +88,13 @@ public class LcCondOccAggregatorTest {
                 areaCalculator.calculate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyLong())).thenReturn(
                 1.0);
 
-        LcCondOccAggregatorConfig config = new LcCondOccAggregatorConfig(varNames);
-        varCtx.defineVariable(config.getVarNames()[0]);
-        varCtx.defineVariable(config.getVarNames()[1]);
+        LcCondOccAggregatorConfig config = new LcCondOccAggregatorConfig(varNames, new String[]{
+                "ba_occ_proportion_area",
+                "ba_occ_mean_frequency",
+                "ba_nYearObs_sum"
+        });
+        varCtx.defineVariable(config.getSourceVarNames()[0]);
+        varCtx.defineVariable(config.getSourceVarNames()[1]);
         return (LcCondOccAggregator) lcCondOccAggregatorDescriptor.createAggregator(varCtx, config);
     }
 

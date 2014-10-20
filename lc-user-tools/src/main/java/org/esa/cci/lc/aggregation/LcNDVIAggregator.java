@@ -15,27 +15,18 @@ import org.esa.beam.binning.WritableVector;
  */
 class LcNDVIAggregator extends AbstractAggregator {
 
-    private static final String[] featureNameTemplates = {"%s_mean", "%s_sum"};
-
     private final int ndviMeanIndex;
     private final int nYearObsIndex;
     private final String ndviMeanInvCountName;
     private final String nYearObsInvCountName;
 
-    LcNDVIAggregator(VariableContext varCtx, String[] varNames) {
-        super(LcMapAggregatorDescriptor.NAME, createFeatureNames(varNames), createFeatureNames(varNames), createFeatureNames(varNames));
+    LcNDVIAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames) {
+        super(LcMapAggregatorDescriptor.NAME, targetVarNames, targetVarNames, targetVarNames);
 
-        ndviMeanIndex = varCtx.getVariableIndex(varNames[0]);
-        ndviMeanInvCountName = "invCount." + varNames[0];
-        nYearObsIndex = varCtx.getVariableIndex((varNames[1]));
-        nYearObsInvCountName = "invCount." + varNames[1];
-    }
-
-    private static String[] createFeatureNames(String[] varNames) {
-        String[] featureNames = new String[featureNameTemplates.length];
-        featureNames[0] = String.format(featureNameTemplates[0], varNames[0]);
-        featureNames[1] = String.format(featureNameTemplates[1], varNames[1]);
-        return featureNames;
+        ndviMeanIndex = varCtx.getVariableIndex(sourceVarNames[0]);
+        ndviMeanInvCountName = "invCount." + sourceVarNames[0];
+        nYearObsIndex = varCtx.getVariableIndex((sourceVarNames[1]));
+        nYearObsInvCountName = "invCount." + sourceVarNames[1];
     }
 
     @Override

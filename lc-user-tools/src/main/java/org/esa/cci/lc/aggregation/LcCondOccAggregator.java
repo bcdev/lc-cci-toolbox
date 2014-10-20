@@ -15,22 +15,13 @@ import org.esa.beam.binning.WritableVector;
  */
 class LcCondOccAggregator extends AbstractAggregator {
 
-    private static final String[] featureNameTemplates = {"%s_proportion_area", "%s_mean_frequency", "%s_sum"};
     private final int condOccIndex;
     private final int condNYearObsIndex;
 
-    LcCondOccAggregator(VariableContext varCtx, String[] varNames) {
-        super(LcMapAggregatorDescriptor.NAME, createFeatureNames(varNames), createFeatureNames(varNames), createFeatureNames(varNames));
+    LcCondOccAggregator(VariableContext varCtx, String[] varNames, String[] targetVarNames) {
+        super(LcMapAggregatorDescriptor.NAME, targetVarNames, targetVarNames, targetVarNames);
         condOccIndex = varCtx.getVariableIndex(varNames[0]);
         condNYearObsIndex = varCtx.getVariableIndex(varNames[1]);
-    }
-
-    private static String[] createFeatureNames(String[] varNames) {
-        String[] featureNames = new String[featureNameTemplates.length];
-        featureNames[0] = String.format(featureNameTemplates[0], varNames[0]);
-        featureNames[1] = String.format(featureNameTemplates[1], varNames[0]);
-        featureNames[2] = String.format(featureNameTemplates[2], varNames[1]);
-        return featureNames;
     }
 
     @Override

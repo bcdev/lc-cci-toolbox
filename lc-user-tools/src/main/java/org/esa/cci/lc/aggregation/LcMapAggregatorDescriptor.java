@@ -11,11 +11,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Marco Peters
  */
 public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
+
+    private static final LCCS LCCS_CLASSES = LCCS.getInstance();
 
     public static final String NAME = "LC_MAP_AGGR";
 
@@ -39,6 +44,32 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
         AreaCalculator areaCalculator = (AreaCalculator) propertySet.getValue("areaCalculator");
 
+        PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
+
+        String[] spatialFeatureNames = createSpatialFeatureNames();
+        String[] outputFeatureNames = createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames);
+        return new LcMapAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut, spatialFeatureNames, outputFeatureNames);
+    }
+
+    @Override
+    public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
+        return new String[]{((LcMapAggregatorConfig) aggregatorConfig).getSourceVarName()};
+    }
+
+    @Override
+    public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
+        PropertySet propertySet = aggregatorConfig.asPropertySet();
+        boolean outputLCCSClasses = (Boolean) propertySet.getValue("outputLCCSClasses");
+        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
+        boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
+        File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
+
+        PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
+        String[] spatialFeatureNames = createSpatialFeatureNames();
+        return createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames);
+    }
+
+    private static PftLut getPftLut(boolean outputPFTClasses, File userPFTConversionTable) {
         PftLut pftLut = null;
         if (outputPFTClasses) {
             try {
@@ -61,7 +92,32 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                 throw new IllegalStateException(e);
             }
         }
-
-        return new LcMapAggregator(outputLCCSClasses, numMajorityClasses, areaCalculator, pftLut);
+        return pftLut;
     }
+
+    private static String[] createSpatialFeatureNames() {
+        String[] spatialFeatureNames = new String[LCCS_CLASSES.getNumClasses()];
+        short[] classValues = LCCS_CLASSES.getClassValues();
+        for (int i = 0; i < spatialFeatureNames.length; i++) {
+            spatialFeatureNames[i] = "class_area_" + classValues[i];
+        }
+        return spatialFeatureNames;
+    }
+
+    private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, PftLut pftLut,
+                                                     String[] spatialFeatureNames) {
+        List<String> outputFeatureNames = new ArrayList<String>();
+        if (outputLCCSClasses) {
+            outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
+        }
+        for (int i = 0; i < numMajorityClasses; i++) {
+            outputFeatureNames.add("majority_class_" + (i + 1));
+        }
+        if (pftLut != null) {
+            outputFeatureNames.addAll(Arrays.asList(pftLut.getPFTNames()));
+        }
+        return outputFeatureNames.toArray(new String[outputFeatureNames.size()]);
+    }
+
+
 }

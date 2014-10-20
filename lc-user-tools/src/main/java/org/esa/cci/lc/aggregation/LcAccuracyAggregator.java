@@ -17,19 +17,16 @@ import java.util.Arrays;
  */
 class LcAccuracyAggregator extends AbstractAggregator {
 
-    private final static String[] featureNames = new String[]{"confidence"};
-
     private final int varIndex;
     private final String contextNameSpace;
 
-
-    LcAccuracyAggregator(VariableContext varCtx, String[] varNames) {
+    LcAccuracyAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames) {
         super(LcAccuracyAggregatorDescriptor.NAME,
-              featureNames,
-              featureNames,
-              featureNames);
-        varIndex = varCtx.getVariableIndex(varNames[0]);
-        contextNameSpace = featureNames[0] + hashCode();
+              targetVarNames,
+              targetVarNames,
+              targetVarNames);
+        varIndex = varCtx.getVariableIndex(sourceVarNames[0]);
+        contextNameSpace = targetVarNames[0] + hashCode();
     }
 
     @Override

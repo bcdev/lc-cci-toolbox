@@ -9,7 +9,7 @@ if %JAVA_LOCATION%.==. GOTO JAVA_NO_INSTALLED
 set TOOL_HOME="%CD%"
 
 if [%1]==[] GOTO HELP
-if [%2]==[] (set lut="..\resources\Default_LCCS2PFT_LUT.csv") else (set lut=%2)
+if [%2]==[] (set lut="..\resources\Default_LCCS2PFT_LUT_update.csv") else (set lut=%2)
 
 java ^
     -Xmx250M -Dceres.context=beam ^

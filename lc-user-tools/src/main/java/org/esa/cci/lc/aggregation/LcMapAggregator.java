@@ -6,10 +6,7 @@ import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -29,14 +26,8 @@ class LcMapAggregator extends AbstractAggregator {
     private PftLut pftLut;
 
     public LcMapAggregator(boolean outputLCCSClasses, int numMajorityClasses,
-                           AreaCalculator calculator, PftLut pftLut) {
-        this(createSpatialFeatureNames(), outputLCCSClasses, numMajorityClasses, calculator, pftLut);
-    }
-
-    private LcMapAggregator(String[] spatialFeatureNames, boolean outputLCCSClasses, int numMajorityClasses,
-                            AreaCalculator calculator, PftLut pftLut) {
-        super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames,
-              createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames));
+                           AreaCalculator calculator, PftLut pftLut, String[] spatialFeatureNames, String[] outputFeatureNames) {
+        super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.pftLut = pftLut;
@@ -94,7 +85,7 @@ class LcMapAggregator extends AbstractAggregator {
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
         initVector(outputVector, Float.NaN);
-        SortedMap<Float, Integer> sortedMap = new TreeMap<Float, Integer>(Collections.reverseOrder());
+        SortedMap<Float, Integer> sortedMap = new TreeMap<>(Collections.reverseOrder());
         int outputVectorIndex = 0;
         for (short i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
@@ -142,30 +133,6 @@ class LcMapAggregator extends AbstractAggregator {
         for (int i = 0; i < outputVector.size(); i++) {
             outputVector.set(i, initValue);
         }
-    }
-
-    private static String[] createSpatialFeatureNames() {
-        String[] spatialFeatureNames = new String[LCCS_CLASSES.getNumClasses()];
-        short[] classValues = LCCS_CLASSES.getClassValues();
-        for (int i = 0; i < spatialFeatureNames.length; i++) {
-            spatialFeatureNames[i] = "class_area_" + classValues[i];
-        }
-        return spatialFeatureNames;
-    }
-
-    private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, PftLut pftLut,
-                                                     String[] spatialFeatureNames) {
-        List<String> outputFeatureNames = new ArrayList<String>();
-        if (outputLCCSClasses) {
-            outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
-        }
-        for (int i = 0; i < numMajorityClasses; i++) {
-            outputFeatureNames.add("majority_class_" + (i + 1));
-        }
-        if (pftLut != null) {
-            outputFeatureNames.addAll(Arrays.asList(pftLut.getPFTNames()));
-        }
-        return outputFeatureNames.toArray(new String[outputFeatureNames.size()]);
     }
 
 }

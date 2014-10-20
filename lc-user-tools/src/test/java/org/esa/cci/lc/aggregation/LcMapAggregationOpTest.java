@@ -1,6 +1,5 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
@@ -13,7 +12,6 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
-import org.esa.cci.lc.util.LcHelper;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
@@ -60,8 +58,7 @@ public class LcMapAggregationOpTest {
         int numMajorityClasses = 2;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
-        aggregationOp.formatterConfig = createFormatterConfig();
-        aggregationOp.outputTargetProduct = true;
+        initOp(aggregationOp);
 
         // execution
         Product targetProduct = aggregationOp.getTargetProduct();
@@ -78,7 +75,7 @@ public class LcMapAggregationOpTest {
         assertThat(targetProduct.getNumBands(), is(expectedNumBands));
     }
 
-    @Test()
+    @Test
     public void testTargetProductCreation_WithOnlyPFTClasses() throws Exception {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
@@ -88,8 +85,7 @@ public class LcMapAggregationOpTest {
         int numMajorityClasses = 0;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
-        aggregationOp.formatterConfig = createFormatterConfig();
-        aggregationOp.outputTargetProduct = true;
+        initOp(aggregationOp);
 
         // execution
         Product targetProduct = aggregationOp.getTargetProduct();
@@ -115,15 +111,6 @@ public class LcMapAggregationOpTest {
         assertThat(aggrOp.getNumMajorityClasses(), is(5));
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
         assertThat(aggrOp.getNumRows(), is(2160));
-
-        final Product sourceProduct = new Product("dummy", "t", 20, 10);
-        sourceProduct.setFileLocation(new File(".", "a-b-c-d-g-h.nc"));
-        aggrOp.setSourceProduct(sourceProduct);
-        aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        LcHelper.ensureTargetDir(aggrOp.getTargetDir(), aggrOp.getSourceProduct());
-        FormatterConfig formatterConfig = aggrOp.createDefaultFormatterConfig("a-b-c-d-aggregated-0.083333Deg-g-h");
-        assertThat(formatterConfig.getOutputType(), is("Product"));
-        assertThat(formatterConfig.getOutputFile(), is("a-b-c-d-aggregated-0.083333Deg-g-h.nc"));
     }
 
     private IsNull isNull() {
@@ -213,14 +200,13 @@ public class LcMapAggregationOpTest {
         assertThat(LcMapAggregationOp.onlyOneIsTrue(I, I, I), is(false));
     }
 
-    private FormatterConfig createFormatterConfig() throws IOException {
-        final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFormat("NetCDF4-BEAM");
+    private void initOp(LcMapAggregationOp aggregationOp) throws IOException {
+        aggregationOp.setOutputFormat("NetCDF4-BEAM");
         File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
         tempFile.deleteOnExit();
-        formatterConfig.setOutputFile(tempFile.getAbsolutePath());
-        formatterConfig.setOutputType("Product");
-        return formatterConfig;
+        aggregationOp.setOutputFile(tempFile.getAbsolutePath());
+        aggregationOp.setOutputType("Product");
+        aggregationOp.outputTargetProduct = true;
     }
 
     private Product createSourceProduct() throws Exception {

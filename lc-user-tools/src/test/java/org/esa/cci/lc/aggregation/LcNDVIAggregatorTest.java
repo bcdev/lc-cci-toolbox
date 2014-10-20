@@ -77,9 +77,12 @@ public class LcNDVIAggregatorTest {
         VariableContextImpl varCtx = new VariableContextImpl();
         LcNDVIAggregatorDescriptor lcNDVIAggregatorDescriptor = new LcNDVIAggregatorDescriptor();
 
-        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig(new String[]{"ndvi_mean", "ndvi_nYearObs"});
-        varCtx.defineVariable(config.getVarNames()[0]);
-        varCtx.defineVariable(config.getVarNames()[1]);
+        LcNDVIAggregatorConfig config = new LcNDVIAggregatorConfig(new String[]{
+                "ndvi_mean",
+                "ndvi_nYearObs"
+        }, new String[]{"ndvi_mean_mean", "ndvi_nYearObs_sum"});
+        varCtx.defineVariable(config.getSourceVarNames()[0]);
+        varCtx.defineVariable(config.getSourceVarNames()[1]);
         return (LcNDVIAggregator) lcNDVIAggregatorDescriptor.createAggregator(varCtx, config);
     }
 

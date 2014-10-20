@@ -1,5 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
+import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.Converter;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
@@ -21,7 +23,7 @@ class LcMapAggregatorConfig extends AggregatorConfig {
     @Parameter
     private File userPFTConversionTable;
 
-    @Parameter
+    @Parameter(converter = AreaCalculatorConverter.class)
     private AreaCalculator areaCalculator;
 
 
@@ -40,8 +42,25 @@ class LcMapAggregatorConfig extends AggregatorConfig {
         this.areaCalculator = areaCalculator;
     }
 
-    @Override
-    public String[] getVarNames() {
-        return new String[]{CLASS_BAND_NAME};
+    public String getSourceVarName() {
+        return CLASS_BAND_NAME;
+    }
+
+    public static class AreaCalculatorConverter implements Converter<AreaCalculator> {
+
+        @Override
+        public Class<? extends AreaCalculator> getValueType() {
+            return AreaCalculator.class;
+        }
+
+        @Override
+        public AreaCalculator parse(String s) throws ConversionException {
+            throw new IllegalStateException("Not implemented.");
+        }
+
+        @Override
+        public String format(AreaCalculator areaCalculator) {
+            return areaCalculator.getClass().getName();
+        }
     }
 }

@@ -21,6 +21,20 @@ public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
 
     @Override
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-        return new LcAccuracyAggregator(varCtx, aggregatorConfig.getVarNames());
+        return new LcAccuracyAggregator(varCtx,
+                                        getSourceVarNames(aggregatorConfig),
+                                        getTargetVarNames(aggregatorConfig));
+    }
+
+    @Override
+    public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
+        LcAccuracyAggregatorConfig config = (LcAccuracyAggregatorConfig) aggregatorConfig;
+        return new String[]{config.getSourceVarName()};
+    }
+
+    @Override
+    public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
+        LcAccuracyAggregatorConfig config = (LcAccuracyAggregatorConfig) aggregatorConfig;
+        return new String[]{config.getTargetVarName()};
     }
 }

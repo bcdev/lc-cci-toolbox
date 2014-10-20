@@ -133,7 +133,7 @@ public class RemapGraphCreator {
                     continue;
                 }
                 TargetBandSpec targetBandSpec = targetBandSpecs.get(i);
-                targetBandSpec.expression += sourceBand + " == " + record[0] + " ? " + record[i] + " : ";
+                targetBandSpec.expression += sourceBand + " == " + record[0] + " ? 100 * " + record[i] + " : ";
             }
         }
 
@@ -153,6 +153,7 @@ public class RemapGraphCreator {
                         "    </expression>\n" +
                         "    <type>int8</type>\n" +
                         "    <noDataValue>0</noDataValue>\n" +
+                        "    <scalingFactor>0.01</scalingFactor>\n" +
                         "</targetBand>",
                         targetBandSpec.name, targetBandSpec.expression));
             }

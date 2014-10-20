@@ -12,7 +12,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ -z "$2" ]; then
-    lut=../resources/Default_LCCS2PFT_LUT.csv
+    lut=../resources/Default_LCCS2PFT_LUT_update.csv
 else
     lut=$2
 fi

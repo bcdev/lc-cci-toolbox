@@ -1,25 +1,17 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.CompositingType;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.binning.operator.FormatterConfig;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.ReducedGaussianGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcCondMetadata;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
@@ -34,25 +26,24 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Cond",
-        version = "3.3",
+        version = "3.5",
         authors = "Marco Peters",
-        copyright = "(c) 2013 by Brockmann Consult",
-        description = "Allows to aggregate LC condition products.")
-public class LcCondAggregationOp extends AbstractLcAggregationOp implements Output {
+        copyright = "(c) 2014 by Brockmann Consult",
+        description = "Allows to aggregate LC condition products.",
+        autoWriteDisabled = true)
+public class LcCondAggregationOp extends AbstractLcAggregationOp {
 
-    FormatterConfig formatterConfig;
     boolean outputTargetProduct;
 
     @Override
     public void initialize() throws OperatorException {
         super.initialize();
         validateInputSettings();
-        final PlanetaryGrid planetaryGrid = createPlanetaryGrid();
-        BinningConfig binningConfig = createBinningConfig(planetaryGrid);
+        final String planetaryGridClassName = getPlanetaryGridClassName();
 
         HashMap<String, String> lcProperties = getLcProperties();
         addAggregationTypeToLcProperties("Condition");
-        addGridNameToLcProperties(planetaryGrid);
+        addGridNameToLcProperties(planetaryGridClassName);
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
@@ -61,12 +52,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         lcProperties.put("startYear", lcCondMetadata.getStartYear());
         lcProperties.put("endYear", lcCondMetadata.getEndYear());
         lcProperties.put("startDate", lcCondMetadata.getStartDate());
-
-        String id = createId(lcProperties);
-        if (formatterConfig == null) {
-            formatterConfig = createDefaultFormatterConfig(id);
-        }
-
 
         BinningOp binningOp;
         try {
@@ -80,12 +65,12 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
             source = createSubset(source, regionEnvelope);
         }
 
+        String id = createId(lcProperties);
+        initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
         binningOp.setSourceProduct(source);
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
-        binningOp.setBinningConfig(binningConfig);
-        binningOp.setFormatterConfig(formatterConfig);
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
@@ -120,7 +105,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
         return id;
     }
 
-    private BinningConfig createBinningConfig(final PlanetaryGrid planetaryGrid) {
+    private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFileName) {
         String sourceFileName = getSourceProduct().getFileLocation().getName();
         AggregatorConfig aggregatorConfig;
         Product sourceProduct = getSourceProduct();
@@ -131,10 +116,12 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
             String[] variableNames = new String[2];
             variableNames[0] = ndviBandNames[0]; // ndvi_mean
             variableNames[1] = ndviBandNames[3]; // ndvi_nYearObs
-            aggregatorConfig = new LcNDVIAggregatorConfig(variableNames);
+            String[] featureNameTemplates = {"%s_mean", "%s_sum"};
+            aggregatorConfig = new LcNDVIAggregatorConfig(variableNames, featureNameTemplates);
         } else {
             String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 2);
-            aggregatorConfig = new LcCondOccAggregatorConfig(variableNames);
+            String[] featureNameTemplates = {"%s_proportion_area", "%s_mean_frequency", "%s_sum"};
+            aggregatorConfig = new LcCondOccAggregatorConfig(variableNames, featureNameTemplates);
         }
 
         if (isSourceSnow(sourceFileName)) {
@@ -145,14 +132,14 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
             maskExpression = "ba_occ >= 0 && ba_occ <= 100";
         }
 
-        BinningConfig binningConfig = new BinningConfig();
-        binningConfig.setMaskExpr(maskExpression);
-        binningConfig.setNumRows(getNumRows());
-        binningConfig.setSuperSampling(3);
-        binningConfig.setAggregatorConfigs(aggregatorConfig);
-        binningConfig.setPlanetaryGrid(planetaryGrid.getClass().getName());
-        binningConfig.setCompositingType(CompositingType.BINNING);
-        return binningConfig;
+        binningOp.setMaskExpr(maskExpression);
+        binningOp.setNumRows(getNumRows());
+        binningOp.setSuperSampling(3);
+        binningOp.setAggregatorConfigs(aggregatorConfig);
+        binningOp.setPlanetaryGridClass(planetaryGridClassName);
+        binningOp.setOutputFile(new File(getTargetDir(), outputFileName).getPath());
+        binningOp.setOutputType("Product");
+        binningOp.setOutputFormat("NETCFDFDFDFDFDFDF");
     }
 
     private boolean isSourceBA(String sourceFileName) {
@@ -165,22 +152,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp implements Outp
 
     private boolean isSourceNDVI(String sourceFileName) {
         return sourceFileName.toUpperCase().contains("NDVI");
-    }
-
-    private PlanetaryGrid createPlanetaryGrid() {
-        PlanetaryGrid planetaryGrid;
-        PlanetaryGridName gridName = getGridName();
-        int numRows = getNumRows();
-        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
-            planetaryGrid = new PlateCarreeGrid(numRows);
-        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new RegularGaussianGrid(numRows);
-        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new ReducedGaussianGrid(numRows);
-        } else {
-            planetaryGrid = new SEAGrid(numRows);
-        }
-        return planetaryGrid;
     }
 
 

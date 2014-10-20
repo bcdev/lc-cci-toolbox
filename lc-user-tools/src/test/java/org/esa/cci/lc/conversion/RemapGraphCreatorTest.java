@@ -16,6 +16,7 @@
 
 package org.esa.cci.lc.conversion;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -43,20 +44,25 @@ public class RemapGraphCreatorTest {
         graphWriter.writeTargetBands();
         graphWriter.writeFooter();
 
-        String result = writer.toString().replaceAll("\\s", "");
-        assertTrue(result.startsWith(RemapGraphCreator.GraphWriter.GRAPH_HEAD.replaceAll("\\s", "")));
-        assertTrue(result.endsWith(RemapGraphCreator.GraphWriter.GRAPH_FOOT.replaceAll("\\s", "")));
-        assertTrue(result.contains(("<name>chl</name>\n" +
-                                    "    <expression>\n" +
-                                    "    source_band == 5 ? 3 : source_band == 15 ? 0 : 0\n" +
-                                    "    </expression>").replaceAll("\\s", "")));
-        assertTrue(result.contains(("<name>sst</name>\n" +
-                                    "    <expression>\n" +
-                                    "    source_band == 5 ? 9 : 0\n" +
-                                    "    </expression>").replaceAll("\\s", "")));
-        assertTrue(result.contains(("<name>tsm</name>\n" +
-                                    "    <expression>\n" +
-                                    "    source_band == 5 ? 2 : source_band == 15 ? 37 : 0\n" +
-                                    "    </expression>").replaceAll("\\s", "")));
+        String result = removeSpaces(writer.toString());
+        assertTrue(result.startsWith(removeSpaces(RemapGraphCreator.GraphWriter.GRAPH_HEAD)));
+        assertTrue(result.endsWith(removeSpaces(RemapGraphCreator.GraphWriter.GRAPH_FOOT)));
+        assertTrue(result.contains(removeSpaces("<name>chl</name>\n" +
+                                                "    <expression>\n" +
+                                                "    source_band == 5 ? 100 * 3 : source_band == 15 ? 100 * 0 : 0\n" +
+                                                "    </expression>")));
+        assertTrue(result.contains(removeSpaces("<name>sst</name>\n" +
+                                                "    <expression>\n" +
+                                                "    source_band == 5 ? 100 * 9 : 0\n" +
+                                                "    </expression>")));
+        assertTrue(result.contains(removeSpaces("<name>tsm</name>\n" +
+                                                "    <expression>\n" +
+                                                "    source_band == 5 ? 100 * 2 : source_band == 15 ? 100 * 37 : 0\n" +
+                                                "    </expression>")));
+        assertEquals(3, StringUtils.countMatches(result, "<scalingFactor>0.01</scalingFactor>"));
+    }
+
+    private static String removeSpaces(String string) {
+        return string.replaceAll("\\s", "");
     }
 }

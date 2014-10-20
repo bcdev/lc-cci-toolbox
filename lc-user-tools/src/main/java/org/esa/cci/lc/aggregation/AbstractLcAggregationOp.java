@@ -1,9 +1,9 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.operator.FormatterConfig;
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.ReducedGaussianGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
+import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
@@ -222,16 +222,16 @@ public abstract class AbstractLcAggregationOp extends Operator {
         }
     }
 
-    protected void addGridNameToLcProperties(PlanetaryGrid planetaryGrid) {
+    protected void addGridNameToLcProperties(String planetaryGridClassName) {
         final String gridName;
         int numRows = getNumRows();
-        if (planetaryGrid instanceof RegularGaussianGrid) {
+        if (planetaryGridClassName.equals(RegularGaussianGrid.class.getName())) {
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
             getLcProperties().put("grid_name", gridName);
-        } else if (planetaryGrid instanceof PlateCarreeGrid) {
+        } else if (planetaryGridClassName.equals(PlateCarreeGrid.class.getName())) {
             getLcProperties().put("grid_name", String.format("Geographic lat lon grid (cell size: %.6f degree)", 180.0 / numRows));
         } else {
-            throw new OperatorException("The grid '" + planetaryGrid.getClass().getName() + "' is not a valid grid.");
+            throw new OperatorException("The grid '" + planetaryGridClassName + "' is not a valid grid.");
         }
     }
 
@@ -239,11 +239,17 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("aggregationType", type);
     }
 
-    FormatterConfig createDefaultFormatterConfig(String id) {
-        final FormatterConfig formatterConfig = new FormatterConfig();
-        formatterConfig.setOutputFile(new File(getTargetDir(), id + ".nc").getPath());
-        formatterConfig.setOutputType("Product");
-        return formatterConfig;
+    protected String getPlanetaryGridClassName() {
+        PlanetaryGridName gridName = getGridName();
+        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
+            return PlateCarreeGrid.class.getName();
+        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
+            return RegularGaussianGrid.class.getName();
+        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {
+            return ReducedGaussianGrid.class.getName();
+        } else {
+            return SEAGrid.class.getName();
+        }
     }
 
     protected Product createSubset(Product source, ReferencedEnvelope regionEnvelope) {

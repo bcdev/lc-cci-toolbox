@@ -9,19 +9,26 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 public class LcCondOccAggregatorConfig extends AggregatorConfig {
 
     @Parameter
-    private String[] varNames;
+    private String[] sourceVarNames;
+
+    @Parameter
+    private String[] targetVarNameTemplates;
 
     LcCondOccAggregatorConfig() {
         super(LcCondOccAggregatorDescriptor.NAME);
     }
 
-    LcCondOccAggregatorConfig(String[] varNames) {
+    LcCondOccAggregatorConfig(String[] sourceVarNames, String[] targetVarNameTemplates) {
         super(LcCondOccAggregatorDescriptor.NAME);
-        this.varNames = varNames;
+        this.sourceVarNames = sourceVarNames;
+        this.targetVarNameTemplates = targetVarNameTemplates;
     }
 
-    @Override
-    public String[] getVarNames() {
-        return varNames;
+    public String[] getSourceVarNames() {
+        return sourceVarNames;
+    }
+
+    public String[] getTargetVarNameTemplates() {
+        return targetVarNameTemplates;
     }
 }

@@ -6,19 +6,26 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 class LcAccuracyAggregatorConfig extends AggregatorConfig {
 
     @Parameter
-    private String varName;
+    private String sourceVarName;
+
+    @Parameter
+    private String targetVarName;
 
     LcAccuracyAggregatorConfig() {
         super(LcAccuracyAggregatorDescriptor.NAME);
     }
 
-    LcAccuracyAggregatorConfig(final String varName) {
+    LcAccuracyAggregatorConfig(final String sourceVarName, final String targetVarName) {
         super(LcAccuracyAggregatorDescriptor.NAME);
-        this.varName = varName;
+        this.sourceVarName = sourceVarName;
+        this.targetVarName = targetVarName;
     }
 
-    @Override
-    public String[] getVarNames() {
-        return new String[]{varName};
+    public String getSourceVarName() {
+        return sourceVarName;
+    }
+
+    public String getTargetVarName() {
+        return targetVarName;
     }
 }

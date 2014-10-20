@@ -9,19 +9,26 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 class LcNDVIAggregatorConfig extends AggregatorConfig {
 
     @Parameter
-    private String[] varNames;
+    private String[] sourceVarNames;
+
+    @Parameter
+    private String[] targetVarNameTemplates;
 
     LcNDVIAggregatorConfig() {
         super(LcNDVIAggregatorDescriptor.NAME);
     }
 
-    LcNDVIAggregatorConfig(String[] varNames) {
+    LcNDVIAggregatorConfig(String[] sourceVarNames, String[] targetVarNameTemplates) {
         super(LcNDVIAggregatorDescriptor.NAME);
-        this.varNames = varNames;
+        this.sourceVarNames = sourceVarNames;
+        this.targetVarNameTemplates = targetVarNameTemplates;
     }
 
-    @Override
-    public String[] getVarNames() {
-        return varNames;
+    public String[] getSourceVarNames() {
+        return sourceVarNames;
+    }
+
+    public String[] getTargetVarNameTemplates() {
+        return targetVarNameTemplates;
     }
 }
