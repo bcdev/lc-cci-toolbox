@@ -12,6 +12,8 @@
         <![CDATA[
     Changes in 3.5:
     - added remapping tool for remapping LC classes to PFT classes
+    - LCCS legend in NetCDF files updated to contain additional classes, e.g. 152, 153, ...
+    - default cross walking table (LUT) updated to cover the additional classes
     Changes in 3.4:
     - set super sampling value correctly
     Changes in 3.3:

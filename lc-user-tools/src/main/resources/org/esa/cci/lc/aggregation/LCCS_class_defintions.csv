@@ -19,13 +19,19 @@
 100 | Mosaic tree and shrub (>50%) / herbaceous cover (<50%) | mosaic_tree_and_shrub
 110 | Mosaic herbaceous cover (>50%) / tree and shrub (<50%) | mosaic_herbaceous
 120 | Shrubland | shrubland
+121 | Shrubland, evergreen | shrubland_evergreen
+122 | Shrubland, deciduous | shrubland_deciduous
 130 | Grassland | grassland
 140 | Lichens and mosses | lichens_and_mosses
 150 | Sparse vegetation (tree, shrub, herbaceous cover) (<15%) | sparse_vegetation
+152 | Sparse shrub (<15%) | sparse_shrub
+153 | Sparse herbaceous cover (<15%) | sparse_herbaceous
 160 | Tree cover, flooded, fresh or brakish water | tree_cover_flooded_fresh_or_brakish_water
 170 | Tree cover, flooded, saline water | tree_cover_flooded_saline_water
 180 | Shrub or herbaceous cover, flooded, fresh/saline/brakish water | shrub_or_herbaceous_cover_flooded
 190 | Urban areas | urban
 200 | Bare areas | bare_areas
+201 | Bare areas, consolidated | bare_areas_consolidated
+202 | Bare areas, unconsolidated | bare_areas_unconsolidated
 210 | Water bodies | water
 220 | Permanent snow and ice | snow_and_ice
