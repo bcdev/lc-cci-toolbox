@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.5</version>
+    <version>3.6</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -55,7 +55,7 @@
         <module>beam-gpf</module>
     </dependency>
     <dependency>
-        <module>beam-binning2</module>
+        <module>beam-binning</module>
     </dependency>
     <dependency>
         <module>beam-netcdf</module>

@@ -42,6 +42,7 @@ public class LcHelper {
         }
         final HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("region", pixelRect);
+        parameters.put("copyMetadata", true);
         Product subset = GPF.createProduct("Subset", parameters, product);
         if (regionIdentifier != null) {
             subset.getMetadataRoot().setAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER, regionIdentifier);

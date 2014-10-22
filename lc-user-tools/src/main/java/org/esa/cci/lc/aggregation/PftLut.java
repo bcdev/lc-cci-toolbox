@@ -22,16 +22,16 @@ class PftLut {
     public static PftLut load(Reader reader) throws IOException {
         BufferedReader bufReader = new BufferedReader(reader);
         String comment = readComment(bufReader);
-        CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX);
-        try {
+        try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
             float[][] conversionFactors = new float[records.size()][pftNames.length];
             for (int i = 0; i < records.size(); i++) {
                 String[] record = records.get(i);
                 if (record.length - 1 != pftNames.length) {
-                    final String format = String.format("Error reading the PFT conversion table. In row %d the number of conversion factors " +
-                                                        "should be %d.", i, pftNames.length);
+                    final String format = String.format(
+                            "Error reading the PFT conversion table. In row %d the number of conversion factors " +
+                            "should be %d.", i, pftNames.length);
                     throw new IOException(format);
                 }
                 for (int j = 1; j < record.length; j++) {
@@ -44,8 +44,6 @@ class PftLut {
                 }
             }
             return new PftLut(pftNames, conversionFactors, comment);
-        } finally {
-            csvReader.close();
         }
     }
 

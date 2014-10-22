@@ -296,6 +296,12 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", band.getName());
+                if (band.getScalingOffset() != 0.0) {
+                    variable.addAttribute("add_offset", band.getScalingOffset());
+                }
+                if (band.getScalingFactor() != 1.0) {
+                    variable.addAttribute("scale_factor", band.getScalingFactor());
+                }
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
             }
 

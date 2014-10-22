@@ -43,12 +43,12 @@ import java.util.Map;
  */
 public class RemapGraphCreator {
 
-    private static final String OUTPUT_FILENAME = "remap_graph.xml";
+    private static final String GRAPH_FILENAME = "remap_graph.xml";
     private static final String SOURCE_BAND_NAME = "lccs_class";
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Usage:\n    RemapGraphCreator input.csv");
+        if (args.length != 2) {
+            System.out.println("Usage:\n    RemapGraphCreator <input.csv> <outputFileName>");
             System.exit(-1);
         }
 
@@ -57,10 +57,11 @@ public class RemapGraphCreator {
             System.exit(-1);
         }
 
-        try (Writer writer = new FileWriter(OUTPUT_FILENAME)) {
-            GraphWriter graphWriter = new GraphWriter(writer);
+        try (Writer writer = new FileWriter(GRAPH_FILENAME)) {
+            String lutFile = args[0];
+            GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
-            try (Reader fr = new FileReader(args[0])) {
+            try (Reader fr = new FileReader(lutFile)) {
                 CsvReader reader = new CsvReader(fr, new char[]{'|'});
                 String[] header = reader.readRecord();
                 graphWriter.init(header);
@@ -75,7 +76,7 @@ public class RemapGraphCreator {
                 graphWriter.writeTargetBands();
 
             }
-            graphWriter.writeFooter();
+            graphWriter.writeFooter(args[1]);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -106,21 +107,35 @@ public class RemapGraphCreator {
                 "        <sourceProducts>remapClassesNode</sourceProducts>\n" +
                 "      </sources>\n" +
                 "    </node>\n" +
+                "    <node id=\"write\">\n" +
+                "        <operator>Write</operator>\n" +
+                "        <sources>\n" +
+                "            <source>merge</source>\n" +
+                "        </sources>\n" +
+                "        <parameters>\n" +
+                "            <formatName>NetCDF4-LC-Map</formatName>\n" +
+                "            <writeEntireTileRows>false</writeEntireTileRows>\n" +
+                "            <clearCacheAfterRowWrite>true</clearCacheAfterRowWrite>\n" +
+                "            <file>%s</file>\n" +
+                "        </parameters>\n" +
+                "    </node>\n" +
                 "  </graph>";
 
         private final Writer writer;
+        private final String lutName;
         private Map<Integer, TargetBandSpec> targetBandSpecs;
 
-        GraphWriter(Writer writer) {
+        GraphWriter(Writer writer, String lutName) {
             this.writer = writer;
+            this.lutName = lutName;
         }
 
         void writeHeader() throws IOException {
             writer.append(GRAPH_HEAD);
         }
 
-        void writeFooter() throws IOException {
-            writer.append(GRAPH_FOOT);
+        void writeFooter(String outputFileName) throws IOException {
+            writer.append(String.format(GRAPH_FOOT, outputFileName));
         }
 
         void init(String[] header) {
@@ -133,7 +148,7 @@ public class RemapGraphCreator {
                     continue;
                 }
                 TargetBandSpec targetBandSpec = targetBandSpecs.get(i);
-                targetBandSpec.expression += sourceBand + " == " + record[0] + " ? 100 * " + record[i] + " : ";
+                targetBandSpec.expression += sourceBand + " == " + record[0] + " ? " + record[i] + " : ";
             }
         }
 
@@ -151,11 +166,12 @@ public class RemapGraphCreator {
                         "    <expression>\n" +
                         "    %s\n" +
                         "    </expression>\n" +
-                        "    <type>int8</type>\n" +
+                        "    <description>%s as defined in %s</description>\n" +
+                        "    <type>int16</type>\n" +
                         "    <noDataValue>0</noDataValue>\n" +
                         "    <scalingFactor>0.01</scalingFactor>\n" +
                         "</targetBand>",
-                        targetBandSpec.name, targetBandSpec.expression));
+                        targetBandSpec.name, targetBandSpec.expression, targetBandSpec.name, lutName));
             }
         }
 

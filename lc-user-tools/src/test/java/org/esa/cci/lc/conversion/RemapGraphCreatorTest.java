@@ -31,7 +31,7 @@ public class RemapGraphCreatorTest {
     @Test
     public void testCreateGraph() throws Exception {
         StringWriter writer = new StringWriter();
-        RemapGraphCreator.GraphWriter graphWriter = new RemapGraphCreator.GraphWriter(writer);
+        RemapGraphCreator.GraphWriter graphWriter = new RemapGraphCreator.GraphWriter(writer, "any_lut.csv");
 
         graphWriter.init(new String[]{"source_band", "chl", "sst", "tsm"});
         graphWriter.writeHeader();
@@ -42,23 +42,26 @@ public class RemapGraphCreatorTest {
         graphWriter.finishExpressions();
 
         graphWriter.writeTargetBands();
-        graphWriter.writeFooter();
+        graphWriter.writeFooter("schlumpf");
 
         String result = removeSpaces(writer.toString());
         assertTrue(result.startsWith(removeSpaces(RemapGraphCreator.GraphWriter.GRAPH_HEAD)));
-        assertTrue(result.endsWith(removeSpaces(RemapGraphCreator.GraphWriter.GRAPH_FOOT)));
+        assertTrue(result.endsWith(removeSpaces(String.format(RemapGraphCreator.GraphWriter.GRAPH_FOOT, "schlumpf"))));
         assertTrue(result.contains(removeSpaces("<name>chl</name>\n" +
                                                 "    <expression>\n" +
-                                                "    source_band == 5 ? 100 * 3 : source_band == 15 ? 100 * 0 : 0\n" +
-                                                "    </expression>")));
+                                                "    source_band == 5 ? 3 : source_band == 15 ? 0 : 0\n" +
+                                                "    </expression>\n" +
+                                                "    <description>chl as defined in any_lut.csv</description>")));
         assertTrue(result.contains(removeSpaces("<name>sst</name>\n" +
                                                 "    <expression>\n" +
-                                                "    source_band == 5 ? 100 * 9 : 0\n" +
-                                                "    </expression>")));
+                                                "    source_band == 5 ? 9 : 0\n" +
+                                                "    </expression>\n" +
+                                                "    <description>sst as defined in any_lut.csv</description>")));
         assertTrue(result.contains(removeSpaces("<name>tsm</name>\n" +
                                                 "    <expression>\n" +
-                                                "    source_band == 5 ? 100 * 2 : source_band == 15 ? 100 * 37 : 0\n" +
-                                                "    </expression>")));
+                                                "    source_band == 5 ? 2 : source_band == 15 ? 37 : 0\n" +
+                                                "    </expression>\n" +
+                                                "    <description>tsm as defined in any_lut.csv</description>")));
         assertEquals(3, StringUtils.countMatches(result, "<scalingFactor>0.01</scalingFactor>"));
     }
 

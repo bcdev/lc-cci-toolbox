@@ -23,13 +23,13 @@ java -Xmx250M -Dceres.context=beam \
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true \
     -Dbeam.mainClass=org.esa.cci.lc.conversion.RemapGraphCreator \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
-    ${lut}
+    ${lut} $1_updated.nc
 
-java -Xmx6G -Dceres.context=beam \
+java -Xmx16G -Dceres.context=beam \
     -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 \
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true \
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
-    remap_graph.xml -x -f NetCDF4-LC-Map -t $1_updated.nc $1
+    remap_graph.xml $1
 
 rm remap_graph.xml

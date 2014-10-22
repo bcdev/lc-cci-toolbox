@@ -70,7 +70,7 @@ public class LcMapAggregatorTest {
         int class82 = 82;
         int class8Index = 16;
         int class170 = 170;
-        int class17Index = 25;
+        int class17Index = 29;
 
         aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
         aggregator.aggregateSpatial(ctx, obs(class82), spatialVector);
@@ -142,7 +142,6 @@ public class LcMapAggregatorTest {
         int startIndex = outputVector.size() - numPFTs;
         assertEquals(3, outputVector.get(startIndex + 0), 1.0e-6); // Tree Broadleaf Evergreen ( 5 * 60% class170)
         assertEquals(0.6, outputVector.get(startIndex + 3), 1.0e-6); // Tree Needleleaf Deciduous ( 2 * 30% class82)
-        assertEquals(0.5, outputVector.get(startIndex + 7), 1.0e-6); // Shrub Needleleaf Deciduous ( 2 * 25% class82)
         assertEquals(2.0, outputVector.get(startIndex + 9), 1.0e-6); // Managed Grass ( 100% class1 & class2)
         assertEquals(Float.NaN, outputVector.get(startIndex + 13), 1.0e-6); // No data
     }
@@ -188,9 +187,11 @@ public class LcMapAggregatorTest {
         aggregator.computeOutput(temporalVector, outputVector);
         int startIndex = outputVector.size() - numPFTs;
         assertEquals(1.1, outputVector.get(startIndex + 0), 1.0e-6); // Bare Soil: 1 * 100% class11  + 1 * 10% class220
-        assertEquals(2.0, outputVector.get(startIndex + 1), 1.0e-6);  // Water: 5 * 10% class0 + 1 * 100% class10 + 1 * 50% class220
+        assertEquals(2.0, outputVector.get(
+                startIndex + 1), 1.0e-6);  // Water: 5 * 10% class0 + 1 * 100% class10 + 1 * 50% class220
         assertEquals(4.4, outputVector.get(startIndex + 2), 1.0e-6);  // Snow/Ice: 5 * 52% class0 + 2 * 90% class12
-        assertEquals(2.5, outputVector.get(startIndex + 3), 1.0e-6);  // No data: 5 * 38% class0 + 2 * 10% class12 + 1 * 40% class220
+        assertEquals(2.5, outputVector.get(
+                startIndex + 3), 1.0e-6);  // No data: 5 * 38% class0 + 2 * 10% class12 + 1 * 40% class220
 
     }
 
