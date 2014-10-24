@@ -17,9 +17,13 @@ If the NetCDF-4 Classic file format is needed the standard nccopy tool can be us
 
 Installation
 ~~~~~~~~~~~~
+As a prerequisite the CCI-LC User Tools require an installed Java SE JRE version 7 or higher
+on the system. It can be obtained from the web page at
+http://www.oracle.com/technetwork/java/javase/downloads/index.html.
+
 1) Unzip the zip-file in a directory of your choice.
 2) Inside the unzipped directory you can find a folder which is named 'bin'.
-   Inside you can find the windows and unix start scripts for the LCCCI tools.
+   Inside you can find the windows and unix start scripts for the CCI-LC tools.
 
 
 Execution
@@ -31,7 +35,7 @@ Use the scripts in the same manner.
     ~~~~~~~~~~~~~~~~~~~~~~~~
         convert.sh -PtargetDir=<dirPath> <pathToMapTifFile|pathToConditionTifFile>
 
-        In case of a LCCCI Map file the corresponding flag files must be in the same directory as the Map file.
+        In case of a CCI-LC Map file the corresponding flag files must be in the same directory as the Map file.
         They are automatically detected and added to the output NetCDF-4 file.
         If a condition product shall be converted the AggMean tif file must be provided as source. All the associated
         variables (AggMean, Std, Status and NYearObs) are considered and integrated into the output NetCDF-4 file if
@@ -48,7 +52,7 @@ Use the scripts in the same manner.
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~
 
-      LC-CCI Condition Products
+      CCI-LC Condition Products
       ~~~~~~~~~~~~~~~~~~~~~~~~~
         aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
 
@@ -84,7 +88,7 @@ Use the scripts in the same manner.
             <sourceFilePath>
                 Is the path to the source NetCDF-4 file.
 
-      LC-CCI Map Products
+      CCI-LC Map Products
       ~~~~~~~~~~~~~~~~~~~
         aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
                          -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
@@ -93,7 +97,7 @@ Use the scripts in the same manner.
 
         Parameter Description:
             For a description of the common aggregation parameters please have a look into the above section
-            for the LC-CCI Condition Products. In addition for the aggregation of the LC.CCI Map Products the
+            for the CCI-LC Condition Products. In addition for the aggregation of the CCI-LC Map Products the
             following parameters exist:
 
             -PoutputLCCSClasses=<boolean>
@@ -108,7 +112,7 @@ Use the scripts in the same manner.
                 output. This parameter can be omitted. The default is true.
             -PuserPFTConversionTable=<filePath>
                 Specifies the path to a user defined PFT conversion table. If not given the default
-                LCCCI conversion table will be used. For a description of the file format see further down.
+                CCI-LC conversion table will be used. For a description of the file format see further down.
             -PoutputAccuracy=<boolean>
                 Specifies the computation of the accuracy shall be performed and the result added to the
                 output. This parameter can be omitted. The default is true.
@@ -116,7 +120,7 @@ Use the scripts in the same manner.
         A real example might look like the following:
         aggregation-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
                            -PpredefinedRegion=AUSTRALIA_AND_NEW_ZEALAND
-                           -PtargetDir="/data/LCCCI/output/" "/data/LCCCI/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
+                           -PtargetDir="/data/CCI-LC/output/" "/data/CCI-LC/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
