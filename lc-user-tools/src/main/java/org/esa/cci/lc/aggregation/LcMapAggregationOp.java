@@ -1,15 +1,18 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.binning.operator.FormatterConfig;
+import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.ReducedGaussianGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
+import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -36,7 +39,7 @@ import java.util.Locale;
         copyright = "(c) 2014 by Brockmann Consult",
         description = "Allows to aggregate LC map products.",
         autoWriteDisabled = true)
-public class LcMapAggregationOp extends AbstractLcAggregationOp implements Output {
+public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
     private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d || current_pixel_state == %d)";
 
@@ -61,7 +64,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
                label = "Output accuracy value", defaultValue = "true")
     private boolean outputAccuracy;
 
-    FormatterConfig formatterConfig;
     boolean outputTargetProduct;
     private String outputFormat;
     private String outputFile;
@@ -154,15 +156,13 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
 
     private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {
 
-        AreaCalculator areaCalculator = new ConstantAreaCalculator();
-        // The following implementation is more accurate (especially when using no super-sampling) but is slower
-        // for this use case a super-sampling of 3 is sufficient that's why we can use the constant area calculator
-//        Product sourceProduct = getSourceProduct();
-//        int sceneWidth = sourceProduct.getSceneRasterWidth();
-//        int sceneHeight = sourceProduct.getSceneRasterHeight();
-//        final double sourceMapResolutionX = 180.0 / sceneHeight;
-//        final double sourceMapResolutionY = 360.0 / sceneWidth;
-//        AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
+        Product sourceProduct = getSourceProduct();
+        int sceneWidth = sourceProduct.getSceneRasterWidth();
+        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        final double sourceMapResolutionX = 180.0 / sceneHeight;
+        final double sourceMapResolutionY = 360.0 / sceneWidth;
+        PlanetaryGrid planetaryGrid = createPlanetaryGrid();
+        AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
         int processed = 1;
         int clearLand = 1;
@@ -171,7 +171,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater, clearSnowIce);
         binningOp.setMaskExpr(validExpr);
         binningOp.setNumRows(getNumRows());
-        binningOp.setSuperSampling(3);
+        binningOp.setSuperSampling(1);
         LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
                                                                                 outputPFTClasses, userPFTConversionTable,
                                                                                 areaCalculator);
@@ -187,6 +187,22 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp implements Outpu
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);
         binningOp.setOutputType(outputType == null ? "Product" : outputType);
         binningOp.setOutputFormat(outputFormat);
+    }
+
+    private PlanetaryGrid createPlanetaryGrid() {
+        PlanetaryGrid planetaryGrid;
+        PlanetaryGridName gridName = getGridName();
+        int numRows = getNumRows();
+        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
+            planetaryGrid = new PlateCarreeGrid(numRows);
+        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
+            planetaryGrid = new RegularGaussianGrid(numRows);
+        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {
+            planetaryGrid = new ReducedGaussianGrid(numRows);
+        } else {
+            planetaryGrid = new SEAGrid(numRows);
+        }
+        return planetaryGrid;
     }
 
     public boolean isOutputLCCSClasses() {
