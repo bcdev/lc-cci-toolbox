@@ -23,7 +23,7 @@ public class LCAggregationAction extends AbstractVisatAction {
     private static ModelessDialog createDialog(final boolean exitOnClose, final String helpId,
                                                final AppContext appContext) {
         return new LCAggregationDialog(
-                "LCCCI.Aggregate", appContext, "Landcover CCI Aggregation Tool", helpId) {
+                "LCCCI.Aggregate.Map", appContext, "Landcover CCI Aggregation Tool", helpId) {
 
             @Override
             protected void onClose() {
