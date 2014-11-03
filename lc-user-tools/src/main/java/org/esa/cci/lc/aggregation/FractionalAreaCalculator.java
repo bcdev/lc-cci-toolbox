@@ -24,7 +24,7 @@ class FractionalAreaCalculator implements AreaCalculator {
     public FractionalAreaCalculator(PlanetaryGrid planetaryGrid, double mapResolutionX, double mapResolutionY) {
         this.planetaryGrid = planetaryGrid;
         deltaGridLat = 180.0 / planetaryGrid.getNumRows();
-        binRectanglesMap = new HashMap<Long, Rectangle2D.Double>();
+        binRectanglesMap = new HashMap<>();
         deltaMapLat = mapResolutionX;
         deltaMapLon = mapResolutionY;
     }
@@ -67,9 +67,30 @@ class FractionalAreaCalculator implements AreaCalculator {
     }
 
     static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
-        Rectangle2D intersection = binRect.createIntersection(obsRect);
-        double intersectionArea = intersection.getWidth() * intersection.getHeight();
-        double binArea = binRect.getWidth() * binRect.getHeight();
-        return intersectionArea / binArea;
+        Rectangle2D binRectangle = normalize(binRect);
+        Rectangle2D obsRectangle = normalize(obsRect);
+        if (binRectangle.intersects(obsRectangle)) {
+            Rectangle2D intersection = binRectangle.createIntersection(obsRectangle);
+            double intersectionArea = intersection.getWidth() * intersection.getHeight();
+            double binArea = binRectangle.getWidth() * binRectangle.getHeight();
+            return intersectionArea / binArea;
+        } else {
+            return 0;
+        }
     }
+
+    private static Rectangle2D normalize(Rectangle2D rect) {
+        double rectMinX = rect.getMinX();
+        double rectMaxX = rect.getMaxX();
+        // in some cases it can happen that the minX gets negative even it is actually zero,
+        // because of inaccurate calculation in Rectangle2D.setFrameFromCenter()
+        double minX = rectMinX + 1.0e-8 < 0 ? rectMinX + 360 : rectMinX;
+        double maxX = rectMaxX + 1.0e-8 < 0 ? rectMaxX + 360 : rectMaxX;
+        double minY = rect.getMinY();
+        double maxY = rect.getMaxY();
+        Rectangle2D.Double targetRect = new Rectangle2D.Double();
+        targetRect.setFrameFromDiagonal(minX, minY, maxX, maxY);
+        return targetRect;
+    }
+
 }
