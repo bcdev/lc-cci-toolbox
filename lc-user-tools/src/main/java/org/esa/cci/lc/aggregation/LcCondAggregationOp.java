@@ -56,6 +56,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         BinningOp binningOp;
         try {
             binningOp = new BinningOp();
+            binningOp.setParameterDefaultValues();
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }

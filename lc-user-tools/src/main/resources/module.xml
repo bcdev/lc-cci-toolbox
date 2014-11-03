@@ -12,6 +12,7 @@
         <![CDATA[
     Changes in 3.6:
     - fixed fractional area calculation when observation or bin crossed the anti-meridian
+    - fixed java.lang.IllegalArgumentException: Unknown metadata aggregator name: null
     Changes in 3.5:
     - added remapping tool for remapping LC classes to PFT classes
     - LCCS legend in NetCDF files updated to contain additional classes, e.g. 152, 153, ...
