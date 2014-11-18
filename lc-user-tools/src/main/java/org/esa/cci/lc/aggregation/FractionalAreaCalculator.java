@@ -67,15 +67,38 @@ class FractionalAreaCalculator implements AreaCalculator {
     }
 
     static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
-        if (binRect.intersects(obsRect)) {
-            Rectangle2D intersection = binRect.createIntersection(obsRect);
+        Rectangle2D binRectangle;
+        Rectangle2D obsRectangle;
+        if (crossesAntiMeridian(binRect) || crossesAntiMeridian(obsRect)) {
+            binRectangle = normalize(binRect);
+            obsRectangle = normalize(obsRect);
+        } else {
+            binRectangle = binRect;
+            obsRectangle = obsRect;
+        }
+        if (binRectangle.intersects(obsRectangle)) {
+            Rectangle2D intersection = binRectangle.createIntersection(obsRectangle);
             double intersectionArea = intersection.getWidth() * intersection.getHeight();
-            double binArea = binRect.getWidth() * binRect.getHeight();
+            double binArea = binRectangle.getWidth() * binRectangle.getHeight();
             return intersectionArea / binArea;
         } else {
             return 0;
         }
     }
 
+    private static boolean crossesAntiMeridian(Rectangle2D rect) {
+        return rect.intersectsLine(180, 90, 180, -90) || rect.intersectsLine(-180, 90, -180, -90);
+    }
+
+    private static Rectangle2D normalize(Rectangle2D rect) {
+        double rectMinX = rect.getMinX();
+        double minX = (rectMinX + 360) % 360;
+        double maxX = minX + rect.getWidth();
+        double minY = rect.getMinY();
+        double maxY = rect.getMaxY();
+        Rectangle2D.Double targetRect = new Rectangle2D.Double();
+        targetRect.setFrameFromDiagonal(minX, minY, maxX, maxY);
+        return targetRect;
+    }
 
 }

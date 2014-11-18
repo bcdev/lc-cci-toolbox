@@ -94,6 +94,21 @@ public class FractionalAreaCalculatorTest {
         Rectangle2D binRect = new Rectangle.Double(179, 68, 3, 2);
         Rectangle2D obsRect = new Rectangle.Double(-179, 68, 1, 1);
         assertEquals(1.0 / 6.0, FractionalAreaCalculator.calcFraction(binRect, obsRect), 1.0e-6);
+
+        binRect = new Rectangle.Double(-179, 68, 1, 2);
+        obsRect = new Rectangle.Double(179, 68, 3, 1);
+        assertEquals(1.0 / 2.0, FractionalAreaCalculator.calcFraction(binRect, obsRect), 1.0e-6);
+    }
+
+    @Test
+    public void testFractionCalculation_WhenCrossingMeridian() throws Exception {
+        Rectangle2D binRect = new Rectangle.Double(-0.2, 68, 0.4, 1);
+        Rectangle2D obsRect = new Rectangle.Double(0.1, 68, 0.1, 1);
+        assertEquals(1.0 / 4.0, FractionalAreaCalculator.calcFraction(binRect, obsRect), 1.0e-6);
+
+        binRect = new Rectangle.Double(0.2, 68, 0.4, 1);
+        obsRect = new Rectangle.Double(-0.5, 68, 2, 1);
+        assertEquals(1.0, FractionalAreaCalculator.calcFraction(binRect, obsRect), 1.0e-6);
     }
 
     private double calcFractionForLonLat(double lon, double lat, PlanetaryGrid grid, AreaCalculator areaCalculator) {
