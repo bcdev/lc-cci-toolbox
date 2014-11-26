@@ -62,7 +62,7 @@ public class RemapGraphCreatorTest {
                                                 "    source_band == 5 ? 2 : source_band == 15 ? 37 : 0\n" +
                                                 "    </expression>\n" +
                                                 "    <description>tsm as defined in any_lut.csv</description>")));
-        assertEquals(3, StringUtils.countMatches(result, "<scalingFactor>0.01</scalingFactor>"));
+        assertEquals(3, StringUtils.countMatches(result, "<scalingFactor>0.0001</scalingFactor>"));
     }
 
     private static String removeSpaces(String string) {
