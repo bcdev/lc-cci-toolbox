@@ -169,7 +169,7 @@ public class RemapGraphCreator {
                         "    <description>%s as defined in %s</description>\n" +
                         "    <type>int16</type>\n" +
                         "    <noDataValue>0</noDataValue>\n" +
-                        "    <scalingFactor>0.01</scalingFactor>\n" +
+                        "    <scalingFactor>0.0001</scalingFactor>\n" +
                         "</targetBand>",
                         targetBandSpec.name, targetBandSpec.expression, targetBandSpec.name, lutName));
             }
