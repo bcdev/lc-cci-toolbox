@@ -70,8 +70,9 @@ public class HazeRemovalOperator extends Operator {
             "radiance_15"
     };
 
-    private String sourceBandName_rad_3 = bandNames[2];
-    private String sourceBandName_rad_7 = bandNames[6];
+    private String sourceBandNameRad3 = bandNames[2];
+    private String sourceBandNameRad7 = bandNames[6];
+    private String sourceBandNameFlag = "cloud_classif_flags";
 
 
     private String targetBandNameTach = "tasseled_cup_haze";
@@ -140,12 +141,16 @@ public class HazeRemovalOperator extends Operator {
             targetBand.setUnit(sourceBand.getUnit());
         }
 
+        Band sourceBandFlag = sourceProduct.getBand(sourceBandNameFlag);
+
+
         targetBandHot = targetProduct.addBand(targetBandNameHot, ProductData.TYPE_FLOAT64);
         targetBandTach = targetProduct.addBand(targetBandNameTach, ProductData.TYPE_FLOAT64);
         targetBandHotLevel = targetProduct.addBand(targetBandNameHotLevel, ProductData.TYPE_INT32);
 
-        targetProduct.setPreferredTileSize
-                (new Dimension(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight()));
+        int preferredWidth =  Math.min(targetProduct.getSceneRasterWidth(), 1000);
+        int preferredHeight =  Math.min(targetProduct.getSceneRasterHeight(), 1000);
+        targetProduct.setPreferredTileSize(preferredWidth, preferredHeight);
     }
 
 
@@ -164,13 +169,14 @@ public class HazeRemovalOperator extends Operator {
         }
         Tile sourceTileRad3 = sourceTiles[2];
         Tile sourceTileRad7 = sourceTiles[6];
+        Tile sourceTileFlag = getSourceTile(sourceProduct.getBand(sourceBandNameFlag), sourceRectangle);
 
         Tile targetTileTach = targetTileMap.get(targetBandTach);
         Tile targetTileHot = targetTileMap.get(targetBandHot);
         Tile targetTileHotLevel = targetTileMap.get(targetBandHotLevel);
 
 
-        FlagDetector flagDetector = new MerisFlagDetector(sourceProduct, targetRectangle);
+        FlagDetector flagDetector = new MerisFlagDetector(sourceTileFlag, sourceRectangle);
 
         final double[] sourceDataBlue = sourceTileRad3.getSamplesDouble();
         final double[] sourceDataRed = sourceTileRad7.getSamplesDouble();
@@ -206,7 +212,7 @@ public class HazeRemovalOperator extends Operator {
                                                                                       tachArray,
                                                                                       flagArray);
 
-            makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, HazeRemovalOperator.KernelRadius);
+            makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, sourceRectangle,HazeRemovalOperator.KernelRadius);
 
             HotTransformation HotBand = new HotTransformation();
             counterClear = HotBand.calculateHOTBand(sourceDataBlue,
@@ -218,7 +224,7 @@ public class HazeRemovalOperator extends Operator {
                                                     hotArray,
                                                     meanValue);
 
-            makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, HazeRemovalOperator.KernelRadius);
+            makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle,HazeRemovalOperator.KernelRadius);
 
             HotHistogram hotHistogram = new HotHistogram();
             Histogram histogramHotAll = hotHistogram.compute(tachArray,
@@ -244,7 +250,7 @@ public class HazeRemovalOperator extends Operator {
                                                          binIndexCounts,
                                                          counterClear);
 
-            makeFilledBand(hotLevelArray, sourceWidth, sourceHeight, targetTileHotLevel, HazeRemovalOperator.KernelRadius);
+            makeFilledBand(hotLevelArray, sourceWidth, sourceHeight, targetTileHotLevel, sourceRectangle,HazeRemovalOperator.KernelRadius);
 
             double[] deltaBandHazeRemoval = new double[maxBinIndex + 1];
 
@@ -291,7 +297,7 @@ public class HazeRemovalOperator extends Operator {
                     }
                 }
 
-                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i], HazeRemovalOperator.KernelRadius);
+                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i],sourceRectangle, HazeRemovalOperator.KernelRadius);
             }
 
         } else {
@@ -304,12 +310,12 @@ public class HazeRemovalOperator extends Operator {
                         sourceData[kk] = sourceData[kk];
                     }
                 }
-                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i], HazeRemovalOperator.KernelRadius);
-                makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, HazeRemovalOperator.KernelRadius);
-                makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i],sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach,sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle,HazeRemovalOperator.KernelRadius);
                 int[] hotLevelArrayZeros = new int[sourceLength];
                 Arrays.fill(hotLevelArrayZeros, -1);
-                makeFilledBand(hotLevelArrayZeros, sourceWidth, sourceHeight, targetTileHotLevel, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(hotLevelArrayZeros, sourceWidth, sourceHeight, targetTileHotLevel,sourceRectangle, HazeRemovalOperator.KernelRadius);
 
             }
         }
@@ -321,59 +327,37 @@ public class HazeRemovalOperator extends Operator {
                     int inputDataWidth,
                     int inputDataHeight,
                     Tile targetTileOutputBand,
+                    Rectangle targetRectangle,
                     int mkr) {
 
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[y * (inputDataWidth) + x]);
+        int xLocation = targetRectangle.x;
+        int yLocation = targetRectangle.y;
+
+        for (int y = 0; y < inputDataHeight; y++) {
+            for (int x = 0; x < inputDataWidth; x++) {
+                targetTileOutputBand.setSample(x + xLocation  - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
+
             }
         }
     }
 
-    static void makeFilledBand
-            (
-                    double[][] inputData,
-                    int inputDataWidth,
-                    int inputDataHeight,
-                    Tile targetTileOutputBand1,
-                    Tile targetTileOutputBand2,
-                    int mkr) {
-
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand1.setSample(x - mkr, y - mkr, inputData[0][y * (inputDataWidth) + x]);
-                targetTileOutputBand2.setSample(x - mkr, y - mkr, inputData[1][y * (inputDataWidth) + x]);
-            }
-        }
-    }
-
-    static void makeFilledBand
-            (
-                    double[][] inputData,
-                    int inputDataWidth,
-                    int inputDataHeight,
-                    Tile targetTileOutputBand,
-                    int index,
-                    int mkr) {
-
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[index][y * (inputDataWidth) + x]);
-            }
-        }
-    }
 
     static void makeFilledBand
             (
                     int[] inputData,
                     int inputDataWidth,
-                    int inputDataHeight
-                    , Tile targetTileOutputBand,
+                    int inputDataHeight,
+                    Tile targetTileOutputBand,
+                    Rectangle targetRectangle,
                     int mkr) {
 
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[y * (inputDataWidth) + x]);
+        int xLocation = targetRectangle.x;
+        int yLocation = targetRectangle.y;
+
+        for (int y = 0; y < inputDataHeight; y++) {
+            for (int x = 0; x < inputDataWidth; x++) {
+                targetTileOutputBand.setSample(x + xLocation  - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
+
             }
         }
     }

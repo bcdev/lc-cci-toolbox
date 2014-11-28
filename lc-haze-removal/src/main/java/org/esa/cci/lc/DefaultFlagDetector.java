@@ -12,5 +12,10 @@ class DefaultFlagDetector implements FlagDetector {
         return false;
     }
 
+    @Override
+    public boolean isClearLand(int x, int y) {
+        return false;
+    }
+
 }
 

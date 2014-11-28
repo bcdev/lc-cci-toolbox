@@ -21,8 +21,8 @@ public class HotHistogram {
 
         int histogramBins = HazeRemovalOperator.standardHistogramBins;
         int lengthHazeArray = counterValid - counterClear;
-        System.out.printf("Valid pixel:  %s  \n", counterValid);
-        System.out.printf("Clear pixel:  %s  \n", counterClear);
+        //System.out.printf("Valid pixel:  %s  \n", counterValid);
+        //System.out.printf("Clear pixel:  %s  \n", counterClear);
 
         int counterHaze = 0;
         final double[] hotDataArray = new double[lengthHazeArray];
@@ -30,7 +30,7 @@ public class HotHistogram {
 
         for (int j = 0; j < sourceHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
-                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.LAND_FLAG && tachArray[j * (sourceWidth) + i] > meanValue) {
+                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.CLEAR_LAND_FLAG && tachArray[j * (sourceWidth) + i] > meanValue) {
                     hotDataArray[counterHaze] = hotArray[j * (sourceWidth) + i];
                     counterHaze = counterHaze + 1;
                 }

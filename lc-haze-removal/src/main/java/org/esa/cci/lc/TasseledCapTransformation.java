@@ -18,7 +18,7 @@ public class TasseledCapTransformation {
         for (int j = 0; j < sourceHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
                 kk = j * (sourceWidth) + i;
-                if (flagArray[kk] != PreparingOfSourceBand.INVALID_FLAG && flagArray[kk] == PreparingOfSourceBand.LAND_FLAG) {
+                if (flagArray[kk] != PreparingOfSourceBand.INVALID_FLAG && flagArray[kk] == PreparingOfSourceBand.CLEAR_LAND_FLAG) {
                     tachArray[kk] = HazeRemovalOperator.tasseledCapFactorBlue * sourceDataBlue[kk]
                                     + HazeRemovalOperator.tasseledCapFactorRed * sourceDataRed[kk];
                     mean += tachArray[kk];
