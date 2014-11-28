@@ -4,8 +4,6 @@ import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.ReducedGaussianGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -15,6 +13,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapTiffReader;
+import org.esa.cci.lc.util.LcRegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -34,7 +33,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Map",
-        version = "3.5",
+        version = "3.6",
         authors = "Marco Peters",
         copyright = "(c) 2014 by Brockmann Consult",
         description = "Allows to aggregate LC map products.",
@@ -196,9 +195,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             planetaryGrid = new PlateCarreeGrid(numRows);
         } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new RegularGaussianGrid(numRows);
-        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new ReducedGaussianGrid(numRows);
+            planetaryGrid = new LcRegularGaussianGrid(numRows);
+//        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {   // not yet supported
+//            planetaryGrid = new ReducedGaussianGrid(numRows);
         } else {
             planetaryGrid = new SEAGrid(numRows);
         }

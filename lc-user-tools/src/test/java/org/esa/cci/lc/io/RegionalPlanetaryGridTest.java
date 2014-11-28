@@ -2,7 +2,7 @@ package org.esa.cci.lc.io;
 
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
+import org.esa.cci.lc.util.LcRegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class RegionalPlanetaryGridTest {
         final ReferencedEnvelope region = new ReferencedEnvelope(CENTRAL_AMERICA,    // minus because lat is upside-down
                                                                  DefaultGeographicCRS.WGS84);
 
-        final RegionalPlanetaryGrid grid = new RegionalPlanetaryGrid(new RegularGaussianGrid(1280), region);
+        final RegionalPlanetaryGrid grid = new RegionalPlanetaryGrid(new LcRegularGaussianGrid(1280), region);
         final int binIndex = 1127261;
         assertFalse(grid.isBinIndexInRegionalGrid(binIndex));
     }

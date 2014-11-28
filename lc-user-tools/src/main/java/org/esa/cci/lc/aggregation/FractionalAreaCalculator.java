@@ -67,8 +67,15 @@ class FractionalAreaCalculator implements AreaCalculator {
     }
 
     static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
-        Rectangle2D binRectangle = normalize(binRect);
-        Rectangle2D obsRectangle = normalize(obsRect);
+        Rectangle2D binRectangle;
+        Rectangle2D obsRectangle;
+        if (crossesAntiMeridian(binRect) || crossesAntiMeridian(obsRect)) {
+            binRectangle = normalize(binRect);
+            obsRectangle = normalize(obsRect);
+        } else {
+            binRectangle = binRect;
+            obsRectangle = obsRect;
+        }
         if (binRectangle.intersects(obsRectangle)) {
             Rectangle2D intersection = binRectangle.createIntersection(obsRectangle);
             double intersectionArea = intersection.getWidth() * intersection.getHeight();
@@ -79,13 +86,14 @@ class FractionalAreaCalculator implements AreaCalculator {
         }
     }
 
+    private static boolean crossesAntiMeridian(Rectangle2D rect) {
+        return rect.intersectsLine(180, 90, 180, -90) || rect.intersectsLine(-180, 90, -180, -90);
+    }
+
     private static Rectangle2D normalize(Rectangle2D rect) {
         double rectMinX = rect.getMinX();
-        double rectMaxX = rect.getMaxX();
-        // in some cases it can happen that the minX gets negative even it is actually zero,
-        // because of inaccurate calculation in Rectangle2D.setFrameFromCenter()
-        double minX = rectMinX + 1.0e-8 < 0 ? rectMinX + 360 : rectMinX;
-        double maxX = rectMaxX + 1.0e-8 < 0 ? rectMaxX + 360 : rectMaxX;
+        double minX = (rectMinX + 360) % 360;
+        double maxX = minX + rect.getWidth();
         double minY = rect.getMinY();
         double maxY = rect.getMaxY();
         Rectangle2D.Double targetRect = new Rectangle2D.Double();
