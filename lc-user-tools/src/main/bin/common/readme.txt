@@ -124,13 +124,30 @@ Use the scripts in the same manner.
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            The table, also known as Cross Walking Table, describes the conversion of the LCCS classes to PFTs.
             The file can start with an optional comment. If the comment is used the first line must start with '#' in
-            order to indicate the comment. Multiple lines are not supported. The comment ('pft_table_comment') is included
-            as an attribute into the NetCDF output file.
-            The PFT table with a table header. Each column of the header defines one PFT except the first. The first
-            column must contain the value of each LCCS class index. The subsequent rows, one for each LCCS class, define
-            the conversion from corresponding class to the PFTs. Columns are separated with the pipe ('|') symbol and
-            the column header names are used as band names.
+            order to indicate the comment. Multiple lines are not supported. The comment ('pft_table_comment') is
+            included as an attribute into the NetCDF output file.
+            The actual PFT table starts with a table header. Each column of the header defines one PFT except the first.
+            The first column is for the LCCS class indices.
+            The subsequent data rows, one for each LCCS class, define the conversion from corresponding class to the
+            PFTs. Each cell specifies the percentage of the PFT, floating point values can be used. Zero percentage
+            can be omitted. Columns are separated with the pipe ('|') symbol and the column header names are used
+            as band names.
+
+            Example:
+            # An optional comment describing the conversion table
+            LCCS Class|Tree Broadleaf Evergreen|...|Managed Grass|Bare soil|Water|Snow/Ice|No data
+            0||...|||||100
+            10||...|100||||
+            11||...|100||||
+            12||...|50||||
+            20||...|100||||
+            30|5|...|60||||
+            40|5|...|25|40|||
+            ...
+            220||...||||100|
+
 
 
     Subset Tool Usage

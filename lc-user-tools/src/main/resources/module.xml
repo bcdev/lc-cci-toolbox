@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.6</version>
+    <version>3.7</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,8 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.7:
+    - updated readme.txt to explain the file format of cross walking table better
     Changes in 3.6:
     - fixed fractional area calculation when observation or bin crossed the anti-meridian
     - fixed java.lang.IllegalArgumentException: Unknown metadata aggregator name: null

@@ -26,7 +26,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Cond",
-        version = "3.6",
+        version = "3.7",
         authors = "Marco Peters",
         copyright = "(c) 2014 by Brockmann Consult",
         description = "Allows to aggregate LC condition products.",
