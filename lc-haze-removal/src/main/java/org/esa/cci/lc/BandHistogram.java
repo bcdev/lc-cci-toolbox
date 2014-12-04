@@ -27,7 +27,7 @@ public class BandHistogram {
 
         for (int j = 0; j < sourceHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
-                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.LAND_FLAG && hotLevelArray[j * (sourceWidth) + i] == binValue) {
+                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.CLEAR_LAND_FLAG && hotLevelArray[j * (sourceWidth) + i] == binValue) {
                     hazeOneClassDataArray[counterHaze] = sourceData[j * (sourceWidth) + i];
                     counterHaze = counterHaze + 1;
                 }
@@ -60,7 +60,7 @@ public class BandHistogram {
 
         for (int j = 0; j < sourceHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
-                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.LAND_FLAG && hotLevelArray[j * (sourceWidth) + i] <= thresholdValue) {
+                if (flagArray[j * (sourceWidth) + i] == PreparingOfSourceBand.CLEAR_LAND_FLAG && hotLevelArray[j * (sourceWidth) + i] <= thresholdValue) {
                     hazeAllClassDataArray[counterHaze] = sourceData[j * (sourceWidth) + i];
                     counterHaze = counterHaze + 1;
                 }

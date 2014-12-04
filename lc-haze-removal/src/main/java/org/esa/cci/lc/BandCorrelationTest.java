@@ -22,7 +22,7 @@ public class BandCorrelationTest {
         int counterValid = 0;
 
         for (int i = 0; i < sourceData1.length; i += 1) {
-            if (flagArray[i] == PreparingOfSourceBand.LAND_FLAG
+            if (flagArray[i] == PreparingOfSourceBand.CLEAR_LAND_FLAG
                 && !Double.isNaN(sourceData1[i]) && !Double.isNaN(sourceData2[i])) {
                 scores1[counterValid] = sourceData1[i];
                 scores2[counterValid] = sourceData2[i];

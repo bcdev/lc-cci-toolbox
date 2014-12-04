@@ -6,6 +6,8 @@ public interface FlagDetector {
 
     boolean isInvalid(int x, int y);
 
+    boolean isClearLand(int x, int y);
+
 }
 
 
