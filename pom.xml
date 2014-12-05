@@ -17,6 +17,7 @@
         <module>lc-image-registration</module>
         <module>lc-land-water-tool</module>
         <module>lc-point-selection-tool</module>
+        <module>lc-l3</module>
     </modules>
     <packaging>pom</packaging>
 

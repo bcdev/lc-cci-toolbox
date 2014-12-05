@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <ows:Identifier>L3</ows:Identifier>
+
+    <wps:DataInputs>
+
+        <wps:Input>
+            <ows:Identifier>productionName</ows:Identifier>
+            <wps:Data><wps:LiteralData>lc seasonal composite test</wps:LiteralData></wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>processorBundleName</ows:Identifier>
+            <wps:Data><wps:LiteralData>lc-l3</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>processorBundleVersion</ows:Identifier>
+            <wps:Data><wps:LiteralData>1.0-SNAPSHOT</wps:LiteralData></wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>inputPath</ows:Identifier>
+            <wps:Data><wps:LiteralData>/calvalus/projects/lc/sr-fr-nc-classic/${yyyy}/${yyyy}-${MM}-${dd}/ESACCI-LC-L3-SR-MERIS-300m-P7D-h36v14-${yyyy}${MM}${dd}-v1.0.nc$</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>minDate</ows:Identifier>
+            <wps:Data><wps:LiteralData>2009-01-01</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>maxDate</ows:Identifier>
+            <wps:Data><wps:LiteralData>2009-06-03</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>periodLength</ows:Identifier>
+            <wps:Data><wps:LiteralData>154</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>regionWKT</ows:Identifier>
+            <wps:Data><wps:LiteralData>POLYGON((0 15,0 20,5 20,5 15,0 15))</wps:LiteralData></wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.output.dir</ows:Identifier>
+            <wps:Data><wps:LiteralData>hdfs://master00:9000/calvalus/home/martin/seasonal-composite</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.output.format</ows:Identifier>
+            <wps:Data><wps:LiteralData>NetCDF4</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.output.prefix</ows:Identifier>
+            <wps:Data><wps:LiteralData>seasonal</wps:LiteralData></wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.l3.parameters</ows:Identifier>
+            <wps:Data>
+                <wps:ComplexData>
+                    <parameters>
+                        <numRows>64800</numRows>
+                        <aggregators>
+                            <aggregator>
+                                <type>LC_SEASONAL_COMPOSITE</type>
+                            </aggregator>
+                        </aggregators>
+                    </parameters>
+                </wps:ComplexData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
+            <wps:Data><wps:LiteralData>0</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapreduce.map.maxattempts</ows:Identifier>
+            <wps:Data><wps:LiteralData>2</wps:LiteralData></wps:Data>
+        </wps:Input>
+<!--
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapreduce.reduce.java.opts</ows:Identifier>
+            <wps:Data><wps:LiteralData>-Djava.awt.headless=true -Xmx2560M</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapreduce.reduce.memory.mb</ows:Identifier>
+            <wps:Data><wps:LiteralData>3072</wps:LiteralData></wps:Data>
+        </wps:Input>
+-->
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+            <wps:Data><wps:LiteralData>lc</wps:LiteralData></wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+            <wps:Data><wps:LiteralData>002</wps:LiteralData></wps:Data>
+        </wps:Input>
+    </wps:DataInputs>
+
+</wps:Execute>
