@@ -57,8 +57,15 @@ public class RemapGraphCreator {
             System.exit(-1);
         }
 
-        try (Writer writer = new FileWriter(GRAPH_FILENAME)) {
-            String lutFile = args[0];
+        String lutFile = args[0];
+        String outputFileName = args[1];
+
+        createGraphFile(lutFile, outputFileName);
+    }
+
+    static File createGraphFile(String lutFile, String outputFileName) {
+        File outputFile = new File(GRAPH_FILENAME);
+        try (Writer writer = new FileWriter(outputFile)) {
             GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
             try (Reader fr = new FileReader(lutFile)) {
@@ -80,10 +87,11 @@ public class RemapGraphCreator {
                 graphWriter.writeTargetBands();
 
             }
-            graphWriter.writeFooter(args[1]);
+            graphWriter.writeFooter(outputFileName);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+        return outputFile;
     }
 
     static class GraphWriter {
