@@ -64,6 +64,10 @@ public class RemapGraphCreator {
             try (Reader fr = new FileReader(lutFile)) {
                 CsvReader reader = new CsvReader(fr, new char[]{'|'});
                 String[] header = reader.readRecord();
+                if (header[0].startsWith("#")) {
+                    // if record starts with '#' it is a comment --> read next record
+                    header = reader.readRecord();
+                }
                 graphWriter.init(header);
                 graphWriter.writeHeader();
 
@@ -161,7 +165,7 @@ public class RemapGraphCreator {
         void writeTargetBands() throws IOException {
             for (TargetBandSpec targetBandSpec : targetBandSpecs.values()) {
                 writer.append(String.format(
-                        "<targetBand>" +
+                        "<targetBand>\n" +
                         "    <name>%s</name>\n" +
                         "    <expression>\n" +
                         "    %s\n" +
