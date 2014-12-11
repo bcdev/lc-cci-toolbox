@@ -9,20 +9,23 @@ public class TasseledCapTransformation {
                                                          int sourceWidth,
                                                          int sourceHeight,
                                                          double[] tachArray,
-                                                         int[] flagArray) {
+                                                         int[] flagArray,
+                                                         int[] counterValue) {
 
         int kk;
-        int counter = 0;
+        int counterValid = 0;
         double mean = 0.0;
+
 
         for (int j = 0; j < sourceHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
                 kk = j * (sourceWidth) + i;
-                if (flagArray[kk] != PreparingOfSourceBand.INVALID_FLAG && flagArray[kk] == PreparingOfSourceBand.CLEAR_LAND_FLAG) {
+                if (flagArray[kk] != PreparingOfSourceBand.INVALID_FLAG && flagArray[kk] == PreparingOfSourceBand.CLEAR_LAND_FLAG
+                       &&  !Double.isNaN(sourceDataBlue[kk]) && !Double.isNaN(sourceDataRed[kk]) ) {
                     tachArray[kk] = HazeRemovalOperator.tasseledCapFactorBlue * sourceDataBlue[kk]
                                     + HazeRemovalOperator.tasseledCapFactorRed * sourceDataRed[kk];
                     mean += tachArray[kk];
-                    counter += 1;
+                    counterValid += 1;
 
                 } else {
                     tachArray[kk] = Double.NaN;
@@ -30,10 +33,11 @@ public class TasseledCapTransformation {
                 }
             }
         }
-        HazeRemovalOperator.counterValid = counter;
-        System.out.printf("counterValid:  %d  \n", HazeRemovalOperator.counterValid);
 
-        return mean / HazeRemovalOperator.counterValid;
+        System.out.printf("counterValid:  %d  \n", counterValid);
+        counterValue[0] = counterValid;
+
+        return mean / counterValid;
     }
 
 }

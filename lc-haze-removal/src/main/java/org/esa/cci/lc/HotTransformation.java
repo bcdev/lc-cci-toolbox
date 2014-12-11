@@ -6,18 +6,19 @@ public class HotTransformation {
     private static final int FILL_NEIGHBOUR_VALUE = 4;
 
 
-    public int calculateHOTBand(double[] sourceDataBlue,
+    public void calculateHOTBand(double[] sourceDataBlue,
                                 double[] sourceDataRed,
                                 int sourceWidth,
                                 int sourceHeight,
                                 double[] tachArray,
                                 int[] flagArray,
                                 double[] hotArray,
-                                double meanValue) {
+                                double meanValue,
+                                int[] counterValue) {
 
         int width = sourceWidth;
         int height = sourceHeight;
-        int counterValid = 0;
+        int counterClear = 0;
         double meanBlue = 0.0;
         double meanRed = 0.0;
         double slope_numerator = 0.0;
@@ -28,14 +29,14 @@ public class HotTransformation {
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
                 if (flagArray[j * (width) + i] == PreparingOfSourceBand.CLEAR_LAND_FLAG && tachArray[j * (width) + i] <= meanValue) {
-                    counterValid = counterValid + 1;
+                    counterClear = counterClear + 1;
                     meanBlue = meanBlue + sourceDataBlue[j * (width) + i];     // x = blue, y = red
                     meanRed = meanRed + sourceDataBlue[j * (width) + i];
                 }
             }
         }
-        meanBlue = meanBlue / counterValid;
-        meanRed = meanRed / counterValid;
+        meanBlue = meanBlue / counterClear;
+        meanRed = meanRed / counterClear;
 
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
@@ -57,7 +58,7 @@ public class HotTransformation {
                 }
             }
         }
-        return counterValid;
+        counterValue[1] = counterClear;
     }
 
 }

@@ -19,14 +19,14 @@ public class BandCorrelationTest {
 
         double[] scores1 = new double[sourceData1.length];
         double[] scores2 = new double[sourceData2.length];
-        int counterValid = 0;
+        int counter = 0;
 
         for (int i = 0; i < sourceData1.length; i += 1) {
             if (flagArray[i] == PreparingOfSourceBand.CLEAR_LAND_FLAG
                 && !Double.isNaN(sourceData1[i]) && !Double.isNaN(sourceData2[i])) {
-                scores1[counterValid] = sourceData1[i];
-                scores2[counterValid] = sourceData2[i];
-                counterValid = counterValid + 1;
+                scores1[counter] = sourceData1[i];
+                scores2[counter] = sourceData2[i];
+                counter = counter + 1;
             }
         }
 
@@ -39,16 +39,16 @@ public class BandCorrelationTest {
         double sum_yy = 0.;
         double sum_xy = 0.;
         double TINY = 1.0e-20;
-        for (int i = 0; i < counterValid; i += 1) { // mean
+        for (int i = 0; i < counter; i += 1) { // mean
             mean_x += scores1[i];
             mean_y += scores2[i];
         }
 
-        mean_x /= counterValid;
-        mean_y /= counterValid;
+        mean_x /= counter;
+        mean_y /= counter;
 
 
-        for (int i = 0; i < counterValid; i += 1) { // correlation coefficient
+        for (int i = 0; i < counter; i += 1) { // correlation coefficient
             delta_x = scores1[i] - mean_x;
             delta_y = scores2[i] - mean_y;
             sum_xx += delta_x * delta_x;

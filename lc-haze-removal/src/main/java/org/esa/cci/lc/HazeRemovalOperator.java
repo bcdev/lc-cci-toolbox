@@ -40,10 +40,10 @@ import java.util.Map;
  * all bands of the target product at once.
  */
 @OperatorMetadata(alias = "HazeOp",
-                  description = "algorithm for haze removal",
-                  authors = "",
-                  version = "1.0",
-                  copyright = "(C) 2010 by Brockmann Consult GmbH (beam@brockmann-consult.de)")
+        description = "algorithm for haze removal",
+        authors = "",
+        version = "1.0",
+        copyright = "(C) 2010 by Brockmann Consult GmbH (beam@brockmann-consult.de)")
 public class HazeRemovalOperator extends Operator {
 
     @SourceProduct
@@ -90,8 +90,6 @@ public class HazeRemovalOperator extends Operator {
 
     static final int standardHistogramBins = 255;
     static final int windowOverlap = 50;
-    static int counterValid = 0;
-    static int counterClear = 0;
     static final double leftHistoAreaSkipped = 0.02;
     static final double rightHistoAreaSkipped = 0.00;
 
@@ -125,10 +123,10 @@ public class HazeRemovalOperator extends Operator {
     public void initialize() throws OperatorException {
 
         targetProduct = new Product("HazeREmovedProducte", "NO_HAZE",
-                                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         String productType = sourceProduct.getProductType();
-        System.out.printf("Product_Type:  %s  \n", productType);
+        //System.out.printf("Product_Type:  %s  \n", productType);
 
         // pixel geocoding attached --> see beam.config
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
@@ -141,15 +139,18 @@ public class HazeRemovalOperator extends Operator {
             targetBand.setUnit(sourceBand.getUnit());
         }
 
-        Band sourceBandFlag = sourceProduct.getBand(sourceBandNameFlag);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
 
 
         targetBandHot = targetProduct.addBand(targetBandNameHot, ProductData.TYPE_FLOAT64);
         targetBandTach = targetProduct.addBand(targetBandNameTach, ProductData.TYPE_FLOAT64);
         targetBandHotLevel = targetProduct.addBand(targetBandNameHotLevel, ProductData.TYPE_INT32);
 
-        int preferredWidth =  Math.min(targetProduct.getSceneRasterWidth(), 1000);
-        int preferredHeight =  Math.min(targetProduct.getSceneRasterHeight(), 1000);
+        int preferredWidth = Math.min(targetProduct.getSceneRasterWidth(), 500);
+        int preferredHeight = Math.min(targetProduct.getSceneRasterHeight(), 500);
+        //int preferredWidth =  targetProduct.getSceneRasterWidth();
+        //int preferredHeight =  targetProduct.getSceneRasterHeight();
         targetProduct.setPreferredTileSize(preferredWidth, preferredHeight);
     }
 
@@ -158,6 +159,10 @@ public class HazeRemovalOperator extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         Rectangle sourceRectangle = new Rectangle(targetRectangle);
+
+        int [] counterValue = new int[2];
+        counterValue[0] = 0;     // valid pixel
+        counterValue[1] = 0;     // clear pixel
 
 
         Tile[] sourceTiles = new Tile[bandNames.length];
@@ -184,7 +189,7 @@ public class HazeRemovalOperator extends Operator {
 
         int sourceWidth = sourceRectangle.width;
         int sourceHeight = sourceRectangle.height;
-        int sourceLength = sourceWidth * sourceWidth;
+        int sourceLength = sourceHeight * sourceWidth;
 
         final double[] tachArray = new double[sourceLength];
         Arrays.fill(tachArray, Double.NaN);
@@ -200,42 +205,45 @@ public class HazeRemovalOperator extends Operator {
 
 
         double correlationCefficient = BandCorrelationTest.getPearsonCorrelation(sourceDataBlue, sourceDataRed, flagArray);
-        System.out.printf("CorelationCoefficient:  %f  \n", correlationCefficient);
+        //System.out.printf("CorelationCoefficient:  %f  \n", correlationCefficient);
 
         if (correlationCefficient > 0.8) {
 
             TasseledCapTransformation tasseledCapBand = new TasseledCapTransformation();
             double meanValue = tasseledCapBand.calculateTasseledCapTransformationHaze(sourceDataBlue,
-                                                                                      sourceDataRed,
-                                                                                      sourceWidth,
-                                                                                      sourceHeight,
-                                                                                      tachArray,
-                                                                                      flagArray);
+                    sourceDataRed,
+                    sourceWidth,
+                    sourceHeight,
+                    tachArray,
+                    flagArray,
+                    counterValue);
 
-            makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, sourceRectangle,HazeRemovalOperator.KernelRadius);
+            makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, sourceRectangle, HazeRemovalOperator.KernelRadius);
 
             HotTransformation HotBand = new HotTransformation();
-            counterClear = HotBand.calculateHOTBand(sourceDataBlue,
-                                                    sourceDataRed,
-                                                    sourceWidth,
-                                                    sourceHeight,
-                                                    tachArray,
-                                                    flagArray,
-                                                    hotArray,
-                                                    meanValue);
+            HotBand.calculateHOTBand(sourceDataBlue,
+                    sourceDataRed,
+                    sourceWidth,
+                    sourceHeight,
+                    tachArray,
+                    flagArray,
+                    hotArray,
+                    meanValue,
+                    counterValue);
 
-            makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle,HazeRemovalOperator.KernelRadius);
+            makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle, HazeRemovalOperator.KernelRadius);
 
             HotHistogram hotHistogram = new HotHistogram();
             Histogram histogramHotAll = hotHistogram.compute(tachArray,
-                                                             hotArray,
-                                                             sourceWidth,
-                                                             sourceHeight,
-                                                             flagArray,
-                                                             meanValue,
-                                                             counterClear,
-                                                             counterValid);
+                    hotArray,
+                    sourceWidth,
+                    sourceHeight,
+                    flagArray,
+                    meanValue,
+                    counterValue);
 
+
+            System.out.printf("counterValid   counterClear:  %d %d \n", counterValue[0], counterValue[1]);
             Range range = histogramHotAll.findRange(leftHistoAreaSkipped, rightHistoAreaSkipped);
             int minBinIndex = histogramHotAll.getBinIndex(range.getMin());
             int maxBinIndex = histogramHotAll.getBinIndex(range.getMax());
@@ -243,14 +251,13 @@ public class HazeRemovalOperator extends Operator {
 
             HotLevelArray hotLevel = new HotLevelArray();
             final int[] hotLevelArray = hotLevel.compute(hotArray,
-                                                         sourceWidth,
-                                                         sourceHeight,
-                                                         flagArray,
-                                                         histogramHotAll,
-                                                         binIndexCounts,
-                                                         counterClear);
+                    sourceWidth,
+                    sourceHeight,
+                    flagArray,
+                    histogramHotAll,
+                    binIndexCounts);
 
-            makeFilledBand(hotLevelArray, sourceWidth, sourceHeight, targetTileHotLevel, sourceRectangle,HazeRemovalOperator.KernelRadius);
+            makeFilledBand(hotLevelArray, sourceWidth, sourceHeight, targetTileHotLevel, sourceRectangle, HazeRemovalOperator.KernelRadius);
 
             double[] deltaBandHazeRemoval = new double[maxBinIndex + 1];
 
@@ -260,12 +267,12 @@ public class HazeRemovalOperator extends Operator {
 
                 BandHistogram bandHazeAllClassHistogram = new BandHistogram();
                 Histogram histogramBandHazeAllClass = bandHazeAllClassHistogram.computeHazeAllClass(sourceData,
-                                                                                                    hotLevelArray,
-                                                                                                    sourceWidth,
-                                                                                                    sourceHeight,
-                                                                                                    flagArray,
-                                                                                                    minBinIndex,
-                                                                                                    counterClear);
+                        hotLevelArray,
+                        sourceWidth,
+                        sourceHeight,
+                        flagArray,
+                        minBinIndex,
+                        counterValue);
 
                 Range rangeHazeAllClass = histogramBandHazeAllClass.findRange(leftHistoAreaSkipped, rightHistoAreaSkipped);
 
@@ -275,12 +282,12 @@ public class HazeRemovalOperator extends Operator {
                 for (int j = minBinIndex; j < maxBinIndex + 1; j++) {
                     BandHistogram bandHazeOneClassHistogram = new BandHistogram();
                     Histogram histogramBandHazeOneClass = bandHazeOneClassHistogram.computeHazeOneClass(sourceData,
-                                                                                                        hotLevelArray,
-                                                                                                        sourceWidth,
-                                                                                                        sourceHeight,
-                                                                                                        flagArray,
-                                                                                                        j,
-                                                                                                        counterClear);
+                            hotLevelArray,
+                            sourceWidth,
+                            sourceHeight,
+                            flagArray,
+                            j,
+                            counterValue);
 
                     Range rangeHazeOneClass = histogramBandHazeOneClass.findRange(leftHistoAreaSkipped, rightHistoAreaSkipped);
                     deltaBandHazeRemoval[j] = rangeHazeOneClass.getMin() - rangeHazeAllClass.getMin();
@@ -297,7 +304,7 @@ public class HazeRemovalOperator extends Operator {
                     }
                 }
 
-                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i],sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i], sourceRectangle, HazeRemovalOperator.KernelRadius);
             }
 
         } else {
@@ -310,12 +317,12 @@ public class HazeRemovalOperator extends Operator {
                         sourceData[kk] = sourceData[kk];
                     }
                 }
-                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i],sourceRectangle, HazeRemovalOperator.KernelRadius);
-                makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach,sourceRectangle, HazeRemovalOperator.KernelRadius);
-                makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle,HazeRemovalOperator.KernelRadius);
+                makeFilledBand(sourceData, sourceWidth, sourceHeight, targetTiles[i], sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(tachArray, sourceWidth, sourceHeight, targetTileTach, sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(hotArray, sourceWidth, sourceHeight, targetTileHot, sourceRectangle, HazeRemovalOperator.KernelRadius);
                 int[] hotLevelArrayZeros = new int[sourceLength];
                 Arrays.fill(hotLevelArrayZeros, -1);
-                makeFilledBand(hotLevelArrayZeros, sourceWidth, sourceHeight, targetTileHotLevel,sourceRectangle, HazeRemovalOperator.KernelRadius);
+                makeFilledBand(hotLevelArrayZeros, sourceWidth, sourceHeight, targetTileHotLevel, sourceRectangle, HazeRemovalOperator.KernelRadius);
 
             }
         }
@@ -335,7 +342,7 @@ public class HazeRemovalOperator extends Operator {
 
         for (int y = 0; y < inputDataHeight; y++) {
             for (int x = 0; x < inputDataWidth; x++) {
-                targetTileOutputBand.setSample(x + xLocation  - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
+                targetTileOutputBand.setSample(x + xLocation - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
 
             }
         }
@@ -356,7 +363,7 @@ public class HazeRemovalOperator extends Operator {
 
         for (int y = 0; y < inputDataHeight; y++) {
             for (int x = 0; x < inputDataWidth; x++) {
-                targetTileOutputBand.setSample(x + xLocation  - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
+                targetTileOutputBand.setSample(x + xLocation - mkr, y + yLocation - mkr, inputData[y * (inputDataWidth) + x]);
 
             }
         }
