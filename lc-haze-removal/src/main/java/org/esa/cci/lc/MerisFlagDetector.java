@@ -19,14 +19,16 @@ class MerisFlagDetector implements FlagDetector {
     @Override
     public boolean isLand(int x, int y) {
         final int sample = data[y * roiWidth + x];
-        return (sample & 128) != 0;
+        // return (sample & 128) != 0;  //    IdePix Evolution
+        return (sample & 1024) != 0;  //    IdePix2.1
     }
 
 
     @Override
     public boolean isClearLand(int x, int y) {
         final int sample = data[y * roiWidth + x];
-        return (sample & 16) != 0 && (sample & 64) == 0;
+        return (sample & 16) != 0 && (sample & 64) == 0;  //    IdePix Evolution
+        //  return (sample & 256) != 0 && (sample & 128) == 0;  //    IdePix2.1
     }
 
 

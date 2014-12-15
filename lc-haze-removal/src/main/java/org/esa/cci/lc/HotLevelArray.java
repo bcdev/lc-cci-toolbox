@@ -12,8 +12,7 @@ public class HotLevelArray {
                          int sourceHeight,
                          int[] flagArray,
                          Histogram histogramHotAll,
-                         int[] binIndex,
-                         int counterClear) {
+                         int[] binIndex) {
 
 
         double minValueHot = histogramHotAll.getMin();
@@ -32,11 +31,11 @@ public class HotLevelArray {
             lowerBinValue[k] = 2 * step + lowerBinValue[k - 1];
             upperBinValue[k] = 2 * step + upperBinValue[k - 1];
 
-            System.out.printf("Bin_Value:  %d  %d   %f  %f  \n", binIndex[k], k, lowerBinValue[k], upperBinValue[k]);
+            //System.out.printf("Bin_Value:  %d  %d   %f  %f  \n", binIndex[k], k, lowerBinValue[k], upperBinValue[k]);
         }
 
 
-        final int[] hotLevelArray = new int[sourceWidth * sourceHeight];
+        int[] hotLevelArray = new int[sourceWidth * sourceHeight];
 
         Arrays.fill(hotLevelArray, HazeRemovalOperator.standardHistogramBins + 1);
 

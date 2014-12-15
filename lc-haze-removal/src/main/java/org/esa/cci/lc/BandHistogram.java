@@ -15,14 +15,14 @@ public class BandHistogram {
                                          int sourceHeight,
                                          int[] flagArray,
                                          int binValue,
-                                         int counterClear) {
+                                         int [] counterValue) {
 
 
         int histogramBins = HazeRemovalOperator.standardHistogramBins;
-        int lengthHazeOneClassArray = counterClear;
+        int lengthHazeOneClassArray = counterValue[1] + 1;
 
         int counterHaze = 0;
-        final double[] hazeOneClassDataArray = new double[lengthHazeOneClassArray];
+        double[] hazeOneClassDataArray = new double[lengthHazeOneClassArray];
         Arrays.fill(hazeOneClassDataArray, Double.NaN);
 
         for (int j = 0; j < sourceHeight; j++) {
@@ -48,14 +48,14 @@ public class BandHistogram {
                                          int sourceHeight,
                                          int[] flagArray,
                                          int thresholdValue,
-                                         int counterClear) {
+                                         int[] counterValue) {
 
 
         int histogramBins = HazeRemovalOperator.standardHistogramBins;
-        int lengthHazeAllClassArray = counterClear;
+        int lengthHazeAllClassArray = counterValue[0] + 1;
 
         int counterHaze = 0;
-        final double[] hazeAllClassDataArray = new double[lengthHazeAllClassArray];
+        double[] hazeAllClassDataArray = new double[lengthHazeAllClassArray];
         Arrays.fill(hazeAllClassDataArray, Double.NaN);
 
         for (int j = 0; j < sourceHeight; j++) {

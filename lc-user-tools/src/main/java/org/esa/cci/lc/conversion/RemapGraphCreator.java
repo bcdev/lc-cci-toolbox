@@ -57,13 +57,24 @@ public class RemapGraphCreator {
             System.exit(-1);
         }
 
-        try (Writer writer = new FileWriter(GRAPH_FILENAME)) {
-            String lutFile = args[0];
+        String lutFile = args[0];
+        String outputFileName = args[1];
+
+        createGraphFile(lutFile, outputFileName);
+    }
+
+    static File createGraphFile(String lutFile, String outputFileName) {
+        File outputFile = new File(GRAPH_FILENAME);
+        try (Writer writer = new FileWriter(outputFile)) {
             GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
             try (Reader fr = new FileReader(lutFile)) {
                 CsvReader reader = new CsvReader(fr, new char[]{'|'});
                 String[] header = reader.readRecord();
+                if (header[0].startsWith("#")) {
+                    // if record starts with '#' it is a comment --> read next record
+                    header = reader.readRecord();
+                }
                 graphWriter.init(header);
                 graphWriter.writeHeader();
 
@@ -76,10 +87,11 @@ public class RemapGraphCreator {
                 graphWriter.writeTargetBands();
 
             }
-            graphWriter.writeFooter(args[1]);
+            graphWriter.writeFooter(outputFileName);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+        return outputFile;
     }
 
     static class GraphWriter {
@@ -161,7 +173,7 @@ public class RemapGraphCreator {
         void writeTargetBands() throws IOException {
             for (TargetBandSpec targetBandSpec : targetBandSpecs.values()) {
                 writer.append(String.format(
-                        "<targetBand>" +
+                        "<targetBand>\n" +
                         "    <name>%s</name>\n" +
                         "    <expression>\n" +
                         "    %s\n" +
@@ -169,7 +181,7 @@ public class RemapGraphCreator {
                         "    <description>%s as defined in %s</description>\n" +
                         "    <type>int16</type>\n" +
                         "    <noDataValue>0</noDataValue>\n" +
-                        "    <scalingFactor>0.0001</scalingFactor>\n" +
+                                "    <scalingFactor>0.01</scalingFactor>\n" +
                         "</targetBand>",
                         targetBandSpec.name, targetBandSpec.expression, targetBandSpec.name, lutName));
             }

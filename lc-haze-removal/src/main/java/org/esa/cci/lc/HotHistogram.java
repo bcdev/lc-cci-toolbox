@@ -15,17 +15,18 @@ public class HotHistogram {
                              int sourceHeight,
                              int[] flagArray,
                              double meanValue,
-                             int counterClear,
-                             int counterValid) {
+                             int [] counterValue) {
 
 
         int histogramBins = HazeRemovalOperator.standardHistogramBins;
-        int lengthHazeArray = counterValid - counterClear;
-        //System.out.printf("Valid pixel:  %s  \n", counterValid);
-        //System.out.printf("Clear pixel:  %s  \n", counterClear);
+        int lengthHazeArray = counterValue[0] - counterValue[1] +2;
+        System.out.printf("Valid pixel:  %s  \n", counterValue[0]);
+        System.out.printf("Clear pixel:  %s  \n", counterValue[1]);
+        System.out.printf("Haze pixel:  %s  \n", lengthHazeArray);
 
         int counterHaze = 0;
-        final double[] hotDataArray = new double[lengthHazeArray];
+        double[] hotDataArray;
+        hotDataArray = new double[lengthHazeArray];
         Arrays.fill(hotDataArray, Double.NaN);
 
         for (int j = 0; j < sourceHeight; j++) {

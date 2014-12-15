@@ -40,8 +40,6 @@ import java.util.Locale;
         autoWriteDisabled = true)
 public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
-    private static final String VALID_EXPRESSION_PATTERN = "processed_flag == %d && (current_pixel_state == %d || current_pixel_state == %d || current_pixel_state == %d)";
-
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
                label = "Output LCCS classes", defaultValue = "true")
     private boolean outputLCCSClasses;
@@ -163,12 +161,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
-        int processed = 1;
-        int clearLand = 1;
-        int clearWater = 2;
-        int clearSnowIce = 3;
-        String validExpr = String.format(VALID_EXPRESSION_PATTERN, processed, clearLand, clearWater, clearSnowIce);
-        binningOp.setMaskExpr(validExpr);
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
         LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
