@@ -120,17 +120,16 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
             String[] featureNameTemplates = {"%s_mean", "%s_sum"};
             aggregatorConfig = new LcNDVIAggregatorConfig(variableNames, featureNameTemplates);
         } else {
+            if (isSourceSnow(sourceFileName)) {
+                maskExpression = "snow_occ >= 0 && snow_occ <= 100";
+            }
+
+            if (isSourceBA(sourceFileName)) {
+                maskExpression = "ba_occ >= 0 && ba_occ <= 100";
+            }
             String[] variableNames = Arrays.copyOf(sourceProduct.getBandNames(), 2);
             String[] featureNameTemplates = {"%s_proportion_area", "%s_mean_frequency", "%s_sum"};
             aggregatorConfig = new LcCondOccAggregatorConfig(variableNames, featureNameTemplates);
-        }
-
-        if (isSourceSnow(sourceFileName)) {
-            maskExpression = "snow_occ >= 0 && snow_occ <= 100";
-        }
-
-        if (isSourceBA(sourceFileName)) {
-            maskExpression = "ba_occ >= 0 && ba_occ <= 100";
         }
 
         binningOp.setMaskExpr(maskExpression);
