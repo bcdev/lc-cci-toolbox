@@ -11,6 +11,7 @@
     <changelog>
         <![CDATA[
     Changes in 3.7:
+    - removed the rules for the map products
     - updated readme.txt to explain the file format of cross walking table better
     - fixed scaling in remap tool
     Changes in 3.6:
