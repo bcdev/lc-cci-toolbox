@@ -33,14 +33,23 @@ import java.io.IOException;
 @OperatorMetadata(alias = "lc.meris.qa")
 public class MerisL1QaOp extends Operator {
 
+    public static final String NON_VEGETATED_LAND_EXPRESSION =
+            "l1_flags.LAND_OCEAN and !l1_flags.BRIGHT and !l1_flags.SUSPECT and !l1_flags.INVALID " +
+                    "and (radiance_13 - radiance_8) / (radiance_13 + radiance_8) < -0.24";
+    public static final String VEGETATED_OCEAN_EXPRESSION =
+            "!l1_flags.LAND_OCEAN and !l1_flags.BRIGHT and !l1_flags.SUSPECT and !l1_flags.INVALID " +
+                    "and (radiance_13 - radiance_8) / (radiance_13 + radiance_8) >= 0.01";
+    public static final String VALID_ZERO_EXPRESSION =
+            "!l1_flags.INVALID and ( radiance_1 <= 0 or radiance_2 <= 0 or radiance_3 <= 0 " +
+                    "or radiance_4 <= 0 or radiance_5 <= 0 or radiance_6 <= 0 or radiance_7 <= 0 " +
+                    "or radiance_8 <= 0 or radiance_9 <= 0 or radiance_10 <= 0 or radiance_11 <= 0 " +
+                    "or radiance_12 <= 0 or radiance_13 <= 0 or radiance_14 <= 0 or radiance_15 <= 0 )";
+
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "l1_flags")
     private String l1FlagBandName;
-
-    @Parameter(defaultValue = "radiance_13")
-    private String radianceOutputBandName;
 
     @Parameter(defaultValue = "l1_flags.INVALID")
     private String invalidExpression;
@@ -120,31 +129,31 @@ public class MerisL1QaOp extends Operator {
             cause = "empty lat/lon lines";
         }
 
-        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, 0, height, "l1_flags.WATER and !l1_flags.BRIGHT and !l1_flags.SUSPECT and !l1_flags.INVALID and (radiance_13 - radiance_8) / (radiance_13 - radiance_8) < 0.01");
-        if (noOfVegetatedWaterPixels > width * height / 1000) {    // TODO relate to # water pixels
+        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, 0, height, NON_VEGETATED_LAND_EXPRESSION);
+        if (noOfNonVegetatedLandPixels > width * height / 1000) {    // TODO relate to # land pixels
             isBad = true;
-            cause = (noOfVegetatedWaterPixels * 1000 / width / height) + " ppm vegetated water";
+            cause = (int)(noOfNonVegetatedLandPixels * 1000.0 / width / height) + " ppm non-vegetated land";
         }
 
-        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, 0, height, "l1_flags.LAND and !l1_flags.BRIGHT and !l1_flags.SUSPECT and !l1_flags.INVALID and (radiance_13 - radiance_8) / (radiance_13 - radiance_8) >= 0.01");
+        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, 0, height, VEGETATED_OCEAN_EXPRESSION);
         if (noOfVegetatedWaterPixels > width * height / 1000) {    // TODO relate to # water pixels
             isBad = true;
-            cause = (noOfVegetatedWaterPixels * 1000 / width / height) + " ppm non-vegetated land";
+            cause = (int)(noOfVegetatedWaterPixels * 1000.0 / width / height) + " ppm vegetated water";
         }
 
-        final int noOfValidZeroPixels1 = noOfMaskedPixels(sourceProduct, width, 0, 1, "!l1_flags.INVALID and ( radiance_1 <= 0 or radiance_2 <= 0 or radiance_3 <= 0 or radiance_4 <= 0 or radiance_5 <= 0 or radiance_6 <= 0 or radiance_7 <= 0 or radiance_8 <= 0 or radiance_9 <= 0 or radiance_10 <= 0 or radiance_11 <= 0 or radiance_12 <= 0 or radiance_13 <= 0 or radiance_14 <= 0 or radiance_15 <= 0");
+        final int noOfValidZeroPixels1 = noOfMaskedPixels(sourceProduct, width, 0, 1, VALID_ZERO_EXPRESSION);
         if (noOfValidZeroPixels1 > width / 2) {
             isBad = true;
             cause = noOfValidZeroPixels1 + " valid pixels with zero radiance in first line";
         }
 
-        final int noOfValidZeroPixels9 = noOfMaskedPixels(sourceProduct, width, height - 1, height, "!l1_flags.INVALID and ( radiance_1 <= 0 or radiance_2 <= 0 or radiance_3 <= 0 or radiance_4 <= 0 or radiance_5 <= 0 or radiance_6 <= 0 or radiance_7 <= 0 or radiance_8 <= 0 or radiance_9 <= 0 or radiance_10 <= 0 or radiance_11 <= 0 or radiance_12 <= 0 or radiance_13 <= 0 or radiance_14 <= 0 or radiance_15 <= 0");
+        final int noOfValidZeroPixels9 = noOfMaskedPixels(sourceProduct, width, height - 1, height, VALID_ZERO_EXPRESSION);
         if (noOfValidZeroPixels9 > width / 2) {
             isBad = true;
             cause = noOfValidZeroPixels9 + " valid pixels with zero radiance in last line";
         }
 
-        final int noOfValidZeroPixels = noOfMaskedPixels(sourceProduct, width, 0, height, "!l1_flags.INVALID and ( radiance_1 <= 0 or radiance_2 <= 0 or radiance_3 <= 0 or radiance_4 <= 0 or radiance_5 <= 0 or radiance_6 <= 0 or radiance_7 <= 0 or radiance_8 <= 0 or radiance_9 <= 0 or radiance_10 <= 0 or radiance_11 <= 0 or radiance_12 <= 0 or radiance_13 <= 0 or radiance_14 <= 0 or radiance_15 <= 0");
+        final int noOfValidZeroPixels = noOfMaskedPixels(sourceProduct, width, 0, height, VALID_ZERO_EXPRESSION);
         if (noOfValidZeroPixels > 2 * width) {
             isBad = true;
             cause = noOfValidZeroPixels + " valid pixels with zero radiance";
@@ -152,6 +161,13 @@ public class MerisL1QaOp extends Operator {
 
         final OperatorDescriptor descriptor = getSpi().getOperatorDescriptor();
         final String aliasName = descriptor.getAlias() != null ? descriptor.getAlias() : descriptor.getName();
+        final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+                                            "Name", "Passed", "QA",
+                                            "#Lines",
+                                            "#Veg-Water", "#NonVeg-Land", "#Zero-FirstLine", "#Zero-LastLine", "#Zero",
+                                            "#InvLines-Start", "#InvLines-End", "#InvLines-Inter",
+                                            "EmptyTiePoints", "EmptyLatLon",
+                                            "Cause");
         final String qaRecord = String.format("%s\t%b\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%b\t%b\t%s",
                                               sourceProduct.getName(), !isBad, aliasName,
                                               height,
@@ -159,6 +175,7 @@ public class MerisL1QaOp extends Operator {
                                               yStart, height-yEnd, badDataRows,
                                               productHasEmptyTiePoints, productHasEmptyLatLonLines,
                                               cause);
+        System.out.println(legend);
         System.out.println(qaRecord);
         final MetadataElement qa = new MetadataElement("QA");
         qa.addAttribute(new MetadataAttribute("record", new ProductData.ASCII(qaRecord), false));
@@ -168,12 +185,12 @@ public class MerisL1QaOp extends Operator {
 
     private int noOfMaskedPixels(Product product, int width, int yStart, int yEnd, String bandMathExpression) throws OperatorException {
         try {
-            BandMathsOp validZeroOp = BandMathsOp.createBooleanExpressionBand(bandMathExpression, product);
-            Band validZeroBand = validZeroOp.getTargetProduct().getBandAt(0);
+            BandMathsOp toBeCountedOp = BandMathsOp.createBooleanExpressionBand(bandMathExpression, product);
+            Band toBeCountedBand = toBeCountedOp.getTargetProduct().getBandAt(0);
             int count = 0;
             int[] flags = new int[width];
             for (int y = yStart; y < yEnd; ++y) {
-                validZeroBand.readPixels(0, y, width, 1, flags);
+                toBeCountedBand.readPixels(0, y, width, 1, flags);
                 for (int x = 0; x < width; ++x) {
                     if (flags[x] != 0) {
                         ++count;
