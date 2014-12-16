@@ -14,7 +14,11 @@ public class AggregatorTestUtils {
     }
 
     public static Observation obs(float... values) {
-        return new ObservationImpl(90.0f, 180.0f, 0.0, values);
+        return obs(90.0, 180.0, values);
+    }
+
+    public static Observation obs(double lat, double lon, float... values) {
+        return new ObservationImpl(lat, lon, 0.0, values);
     }
 
     public static BinContext createCtx() {

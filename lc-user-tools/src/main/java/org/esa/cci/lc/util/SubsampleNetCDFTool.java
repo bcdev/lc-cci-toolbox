@@ -1,5 +1,6 @@
 package org.esa.cci.lc.util;
 
+import com.bc.ceres.core.PrintWriterProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
@@ -29,6 +30,8 @@ public class SubsampleNetCDFTool {
         LcMapNetCdf4WriterPlugIn lcMapNetCdf4WriterPlugIn = new LcMapNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
         String formatName = lcMapNetCdf4WriterPlugIn.getFormatNames()[0];
-        ProductIO.writeProduct(subsetProduct, new File(product.getFileLocation().getParentFile(), productName + ".nc"), formatName, false);
+        File outputFile = new File(product.getFileLocation().getParentFile(), productName + ".nc");
+        PrintWriterProgressMonitor pm = new PrintWriterProgressMonitor(System.out);
+        ProductIO.writeProduct(subsetProduct, outputFile, formatName, false, pm);
     }
 }
