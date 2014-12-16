@@ -1,13 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Marco Peters
@@ -56,7 +57,7 @@ public class FractionalAreaCalculatorTest {
     @Test
     public void testThatFractionalInputPixelsAreConsidered() throws Exception {
         PlanetaryGrid planetaryGrid = new SEAGrid(10);
-        AreaCalculator fractionCalculator = new FractionalAreaCalculator(new SEAGrid(10), 20, 10);
+        AreaCalculator fractionCalculator = new FractionalAreaCalculator(planetaryGrid, 20, 10);
         // First row has 3 bins
 
         // retrieve lat/lon of first bin
@@ -66,6 +67,17 @@ public class FractionalAreaCalculatorTest {
 
         double fraction = calcFractionForLonLat(obsLon, obsLat, planetaryGrid, fractionCalculator);
         assertEquals(1.0 / (20.0 / 3.0), fraction, 1.0e-6);
+    }
+
+    @Test
+    public void testCalculate_RegularGaussianGrid() throws Exception {
+        PlanetaryGrid planetaryGrid = new RegularGaussianGrid(160);
+        AreaCalculator fractionCalculator = new FractionalAreaCalculator(planetaryGrid, 129600, 64800);
+        double fraction;
+
+        // observation is completely in bin cell
+        fraction = calcFractionForLonLat(60.2, 10.4, planetaryGrid, fractionCalculator);
+        assertEquals(Math.pow(320.0 / 129600.0, 2.0), fraction, 1.0e-6);
     }
 
     @Test
