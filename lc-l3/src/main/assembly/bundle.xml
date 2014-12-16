@@ -16,6 +16,9 @@
         <dependencySet>
             <scope>runtime</scope>
             <useTransitiveDependencies>false</useTransitiveDependencies>
+            <excludes>
+                <exclude>org.esa.beam:beam-binning</exclude>
+            </excludes>
             <useProjectArtifact>true</useProjectArtifact>
         </dependencySet>
     </dependencySets>
