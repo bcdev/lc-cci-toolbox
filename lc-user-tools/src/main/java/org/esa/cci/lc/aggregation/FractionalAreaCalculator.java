@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -44,9 +45,15 @@ class FractionalAreaCalculator implements AreaCalculator {
             double[] binCenterLatLon = planetaryGrid.getCenterLatLon(binIndex);
             double binCenterLon = binCenterLatLon[1];
             double binCenterLat = binCenterLatLon[0];
-            int rowIndex = planetaryGrid.getRowIndex(binIndex);
-            double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
-            binRect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
+            if (planetaryGrid instanceof RegularGaussianGrid) {
+                int rowIndex = planetaryGrid.getRowIndex(binIndex);
+                double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
+                binRect = new Rectangle2D.Double(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
+            } else {
+                int rowIndex = planetaryGrid.getRowIndex(binIndex);
+                double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
+                binRect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
+            }
             binRectanglesMap.put(binIndex, binRect);
         }
         return binRect;

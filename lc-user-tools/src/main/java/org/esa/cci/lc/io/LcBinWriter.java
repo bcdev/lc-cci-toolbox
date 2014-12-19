@@ -7,17 +7,17 @@ import org.esa.beam.binning.TemporalBin;
 import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.operator.BinWriter;
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.nc.NVariable;
 import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.cci.lc.util.LcRegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import ucar.ma2.DataType;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +79,10 @@ public class LcBinWriter implements BinWriter {
     }
 
     private CoordinateEncoder createCoordinateEncoder() {
-        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof LcRegularGaussianGrid || planetaryGrid instanceof RegionalPlanetaryGrid) {
+        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof RegionalPlanetaryGrid) {
             return new RegularCoordinateEncoder(planetaryGrid);
+        } else if (planetaryGrid instanceof RegularGaussianGrid) {
+            return new GaussianGridEncoder(planetaryGrid);
         } else {
             throw new IllegalStateException("Unknown planetary grid");
         }
