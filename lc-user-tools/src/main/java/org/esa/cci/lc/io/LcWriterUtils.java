@@ -2,15 +2,17 @@ package org.esa.cci.lc.io;
 
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;
-import com.bc.ceres.core.runtime.internal.ModuleManifestParser;
+import com.bc.ceres.core.runtime.internal.ModuleReader;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * @author Marco Peters
@@ -28,11 +30,13 @@ public class LcWriterUtils {
     static final Dimension TILE_SIZE = new Dimension(512, 512);
 
 
-    static String getModuleVersion() throws IOException {
+    private static String getModuleVersion() throws IOException {
         String lcUserToolsVersion;
+        ModuleReader moduleReader = new ModuleReader(Logger.getAnonymousLogger());
+        URL moduleLocation = LcWriterUtils.class.getProtectionDomain().getCodeSource().getLocation();
         try {
-            ModuleImpl moduleManifest = new ModuleManifestParser().parse(LcWriterUtils.class.getResourceAsStream("/module.xml"));
-            lcUserToolsVersion = moduleManifest.getVersion().toString();
+            ModuleImpl module = moduleReader.readFromLocation(moduleLocation);
+            lcUserToolsVersion = module.getVersion().toString();
         } catch (CoreException e) {
             throw new IOException("Could not read version from module.xml");
         }
