@@ -1,6 +1,7 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -79,8 +80,12 @@ public class LcConversionOp extends Operator implements Output {
         }
 
         // setting the id in order to hand over to the writer
-        sourceProduct.getMetadataRoot().setAttributeString("type", typeString);
-        sourceProduct.getMetadataRoot().setAttributeString("id", id);
+        MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
+        metadataRoot.setAttributeString("type", typeString);
+        metadataRoot.setAttributeString("id", id);
+        if (targetVersion != null) {
+            metadataRoot.setAttributeString("version", targetVersion);
+        }
 
         if (targetDir == null) {
             targetDir = sourceFile.getParentFile();
