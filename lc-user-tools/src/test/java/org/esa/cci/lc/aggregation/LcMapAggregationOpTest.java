@@ -23,9 +23,10 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 
 public class LcMapAggregationOpTest {
@@ -186,20 +187,6 @@ public class LcMapAggregationOpTest {
     }
 
     @Test
-    public void testOnlyOneIsTrue() {
-        final boolean O = false;
-        final boolean I = true;
-
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, O, O), is(false));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, O, I), is(true));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, I, O), is(true));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(O, I, I), is(false));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, O, O), is(true));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, O, I), is(false));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, I, O), is(false));
-        assertThat(LcMapAggregationOp.onlyOneIsTrue(I, I, I), is(false));
-    }
-
     private void initOp(LcMapAggregationOp aggregationOp) throws IOException {
         aggregationOp.setOutputFormat("NetCDF4-BEAM");
         File tempFile = File.createTempFile("BEAM-TEST_", ".nc");

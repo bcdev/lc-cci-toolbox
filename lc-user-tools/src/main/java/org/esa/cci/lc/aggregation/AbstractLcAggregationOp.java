@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -10,7 +11,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.LcHelper;
-import org.esa.cci.lc.util.LcRegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
@@ -224,7 +224,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
     protected void addGridNameToLcProperties(String planetaryGridClassName) {
         final String gridName;
         int numRows = getNumRows();
-        if (planetaryGridClassName.equals(LcRegularGaussianGrid.class.getName())) {
+        if (planetaryGridClassName.equals(RegularGaussianGrid.class.getName())) {
             gridName = "Regular gaussian grid (N" + numRows / 2 + ")";
             getLcProperties().put("grid_name", gridName);
         } else if (planetaryGridClassName.equals(PlateCarreeGrid.class.getName())) {
@@ -243,7 +243,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             return PlateCarreeGrid.class.getName();
         } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            return LcRegularGaussianGrid.class.getName();  // using this -180 to 180 grid instead of the one in BEAM which is from 0 to 360
+            return RegularGaussianGrid.class.getName();  // using this -180 to 180 grid instead of the one in BEAM which is from 0 to 360
 //            return RegularGaussianGrid.class.getName();
 //        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) { // not supported yet
 //            return ReducedGaussianGrid.class.getName();

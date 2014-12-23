@@ -4,6 +4,7 @@ import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.support.PlateCarreeGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -13,7 +14,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapTiffReader;
-import org.esa.cci.lc.util.LcRegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -187,7 +187,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             planetaryGrid = new PlateCarreeGrid(numRows);
         } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new LcRegularGaussianGrid(numRows);
+            planetaryGrid = new RegularGaussianGrid(numRows);
 //        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {   // not yet supported
 //            planetaryGrid = new ReducedGaussianGrid(numRows);
         } else {
@@ -247,14 +247,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
             }
         }
-    }
-
-    static boolean onlyOneIsTrue(boolean b1, boolean b2, boolean b3) {
-        int count = 0;
-        count += b1 ? 1 : 0;
-        count += b2 ? 1 : 0;
-        count += b3 ? 1 : 0;
-        return count == 1;
     }
 
     /**
