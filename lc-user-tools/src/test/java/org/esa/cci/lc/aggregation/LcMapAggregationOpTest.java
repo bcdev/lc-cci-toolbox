@@ -106,8 +106,6 @@ public class LcMapAggregationOpTest {
     public void testDefaultValues() {
         LcMapAggregationOp aggrOp = (LcMapAggregationOp) aggregationSpi.createOperator();
         assertThat(aggrOp.getGridName(), isNull());
-//        assertThat(aggrOp.getPixelSizeX(), is(0.1));
-//        assertThat(aggrOp.getPixelSizeY(), is(0.1));
         assertThat(aggrOp.isOutputLCCSClasses(), is(true));
         assertThat(aggrOp.getNumMajorityClasses(), is(5));
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
@@ -186,7 +184,6 @@ public class LcMapAggregationOpTest {
         assertEquals(54.4f, region.getMinimum(1), 1.0e-6);
     }
 
-    @Test
     private void initOp(LcMapAggregationOp aggregationOp) throws IOException {
         aggregationOp.setOutputFormat("NetCDF4-BEAM");
         File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
