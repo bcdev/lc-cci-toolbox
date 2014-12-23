@@ -79,10 +79,11 @@ public class LcBinWriter implements BinWriter {
     }
 
     private CoordinateEncoder createCoordinateEncoder() {
-        if (planetaryGrid instanceof PlateCarreeGrid || planetaryGrid instanceof RegionalPlanetaryGrid) {
+        boolean isKnownGrid = planetaryGrid instanceof PlateCarreeGrid ||
+                planetaryGrid instanceof RegionalPlanetaryGrid ||
+                planetaryGrid instanceof RegularGaussianGrid;
+        if (isKnownGrid) {
             return new RegularCoordinateEncoder(planetaryGrid);
-        } else if (planetaryGrid instanceof RegularGaussianGrid) {
-            return new GaussianGridEncoder(planetaryGrid);
         } else {
             throw new IllegalStateException("Unknown planetary grid");
         }
