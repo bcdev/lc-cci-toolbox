@@ -26,7 +26,7 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Convert",
-        version = "1.1",
+        version = "1.2",
         internal = true,
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
@@ -40,6 +40,8 @@ public class LcConversionOp extends Operator implements Output {
     private Product sourceProduct;
     @Parameter(description = "The target directory. Default is the directory of the source product.")
     private File targetDir;
+    @Parameter(description = "Version of the target file. Replacing the one given by the source product")
+    private String targetVersion;
 
     @Override
     public void initialize() throws OperatorException {
@@ -60,7 +62,7 @@ public class LcConversionOp extends Operator implements Output {
             id = String.format("%s-%s-v%s",
                                typeString,
                                metadata.getEpoch(),
-                               metadata.getVersion());
+                               targetVersion != null ? targetVersion : metadata.getVersion());
         } else {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
@@ -73,7 +75,7 @@ public class LcConversionOp extends Operator implements Output {
             id = String.format("%s-%s-v%s",
                                typeString,
                                metadata.getStartDate(),
-                               metadata.getVersion());
+                               targetVersion != null ? targetVersion : metadata.getVersion());
         }
 
         // setting the id in order to hand over to the writer
