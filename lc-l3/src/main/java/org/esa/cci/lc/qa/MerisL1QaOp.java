@@ -56,17 +56,30 @@ public class MerisL1QaOp extends Operator {
 
     @Parameter(defaultValue = "7")
     private int invalidMaskBitIndex;
+    @Parameter(defaultValue = "0")
+    private int cosmeticMaskBitIndex;
 
     // percentage of bad data values per row as criterion for QA failure (100% means that whole row must be 'bad')
     @Parameter(defaultValue = "100.0")
     private float percentBadDataValuesThreshold;
-
     // threshold of rows identified as 'bad' as criterion for QA failure
-    @Parameter(defaultValue = "1")
+    @Parameter(defaultValue = "32")
     private int badDataRowsThreshold;
+    @Parameter(defaultValue = "55.0")
+    private float stripeGradientThreshold;
+    @Parameter(defaultValue = "45")
+    private int stripeMinLength;
+    @Parameter(defaultValue = "129")
+    private int shortProductThreshold;
+    @Parameter(defaultValue = "1000")
+    private int stripesPixelThreshold;
+    @Parameter(defaultValue = "3")
+    private int geoshiftLinesThreshold;
+    @Parameter(defaultValue = "12")
+    private int cosmeticPercentThreshold;
 
-    private static final int START_ROW_OFFSET_MAX = 100;
-    private static final int END_ROW_OFFSET_MAX = 100;
+    // set by counting methods as a side effect, second return value
+    private int firstBadLine = -1;
 
     @Override
     public void initialize() throws OperatorException {
@@ -90,91 +103,96 @@ public class MerisL1QaOp extends Operator {
         boolean isBad = false;
         String cause = "";
 
-        // check first rows of product
-        final int yStart = firstGoodRow(width, height, sourceRaster);
-
-        if (yStart >= START_ROW_OFFSET_MAX) {
-            System.out.println("Too many invalid rows (" + yStart + ") at start of product - QA failed.");
+        // count cosmetic pixels
+        final int noCosmeticPixels = noCosmeticPixels(sourceProduct, sourceRaster, width, height);
+        final int firstCosmeticDataRow = this.firstBadLine;
+        if (noCosmeticPixels > height * width / 100 * cosmeticPercentThreshold) {
             isBad = true;
-            cause = "more than " + START_ROW_OFFSET_MAX + " initial invalid lines";
+            cause = "cosmetic: " + noCosmeticPixels + " valid cosmetic pixels";
         }
 
-        // check last rows of product
-        final int yEnd = lastGoodRow(width, height, sourceRaster, yStart);
+        // count invalid rows
+        final int invalidDataRows = badDataRows(width, sourceRaster, 0, height);
+        final int firstInvalidDataRow = this.firstBadLine;
 
-        if (yEnd <= height-END_ROW_OFFSET_MAX) {
-            System.out.println("Too many invalid rows (" + yStart + ") at end of product - QA failed.");
+        if (invalidDataRows >= badDataRowsThreshold) {
             isBad = true;
-            cause = "more than " + END_ROW_OFFSET_MAX + " final invalid lines";
+            cause = invalidDataRows + " invalid lines";
         }
 
-        // valid start and end row found in first and last 100 rows - now check all rows in between
-        final int badDataRows = badDataRows(width, sourceRaster, yStart, yEnd);
-
-        if (badDataRows >= badDataRowsThreshold) {
-            // limit of allowed 'bad' rows is exceeded - QA failed
+        // check for geo-shift by counting non-vegetated land pixels
+        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION);
+        final int firstNonVegetatedLandDataRow = this.firstBadLine;
+        if (noOfNonVegetatedLandPixels > width * geoshiftLinesThreshold) {
             isBad = true;
-            cause = "more than " + badDataRowsThreshold + "% intermediate invalid lines";
+            cause = "geocoding: " + noOfNonVegetatedLandPixels  + " pixels non-vegetated land";
         }
 
+        // check for geo-shift by counting vegetated water pixels
+        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, height, VEGETATED_OCEAN_EXPRESSION);
+        final int firstVegetatedWaterDataRow = this.firstBadLine;
+        if (noOfVegetatedWaterPixels > width * geoshiftLinesThreshold) {
+            isBad = true;
+            cause = "geocoding: " + noOfVegetatedWaterPixels  + " pixels vegetated water";
+        }
+
+        // check for horizontal stripes by gradient between segments of subsequent lines
+        final int noHorizontalStripePixels = noHorizontalStripePixels(sourceProduct, sourceRaster, width, height);
+        final int firstHorizontalStripeDataRow = this.firstBadLine;
+        if (noHorizontalStripePixels > stripesPixelThreshold) {
+            isBad = true;
+            cause = "stripes: " + noHorizontalStripePixels + " horizontal stripe pixels";
+        }
+
+        // check for vertical stripes by gradient between segments of adjacent columns
+        final int noVerticalStripePixels = noVerticalStripePixels(sourceProduct, sourceRaster, width, height);
+        if (noVerticalStripePixels > stripesPixelThreshold) {
+            isBad = true;
+            cause = "stripes: " + noVerticalStripePixels + " vertical stripe pixels";
+        }
+
+        // check for wrong colours by counting valid pixels with zero radiance in some band
+        final int noOfValidZeroPixels = noOfMaskedPixels(sourceProduct, width, height, VALID_ZERO_EXPRESSION);
+        final int firstValidZeroDataRow = this.firstBadLine;
+        if (noOfValidZeroPixels > 3 * width) {
+            isBad = true;
+            cause = "colours: " + noOfValidZeroPixels + " valid pixels with zero radiance";
+        }
+
+        // check for empty tie points (relevant after AMORGOS)
         final boolean productHasEmptyTiePoints = productHasEmptyTiepoints(sourceProduct);
         if (productHasEmptyTiePoints) {
             isBad = true;
             cause = "empty tie points";
         }
 
+        // check for empty lat/lon lines (relevant after AMORGOS)
         final boolean productHasEmptyLatLonLines = productHasEmptyLatLonLines(sourceProduct);
         if (productHasEmptyLatLonLines) {
             isBad = true;
             cause = "empty lat/lon lines";
         }
 
-        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, 0, height, NON_VEGETATED_LAND_EXPRESSION);
-        if (noOfNonVegetatedLandPixels > width * height / 1000) {    // TODO relate to # land pixels
+        // check for short products, number of lines
+        if (height <= shortProductThreshold) {
             isBad = true;
-            cause = (int)(noOfNonVegetatedLandPixels * 1000.0 / width / height) + " ppm non-vegetated land";
-        }
-
-        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, 0, height, VEGETATED_OCEAN_EXPRESSION);
-        if (noOfVegetatedWaterPixels > width * height / 1000) {    // TODO relate to # water pixels
-            isBad = true;
-            cause = (int)(noOfVegetatedWaterPixels * 1000.0 / width / height) + " ppm vegetated water";
-        }
-
-        final int noOfValidZeroPixels1 = noOfMaskedPixels(sourceProduct, width, 0, 1, VALID_ZERO_EXPRESSION);
-        if (noOfValidZeroPixels1 > width / 2) {
-            isBad = true;
-            cause = noOfValidZeroPixels1 + " valid pixels with zero radiance in first line";
-        }
-
-        final int noOfValidZeroPixels9 = noOfMaskedPixels(sourceProduct, width, height - 1, height, VALID_ZERO_EXPRESSION);
-        if (noOfValidZeroPixels9 > width / 2) {
-            isBad = true;
-            cause = noOfValidZeroPixels9 + " valid pixels with zero radiance in last line";
-        }
-
-        final int noOfValidZeroPixels = noOfMaskedPixels(sourceProduct, width, 0, height, VALID_ZERO_EXPRESSION);
-        if (noOfValidZeroPixels > 2 * width) {
-            isBad = true;
-            cause = noOfValidZeroPixels + " valid pixels with zero radiance";
+            cause = "short product";
         }
 
         final OperatorDescriptor descriptor = getSpi().getOperatorDescriptor();
         final String aliasName = descriptor.getAlias() != null ? descriptor.getAlias() : descriptor.getName();
-        final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
-                                            "Name", "Passed", "QA",
-                                            "#Lines",
-                                            "#Veg-Water", "#NonVeg-Land", "#Zero-FirstLine", "#Zero-LastLine", "#Zero",
-                                            "#InvLines-Start", "#InvLines-End", "#InvLines-Inter",
-                                            "EmptyTiePoints", "EmptyLatLon",
-                                            "Cause");
-        final String qaRecord = String.format("%s\t%b\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%b\t%b\t%s",
-                                              sourceProduct.getName(), !isBad, aliasName,
-                                              height,
-                                              noOfVegetatedWaterPixels, noOfNonVegetatedLandPixels, noOfValidZeroPixels1, noOfValidZeroPixels9, noOfValidZeroPixels,
-                                              yStart, height-yEnd, badDataRows,
-                                              productHasEmptyTiePoints, productHasEmptyLatLonLines,
-                                              cause);
+        final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+                                            "Name", "Lines", "QA",
+                                            "InvalidLines", "VegWater", "NonVegLand", "ZeroRad", "Cosmetic", "VStripes", "HStripes",
+                                            "EmptyTiePoints",
+                                            "FirstInvalidRow", "FirstVegWaterRow", "FirstNonVegLandRow", "FirstZeroRadRow", "FirstCosmeticDataRow", "FirstHorizontalStripesRow",
+                                            "Passed", "Cause");
+        final String qaRecord = String.format("%s\t%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%b\t%d\t%d\t%d\t%d\t%d\t%d\t%b\t%s",
+                                              sourceProduct.getName(), height, aliasName,
+                                              invalidDataRows, noOfVegetatedWaterPixels, noOfNonVegetatedLandPixels, noOfValidZeroPixels, noCosmeticPixels, noVerticalStripePixels, noHorizontalStripePixels,
+                                              productHasEmptyTiePoints || productHasEmptyLatLonLines,
+                                              firstInvalidDataRow, firstVegetatedWaterDataRow, firstNonVegetatedLandDataRow, firstValidZeroDataRow, firstCosmeticDataRow, firstHorizontalStripeDataRow,
+                                              !isBad, cause);
         System.out.println(legend);
         System.out.println(qaRecord);
         final MetadataElement qa = new MetadataElement("QA");
@@ -183,18 +201,253 @@ public class MerisL1QaOp extends Operator {
         setTargetProduct(sourceProduct);
     }
 
-    private int noOfMaskedPixels(Product product, int width, int yStart, int yEnd, String bandMathExpression) throws OperatorException {
+    private int noCosmeticPixels(Product sourceProduct, RasterDataNode sourceRaster, int width, int height) {
+        int cosmetic = 0;
+        this.firstBadLine = -1;
+        int[] flags = new int[width];
+        for (int y = 0; y < height; ++y) {
+            sourceRaster.getPixels(0, y, width, 1, flags);
+            for (int x=0; x<width; ++x) {
+                if (isCosmeticMaskBitSet(flags[x]) && ! isInvalidMaskBitSet(flags[x])) {
+                    ++cosmetic;
+                    if (this.firstBadLine < 0) {
+                        this.firstBadLine = y;
+                    }
+                }
+            }
+        }
+        return cosmetic;
+    }
+
+    private int noOfVerticalStripes(Product product, RasterDataNode sourceRaster, int width, int height) throws OperatorException {
+        try {
+            int stripes = 0;
+            int[] counts = new int[width-1];  // counter of stripe length up to current line
+            int[] lines = new int[width-1];  // marker up to which line a stripe has been recognised
+            for (int x=0; x<width-1; ++x) {
+                lines[x] = -1;
+            }
+            float[] radiances = new float[width];
+            int[] flags = new int[width];
+            Band[] bands = product.getBands();
+            for (int y = 0; y < height; ++y) {
+                sourceRaster.getPixels(0, y, width, 1, flags);
+                for (Band band : bands) {
+                    if (! band.getDisplayName().startsWith("radiance")) {
+                        continue;
+                    }
+                    band.readPixels(0, y, width, 1, radiances);
+                    for (int x=0; x<width-1; ++x) {
+                        if (!isInvalidMaskBitSet(flags[x]) && !isInvalidMaskBitSet(flags[x+1])
+                                && !isCosmeticMaskBitSet(flags[x]) && !isCosmeticMaskBitSet(flags[x + 1])
+                                && Math.abs(radiances[x]-radiances[x+1]) > stripeGradientThreshold) {
+                            lines[x] = y;
+                        }
+                    }
+                }
+                for (int x=0; x<width-1; ++x) {
+                    if (lines[x] == y) {
+                        ++counts[x];
+                    } else {
+                        if (counts[x] >= stripeMinLength) {
+                            ++stripes;
+                        }
+                        counts[x] = 0;
+                    }
+                }
+            }
+            for (int x=0; x<width-1; ++x) {
+                if (counts[x] >= stripeMinLength) {
+                    ++stripes;
+                }
+            }
+            return stripes;
+        } catch (IOException e) {
+            throw new OperatorException(e.getMessage(), e);
+        }
+    }
+
+    private int noVerticalStripePixels(Product product, RasterDataNode sourceRaster, int width, int height) throws OperatorException {
+        try {
+            int stripes = 0;
+            int[] counts = new int[width-1];  // counter of stripe length up to current line
+            float[] gradients = new float[width-1];
+            for (int x=0; x<width-1; ++x) {
+                gradients[x] = 0.0f;
+            }
+            float[] radiances = new float[width];
+            int[] flags = new int[width];
+            Band[] bands = product.getBands();
+            for (Band band : bands) {
+                if (! band.getDisplayName().startsWith("radiance")) {
+                    continue;
+                }
+                for (int y = 0; y < height; ++y) {
+                    sourceRaster.getPixels(0, y, width, 1, flags);
+                    band.readPixels(0, y, width, 1, radiances);
+                    for (int x=0; x<width-1; ++x) {
+                        if (! isInvalidMaskBitSet(flags[x]) && ! isInvalidMaskBitSet(flags[x+1])
+                                && ! isCosmeticMaskBitSet(flags[x]) && ! isCosmeticMaskBitSet(flags[x+1])) {
+                            float gradient = radiances[x]-radiances[x+1];
+                            if (gradient >= stripeGradientThreshold) {
+                                if (gradients[x] > 0.0f) {
+                                    ++counts[x];
+                                } else {
+                                    if (counts[x] >= stripeMinLength) {
+                                        stripes += counts[x];
+                                    }
+                                    counts[x] = 1;
+                                    gradients[x] = 1.0f;
+                                }
+                            } else if (gradient <= -stripeGradientThreshold) {
+                                if (gradients[x] < 0.0f) {
+                                    ++counts[x];
+                                } else {
+                                    if (counts[x] >= stripeMinLength) {
+                                        stripes += counts[x];
+                                    }
+                                    counts[x] = 1;
+                                    gradients[x] = -1.0f;
+                                }
+                            } else {
+                                if (counts[x] >= stripeMinLength) {
+                                    stripes += counts[x];
+                                }
+                                gradients[x] = 0.0f;
+                                counts[x] = 0;
+                            }
+                        } else {
+                            if (counts[x] >= stripeMinLength) {
+                                stripes += counts[x];
+                            }
+                            gradients[x] = 0.0f;
+                            counts[x] = 0;
+                        }
+                    }
+                }
+                for (int x=0; x<width-1; ++x) {
+                    if (counts[x] >= stripeMinLength) {
+                        stripes += counts[x];
+                    }
+                }
+            }
+            return stripes;
+        } catch (IOException e) {
+            throw new OperatorException(e.getMessage(), e);
+        }
+    }
+
+    private int noHorizontalStripePixels(Product product, RasterDataNode sourceRaster, int width, int height) {
+        try {
+            int stripes = 0;
+            int length = 0;
+            this.firstBadLine = -1;
+            float gradient0 = 0.0f;
+            float[] radiances0 = new float[width];
+            float[] radiances = new float[width];
+            int[] flags0 = new int[width];
+            int[] flags = new int[width];
+            Band[] bands = product.getBands();
+            for (Band band : bands) {
+                if (! band.getDisplayName().startsWith("radiance")) {
+                    continue;
+                }
+                sourceRaster.getPixels(0, 0, width, 1, flags0);
+                band.readPixels(0, 0, width, 1, radiances0);
+                for (int y = 1; y < height; ++y) {
+                    sourceRaster.getPixels(0, y, width, 1, flags);
+                    band.readPixels(0, y, width, 1, radiances);
+                    for (int x=0; x<width-1; ++x) {
+                        if (! isInvalidMaskBitSet(flags[x]) && ! isInvalidMaskBitSet(flags0[x])
+                                && ! isCosmeticMaskBitSet(flags[x]) && ! isCosmeticMaskBitSet(flags0[x])) {
+                            float gradient = radiances[x]-radiances0[x];
+                            if (gradient >= stripeGradientThreshold) {
+                                if (gradient0 > 0.0f) {
+                                    ++length;
+                                } else {
+                                    if (length >= stripeMinLength) {
+                                        stripes += length;
+                                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
+                                            this.firstBadLine = y;
+                                        }
+                                    }
+                                    length = 1;
+                                    gradient0 = 1.0f;
+                                }
+                            } else if (gradient <= -stripeGradientThreshold) {
+                                if (gradient0 < 0.0f) {
+                                    ++length;
+                                } else {
+                                    if (length >= stripeMinLength) {
+                                        stripes += length;
+                                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
+                                            this.firstBadLine = y;
+                                        }
+                                    }
+                                    length = 1;
+                                    gradient0 = -1.0f;
+                                }
+                            } else {
+                                if (length >= stripeMinLength) {
+                                    stripes += length;
+                                    if (this.firstBadLine == -1 || y < this.firstBadLine) {
+                                        this.firstBadLine = y;
+                                    }
+                                }
+                                gradient0 = 0.0f;
+                                length = 0;
+                            }
+                        } else {
+                            if (length >= stripeMinLength) {
+                                stripes += length;
+                                if (this.firstBadLine == -1 || y < this.firstBadLine) {
+                                    this.firstBadLine = y;
+                                }
+                            }
+                            gradient0 = 0.0f;
+                            length = 0;
+                        }
+                    }
+                    if (length >= stripeMinLength) {
+                        stripes += length;
+                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
+                            this.firstBadLine = y;
+                        }
+                    }
+                    length = 0;
+                    // switch lines
+                    final int[] flags1 = flags0;
+                    flags0 = flags;
+                    flags = flags1;
+                    final float[] radiances1 = radiances0;
+                    radiances0 = radiances;
+                    radiances = radiances1;
+                }
+            }
+            return stripes;
+        } catch (IOException e) {
+            throw new OperatorException(e.getMessage(), e);
+        }
+    }
+
+    private int noOfMaskedPixels(Product product, int width, int height, String bandMathExpression) throws OperatorException {
         try {
             BandMathsOp toBeCountedOp = BandMathsOp.createBooleanExpressionBand(bandMathExpression, product);
             Band toBeCountedBand = toBeCountedOp.getTargetProduct().getBandAt(0);
             int count = 0;
+            this.firstBadLine = -1;
             int[] flags = new int[width];
-            for (int y = yStart; y < yEnd; ++y) {
+            for (int y = 0; y < height; ++y) {
                 toBeCountedBand.readPixels(0, y, width, 1, flags);
+                int lineCount = 0;
                 for (int x = 0; x < width; ++x) {
                     if (flags[x] != 0) {
                         ++count;
+                        ++lineCount;
                     }
+                }
+                if (this.firstBadLine < 0 && lineCount * 100 / width >= 1) {
+                    this.firstBadLine = y;
                 }
             }
             return count;
@@ -206,6 +459,7 @@ public class MerisL1QaOp extends Operator {
     private int badDataRows(int width, RasterDataNode sourceRaster, int yStart, int yEnd) {
         int y = yStart;
         int badDataRows = 0;
+        this.firstBadLine = -1;
         while (y < yEnd) {
             int[] pixels = new int[width];
             pixels = sourceRaster.getPixels(0, y, width, 1, pixels);
@@ -222,6 +476,9 @@ public class MerisL1QaOp extends Operator {
             if (percentBadDataValues >= percentBadDataValuesThreshold) {
                 // row is identified as 'bad'
                 badDataRows++;
+                if (this.firstBadLine < 0) {
+                    this.firstBadLine = y;
+                }
             }
             y++;
         }
@@ -262,6 +519,10 @@ public class MerisL1QaOp extends Operator {
 
     private boolean isInvalidMaskBitSet(int pixel) {
         return ((pixel >> invalidMaskBitIndex) & 1) != 0;
+    }
+
+    private boolean isCosmeticMaskBitSet(int pixel) {
+        return ((pixel >> cosmeticMaskBitIndex) & 1) != 0;
     }
 
     private static boolean productHasSuspectLines(Product product) throws IOException {
