@@ -23,10 +23,10 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 
 public class LcMapAggregationOpTest {
@@ -50,7 +50,7 @@ public class LcMapAggregationOpTest {
         ProductIOPlugInManager.getInstance().removeWriterPlugIn(lcMapNetCdf4WriterPlugIn);
     }
 
-    @Test()
+    @Test
     public void testTargetProductCreation_Binning() throws Exception {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
@@ -74,6 +74,15 @@ public class LcMapAggregationOpTest {
                                      + numPFTs
                                      + numAccuracyBands;
         assertThat(targetProduct.getNumBands(), is(expectedNumBands));
+    }
+
+    @Test(expected = OperatorException.class)
+    public void testRegionWithGaussianGrid() throws Exception {
+        LcMapAggregationOp aggrOp = createAggrOp();
+        aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
+        aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
+
+        aggrOp.initialize();
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.support.RegularGaussianGrid;
 
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -33,7 +34,12 @@ class FractionalAreaCalculator implements AreaCalculator {
     @Override
     public double calculate(double longitude, double latitude, long binIndex) {
         Rectangle2D.Double binRect = getBinRect(binIndex);
-        Rectangle2D.Double obsRect = createRect(longitude, latitude, deltaMapLon, deltaMapLat);
+        Rectangle2D.Double obsRect = new Rectangle2D.Double();
+        obsRect.setFrameFromDiagonal(longitude - deltaMapLon / 2.0,
+                                     latitude + deltaMapLat / 2.0,
+                                     longitude + deltaMapLon / 2.0,
+                                     latitude - deltaMapLat / 2.0);
+
         return calcFraction(binRect, obsRect);
     }
 
@@ -44,9 +50,33 @@ class FractionalAreaCalculator implements AreaCalculator {
             double[] binCenterLatLon = planetaryGrid.getCenterLatLon(binIndex);
             double binCenterLon = binCenterLatLon[1];
             double binCenterLat = binCenterLatLon[0];
+            double maxLat;
+            double minLat;
             int rowIndex = planetaryGrid.getRowIndex(binIndex);
             double deltaGridLon = 360.0 / planetaryGrid.getNumCols(rowIndex);
-            binRect = createRect(binCenterLon, binCenterLat, deltaGridLon, deltaGridLat);
+            if (planetaryGrid instanceof RegularGaussianGrid) {
+                if (rowIndex == 0) {
+                    maxLat = 90;
+                } else {
+                    maxLat = (planetaryGrid.getCenterLat(rowIndex - 1) + binCenterLat) / 2;
+                }
+                if (rowIndex == planetaryGrid.getNumRows() - 1) {
+                    minLat = -90;
+                } else {
+                    minLat = (planetaryGrid.getCenterLat(rowIndex + 1) + binCenterLat) / 2;
+                }
+                binRect = new Rectangle2D.Double();
+                binRect.setFrameFromDiagonal(binCenterLon - deltaGridLon / 2.0,
+                                             maxLat,
+                                             binCenterLon + deltaGridLon / 2.0,
+                                             minLat);
+            } else {
+                binRect = new Rectangle2D.Double();
+                binRect.setFrameFromDiagonal(binCenterLon - deltaGridLon / 2.0,
+                                             binCenterLat + deltaGridLat / 2.0,
+                                             binCenterLon + deltaGridLon / 2.0,
+                                             binCenterLat - deltaGridLat / 2.0);
+            }
             binRectanglesMap.put(binIndex, binRect);
         }
         return binRect;
@@ -56,14 +86,6 @@ class FractionalAreaCalculator implements AreaCalculator {
         if (binRectanglesMap.size() > 5000) { // this test could be cleverer, but works right now
             binRectanglesMap.clear();
         }
-    }
-
-    private Rectangle2D.Double createRect(double binCenterLon, double binCenterLat, double deltaGridLon,
-                                          double deltaGridLat) {
-        Rectangle2D.Double binRect = new Rectangle2D.Double();
-        binRect.setFrameFromCenter(binCenterLon, binCenterLat, binCenterLon + deltaGridLon / 2.0,
-                                   binCenterLat + deltaGridLat / 2.0);
-        return binRect;
     }
 
     static double calcFraction(Rectangle2D binRect, Rectangle2D obsRect) {
