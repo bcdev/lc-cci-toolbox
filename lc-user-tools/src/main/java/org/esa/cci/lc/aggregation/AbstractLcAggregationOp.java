@@ -55,7 +55,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
     private final HashMap<String, String> lcProperties;
 
     protected AbstractLcAggregationOp() {
-        this.lcProperties = new HashMap<String, String>();
+        this.lcProperties = new HashMap<>();
     }
 
     @Override
@@ -184,7 +184,11 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
         }
-        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
+        boolean regularGaussianGridUsed = PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName());
+        if (regularGaussianGridUsed && getRegionIdentifier() != null) {
+            throw new OperatorException("Regional subsets can not be used with " + PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
+        }
+        if (regularGaussianGridUsed) {
             setNumRows(numRows * 2);
         }
     }

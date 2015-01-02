@@ -58,9 +58,9 @@ Use the scripts in the same manner.
 
         Parameter Description:
             -PgridName=<name>
-                Specifies the target grid of the resulting product. For example a regular gaussian grid.
-                Valid Parameters are:  GEOGRAPHIC_LAT_LON  and  REGULAR_GAUSSIAN_GRID
-                This is a mandatory parameter.
+                Specifies the target grid of the resulting product. This is a mandatory parameter.
+                Valid parameters are: GEOGRAPHIC_LAT_LON  and  REGULAR_GAUSSIAN_GRID.
+                When REGULAR_GAUSSIAN_GRID is chosen regional subsets can not be used.
             -PnumRows=<integer>
                 Specifies the number of rows for the specified grid.
                 Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
