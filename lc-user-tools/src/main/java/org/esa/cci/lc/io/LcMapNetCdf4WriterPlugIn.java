@@ -97,7 +97,10 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("type", lcMapMetadata.getType());
             writeable.addGlobalAttribute("id", lcMapMetadata.getId());
             LcWriterUtils.addGenericGlobalAttributes(writeable);
-            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
+
+            LcWriterUtils.addSpecificGlobalAttributes("MERIS FR L1B version 5.05, MERIS RR L1B version 8.0, SPOT VGT P",
+                                                      "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0",
+                                                      spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "Y",
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable);

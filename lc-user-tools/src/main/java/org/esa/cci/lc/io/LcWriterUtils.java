@@ -48,10 +48,6 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("references", "http://www.esa-landcover-cci.org/");
         writeable.addGlobalAttribute("institution", "Universite catholique de Louvain");
         writeable.addGlobalAttribute("contact", "landcover-cci@uclouvain.be");
-        writeable.addGlobalAttribute("source", "MERIS FR L1B version 5.05, MERIS RR L1B version 8.0, SPOT VGT P");
-        String lcUserToolsVersion = getModuleVersion();
-        writeable.addGlobalAttribute("history",
-                                     "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0, lc-user-tools-" + lcUserToolsVersion);  // versions
         writeable.addGlobalAttribute("comment", "");
 
         writeable.addGlobalAttribute("Conventions", "CF-1.6");
@@ -65,7 +61,8 @@ public class LcWriterUtils {
 
     }
 
-    static void addSpecificGlobalAttributes(String spatialResolutionDegrees, String spatialResolution,
+    static void addSpecificGlobalAttributes(String source, String history,
+                                            String spatialResolutionDegrees, String spatialResolution,
                                             String temporalCoverageYears, String temporalResolution, String unit,
                                             String startTime, String endTime, String version,
                                             String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
@@ -75,7 +72,9 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("creator_name", "University catholique de Louvain");
         writeable.addGlobalAttribute("creator_url", "http://www.uclouvain.be/");
         writeable.addGlobalAttribute("creator_email", "landcover-cci@uclouvain.be");
-
+        writeable.addGlobalAttribute("source", source);
+        String lcUserToolsVersion = getModuleVersion();
+        writeable.addGlobalAttribute("history", history + ",lc-user-tools-" + lcUserToolsVersion);  // versions
 //            writeable.addGlobalAttribute("time_coverage_start", COMPACT_ISO_FORMAT.format(product.getStartTime().getAsDate()));
 //            writeable.addGlobalAttribute("time_coverage_end", COMPACT_ISO_FORMAT.format(product.getEndTime().getAsDate()));
         writeable.addGlobalAttribute("time_coverage_start", startTime);

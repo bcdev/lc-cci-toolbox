@@ -16,6 +16,8 @@ import org.esa.cci.lc.io.LcCondMetadata;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcWbMetadata;
+import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 
 import java.io.File;
 
@@ -35,6 +37,7 @@ import java.io.File;
 public class LcConversionOp extends Operator implements Output {
 
     private static final String LC_MAP_FORMAT = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
+    private static final String LC_WB_FORMAT = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_CONDITION_FORMAT = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
 
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
@@ -58,6 +61,16 @@ public class LcConversionOp extends Operator implements Output {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
             typeString = String.format("ESACCI-LC-L4-LCCS-Map-%s-P%sY",
+                                       metadata.getSpatialResolution(),
+                                       metadata.getTemporalResolution());
+            id = String.format("%s-%s-v%s",
+                               typeString,
+                               metadata.getEpoch(),
+                               targetVersion != null ? targetVersion : metadata.getVersion());
+        } else if (sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map")) {
+            outputFormat = LC_WB_FORMAT;
+            final LcWbMetadata metadata = new LcWbMetadata(sourceProduct);
+            typeString = String.format("ESACCI-LC-L4-WB-Map-%s-P%sY",
                                        metadata.getSpatialResolution(),
                                        metadata.getTemporalResolution());
             id = String.format("%s-%s-v%s",

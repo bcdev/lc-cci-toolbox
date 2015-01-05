@@ -202,6 +202,8 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
         lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));
         lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
+        lcProperties.put("source", globalAttributes.getAttributeString("source"));
+        lcProperties.put("history", globalAttributes.getAttributeString("history"));
         final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
             final double latMin = regionEnvelope.getMinimum(1);

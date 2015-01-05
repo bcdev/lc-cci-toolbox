@@ -116,7 +116,9 @@ public class LcBinWriter implements BinWriter {
         writeable.addGlobalAttribute("id", lcProperties.remove("id"));
 
         LcWriterUtils.addGenericGlobalAttributes(writeable);
-        LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("spatialResolutionDegrees"),
+        LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("source"),
+                                                  lcProperties.remove("history"),
+                                                  lcProperties.remove("spatialResolutionDegrees"),
                                                   lcProperties.remove("spatialResolution"),
                                                   lcProperties.remove("temporalCoverageYears"),
                                                   lcProperties.remove("temporalResolution"),
@@ -131,8 +133,8 @@ public class LcBinWriter implements BinWriter {
                                                   writeable);
 
         // LC specific way of metadata provision
-        for (Map.Entry<String, String> lcPropEentry : lcProperties.entrySet()) {
-            writeable.addGlobalAttribute(lcPropEentry.getKey(), lcPropEentry.getValue());
+        for (Map.Entry<String, String> lcPropEntry : lcProperties.entrySet()) {
+            writeable.addGlobalAttribute(lcPropEntry.getKey(), lcPropEntry.getValue());
         }
 
     }

@@ -115,9 +115,8 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
     public void aggregateSpatial(BinContext ctx, Observation observationVector, WritableVector spatialVector) {
         final float value = observationVector.get(statusIndex);
         if (value > 0.0) {
-            //spatialVector.set(0, (float) observationVector.getMJD());
             for (int i = 0; i < numSetFeatures; i++) {
-                spatialVector.set(i/* + 1*/, observationVector.get(setIndexes[i]));
+                spatialVector.set(i, observationVector.get(setIndexes[i]));
             }
         }
         LOGGER.info("aggregateSpatial status=" + (int)value);
@@ -129,9 +128,9 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
 
     @Override
     public void initTemporal(BinContext ctx, WritableVector vector) {
-        vector.set(0, Float.POSITIVE_INFINITY);
-        vector.set(1, -1.0f);
-        vector.set(2, 0.0f);
+        vector.set(0, Float.POSITIVE_INFINITY);  // status
+        vector.set(1, -1.0f);  // numStatusObs
+        vector.set(2, 0.0f);  // numObs
         for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
             vector.set(i, -1.0f);
         }

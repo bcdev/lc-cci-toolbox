@@ -102,7 +102,9 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             writeable.addGlobalAttribute("id", metadata.getId());
 
             LcWriterUtils.addGenericGlobalAttributes(writeable);
-            LcWriterUtils.addSpecificGlobalAttributes(spatialResolutionDegrees, spatialResolution,
+            LcWriterUtils.addSpecificGlobalAttributes("SPOT VGT, MODIS, ...",
+                                                      "lc-condition-1.0",
+                                                      spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "D",
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable);
