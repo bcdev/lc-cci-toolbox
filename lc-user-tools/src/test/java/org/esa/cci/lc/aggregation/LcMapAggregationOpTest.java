@@ -238,6 +238,8 @@ public class LcMapAggregationOpTest {
         globalAttributes.addAttribute(new MetadataAttribute("geospatial_lat_max", ProductData.createInstance("90"), true));
         globalAttributes.addAttribute(new MetadataAttribute("geospatial_lon_min", ProductData.createInstance("-180"), true));
         globalAttributes.addAttribute(new MetadataAttribute("geospatial_lon_max", ProductData.createInstance("180"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("source", ProductData.createInstance("MERIS FR L1B"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("history", ProductData.createInstance("LC tool tests"), true));
         product.getMetadataRoot().addElement(globalAttributes);
         return product;
     }
