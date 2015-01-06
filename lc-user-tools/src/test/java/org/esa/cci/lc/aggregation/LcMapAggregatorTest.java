@@ -1,9 +1,10 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.Bin;
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.binning.SpatialBin;
+import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.binning.support.VectorImpl;
@@ -206,31 +207,43 @@ public class LcMapAggregatorTest {
 
     @Test
     public void testAggregationWithGaussianGrid() {
-        final double lat = 60.2;
-        final double lon = 10.4;
         final PlanetaryGrid planetaryGrid = new RegularGaussianGrid(160);
-        BinContext ctx = new Bin() {
-            @Override
-            public long getIndex() {
-                return planetaryGrid.getBinIndex(lat, lon);
-            }
-        };
+        BinContext ctx = new SpatialBin(8329, 0);
         AreaCalculator fractionCalculator = new FractionalAreaCalculator(planetaryGrid, 129600, 64800);
+        PlateCarreeGrid plateCarreeGrid = new PlateCarreeGrid(64800);
         LcMapAggregator aggregator = createAggregator(true, 0, false, null, fractionCalculator);
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
         VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
         aggregator.initSpatial(ctx, spatialVector);
 
+        int class81 = 81;
+        int class81Index = 15;
         int class82 = 82;
         int class82Index = 16;
-        int numObs = 164025; // this should fill the complete bin
-        for (int i = 0; i < numObs; i++) {
-            Observation obs = obs(lat, lon, class82);
-            aggregator.aggregateSpatial(ctx, obs, spatialVector);
+        int colStartIndex = plateCarreeGrid.getColIndex(10.4 - 1.5);
+        int rowStartIndex = plateCarreeGrid.getRowIndex(60.2 + 1.5);
+        int colStopIndex = plateCarreeGrid.getColIndex(10.4 + 1.5);
+        int rowStopIndex = plateCarreeGrid.getRowIndex(60.2 - 1.5);
+        for (int y = rowStartIndex; y < rowStopIndex; y++) {
+            for (int x = colStartIndex; x < colStopIndex; x++) {
+                long binIndex = plateCarreeGrid.getFirstBinIndex(y) + x;
+                double[] centerLatLon = plateCarreeGrid.getCenterLatLon(binIndex);
+                Observation obs;
+                if (x % 2 == 0) {
+                    obs = obs(centerLatLon[0], centerLatLon[1], class81);
+                } else {
+                    obs = obs(centerLatLon[0], centerLatLon[1], class82);
+                }
+                aggregator.aggregateSpatial(ctx, obs, spatialVector);
+            }
         }
-        aggregator.completeSpatial(ctx, numObs, spatialVector);
-        assertEquals(1, spatialVector.get(class82Index), 1.0e-2);
+        aggregator.completeSpatial(ctx, -1, spatialVector);
+        float actual82Value = spatialVector.get(class82Index);
+        float actual81Value = spatialVector.get(class81Index);
+
+        float actualValue = actual81Value + actual82Value;
+        assertEquals(1.0f, actualValue, 1.0e-6);
     }
 
     @Test
