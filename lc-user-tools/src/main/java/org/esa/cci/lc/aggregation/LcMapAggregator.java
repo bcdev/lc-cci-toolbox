@@ -60,7 +60,19 @@ class LcMapAggregator extends AbstractAggregator {
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
-        // Nothing to be done here
+        // normalizing the data because of aggregating with float data and the float inaccuracy
+        float sum = 0;
+        for (int i = 0; i < spatialVector.size(); i++) {
+            float v = spatialVector.get(i);
+            if (!Float.isNaN(v)) {
+                sum += v;
+            }
+        }
+        if (sum != 1.0f) {
+            for (int i = 0; i < spatialVector.size(); i++) {
+                spatialVector.set(i, spatialVector.get(i) / sum);
+            }
+        }
     }
 
     @Override
