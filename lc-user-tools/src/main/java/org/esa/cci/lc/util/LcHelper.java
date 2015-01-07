@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class LcHelper {
 
     // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2005-v1.1.nc
+    // ESACCI-LC-L4-WB-Map-300m-P5Y-2005-v1.1.nc
     // ESACCI-LC-L4-NDVI-Cond-1000m-P14Y7D-19991224-v2.0.nc
     // ESACCI-LC-L4-NDVI-Cond-1000m-P14Y7D-aggregated-subsetted-19991224-v2.0.nc
 

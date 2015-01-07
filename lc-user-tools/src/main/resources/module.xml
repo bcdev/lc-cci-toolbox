@@ -14,6 +14,7 @@
     - removed the rules for the map products
     - updated readme.txt to explain the file format of cross walking table better
     - fixed scaling in remap tool
+    - added NetCDF conversion of WB products
     Changes in 3.6:
     - fixed fractional area calculation when observation or bin crossed the anti-meridian
     - fixed java.lang.IllegalArgumentException: Unknown metadata aggregator name: null

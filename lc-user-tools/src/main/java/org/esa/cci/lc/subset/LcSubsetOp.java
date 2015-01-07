@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
@@ -74,6 +75,8 @@ public class LcSubsetOp extends Operator implements Output {
         final String formatName;
         if (id.startsWith("ESACCI-LC-L4-LCCS-Map-")) {
             formatName = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
+        } else if (id.startsWith("ESACCI-LC-L4-WB-Map-")) {
+            formatName = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
         } else {
             formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
         }
