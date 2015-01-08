@@ -38,6 +38,7 @@ public class LcMapAggregationOpTest {
     public static void beforeClass() {
         aggregationSpi = new LcMapAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        spiRegistry.loadOperatorSpis();
         spiRegistry.addOperatorSpi(aggregationSpi);
         lcMapNetCdf4WriterPlugIn = new LcMapNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
@@ -79,8 +80,10 @@ public class LcMapAggregationOpTest {
     @Test(expected = OperatorException.class)
     public void testRegionWithGaussianGrid() throws Exception {
         LcMapAggregationOp aggrOp = createAggrOp();
+        aggrOp.setSourceProduct(createSourceProduct());
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
-        aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
+        aggrOp.setNumRows(80);
+        aggrOp.setPredefinedRegion(PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
 
         aggrOp.initialize();
     }

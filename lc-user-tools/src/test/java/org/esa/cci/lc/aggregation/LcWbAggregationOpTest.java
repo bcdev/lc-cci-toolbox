@@ -10,7 +10,6 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
-import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -39,6 +38,7 @@ public class LcWbAggregationOpTest {
     public static void beforeClass() {
         aggregationSpi = new LcWbAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        spiRegistry.loadOperatorSpis();
         spiRegistry.addOperatorSpi(aggregationSpi);
         lcWbNetCdf4WriterPlugIn = new LcWbNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcWbNetCdf4WriterPlugIn);
@@ -78,8 +78,10 @@ public class LcWbAggregationOpTest {
     @Test(expected = OperatorException.class)
     public void testRegionWithGaussianGrid() throws Exception {
         LcWbAggregationOp aggrOp = createAggrOp();
+        aggrOp.setSourceProduct(createSourceProduct());
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
-        aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
+        aggrOp.setNumRows(80);
+        aggrOp.setPredefinedRegion(PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
 
         aggrOp.initialize();
     }

@@ -148,7 +148,13 @@ public abstract class AbstractLcAggregationOp extends Operator {
     }
 
     private ReferencedEnvelope createEnvelope(float north, float east, float south, float west) {
-        return new ReferencedEnvelope(east, west, north, south, DefaultGeographicCRS.WGS84);
+        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
+            float newEast = (east + 360) % 360;
+            float newWest = (west + 360) % 360;
+            return new ReferencedEnvelope(newEast, newWest, north, south, DefaultGeographicCRS.WGS84);
+        } else {
+            return new ReferencedEnvelope(east, west, north, south, DefaultGeographicCRS.WGS84);
+        }
     }
 
     private boolean isPredefinedRegionSet() {
@@ -184,11 +190,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
         }
-        boolean regularGaussianGridUsed = PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName());
-        if (regularGaussianGridUsed && getRegionIdentifier() != null) {
-            throw new OperatorException("Regional subsets can not be used with " + PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
-        }
-        if (regularGaussianGridUsed) {
+        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
             setNumRows(numRows * 2);
         }
     }

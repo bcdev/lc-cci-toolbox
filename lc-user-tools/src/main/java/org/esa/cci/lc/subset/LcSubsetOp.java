@@ -66,10 +66,17 @@ public class LcSubsetOp extends Operator implements Output {
 
         if (predefinedRegionIsSelected()) {
             final PredefinedRegion r = predefinedRegion;
-            subsetProduct = LcHelper.createProductSubset(sourceProduct, r.getNorth(), r.getEast(), r.getSouth(), r.getWest(), getRegionIdentifier());
-        } else {
-            subsetProduct = LcHelper.createProductSubset(sourceProduct, north, east, south, west, getRegionIdentifier());
+            north = r.getNorth();
+            east = r.getEast();
+            south = r.getSouth();
+            west = r.getWest();
         }
+        MetadataElement globalAttributes = sourceProduct.getMetadataRoot().getElement(LcMapMetadata.GLOBAL_ATTRIBUTES_ELEMENT_NAME);
+        if (globalAttributes.getAttributeString("grid_name", "").startsWith("Regular gaussian grid")) {
+            east = (east + 360) % 360;
+            west = (west + 360) % 360;
+        }
+        subsetProduct = LcHelper.createProductSubset(sourceProduct, north, east, south, west, getRegionIdentifier());
 
         updateIdMetadataAttribute(id);
         final String formatName;
