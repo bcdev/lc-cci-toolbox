@@ -204,7 +204,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
         lcProperties.put("source", globalAttributes.getAttributeString("source"));
         lcProperties.put("history", globalAttributes.getAttributeString("history"));
-        float resolutionDegree = 180.0f / getNumRows();
+        float resolutionDegree = getTargetSpatialResolution();
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
         lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
         final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
@@ -254,11 +254,19 @@ public abstract class AbstractLcAggregationOp extends Operator {
     }
 
     protected Product createSubset(Product source, ReferencedEnvelope regionEnvelope) {
-        double north = regionEnvelope.getMaximum(1);
-        double east = regionEnvelope.getMaximum(0);
-        double south = regionEnvelope.getMinimum(1);
-        double west = regionEnvelope.getMinimum(0);
+        ReferencedEnvelope envelopeCopy = new ReferencedEnvelope(regionEnvelope);
+        // work on the copy to prevent altering the original envelope
+        envelopeCopy.expandBy(getTargetSpatialResolution() * 5);
+        double north = envelopeCopy.getMaximum(1);
+        double east = envelopeCopy.getMaximum(0);
+        double south = envelopeCopy.getMinimum(1);
+        double west = envelopeCopy.getMinimum(0);
         source = LcHelper.createProductSubset(source, north, east, south, west, getRegionIdentifier());
         return source;
     }
+
+    private float getTargetSpatialResolution() {
+        return 180.0f / getNumRows();
+    }
+
 }
