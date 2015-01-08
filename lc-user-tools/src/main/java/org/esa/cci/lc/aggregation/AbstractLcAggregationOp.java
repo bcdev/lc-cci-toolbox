@@ -204,22 +204,17 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
         lcProperties.put("source", globalAttributes.getAttributeString("source"));
         lcProperties.put("history", globalAttributes.getAttributeString("history"));
+        float resolutionDegree = 180.0f / getNumRows();
+        lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
+        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
         final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
-            final double latMin = regionEnvelope.getMinimum(1);
-            final double latMax = regionEnvelope.getMaximum(1);
-            float resolutionDegree = (float) ((latMax - latMin) / getNumRows());
-            lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
-            lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
-            lcProperties.put("latMin", String.valueOf(latMin));
-            lcProperties.put("latMax", String.valueOf(latMax));
+            lcProperties.put("latMin", String.valueOf(regionEnvelope.getMinimum(1)));
+            lcProperties.put("latMax", String.valueOf(regionEnvelope.getMaximum(1)));
             lcProperties.put("lonMin", String.valueOf(regionEnvelope.getMinimum(0)));
             lcProperties.put("lonMax", String.valueOf(regionEnvelope.getMaximum(0)));
 
         } else {
-            float resolutionDegree = 180.0f / getNumRows();
-            lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
-            lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
             lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
             lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
             lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
