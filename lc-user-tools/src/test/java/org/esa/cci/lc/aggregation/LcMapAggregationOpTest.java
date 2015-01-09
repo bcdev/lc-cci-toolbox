@@ -83,7 +83,7 @@ public class LcMapAggregationOpTest {
         aggrOp.setSourceProduct(createSourceProduct());
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
         aggrOp.setNumRows(80);
-        aggrOp.setPredefinedRegion(PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
+        aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
 
         aggrOp.initialize();
     }

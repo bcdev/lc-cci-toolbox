@@ -148,13 +148,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
     }
 
     private ReferencedEnvelope createEnvelope(float north, float east, float south, float west) {
-        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
-            float newEast = (east + 360) % 360;
-            float newWest = (west + 360) % 360;
-            return new ReferencedEnvelope(newEast, newWest, north, south, DefaultGeographicCRS.WGS84);
-        } else {
-            return new ReferencedEnvelope(east, west, north, south, DefaultGeographicCRS.WGS84);
-        }
+        return new ReferencedEnvelope(east, west, north, south, DefaultGeographicCRS.WGS84);
     }
 
     private boolean isPredefinedRegionSet() {
@@ -209,7 +203,14 @@ public abstract class AbstractLcAggregationOp extends Operator {
         float resolutionDegree = getTargetSpatialResolution();
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
         lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
-        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
+            double newEast = (regionEnvelope.getMaximum(0) + 360) % 360;
+            double newWest = (regionEnvelope.getMinimum(0) + 360) % 360;
+            double south = regionEnvelope.getMinimum(1);
+            double north = regionEnvelope.getMaximum(1);
+            regionEnvelope = new ReferencedEnvelope(newEast, newWest, north, south, DefaultGeographicCRS.WGS84);
+        }
         if (regionEnvelope != null) {
             lcProperties.put("latMin", String.valueOf(regionEnvelope.getMinimum(1)));
             lcProperties.put("latMax", String.valueOf(regionEnvelope.getMaximum(1)));

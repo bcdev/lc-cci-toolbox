@@ -86,7 +86,7 @@ public class LcWbAggregationOpTest {
     }
 
     @Test
-    public void testRegionWithGeoGrid() throws Exception {
+    public void testRegionWithGeoGridWithRegionAt180() throws Exception {
         LcWbAggregationOp aggrOp = createAggrOp();
         aggrOp.setSourceProduct(createSourceProduct());
         aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
