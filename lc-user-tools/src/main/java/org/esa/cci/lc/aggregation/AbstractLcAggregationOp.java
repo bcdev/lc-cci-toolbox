@@ -204,7 +204,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
         lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
         ReferencedEnvelope regionEnvelope = getRegionEnvelope();
-        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
+        if (regionEnvelope != null && PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
             double newEast = (regionEnvelope.getMaximum(0) + 360) % 360;
             double newWest = (regionEnvelope.getMinimum(0) + 360) % 360;
             double south = regionEnvelope.getMinimum(1);
