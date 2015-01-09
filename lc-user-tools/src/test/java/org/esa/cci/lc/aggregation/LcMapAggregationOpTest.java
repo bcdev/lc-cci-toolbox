@@ -77,7 +77,7 @@ public class LcMapAggregationOpTest {
         assertThat(targetProduct.getNumBands(), is(expectedNumBands));
     }
 
-    @Test(expected = OperatorException.class)
+    @Test
     public void testRegionWithGaussianGrid() throws Exception {
         LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setSourceProduct(createSourceProduct());

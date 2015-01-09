@@ -95,7 +95,7 @@ public class LcSubsetOpTest {
         final int th = subsetProduct.getSceneRasterHeight();
         final int tw = subsetProduct.getSceneRasterWidth();
         assertThat(th, is(831));
-        assertThat(tw, is(1271));
+        assertThat(tw, is(1270));
 //        final GeoCoding targetGC = subsetProduct.getGeoCoding();
 //        assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15.0f, -15.0f)));
 //        assertThat(targetGC.getGeoPos(new PixelPos(tw, th), null), equalTo(new GeoPos(-15.0f, 15.0f)));
