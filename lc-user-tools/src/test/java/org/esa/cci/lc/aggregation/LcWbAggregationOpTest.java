@@ -82,8 +82,21 @@ public class LcWbAggregationOpTest {
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
         aggrOp.setNumRows(80);
         aggrOp.setPredefinedRegion(PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
-
         aggrOp.initialize();
+    }
+
+    @Test
+    public void testRegionWithGeoGrid() throws Exception {
+        LcWbAggregationOp aggrOp = createAggrOp();
+        aggrOp.setSourceProduct(createSourceProduct());
+        aggrOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
+        boolean outputWbClasses = true;
+        aggrOp.setOutputWbClasses(outputWbClasses);
+        int numMajorityClasses = 2;
+        aggrOp.setNumMajorityClasses(numMajorityClasses);
+        aggrOp.setNumRows(180);
+        aggrOp.setPredefinedRegion(PredefinedRegion.ASIA);
+        initOp(aggrOp);
     }
 
     @Test
