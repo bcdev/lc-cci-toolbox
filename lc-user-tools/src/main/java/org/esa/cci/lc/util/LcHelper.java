@@ -8,7 +8,7 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.cci.lc.io.LcWriterUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 
@@ -36,12 +36,10 @@ public class LcHelper {
     }
 
     public static Product createProductSubset(Product product, double north, double east, double south, double west, String regionIdentifier) {
-        final Rectangle pixelRect = getPixelBounds(north, east, south, west, product.getGeoCoding());
-        if (pixelRect.x < 0 || pixelRect.y < 0 || pixelRect.width < 1 || pixelRect.height < 1) {
-            final String msg = "Invalid pixel region %s computed for geo-coordinates [north=%f, east=%f, south=%f, west=%f]";
-            throw new OperatorException(String.format(msg, pixelRect, north, east, south, west));
-        }
-        final HashMap<String, Object> parameters = new HashMap<String, Object>();
+        Rectangle pixelRect = getPixelBounds(north, east, south, west, product.getGeoCoding());
+        Rectangle productRect = new Rectangle(0, 0, product.getSceneRasterWidth(), product.getSceneRasterHeight());
+        pixelRect = pixelRect.intersection(productRect);
+        final HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("region", pixelRect);
         parameters.put("copyMetadata", true);
         Product subset = GPF.createProduct("Subset", parameters, product);
