@@ -209,7 +209,6 @@ public abstract class AbstractLcAggregationOp extends Operator {
             lcProperties.put("latMax", String.valueOf(regionEnvelope.getMaximum(1)));
             lcProperties.put("lonMin", String.valueOf(regionEnvelope.getMinimum(0)));
             lcProperties.put("lonMax", String.valueOf(regionEnvelope.getMaximum(0)));
-
         } else {
             lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
             lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
