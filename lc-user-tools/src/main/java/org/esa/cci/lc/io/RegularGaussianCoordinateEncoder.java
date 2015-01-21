@@ -23,7 +23,7 @@ class RegularGaussianCoordinateEncoder extends AbstractCoordinateEncoder {
     }
 
     @Override
-    protected float[] getlatValues(int sceneHeight) {
+    protected float[] getLatValues(int sceneHeight) {
         final float[] lats = new float[sceneHeight];
         for (int i = 0; i < sceneHeight; i++) {
             lats[i] = (float) planetaryGrid.getCenterLat(i);

@@ -38,7 +38,7 @@ abstract class AbstractCoordinateEncoder implements CoordinateEncoder {
         int sceneHeight = planetaryGrid.getNumRows();
         int sceneWidth = planetaryGrid.getNumCols(0);
 
-        final float[] lats = getlatValues(sceneHeight);
+        final float[] lats = getLatValues(sceneHeight);
         latVar.writeFully(Array.factory(lats));
 
         final float[] lons = getLonValues(sceneWidth);
@@ -47,5 +47,5 @@ abstract class AbstractCoordinateEncoder implements CoordinateEncoder {
 
     protected abstract float[] getLonValues(int sceneWidth);
 
-    protected abstract float[] getlatValues(int sceneHeight);
+    protected abstract float[] getLatValues(int sceneHeight);
 }
