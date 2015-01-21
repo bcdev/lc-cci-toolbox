@@ -79,14 +79,23 @@ public class LcBinWriter implements BinWriter {
     }
 
     private CoordinateEncoder createCoordinateEncoder() {
-        boolean isKnownGrid = planetaryGrid instanceof PlateCarreeGrid ||
-                planetaryGrid instanceof RegionalPlanetaryGrid ||
-                planetaryGrid instanceof RegularGaussianGrid;
-        if (isKnownGrid) {
-            return new RegularCoordinateEncoder(planetaryGrid);
+
+        if (isGridImplementationUsed(RegularGaussianGrid.class)) {
+            return new RegularGaussianCoordinateEncoder(planetaryGrid);
+        } else if (isGridImplementationUsed(PlateCarreeGrid.class)) {
+            return new PlateCarreeCoordinateEncoder(planetaryGrid);
         } else {
             throw new IllegalStateException("Unknown planetary grid");
         }
+    }
+
+    private boolean isGridImplementationUsed(Class<? extends PlanetaryGrid> gridClass) {
+        boolean isGaussianGrid = planetaryGrid.getClass().isAssignableFrom(gridClass);
+        if (!isGaussianGrid && planetaryGrid.getClass().isAssignableFrom(RegionalPlanetaryGrid.class)) {
+            RegionalPlanetaryGrid grid = (RegionalPlanetaryGrid) planetaryGrid;
+            isGaussianGrid = grid.getGlobalGrid().getClass().isAssignableFrom(gridClass);
+        }
+        return isGaussianGrid;
     }
 
     @Override
