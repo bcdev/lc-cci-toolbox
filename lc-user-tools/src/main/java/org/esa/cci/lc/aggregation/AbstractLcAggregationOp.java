@@ -239,7 +239,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
             return PlateCarreeGrid.class.getName();
         } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            return RegularGaussianGrid.class.getName();  // using this -180 to 180 grid instead of the one in BEAM which is from 0 to 360
+            return RegularGaussianGrid.class.getName();
 //            return RegularGaussianGrid.class.getName();
 //        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) { // not supported yet
 //            return ReducedGaussianGrid.class.getName();
