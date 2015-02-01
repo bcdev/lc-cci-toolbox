@@ -37,11 +37,11 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
 
     protected Logger LOGGER = BeamLogManager.getSystemLogger();
 
-    private static String[] SR_VARIABLES = new String[] {
+    static String[] SR_VARIABLES = new String[] {
             "current_pixel_state",
             "clear_land_count",
-            "clear_snow_ice_count",
             "clear_water_count",
+            "clear_snow_ice_count",
             "cloud_count",
             "cloud_shadow_count",
             "sr_1_mean",
@@ -59,7 +59,7 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
             "sr_14_mean",
             "vegetation_index_mean"
     };
-    private static String[] SEASONAL_COMPOSITE_VARIABLES = new String[] {
+    static String[] SEASONAL_COMPOSITE_VARIABLES = new String[] {
             "status",
             "status_count",
             "obs_count",
