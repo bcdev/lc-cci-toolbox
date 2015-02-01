@@ -8,13 +8,15 @@ import ucar.ma2.DataType;
 
 import java.io.IOException;
 
-class RegularCoordinateEncoder implements CoordinateEncoder {
-
+/**
+ * @author Marco Peters
+ */
+abstract class AbstractCoordinateEncoder implements CoordinateEncoder {
     protected final PlanetaryGrid planetaryGrid;
     protected NVariable latVar;
     protected NVariable lonVar;
 
-    public RegularCoordinateEncoder(PlanetaryGrid planetaryGrid) {
+    public AbstractCoordinateEncoder(PlanetaryGrid planetaryGrid) {
         this.planetaryGrid = planetaryGrid;
     }
 
@@ -34,21 +36,16 @@ class RegularCoordinateEncoder implements CoordinateEncoder {
     @Override
     public void fillCoordinateVars(NFileWriteable writeable) throws IOException {
         int sceneHeight = planetaryGrid.getNumRows();
+        int sceneWidth = planetaryGrid.getNumCols(0);
 
-        final float[] lats = new float[sceneHeight];
-        for (int i = 0; i < sceneHeight; i++) {
-            lats[i] = (float) planetaryGrid.getCenterLat(i);
-        }
+        final float[] lats = getLatValues(sceneHeight);
         latVar.writeFully(Array.factory(lats));
 
-        int sceneWidth = planetaryGrid.getNumCols(0);
-        final float[] lons = new float[sceneWidth];
-
-        final int firstBinIndex = (int) planetaryGrid.getFirstBinIndex(0);
-        for (int i = 0; i < sceneWidth; i++) {
-            lons[i] = (float) planetaryGrid.getCenterLatLon(firstBinIndex + i)[1];
-        }
+        final float[] lons = getLonValues(sceneWidth);
         lonVar.writeFully(Array.factory(lons));
     }
 
+    protected abstract float[] getLonValues(int sceneWidth);
+
+    protected abstract float[] getLatValues(int sceneHeight);
 }

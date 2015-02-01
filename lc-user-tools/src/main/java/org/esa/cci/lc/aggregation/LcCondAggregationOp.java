@@ -134,7 +134,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
 
         binningOp.setMaskExpr(maskExpression);
         binningOp.setNumRows(getNumRows());
-        binningOp.setSuperSampling(3);
         binningOp.setAggregatorConfigs(aggregatorConfig);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(new File(getTargetDir(), outputFileName).getPath());
