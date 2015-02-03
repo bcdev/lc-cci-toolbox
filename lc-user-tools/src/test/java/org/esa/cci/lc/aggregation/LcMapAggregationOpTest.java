@@ -190,7 +190,7 @@ public class LcMapAggregationOpTest {
     }
 
     private void initOp(LcMapAggregationOp aggregationOp) throws IOException {
-        aggregationOp.setOutputFormat("NetCDF4-LC-Map");
+        aggregationOp.setOutputFormat("NetCDF4-BEAM");
         File tempFile = File.createTempFile("BEAM-TEST_", ".nc");
         tempFile.deleteOnExit();
         aggregationOp.setOutputFile(tempFile.getAbsolutePath());
