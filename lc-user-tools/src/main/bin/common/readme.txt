@@ -56,11 +56,15 @@ Use the scripts in the same manner.
       ~~~~~~~~~~~~~~~~~~~~~~~~~
         aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
 
+        Note:
+        When the REGULAR_GAUSSIAN_GRID is chosen as target grid and a regional subset which crosses the
+        prime meridian is also defined the processing will not work. This affects the predefined regions
+        WESTERN_EUROPE_AND_MEDITERRANEAN and AFRICA.
+
         Parameter Description:
             -PgridName=<name>
                 Specifies the target grid of the resulting product. This is a mandatory parameter.
                 Valid parameters are: GEOGRAPHIC_LAT_LON  and  REGULAR_GAUSSIAN_GRID.
-                When REGULAR_GAUSSIAN_GRID is chosen regional subsets can not be used.
             -PnumRows=<integer>
                 Specifies the number of rows for the specified grid.
                 Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
