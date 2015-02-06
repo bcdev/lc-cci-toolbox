@@ -9,33 +9,20 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 public class RegionalPlanetaryGrid implements PlanetaryGrid {
 
     private final PlanetaryGrid globalGrid;
-    private final long binIndexOffset;
-    private final long binIndexMax;
-    private final int rowOffset;
-    private final int columnOffset;
-    private final int numRows;
-    private final long numBins;
-    private final int numCols;
-    private final double maxLat;
-    private final double minLon;
-    private final double minLat;
-    private final double maxLon;
+    private final ReferencedEnvelope region;
+
+    private long binIndexOffset;
+    private long binIndexMax;
+    private int rowOffset;
+    private int columnOffset;
+    private int numRows;
+    private long numBins;
+    private int numCols;
 
     public RegionalPlanetaryGrid(PlanetaryGrid globalGrid, ReferencedEnvelope region) {
         this.globalGrid = globalGrid;
-        maxLat = region.getMaximum(1);
-        minLon = region.getMinimum(0);
-        minLat = region.getMinimum(1);
-        maxLon = region.getMaximum(0);
-        binIndexOffset = globalGrid.getBinIndex(maxLat, minLon);
-        binIndexMax = globalGrid.getBinIndex(minLat, maxLon);
-        final long urIndex = globalGrid.getBinIndex(maxLat, maxLon);
-        numCols = (int) (urIndex - binIndexOffset) + 1;
-        rowOffset = globalGrid.getRowIndex(binIndexOffset);
-        columnOffset = (int) (binIndexOffset - globalGrid.getFirstBinIndex(rowOffset));
-        int maxRowIndex = globalGrid.getRowIndex(binIndexMax);
-        this.numRows = (maxRowIndex + 1) - rowOffset;
-        numBins = numCols * numRows;
+        this.region = new ReferencedEnvelope(region);
+        initBinIndexValues(globalGrid);
     }
 
     public PlanetaryGrid getGlobalGrid() {
@@ -119,9 +106,37 @@ public class RegionalPlanetaryGrid implements PlanetaryGrid {
         return false;
     }
 
+    private void initBinIndexValues(PlanetaryGrid globalGrid) {
+        binIndexOffset = globalGrid.getBinIndex(getLatMaximum(), getLonMinimum());
+        binIndexMax = globalGrid.getBinIndex(getLatMinimum(), getLonMaximum());
+        final long urIndex = globalGrid.getBinIndex(getLatMaximum(), getLonMaximum());
+        numCols = (int) (urIndex - binIndexOffset) + 1;
+        rowOffset = globalGrid.getRowIndex(binIndexOffset);
+        columnOffset = (int) (binIndexOffset - globalGrid.getFirstBinIndex(rowOffset));
+        int maxRowIndex = globalGrid.getRowIndex(binIndexMax);
+        this.numRows = (maxRowIndex + 1) - rowOffset;
+        numBins = numCols * numRows;
+    }
+
     private boolean contains(double lat, double lon) {
-        return lat <= maxLat && lat >= minLat &&
-               lon <= maxLon && lon >= minLon;
+        return lat <= getLatMaximum() && lat >= getLatMinimum() &&
+                lon <= getLonMaximum() && lon >= getLonMinimum();
+    }
+
+    private double getLonMaximum() {
+        return region.getMaximum(0);
+    }
+
+    private double getLatMinimum() {
+        return region.getMinimum(1);
+    }
+
+    private double getLonMinimum() {
+        return region.getMinimum(0);
+    }
+
+    private double getLatMaximum() {
+        return region.getMaximum(1);
     }
 
 }
