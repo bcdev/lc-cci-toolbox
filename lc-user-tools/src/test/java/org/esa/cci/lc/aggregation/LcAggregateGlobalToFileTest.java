@@ -33,7 +33,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Marco Peters
  */
-public class LcAggregateToFileTest {
+public class LcAggregateGlobalToFileTest {
 
 
     private static LcMapNetCdf4WriterPlugIn lcMapNetCdf4WriterPlugIn;
@@ -49,7 +49,7 @@ public class LcAggregateToFileTest {
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
         lcCondNetCdf4WriterPlugIn = new LcConditionNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcCondNetCdf4WriterPlugIn);
-        tempDirectory = Files.createTempDirectory(LcAggregateToFileTest.class.getSimpleName());
+        tempDirectory = Files.createTempDirectory(LcAggregateGlobalToFileTest.class.getSimpleName());
     }
 
     @AfterClass
@@ -109,46 +109,42 @@ public class LcAggregateToFileTest {
 
     @Test
     public void testCond_Gaussian_WithSubset_CentralAmerica() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.CENTRAL_AMERICA);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.CENTRAL_AMERICA);
     }
 
     @Test
     public void testCond_Gaussian_WithSubset_Australia() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
     }
 
     @Test(expected = OperatorException.class)
     public void testCond_Gaussian_WithSubset_Europe() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
     }
 
     @Test(expected = OperatorException.class)
     public void testCond_Gaussian_WithSubset_Africa() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AFRICA);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AFRICA);
     }
 
     @Test
     public void testCond_WGS84_WithSubset_CentralAmerica() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.CENTRAL_AMERICA);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.CENTRAL_AMERICA);
     }
 
     @Test
     public void testCond_WGS84_WithSubset_Australia() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
     }
 
     @Test
     public void testCond_WGS84_WithSubset_Europe() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
     }
 
     @Test
     public void testCond_WGS84_WithSubset_Africa() throws IOException {
-        executeOnGridAndRegion(PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AFRICA);
-    }
-
-    private void executeOnGridAndRegion(PlanetaryGridName grid, PredefinedRegion region) throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), grid, region);
+        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AFRICA);
     }
 
     private void exuteOpOnGridAndRegion(AbstractLcAggregationOp aggrOp, PlanetaryGridName grid, PredefinedRegion region) throws IOException {
