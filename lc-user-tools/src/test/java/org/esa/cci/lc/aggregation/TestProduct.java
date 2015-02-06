@@ -17,7 +17,7 @@ abstract class TestProduct {
     protected TestProduct() {
     }
 
-    static Product createSourceProduct() {
+    static Product createMapSourceProduct() {
         final Integer width = 3600;
         final Integer height = 1800;
         final Product product = new Product("P", "T", width, height);
@@ -60,6 +60,42 @@ abstract class TestProduct {
         globalAttributes.addAttribute(new MetadataAttribute("geospatial_lon_max", ProductData.createInstance("180"), true));
         globalAttributes.addAttribute(new MetadataAttribute("source", ProductData.createInstance("MERIS FR L1B"), true));
         globalAttributes.addAttribute(new MetadataAttribute("history", ProductData.createInstance("LC tool tests"), true));
+        product.getMetadataRoot().addElement(globalAttributes);
+        return product;
+    }
+
+    static Product createConditionSourceProduct() {
+        final Integer width = 3600;
+        final Integer height = 1800;
+        final Product product = new Product("P", "T", width, height);
+        product.setFileLocation(new File("/blah/ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20000108-v2.0.nc"));
+        final Band classesBand = product.addBand("snow_occ", ProductData.TYPE_UINT8);
+        classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                             new Byte[]{10}, null));
+        final Band processedFlag = product.addBand("snow_nYearObs", ProductData.TYPE_INT8);
+        processedFlag.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
+                                                               new Byte[]{1}, null));
+        try {
+            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+        } catch (FactoryException | TransformException e) {
+            // should not come here, creation og GC should work
+            e.printStackTrace();
+        }
+        MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
+        globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20000108-v2.0"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("type", ProductData.createInstance("ESACCI-LC-L4-Snow-Cond-500m-P13Y7D"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("time_coverage_duration", ProductData.createInstance("P13Y"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("time_coverage_resolution", ProductData.createInstance("P7D"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("time_coverage_start", ProductData.createInstance("20000108"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("time_coverage_end", ProductData.createInstance("20120108"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("product_version", ProductData.createInstance("2.0"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("spatial_resolution", ProductData.createInstance("500m"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("geospatial_lat_min", ProductData.createInstance("-90"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("geospatial_lat_max", ProductData.createInstance("90"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("geospatial_lon_min", ProductData.createInstance("-180"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("geospatial_lon_max", ProductData.createInstance("180"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("source", ProductData.createInstance("ERIS FR L1B version 5.05, MERIS RR L1B version 8.0, SPOT VGT P"), true));
+        globalAttributes.addAttribute(new MetadataAttribute("history", ProductData.createInstance("amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0, lc-user-tools-4.11.1"), true));
         product.getMetadataRoot().addElement(globalAttributes);
         return product;
     }

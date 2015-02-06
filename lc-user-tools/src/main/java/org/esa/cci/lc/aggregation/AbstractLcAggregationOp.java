@@ -53,6 +53,9 @@ public abstract class AbstractLcAggregationOp extends Operator {
 
 
     private final HashMap<String, String> lcProperties;
+    private String outputFile;
+    private String outputFormat;
+    private String outputType;
 
     protected AbstractLcAggregationOp() {
         this.lcProperties = new HashMap<>();
@@ -173,6 +176,30 @@ public abstract class AbstractLcAggregationOp extends Operator {
         return lcProperties;
     }
 
+    void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
+    }
+
+    String getOutputFile() {
+        return outputFile;
+    }
+
+    void setOutputFormat(String outputFormat) {
+        this.outputFormat = outputFormat;
+    }
+
+    String getOutputFormat() {
+        return outputFormat;
+    }
+
+    void setOutputType(String outputType) {
+        this.outputType = outputType;
+    }
+
+    String getOutputType() {
+        return outputType;
+    }
+
     protected void validateInputSettings() {
         if (targetDir == null) {
             throw new OperatorException("The parameter 'targetDir' must be given.");
@@ -184,7 +211,18 @@ public abstract class AbstractLcAggregationOp extends Operator {
         if (numRows < 2 || numRows % 2 != 0) {
             throw new OperatorException("Number of rows must be greater than 2 and must be an even number.");
         }
-        if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName())) {
+        boolean regularGaussianGridUsed = PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(getGridName());
+        if (regularGaussianGridUsed && getRegionIdentifier() != null) {
+            ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+            double maxLon = regionEnvelope.getMaximum(0);
+            double minLon = regionEnvelope.getMinimum(0);
+            if (maxLon > 0 && minLon < 0) {
+                throw new OperatorException("The planetary grid '" + PlanetaryGridName.REGULAR_GAUSSIAN_GRID + "' " +
+                                                    "can not be used in combination with a region which crosses the " +
+                                                    "prime meridian.");
+            }
+        }
+        if (regularGaussianGridUsed) {
             setNumRows(numRows * 2);
         }
     }

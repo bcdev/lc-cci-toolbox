@@ -49,7 +49,7 @@ public class LcMapAggregationOpTest {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        aggregationOp.setSourceProduct(TestProduct.createSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct());
         int numMajorityClasses = 2;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
@@ -73,7 +73,7 @@ public class LcMapAggregationOpTest {
     @Test
     public void testRegionWithGaussianGrid() throws Exception {
         LcMapAggregationOp aggrOp = createAggrOp();
-        aggrOp.setSourceProduct(TestProduct.createSourceProduct());
+        aggrOp.setSourceProduct(TestProduct.createMapSourceProduct());
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
         aggrOp.setNumRows(80);
         aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
@@ -86,7 +86,7 @@ public class LcMapAggregationOpTest {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        aggregationOp.setSourceProduct(TestProduct.createSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct());
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);

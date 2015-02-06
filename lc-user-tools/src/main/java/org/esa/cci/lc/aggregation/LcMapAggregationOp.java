@@ -62,9 +62,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
     private boolean outputAccuracy;
 
     boolean outputTargetProduct;
-    private String outputFormat;
-    private String outputFile;
-    private String outputType;
 
     @Override
     public void initialize() throws OperatorException {
@@ -101,7 +98,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
-
     }
 
     private String createTypeAndID(HashMap<String, String> lcProperties) {
@@ -175,9 +171,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         }
         binningOp.setAggregatorConfigs(aggregatorConfigs);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
-        binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);
-        binningOp.setOutputType(outputType == null ? "Product" : outputType);
-        binningOp.setOutputFormat(outputFormat);
+        binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
+        binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
+        binningOp.setOutputFormat(getOutputFormat());
     }
 
     private PlanetaryGrid createPlanetaryGrid() {
@@ -202,18 +198,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
     public void setOutputLCCSClasses(boolean outputLCCSClasses) {
         this.outputLCCSClasses = outputLCCSClasses;
-    }
-
-    void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat;
-    }
-
-    void setOutputFile(String outputFile) {
-        this.outputFile = outputFile;
-    }
-
-    void setOutputType(String outputType) {
-        this.outputType = outputType;
     }
 
     int getNumMajorityClasses() {

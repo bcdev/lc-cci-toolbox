@@ -66,7 +66,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
             source = createSubset(source, regionEnvelope);
         }
 
-        String id = createId(lcProperties);
+        String id = createTypeAndId(lcProperties);
         initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
         binningOp.setSourceProduct(source);
         binningOp.setOutputTargetProduct(outputTargetProduct);
@@ -77,7 +77,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         setTargetProduct(dummyTarget);
     }
 
-    private String createId(HashMap<String, String> lcProperties) {
+    private String createTypeAndId(HashMap<String, String> lcProperties) {
 
         String condition = lcProperties.remove("condition");
         String startYear = lcProperties.remove("startYear");
@@ -136,9 +136,9 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         binningOp.setNumRows(getNumRows());
         binningOp.setAggregatorConfigs(aggregatorConfig);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
-        binningOp.setOutputFile(new File(getTargetDir(), outputFileName).getPath());
-        binningOp.setOutputType("Product");
-        binningOp.setOutputFormat("NETCFDFDFDFDFDFDF");
+        binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFileName).getPath() : getOutputFile());
+        binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
+        binningOp.setOutputFormat(getOutputFormat());
     }
 
     private boolean isSourceBA(String sourceFileName) {
