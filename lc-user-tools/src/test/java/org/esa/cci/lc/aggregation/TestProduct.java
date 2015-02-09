@@ -1,6 +1,5 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -10,38 +9,24 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import javax.media.jai.operator.ConstantDescriptor;
+import java.awt.*;
 import java.io.File;
 
 abstract class TestProduct {
     protected TestProduct() {
     }
 
-    static Product createMapSourceProduct() {
-        final Integer width = 3600;
-        final Integer height = 1800;
-        final Product product = new Product("P", "T", width, height);
+    static Product createMapSourceProduct(Dimension size) {
+        final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"));
-        final Band classesBand = product.addBand("lccs_class", ProductData.TYPE_UINT8);
-        classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                             new Byte[]{10}, null));
-        final Band processedFlag = product.addBand("processed_flag", ProductData.TYPE_INT8);
-        processedFlag.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                               new Byte[]{1}, null));
-        final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_INT8);
-        currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                                   new Byte[]{1}, null));
-        final Band observationBand = product.addBand("observation_count", ProductData.TYPE_INT8);
-        observationBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                                 new Float[]{10f}, null));
-        final Band algoConfidBand = product.addBand("algorithmic_confidence_level", ProductData.TYPE_FLOAT32);
-        algoConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                                new Float[]{10f}, null));
-        final Band overallConfidBand = product.addBand("overall_confidence_level", ProductData.TYPE_INT8);
-        overallConfidBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                                   new Float[]{10f}, null));
+        product.addBand("lccs_class", "X", ProductData.TYPE_UINT8);
+        product.addBand("processed_flag", "Y", ProductData.TYPE_INT8);
+        product.addBand("current_pixel_state", "X * Y", ProductData.TYPE_INT8);
+        product.addBand("observation_count", "10", ProductData.TYPE_INT8);
+        product.addBand("algorithmic_confidence_level", "10", ProductData.TYPE_FLOAT32);
+        product.addBand("overall_confidence_level", "10", ProductData.TYPE_INT8);
         try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height, -179.95, 89.95, 0.1, 0.1));
         } catch (FactoryException | TransformException e) {
             // should not come here, creation og GC should work
             e.printStackTrace();
@@ -64,19 +49,13 @@ abstract class TestProduct {
         return product;
     }
 
-    static Product createConditionSourceProduct() {
-        final Integer width = 3600;
-        final Integer height = 1800;
-        final Product product = new Product("P", "T", width, height);
+    static Product createConditionSourceProduct(Dimension size) {
+        final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20000108-v2.0.nc"));
-        final Band classesBand = product.addBand("snow_occ", ProductData.TYPE_UINT8);
-        classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                             new Byte[]{10}, null));
-        final Band processedFlag = product.addBand("snow_nYearObs", ProductData.TYPE_INT8);
-        processedFlag.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
-                                                               new Byte[]{1}, null));
+        product.addBand("snow_occ", "X", ProductData.TYPE_UINT8);
+        product.addBand("snow_nYearObs", "Y", ProductData.TYPE_INT8);
         try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height, -179.95, 89.95, 0.1, 0.1));
         } catch (FactoryException | TransformException e) {
             // should not come here, creation og GC should work
             e.printStackTrace();
