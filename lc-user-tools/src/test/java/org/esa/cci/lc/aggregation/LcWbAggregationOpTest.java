@@ -12,6 +12,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;

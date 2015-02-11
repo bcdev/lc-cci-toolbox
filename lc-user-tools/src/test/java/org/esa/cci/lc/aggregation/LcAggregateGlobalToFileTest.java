@@ -3,20 +3,22 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.util.ProductUtils;
+import org.esa.cci.lc.io.LCCfNetCdfReaderPlugIn;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
-import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -68,121 +70,81 @@ public class LcAggregateGlobalToFileTest {
     }
 
     @Test
-    public void testMap_Gaussian_WithSubset_CentralAmerica() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.CENTRAL_AMERICA);
+    public void testMap_Gaussian() throws IOException {
+        executeOpOnGrid(createMapAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
     }
 
     @Test
-    public void testMap_Gaussian_WithSubset_Australia() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
-    }
-
-    @Test(expected = OperatorException.class)
-    public void testMap_Gaussian_WithSubset_Europe() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
-    }
-
-    @Test(expected = OperatorException.class)
-    public void testMap_Gaussian_WithSubset_Africa() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AFRICA);
+    public void testMap_WGS84() throws IOException {
+        executeOpOnGrid(createMapAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON);
     }
 
     @Test
-    public void testMap_WGS84_WithSubset_CentralAmerica() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.CENTRAL_AMERICA);
+    public void testCond_Gaussian() throws IOException {
+        executeOpOnGrid(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
     }
 
     @Test
-    public void testMap_WGS84_WithSubset_Australia() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
+    public void testCond_WGS84() throws IOException {
+        executeOpOnGrid(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON);
     }
 
-    @Test
-    public void testMap_WGS84_WithSubset_Europe() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
-    }
-
-    @Test
-    public void testMap_WGS84_WithSubset_Africa() throws IOException {
-        exuteOpOnGridAndRegion(createMapAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AFRICA);
-    }
-
-    @Test
-    public void testCond_Gaussian_WithSubset_CentralAmerica() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.CENTRAL_AMERICA);
-    }
-
-    @Test
-    public void testCond_Gaussian_WithSubset_Australia() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
-    }
-
-    @Test(expected = OperatorException.class)
-    public void testCond_Gaussian_WithSubset_Europe() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
-    }
-
-    @Test(expected = OperatorException.class)
-    public void testCond_Gaussian_WithSubset_Africa() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.REGULAR_GAUSSIAN_GRID, PredefinedRegion.AFRICA);
-    }
-
-    @Test
-    public void testCond_WGS84_WithSubset_CentralAmerica() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.CENTRAL_AMERICA);
-    }
-
-    @Test
-    public void testCond_WGS84_WithSubset_Australia() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AUSTRALIA_AND_NEW_ZEALAND);
-    }
-
-    @Test
-    public void testCond_WGS84_WithSubset_Europe() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.WESTERN_EUROPE_AND_MEDITERRANEAN);
-    }
-
-    @Test
-    public void testCond_WGS84_WithSubset_Africa() throws IOException {
-        exuteOpOnGridAndRegion(createCondAggrOp(), PlanetaryGridName.GEOGRAPHIC_LAT_LON, PredefinedRegion.AFRICA);
-    }
-
-    private void exuteOpOnGridAndRegion(AbstractLcAggregationOp aggrOp, PlanetaryGridName grid, PredefinedRegion region) throws IOException {
+    private void executeOpOnGrid(AbstractLcAggregationOp aggrOp, PlanetaryGridName grid) throws IOException {
         aggrOp.setGridName(grid);
         aggrOp.setNumRows(80);
-        aggrOp.setPredefinedRegion(region);
 
         aggrOp.initialize();
-        Product product = null;
+        checkProductWithStandardReader(tempOutputPath.toFile(), grid);
+        checkProductWithLcReader(tempOutputPath.toFile(), grid);
+    }
+
+    private void checkProductWithStandardReader(File file, PlanetaryGridName grid) throws IOException {
+        CfNetCdfReaderPlugIn plugIn = new CfNetCdfReaderPlugIn();
+        DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
+        assertEquals(DecodeQualification.SUITABLE, decodeQualification);
+        Product product = plugIn.createReaderInstance().readProductNodes(file, null);
         try {
-            File file = tempOutputPath.toFile();
-            product = readProduct(file);
             assertNotNull(product);
-//            debugOutput(grid, region, product);
+            GeoCoding geoCoding = product.getGeoCoding();
+            GeoPos ulgp = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
+            GeoPos urgp = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f, 0.5f), null);
+            if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(grid)) {
+                assertEquals(-180.0f, ulgp.lon, 1.0e-6f);
+                assertEquals(178.875f, urgp.lon, 1.0e-6f);
+            } else {
+                assertEquals(-178.875, ulgp.lon, 1.0e-6f);
+                assertEquals(178.875f, urgp.lon, 1.0e-6f);
+            }
         } finally {
-            aggrOp.dispose();
             if (product != null) {
                 product.dispose();
             }
         }
     }
 
-    private void debugOutput(PlanetaryGridName grid, PredefinedRegion region, Product product) {
-        GeoPos[] geoBoundary = ProductUtils.createGeoBoundary(product, 500);
-        System.out.println("region = " + region.name());
-        System.out.println("grid = " + grid.name());
-        System.out.print("\t");
-        for (GeoPos geoPos : geoBoundary) {
-            System.out.printf("{%.3f, %.3f}", geoPos.getLat(), geoPos.getLon());
-        }
-        System.out.println();
-    }
-
-    private Product readProduct(File file) throws IOException {
-        CfNetCdfReaderPlugIn plugIn = new CfNetCdfReaderPlugIn();
+    private void checkProductWithLcReader(File file, PlanetaryGridName grid) throws IOException {
+        CfNetCdfReaderPlugIn plugIn = new LCCfNetCdfReaderPlugIn();
         DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
-        assertEquals(DecodeQualification.SUITABLE, decodeQualification);
-        return plugIn.createReaderInstance().readProductNodes(file, null);
+        assertEquals(DecodeQualification.INTENDED, decodeQualification);
+        Product product = plugIn.createReaderInstance().readProductNodes(file, null);
+        try {
+            assertNotNull(product);
+            GeoCoding geoCoding = product.getGeoCoding();
+            GeoPos ulgp = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
+            GeoPos urgp = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f, 0.5f), null);
+            if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(grid)) {
+                // the actual NetCDF data is OK [0,360], but the NetCDF reader of BEAM shifts lon data to [-180,180]
+                assertEquals(0f, ulgp.lon, 1.0e-6f);
+                assertEquals(358.875f, urgp.lon, 1.0e-6f);
+            } else {
+                assertEquals(-178.875f, ulgp.lon, 1.0e-6f);
+                assertEquals(178.875f, urgp.lon, 1.0e-6f);
+            }
+        } finally {
+            if (product != null) {
+                product.dispose();
+            }
+        }
     }
 
     private LcCondAggregationOp createCondAggrOp() throws IOException {
@@ -192,7 +154,7 @@ public class LcAggregateGlobalToFileTest {
         aggregationOp.setOutputFile(tempOutputPath.toAbsolutePath().toString());
         aggregationOp.setOutputFormat(null);
         aggregationOp.outputTargetProduct = false;
-        aggregationOp.setSourceProduct(TestProduct.createConditionSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createConditionSourceProduct(new Dimension(360, 180)));
         return aggregationOp;
     }
 
@@ -203,7 +165,7 @@ public class LcAggregateGlobalToFileTest {
         aggregationOp.setOutputFile(tempOutputPath.toAbsolutePath().toString());
         aggregationOp.setOutputFormat(null);
         aggregationOp.outputTargetProduct = false;
-        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(360, 180)));
         return aggregationOp;
     }
 

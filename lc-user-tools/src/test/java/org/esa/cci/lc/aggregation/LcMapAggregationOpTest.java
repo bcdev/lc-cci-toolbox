@@ -7,12 +7,14 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -49,7 +51,7 @@ public class LcMapAggregationOpTest {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(3600, 1800)));
         int numMajorityClasses = 2;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
         aggregationOp.setNumRows(4);
@@ -73,7 +75,7 @@ public class LcMapAggregationOpTest {
     @Test
     public void testRegionWithGaussianGrid() throws Exception {
         LcMapAggregationOp aggrOp = createAggrOp();
-        aggrOp.setSourceProduct(TestProduct.createMapSourceProduct());
+        aggrOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(3600, 1800)));
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
         aggrOp.setNumRows(80);
         aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
@@ -86,7 +88,7 @@ public class LcMapAggregationOpTest {
         // preparation
         LcMapAggregationOp aggregationOp = createAggrOp();
         aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
-        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct());
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(3600, 1800)));
         aggregationOp.setOutputLCCSClasses(false);
         int numMajorityClasses = 0;
         aggregationOp.setNumMajorityClasses(numMajorityClasses);
