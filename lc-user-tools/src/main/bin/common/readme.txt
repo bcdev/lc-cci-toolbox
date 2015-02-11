@@ -13,6 +13,9 @@ General Note
 ~~~~~~~~~~~~
 The target files are always written in NetCDF-4 (enhanced model) file format.
 If the NetCDF-4 Classic file format is needed the standard nccopy tool can be used for conversion.
+When the REGULAR_GAUSSIAN_GRID is chosen as target grid and a regional subset which crosses the
+prime meridian is also defined the the aggregation or the subsetting process will not work. This affects
+the predefined regions WESTERN_EUROPE_AND_MEDITERRANEAN and AFRICA.
 
 
 Installation
@@ -55,11 +58,6 @@ Use the scripts in the same manner.
       CCI-LC Condition Products
       ~~~~~~~~~~~~~~~~~~~~~~~~~
         aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
-
-        Note:
-        When the REGULAR_GAUSSIAN_GRID is chosen as target grid and a regional subset which crosses the
-        prime meridian is also defined the processing will not work. This affects the predefined regions
-        WESTERN_EUROPE_AND_MEDITERRANEAN and AFRICA.
 
         Parameter Description:
             -PgridName=<name>
@@ -167,11 +165,13 @@ Use the scripts in the same manner.
         -Pnorth=<degree>
             Specifies north bound of the regional subset.
         -Peast=<degree>
-            Specifies east bound of the regional subset.
+            Specifies east bound of the regional subset. If the grid of the source product is REGULAR_GAUSSIAN_GRID
+            coordinates the values must be between 0 and 360.
         -Psouth=<degree>
             Specifies south bound of the regional subset.
         -Pwest=<degree>
-            Specifies west bound of the regional subset.
+            Specifies west bound of the regional subset. If the grid of the source product is REGULAR_GAUSSIAN_GRID
+            coordinates the values must be between 0 and 360.
         -PtargetDir=<dirPath>
             Specifies the directory where the target will be written. It is written as NetCDF-4 file.
             If already a file with the same name/path exists, it will be overwritten.
