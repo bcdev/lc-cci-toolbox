@@ -1,3 +1,4 @@
 org.esa.cci.lc.io.LcMapTiffReaderPlugin
 org.esa.cci.lc.io.LcWbTiffReaderPlugin
 org.esa.cci.lc.io.LcConditionTiffReaderPlugin
+org.esa.cci.lc.io.LCCfNetCdfReaderPlugIn
