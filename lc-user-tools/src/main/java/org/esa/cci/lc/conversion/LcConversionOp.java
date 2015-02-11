@@ -32,7 +32,7 @@ import java.io.File;
         version = "1.2",
         internal = true,
         authors = "Martin Böttcher, Marco Peters",
-        copyright = "(c) 2013 by Brockmann Consult",
+        copyright = "(c) 2015 by Brockmann Consult",
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names")
 public class LcConversionOp extends Operator implements Output {
 
