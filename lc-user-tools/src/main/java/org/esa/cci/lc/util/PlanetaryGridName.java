@@ -1,9 +1,9 @@
-package org.esa.cci.lc.aggregation;
+package org.esa.cci.lc.util;
 
 /**
  * @author Marco Peters
  */
-enum PlanetaryGridName {
+public enum PlanetaryGridName {
     REGULAR_GAUSSIAN_GRID,
     //    REDUCED_GAUSSIAN_GRID,
     GEOGRAPHIC_LAT_LON,

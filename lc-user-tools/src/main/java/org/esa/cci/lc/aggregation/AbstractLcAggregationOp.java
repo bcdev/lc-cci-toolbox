@@ -11,6 +11,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.LcHelper;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 

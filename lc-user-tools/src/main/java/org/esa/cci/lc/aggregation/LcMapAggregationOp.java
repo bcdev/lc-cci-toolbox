@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapTiffReader;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;

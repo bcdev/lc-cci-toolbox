@@ -12,11 +12,10 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
-import org.esa.cci.lc.io.LcWbTiffReader;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
