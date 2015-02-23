@@ -129,10 +129,10 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
     @Override
     public void initTemporal(BinContext ctx, WritableVector vector) {
         vector.set(0, Float.POSITIVE_INFINITY);  // status
-        vector.set(1, -1.0f);  // numStatusObs
+        vector.set(1, 0.0f);  // numStatusObs
         vector.set(2, 0.0f);  // numObs
         for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
-            vector.set(i, -1.0f);
+            vector.set(i, Float.NaN);
         }
     }
 
@@ -144,23 +144,46 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
         final float aggregatedStatus = temporalVector.get(0);
         final int numStatusObs = numObsOf(status, spatialVector);
         final int numObs = numObsOf(spatialVector);
-        // we found a better status and start aggregating again
-        if (status > 0.0f && status < aggregatedStatus) {
-            temporalVector.set(0, status);
-            temporalVector.set(1, numStatusObs);
-            temporalVector.set(2, temporalVector.get(2) + numObs);
-            for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
-                temporalVector.set(i, spatialVector.get(i+SR_OFFSET) * numStatusObs);
-            }
-            LOGGER.info("aggregateTemporal 0 " + temporalVector.get(1) + " status=" + (int)status);
         // same status as before, aggregating
-        } else if (status == aggregatedStatus) {
+        if (status == aggregatedStatus) {
             temporalVector.set(1, temporalVector.get(1) + numStatusObs);
             temporalVector.set(2, temporalVector.get(2) + numObs);
             for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
                 temporalVector.set(i, temporalVector.get(i) + spatialVector.get(i+SR_OFFSET) * numStatusObs);
             }
-            LOGGER.info("aggregateSpatial n " + temporalVector.get(1) + " status=" + (int)status);
+            //LOGGER.info("aggregateSpatial n " + temporalVector.get(1) + " status=" + (int)status);
+        }
+        else if (status > 0.0f) {
+            // we found a better status and start aggregating again
+            if (status < aggregatedStatus) {
+                temporalVector.set(0, status);
+                temporalVector.set(1, numStatusObs);
+                for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
+                    temporalVector.set(i, spatialVector.get(i+SR_OFFSET) * numStatusObs);
+                }
+                //LOGGER.info("aggregateTemporal 0 " + temporalVector.get(1) + " status=" + (int)status);
+            }
+            temporalVector.set(2, temporalVector.get(2) + numObs);
+        }
+    }
+
+    @Override
+    public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
+        int numStatusObs = (int)temporalVector.get(1);
+        if (numStatusObs != 0) {
+            for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
+                temporalVector.set(i, temporalVector.get(i) / numStatusObs);
+            }
+        }
+        if (Float.isInfinite(temporalVector.get(0))) {
+            temporalVector.set(0, 0.0f);
+        }
+    }
+
+    @Override
+    public void computeOutput(Vector temporalVector, WritableVector outputVector) {
+        for (int i = 0; i < SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
+            outputVector.set(i, temporalVector.get(i));
         }
     }
 
@@ -182,25 +205,6 @@ public class AggregatorLcSeasonalComposite extends AbstractAggregator {
 
     private static int numObsOf(Vector spatialVector) {
         return (int)spatialVector.get(1) + (int)spatialVector.get(2) + (int)spatialVector.get(3) + (int)spatialVector.get(4) + (int)spatialVector.get(5);
-    }
-
-    @Override
-    public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
-        int numStatusObs = (int)temporalVector.get(1);
-        for (int i=3; i<SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
-            temporalVector.set(i, temporalVector.get(i) / numStatusObs);
-        }
-    }
-
-    @Override
-    public void computeOutput(Vector temporalVector, WritableVector outputVector) {
-        for (int i = 0; i < SEASONAL_COMPOSITE_VARIABLES.length; ++i) {
-            float value = temporalVector.get(i);
-            if (Float.isInfinite(value)) {
-                value = Float.NaN;
-            }
-            outputVector.set(i, value);
-        }
     }
 
     @Override

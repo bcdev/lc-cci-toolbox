@@ -24,6 +24,7 @@ import org.junit.Test;
 import static java.lang.Float.NaN;
 import static org.esa.cci.lc.l3.AggregatorTestUtils.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AggregatorLcSeasonalCompositeTest {
 
@@ -108,10 +109,10 @@ public class AggregatorLcSeasonalCompositeTest {
 
         agg.initTemporal(ctx, tvec);
         assertEquals(Float.POSITIVE_INFINITY, tvec.get(0), 0.0f);
-        assertEquals(-1.0f, tvec.get(1), 0.0f);
+        assertEquals(0.0f, tvec.get(1), 0.0f);
         assertEquals(0.0f, tvec.get(2), 0.0f);
-        assertEquals(-1.0f, tvec.get(3), 0.0f);
-        assertEquals(-1.0f, tvec.get(4), 0.0f);
+        assertTrue(Float.isNaN(tvec.get(3)));
+        assertTrue(Float.isNaN(tvec.get(4)));
 
         agg.aggregateTemporal(ctx, svec, 99, tvec);
         assertEquals(3.0f, tvec.get(0), 0.0f);
