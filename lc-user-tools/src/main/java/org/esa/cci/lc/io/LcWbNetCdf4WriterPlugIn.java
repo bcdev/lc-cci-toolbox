@@ -124,8 +124,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
     public ProfilePartWriter createBandPartWriter() {
         return new BeamBandPart() {
             private static final String WB_CLASS_BAND_NAME = "wb_class";
-            private static final String WS_OBSERVATION_COUNT_BAND_NAME = "observation_count_ws";
-            private static final String GM_OBSERVATION_COUNT_BAND_NAME = "observation_count_gm";
+            private static final String WS_OBSERVATION_COUNT_BAND_NAME = "ws_observation_count";
+            private static final String GM_OBSERVATION_COUNT_BAND_NAME = "gm_observation_count";
 
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
@@ -135,9 +135,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 for (Band band : p.getBands()) {
                     if (WB_CLASS_BAND_NAME.equals(band.getName())) {
                         addWbClassVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariableString);
-                    } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
-                        addObservationCountVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
-                    } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
+                    } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName()) ||
+                               GM_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
                         addObservationCountVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     }else {
                         // this branch is passed if an aggregated product is subsetted
