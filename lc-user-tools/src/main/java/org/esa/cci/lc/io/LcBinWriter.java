@@ -139,7 +139,8 @@ public class LcBinWriter implements BinWriter {
                                                   lcProperties.remove("latMin"),
                                                   lcProperties.remove("lonMin"),
                                                   lcProperties.remove("lonMax"),
-                                                  writeable);
+                                                  writeable,
+                                                  "University catholique de Louvain");
 
         // LC specific way of metadata provision
         for (Map.Entry<String, String> lcPropEntry : lcProperties.entrySet()) {

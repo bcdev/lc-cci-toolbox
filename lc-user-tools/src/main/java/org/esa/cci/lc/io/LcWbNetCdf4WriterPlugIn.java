@@ -19,9 +19,6 @@ import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.util.StringUtils;
-import org.esa.cci.lc.aggregation.LCCS;
-import ucar.ma2.Array;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -102,7 +99,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                                       spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "Y",
                                                       startTime, endTime,
-                                                      version, latMax, latMin, lonMin, lonMax, writeable);
+                                                      version, latMax, latMin, lonMin, lonMax, writeable,
+                                                      "ESA 2014 - UCLouvain and Gamma-RS");
 
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());

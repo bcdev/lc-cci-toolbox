@@ -65,11 +65,12 @@ public class LcWriterUtils {
                                             String spatialResolutionDegrees, String spatialResolution,
                                             String temporalCoverageYears, String temporalResolution, String unit,
                                             String startTime, String endTime, String version,
-                                            String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable) throws IOException {
+                                            String latMax, String latMin, String lonMin, String lonMax, NFileWriteable writeable,
+                                            String creator) throws IOException {
         writeable.addGlobalAttribute("tracking_id", UUID.randomUUID().toString());
         writeable.addGlobalAttribute("product_version", version);
         writeable.addGlobalAttribute("date_created", COMPACT_ISO_FORMAT.format(new Date()));
-        writeable.addGlobalAttribute("creator_name", "University catholique de Louvain");
+        writeable.addGlobalAttribute("creator_name", creator);
         writeable.addGlobalAttribute("creator_url", "http://www.uclouvain.be/");
         writeable.addGlobalAttribute("creator_email", "landcover-cci@uclouvain.be");
         writeable.addGlobalAttribute("source", source);

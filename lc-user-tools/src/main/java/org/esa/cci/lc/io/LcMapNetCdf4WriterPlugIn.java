@@ -103,7 +103,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                                       spatialResolutionDegrees, spatialResolution,
                                                       temporalCoverageYears, temporalResolution, "Y",
                                                       startTime, endTime,
-                                                      version, latMax, latMin, lonMin, lonMax, writeable);
+                                                      version, latMax, latMin, lonMin, lonMax, writeable, "University catholique de Louvain");
 
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
