@@ -20,14 +20,21 @@ class PftLut {
     private final float[][] conversionFactors;
 
     public static PftLut load(Reader reader) throws IOException {
+        final LCCS lccs = LCCS.getInstance();
         BufferedReader bufReader = new BufferedReader(reader);
         String comment = readComment(bufReader);
         try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
             float[][] conversionFactors = new float[records.size()][pftNames.length];
-            for (int i = 0; i < records.size(); i++) {
+            for (int i = 0; i < records.size() && i < lccs.getClassValues().length; i++) {
                 String[] record = records.get(i);
+                if (! String.valueOf(lccs.getClassValue((short) i)).equals(record[0])) {
+                    final String format = String.format(
+                            "Error reading the PFT conversion table. In row %d the name %s of the LCCS class " +
+                            "should be %d.", i, record[0], lccs.getClassValue((short) i));
+                    throw new IOException(format);
+                }
                 if (record.length - 1 != pftNames.length) {
                     final String format = String.format(
                             "Error reading the PFT conversion table. In row %d the number of conversion factors " +
@@ -42,6 +49,12 @@ class PftLut {
                     }
                     conversionFactors[i][j - 1] = pftFactor;
                 }
+            }
+            if (records.size() != lccs.getClassValues().length) {
+                final String format = String.format(
+                        "Error reading the PFT conversion table. Number of rows %d does not match " +
+                        "LCCS class count %d.", records.size(), lccs.getClassValues().length);
+                throw new IOException(format);
             }
             return new PftLut(pftNames, conversionFactors, comment);
         }

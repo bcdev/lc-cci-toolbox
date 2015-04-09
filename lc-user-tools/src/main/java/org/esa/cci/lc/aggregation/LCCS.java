@@ -19,6 +19,7 @@ public class LCCS {
     classValue | description | flag meaning
      */
     private static final String CLASS_DEFINTIONS_FILE = "LCCS_class_defintions.csv";
+    private static LCCS singleton = null;
     private final short[] classValues;
     private final String[] classDescriptions;
     private final String[] flagMeanings;
@@ -27,11 +28,14 @@ public class LCCS {
     private final Map<Short, Short> indexToClassValueMap;
 
     public static LCCS getInstance() {
-        try {
-            return LCCS.load(new InputStreamReader(LcMapAggregator.class.getResourceAsStream(CLASS_DEFINTIONS_FILE)));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+        if (singleton == null) {
+            try {
+                singleton = LCCS.load(new InputStreamReader(LcMapAggregator.class.getResourceAsStream(CLASS_DEFINTIONS_FILE)));
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
+        return singleton;
     }
 
     LCCS(short[] classValues, String[] classDescriptions, String[] flagMeanings) {
