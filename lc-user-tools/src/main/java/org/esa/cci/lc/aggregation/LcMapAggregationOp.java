@@ -34,7 +34,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Map",
-        version = "3.7",
+        version = "3.8",
         authors = "Marco Peters",
         copyright = "(c) 2014 by Brockmann Consult",
         description = "Allows to aggregate LC map products.",

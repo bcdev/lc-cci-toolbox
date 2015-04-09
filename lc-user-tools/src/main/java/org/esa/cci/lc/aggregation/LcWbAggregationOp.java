@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.WB",
-        version = "3.7",
+        version = "3.8",
         authors = "Marco Peters, Martin Boettcher",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Allows to aggregate LC WB products.",

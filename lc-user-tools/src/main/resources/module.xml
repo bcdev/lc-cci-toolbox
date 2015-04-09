@@ -10,6 +10,9 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.8:
+    - variable metadata of WB NetCDF corrected, fill value NaN replaced by -1 for count bands
+    - checks added to ensure that cross walking tables contain the correct sequence and number of LCCS classes.
     Changes in 3.7:
     - removed the rules for the map products
     - updated readme.txt to explain the file format of cross walking table better
