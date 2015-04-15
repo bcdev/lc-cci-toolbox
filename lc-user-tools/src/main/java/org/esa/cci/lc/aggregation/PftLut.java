@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Marco Peters
  */
-class PftLut {
+public class PftLut {
 
     private static final String COMMENT_PREFIX = "#";
     private static final char[] SEPARATORS = new char[]{'|'};
@@ -20,13 +20,18 @@ class PftLut {
     private final float[][] conversionFactors;
 
     public static PftLut load(Reader reader) throws IOException {
+        return load(reader, true, false);
+    }
+
+    public static PftLut load(Reader reader, boolean applyScaling, boolean readAllColumns) throws IOException {
         final LCCS lccs = LCCS.getInstance();
         BufferedReader bufReader = new BufferedReader(reader);
         String comment = readComment(bufReader);
         try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
             List<String[]> records = csvReader.readStringRecords();
-            float[][] conversionFactors = new float[records.size()][pftNames.length];
+            int conversionFactorCount = pftNames.length + (readAllColumns ? 1 : 0);
+            float[][] conversionFactors = new float[records.size()][conversionFactorCount];
             for (int i = 0; i < records.size() && i < lccs.getClassValues().length; i++) {
                 String[] record = records.get(i);
                 if (! String.valueOf(lccs.getClassValue((short) i)).equals(record[0])) {
@@ -41,13 +46,19 @@ class PftLut {
                             "should be %d.", i, pftNames.length);
                     throw new IOException(format);
                 }
-                for (int j = 1; j < record.length; j++) {
+                int firstColumn = readAllColumns ? 0 : 1;
+                for (int j = firstColumn; j < record.length; j++) {
                     float pftFactor = Float.NaN;
                     String stringValue = record[j];
                     if (!stringValue.isEmpty()) {
-                        pftFactor = Float.parseFloat(stringValue) / 100.0f;
+                        if (applyScaling) {
+                            pftFactor = Float.parseFloat(stringValue) / 100.0f;
+                        } else {
+                            pftFactor = Float.parseFloat(stringValue);
+                        }
                     }
-                    conversionFactors[i][j - 1] = pftFactor;
+                    int conversionFactorIndex = readAllColumns ? j : j - 1;
+                    conversionFactors[i][conversionFactorIndex] = pftFactor;
                 }
             }
             if (records.size() != lccs.getClassValues().length) {

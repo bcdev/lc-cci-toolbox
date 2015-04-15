@@ -16,8 +16,7 @@
 
 package org.esa.cci.lc.conversion;
 
-import org.esa.beam.util.StringUtils;
-import org.esa.beam.util.io.CsvReader;
+import org.esa.cci.lc.aggregation.PftLut;
 
 import java.io.File;
 import java.io.FileReader;
@@ -69,18 +68,13 @@ public class RemapGraphCreator {
             GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
             try (Reader fr = new FileReader(lutFile)) {
-                CsvReader reader = new CsvReader(fr, new char[]{'|'});
-                String[] header = reader.readRecord();
-                if (header[0].startsWith("#")) {
-                    // if record starts with '#' it is a comment --> read next record
-                    header = reader.readRecord();
-                }
-                graphWriter.init(header);
+                PftLut lut = PftLut.load(fr, false, true);
+                graphWriter.init(lut.getPFTNames());
                 graphWriter.writeHeader();
 
-                String[] record;
-                while ((record = reader.readRecord()) != null) {
-                    graphWriter.extendExpression(SOURCE_BAND_NAME, record);
+                float[][] conversionFactors = lut.getConversionFactors();
+                for (float[] conversionFactorsRecord : conversionFactors) {
+                    graphWriter.extendExpression(SOURCE_BAND_NAME, conversionFactorsRecord);
                 }
 
                 graphWriter.finishExpressions();
@@ -154,14 +148,20 @@ public class RemapGraphCreator {
             targetBandSpecs = createTargetBandSpecs(header);
         }
 
-        void extendExpression(String sourceBand, String[] record) {
+        void extendExpression(String sourceBand, float[] record) {
             for (int i = 1; i < record.length; i++) {
-                if (StringUtils.isNullOrEmpty(record[i])) {
+                if (Float.isNaN(record[i])) {
                     continue;
                 }
                 TargetBandSpec targetBandSpec = targetBandSpecs.get(i);
-                targetBandSpec.expression += sourceBand + " == " + record[0] + " ? " + record[i] + " : ";
+                targetBandSpec.expression +=
+                        sourceBand + " == " + format(record[0]) + " ? " + format(record[i]) + " : ";
             }
+        }
+
+        private static String format(float value) {
+            int i = (int) value;
+            return value == i ? String.valueOf(i) : String.valueOf(value);
         }
 
         void finishExpressions() {
@@ -188,9 +188,9 @@ public class RemapGraphCreator {
         }
 
         private Map<Integer, TargetBandSpec> createTargetBandSpecs(String[] header) {
-            HashMap<Integer, TargetBandSpec> map = new HashMap<>();
-            for (int i = 1; i < header.length; i++) {
-                map.put(i, new TargetBandSpec(header[i]));
+            Map<Integer, TargetBandSpec> map = new HashMap<>();
+            for (int i = 0; i < header.length; i++) {
+                map.put(i + 1, new TargetBandSpec(header[i]));
             }
             return map;
         }
