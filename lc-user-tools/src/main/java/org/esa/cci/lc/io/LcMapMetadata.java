@@ -26,6 +26,7 @@ public class LcMapMetadata {
     private String mapType;
 
     public LcMapMetadata(Product sourceProduct) {
+        mapType = sourceProduct.getFileLocation() != null ? mapTypeOf(sourceProduct.getFileLocation().getName()) : "unknown";
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
         if (metadataRoot.containsElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME)) {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
