@@ -84,7 +84,7 @@ public class LcSubsetOp extends Operator implements Output {
 
         updateIdMetadataAttribute(id);
         final String formatName;
-        if (id.startsWith("ESACCI-LC-L4-LCCS-Map-")) {
+        if (id.startsWith("ESACCI-LC-L4-LCCS-Map-") || id.startsWith("ESACCI-LC-L4-LCCS-AlternativeMap")) {
             formatName = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
         } else if (id.startsWith("ESACCI-LC-L4-WB-Map-")) {
             formatName = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;

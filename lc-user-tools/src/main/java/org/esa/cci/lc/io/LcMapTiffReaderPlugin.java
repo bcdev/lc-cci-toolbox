@@ -49,7 +49,7 @@ public class LcMapTiffReaderPlugin implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
-        if (filename.matches(LcMapTiffReader.LC_CLASSIF_FILENAME_PATTERN)) {
+        if (filename.matches(LcMapTiffReader.LC_MAP_FILENAME_PATTERN) || filename.matches(LcMapTiffReader.LC_ALTERNATIVE_FILENAME_PATTERN)) {
             return DecodeQualification.INTENDED;
         } else {
             return DecodeQualification.UNABLE;

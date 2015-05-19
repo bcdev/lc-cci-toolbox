@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 public class LcMapMetadata {
 
     private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
+    private static final String LC_ALTERNATIVE_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-(....)-v(.*)_AlternativeMap.*";
+    private static final String LC_ALTERNATIVE_MAP_ID_PATTERN2 = "ESACCI-LC-L4-LCCS-AlternativeMap.*-(.*m)-P(.*)Y-(....)-v(.*)";
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
@@ -21,6 +23,7 @@ public class LcMapMetadata {
     private String version;
     private String spatialResolution;
     private String temporalResolution;
+    private String mapType;
 
     public LcMapMetadata(Product sourceProduct) {
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
@@ -28,7 +31,7 @@ public class LcMapMetadata {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
             type = globalAttributes.getAttributeString("type");
             id = globalAttributes.getAttributeString("id");
-            Matcher idMatcher = lcMapTypeMatcher(id);
+            Matcher idMatcher = lcMapIdMatcher(id);
 
             spatialResolution = idMatcher.group(1);
             temporalResolution = idMatcher.group(2);
@@ -48,13 +51,30 @@ public class LcMapMetadata {
         }
     }
 
-    static Matcher lcMapTypeMatcher(String id) {
-        Pattern p = Pattern.compile(LC_MAP_ID_PATTERN);
+    static Matcher lcMapIdMatcher(String id) {
+        final String regexp =
+                id.contains("_AlternativeMap") ? LC_ALTERNATIVE_MAP_ID_PATTERN :
+                id.contains("AlternativeMap") ? LC_ALTERNATIVE_MAP_ID_PATTERN2 : LC_MAP_ID_PATTERN;
+        Pattern p = Pattern.compile(regexp);
         final Matcher m = p.matcher(id);
         if (!m.matches()) {
-            throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_MAP_ID_PATTERN);
+            throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + regexp);
         }
         return m;
+    }
+
+    public static String mapTypeOf(String filename) {
+        String mapType;
+        if (filename.contains("MaxBiomass")) {
+            mapType = "AlternativeMapMaxBiomass";
+        } else if (filename.contains("MinBiomass")) {
+            mapType = "AlternativeMapMinBiomass";
+        } else if (filename.contains("AlternativeMap")) {
+            mapType = "AlternativeMap";
+        } else {
+            mapType = "Map";
+        }
+        return mapType;
     }
 
     public String getType() {
@@ -80,5 +100,7 @@ public class LcMapMetadata {
     public String getTemporalResolution() {
         return temporalResolution;
     }
+
+    public String getMapType() { return mapType; }
 
 }

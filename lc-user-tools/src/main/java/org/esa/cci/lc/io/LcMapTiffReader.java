@@ -44,13 +44,16 @@ import java.util.regex.Pattern;
  */
 public class LcMapTiffReader extends AbstractProductReader {
     // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2000-v1.1.tif
-    public static final String LC_CLASSIF_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)\\.(tiff?)";
+    public static final String LC_MAP_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)\\.(tiff?)";
+    public static final String LC_ALTERNATIVE_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)_AlternativeMap.*\\.(tiff?)";
     public static final String[] LC_VARIABLE_NAMES = {
             "lccs_class",
             "processed_flag",
             "current_pixel_state",
             "observation_count",
             "algorithmic_confidence_level",
+            "label_confidence_level",
+            "label_source" ,
             "overall_confidence_level"
     };
     private static final String[] LC_VARIABLE_DESCRIPTIONS = new String[]{
@@ -59,6 +62,8 @@ public class LcMapTiffReader extends AbstractProductReader {
             "LC pixel type mask",
             "number of valid observations",
             "LC map confidence level based on algorithm performance",
+            "Alternative label confidence level",
+            "Source of the alternative class",
             "LC map confidence level based on product validation"
     };
     private List<Product> bandProducts;
@@ -79,7 +84,8 @@ public class LcMapTiffReader extends AbstractProductReader {
         final File productDir = lcClassifLccsFile.getParentFile();
 
         final String lcClassifLccsFilename = lcClassifLccsFile.getName();
-        final Matcher m = lcClassifLccsFileMatcher(lcClassifLccsFilename);
+        final String mapType = mapTypeOf(lcClassifLccsFilename);
+        final Matcher m = lcClassifLccsFileMatcher(lcClassifLccsFilename, mapType);
         final String epoch = m.group(1);
         final String version = m.group(2);
         final String extension = m.group(3);
@@ -100,26 +106,47 @@ public class LcMapTiffReader extends AbstractProductReader {
         metadataRoot.setAttributeString("temporalResolution", "5");
 
         bandProducts.add(lcClassifLccsProduct);
-        Band band = addBand(0, lcClassifLccsProduct, result);
+        Band band = addBand(LC_VARIABLE_NAMES[0], lcClassifLccsProduct, result);
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
 
-        for (int i = 1; i <= 5; ++i) {
-            //String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map-qualityflag" + i + "-300m-P5Y-" + epoch + "-v" + version + "." + extension;
-            String lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
-            final Product lcFlagProduct = readProduct(productDir, lcFlagFilename, plugIn);
-            if (lcFlagProduct == null) {
-                continue;
+        if ("Map".equals(mapType)) {
+            for (int i = 1; i < 5; ++i) {
+                String lcFlagFilename;
+                lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
+                addInputToResult(productDir, lcFlagFilename, result, plugIn, LC_VARIABLE_NAMES[i], LC_VARIABLE_DESCRIPTIONS[i]);
             }
-            if (result.getSceneRasterWidth() != lcFlagProduct.getSceneRasterWidth() ||
-                result.getSceneRasterHeight() != lcFlagProduct.getSceneRasterHeight()) {
-                throw new IllegalArgumentException("dimensions of flag band " + i + " does not match map");
+        } else {
+            for (int i = 5; i < 7; ++i) {
+                String lcFlagFilename;
+                if ("AlternativeMap".equals(mapType)) {
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_QF" + (i-4) + "." + extension;
+                } else if ("AlternativeMapMaxBiomass".equals(mapType)) {
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_MaxBiomass_QF" + (i-4) + "." + extension;
+                } else if ("AlternativeMapMinBiomass".equals(mapType)) {
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_MinBiomass_QF" + (i-4) + "." + extension;
+                } else {
+                    throw new IllegalArgumentException("unknown map type " + mapType);
+                }
+                addInputToResult(productDir, lcFlagFilename, result, plugIn, LC_VARIABLE_NAMES[i], LC_VARIABLE_DESCRIPTIONS[i]);
             }
-            bandProducts.add(lcFlagProduct);
-            band = addBand(i, lcFlagProduct, result);
-            band.setDescription(LC_VARIABLE_DESCRIPTIONS[i]);
         }
 
         return result;
+    }
+
+    private void addInputToResult(File productDir, String lcFlagFilename, Product result, GeoTiffProductReaderPlugIn plugIn, String variableName, String variableDescription) throws IOException {
+        Band band;
+        final Product lcFlagProduct = readProduct(productDir, lcFlagFilename, plugIn);
+        if (lcFlagProduct == null) {
+            return;
+        }
+        if (result.getSceneRasterWidth() != lcFlagProduct.getSceneRasterWidth() ||
+            result.getSceneRasterHeight() != lcFlagProduct.getSceneRasterHeight()) {
+            throw new IllegalArgumentException("dimensions of " + lcFlagFilename + " does not match map");
+        }
+        bandProducts.add(lcFlagProduct);
+        band = addBand(variableName, lcFlagProduct, result);
+        band.setDescription(variableDescription);
     }
 
     @Override
@@ -141,13 +168,28 @@ public class LcMapTiffReader extends AbstractProductReader {
         }
     }
 
-    private static Matcher lcClassifLccsFileMatcher(String lcClassifLccsFilename) {
-        Pattern p = Pattern.compile(LC_CLASSIF_FILENAME_PATTERN);
+    private static Matcher lcClassifLccsFileMatcher(String lcClassifLccsFilename, String mapType) {
+        final String regexp = mapType.startsWith("AlternativeMap") ? LC_ALTERNATIVE_FILENAME_PATTERN : LC_MAP_FILENAME_PATTERN;
+        Pattern p = Pattern.compile(regexp);
         final Matcher m = p.matcher(lcClassifLccsFilename);
         if (!m.matches()) {
-            throw new IllegalArgumentException("input file name " + lcClassifLccsFilename + " does not match pattern " + LC_CLASSIF_FILENAME_PATTERN);
+            throw new IllegalArgumentException("input file name " + lcClassifLccsFilename + " does not match pattern " + regexp);
         }
         return m;
+    }
+
+    static String mapTypeOf(String filename) {
+        String mapType;
+        if (filename.contains("AlternativeMap_MaxBiomass")) {
+            mapType = "AlternativeMapMaxBiomass";
+        } else if (filename.contains("AlternativeMap_MinBiomass")) {
+            mapType = "AlternativeMapMinBiomass";
+        } else if (filename.contains("AlternativeMap")) {
+            mapType = "AlternativeMap";
+        } else {
+            mapType = "Map";
+        }
+        return mapType;
     }
 
     private static Product readProduct(File productDir, String lcFlagFilename, ProductReaderPlugIn plugIn)
@@ -160,9 +202,9 @@ public class LcMapTiffReader extends AbstractProductReader {
         return productReader1.readProductNodes(lcFlagFile, null);
     }
 
-    private static Band addBand(int i, Product lcFlagProduct, Product result) {
+    private static Band addBand(String variableName, Product lcFlagProduct, Product result) {
         final Band srcBand = lcFlagProduct.getBandAt(0);
-        final String bandName = LC_VARIABLE_NAMES[i];
+        final String bandName = variableName;
         final Band band = result.addBand(bandName, srcBand.getDataType());
         band.setNoDataValueUsed(false);
         band.setSourceImage(srcBand.getSourceImage());

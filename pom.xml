@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>5.0.3</version>
+                <version>5.0.5</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
@@ -57,7 +57,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>5.0.4</version>
+                <version>5.0.6</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
@@ -135,7 +135,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>2.10.3</version>
                 <configuration>
                     <excludePackageNames>*.internal;</excludePackageNames>
                     <quiet>true</quiet>

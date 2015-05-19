@@ -53,14 +53,14 @@ public class LcConversionOp extends Operator implements Output {
 
         File sourceFile = sourceProduct.getFileLocation();
 
-
         String typeString;
         String id;
         String outputFormat;
         if (sourceFile.getName().startsWith("ESACCI-LC-L4-LCCS-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
-            typeString = String.format("ESACCI-LC-L4-LCCS-Map-%s-P%sY",
+            typeString = String.format("ESACCI-LC-L4-LCCS-%s-%s-P%sY",
+                                       metadata.getMapType(),
                                        metadata.getSpatialResolution(),
                                        metadata.getTemporalResolution());
             id = String.format("%s-%s-v%s",

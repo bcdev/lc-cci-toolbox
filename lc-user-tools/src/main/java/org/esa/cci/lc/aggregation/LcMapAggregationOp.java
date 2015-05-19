@@ -13,6 +13,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
+import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -68,13 +69,15 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
     public void initialize() throws OperatorException {
         super.initialize();
         validateInputSettings();
-        final String planetaryGridClassName = getPlanetaryGridClassName();
 
-        HashMap<String, String> lcProperties = getLcProperties();
+        Product source = getSourceProduct();
+        final String planetaryGridClassName = getPlanetaryGridClassName();
+        final String mapType = source.getFileLocation() != null ? LcMapMetadata.mapTypeOf(source.getFileLocation().getName()) : "unknown";
+        final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
+        final HashMap<String, String> lcProperties = getLcProperties();
         addPFTTableToLcProperties(lcProperties);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGridClassName);
-        MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
 
         BinningOp binningOp;
@@ -84,13 +87,12 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        Product source = getSourceProduct();
         final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
             source = createSubset(source, regionEnvelope);
         }
 
-        String id = createTypeAndID(lcProperties);
+        String id = createTypeAndID(lcProperties, mapType);
         initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
         binningOp.setSourceProduct(source);
         binningOp.setOutputTargetProduct(outputTargetProduct);
@@ -101,11 +103,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         setTargetProduct(dummyTarget);
     }
 
-    private String createTypeAndID(HashMap<String, String> lcProperties) {
+    private String createTypeAndID(HashMap<String, String> lcProperties, String mapType) {
         String spatialResolutionNominal = lcProperties.get("spatialResolutionNominal");
         String temporalResolution = lcProperties.get("temporalResolution");
         String version = lcProperties.get("version");
-        String typeString = String.format("ESACCI-LC-L4-LCCS-Map-%s-P%sY", spatialResolutionNominal, temporalResolution);
+        String typeString = String.format("ESACCI-LC-L4-LCCS-%s-%s-P%sY", mapType, spatialResolutionNominal, temporalResolution);
         int startYear = Integer.parseInt(lcProperties.get("startTime").substring(0, 4));
         int endYear = Integer.parseInt(lcProperties.get("endTime").substring(0, 4));
         String epoch = String.valueOf((endYear + startYear) / 2);
@@ -151,6 +153,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
     private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {
 
         Product sourceProduct = getSourceProduct();
+        final String mapType = sourceProduct.getFileLocation() != null ? LcMapMetadata.mapTypeOf(sourceProduct.getFileLocation().getName()) : "unknown";
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         final double sourceMapResolutionX = 180.0 / sceneHeight;
@@ -165,7 +168,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                                                                                 areaCalculator);
         AggregatorConfig[] aggregatorConfigs;
         if (outputAccuracy) {
-            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig("algorithmic_confidence_level", "confidence");
+            final String accuracyVariable = "Map".equals(mapType) ? "algorithmic_confidence_level" : "label_confidence_level";
+            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence");
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcAccuracyAggregatorConfig};
         } else {
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig};
@@ -226,7 +230,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         if (numMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of majority classes exceeds number of LC classes.");
         }
-        final String[] lcVariableNames = Arrays.copyOf(LcMapTiffReader.LC_VARIABLE_NAMES, 5);
+        final String[] lcVariableNames = Arrays.copyOf(LcMapTiffReader.LC_VARIABLE_NAMES, 1);
         for (String variableName : lcVariableNames) {
             if (!getSourceProduct().containsBand(variableName)) {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));

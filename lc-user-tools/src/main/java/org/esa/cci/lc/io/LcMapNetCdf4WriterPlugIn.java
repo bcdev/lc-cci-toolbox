@@ -130,6 +130,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private static final String OBSERVATION_COUNT_BAND_NAME = "observation_count";
             private static final String ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME = "algorithmic_confidence_level";
             private static final String OVERALL_CONFIDENCE_LEVEL_BAND_NAME = "overall_confidence_level";
+            private static final String LABEL_CONFIDENCE_LEVEL_BAND_NAME = "label_confidence_level";
+            private static final String LABEL_SOURCE_BAND_NAME = "label_source";
 
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
@@ -149,6 +151,10 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         addAlgorithmicConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addOverallConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                    } else if (LABEL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
+                        addLabelConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                    } else if (LABEL_SOURCE_BAND_NAME.equals(band.getName())) {
+                        addLabelSourceVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
                         addGeneralVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
@@ -175,7 +181,9 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                        CURRENT_PIXEL_STATE_BAND_NAME.equals(bandName) ||
                        OBSERVATION_COUNT_BAND_NAME.equals(bandName) ||
                        ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
-                       OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName);
+                       OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
+                       LABEL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
+                       LABEL_SOURCE_BAND_NAME.equals(bandName);
             }
 
             private void addLccsClassVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
@@ -290,6 +298,42 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
                 } else {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
+            }
+
+            private void addLabelConfidenceLevelVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", "land_cover_lccs confidence");
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 100);
+                variable.addAttribute("scale_factor", 0.01f);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
+            }
+
+            private void addLabelSourceVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
+                final byte[] flagValues = new byte[]{0, 1, 2, 3};
+                final String flagMeanings = "invalid original_label first_alternative_label second_alternative_label";
+                final Array valids = Array.factory(flagValues);
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", "land_cover_lccs status_flag");
+                variable.addAttribute("flag_values", valids);
+                variable.addAttribute("flag_meanings", flagMeanings);
+                variable.addAttribute("valid_min", 1);
+                variable.addAttribute("valid_max", 3);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) 0);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
                 }
             }
 

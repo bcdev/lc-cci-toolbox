@@ -40,6 +40,8 @@ Use the scripts in the same manner.
 
         In case of a CCI-LC Map file the corresponding flag files must be in the same directory as the Map file.
         They are automatically detected and added to the output NetCDF-4 file.
+        For an alternative map the corresponding QF1 and QF2 files, as well as the qualityflag3 and qualityflag4 files
+        of the original Map must be in the same directory.
         If a condition product shall be converted the AggMean tif file must be provided as source. All the associated
         variables (AggMean, Std, Status and NYearObs) are considered and integrated into the output NetCDF-4 file if
         they reside in the same folder as the source tif file.
@@ -120,9 +122,9 @@ Use the scripts in the same manner.
                 output. This parameter can be omitted. The default is true.
 
         A real example might look like the following:
-        aggregation-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
-                           -PpredefinedRegion=AUSTRALIA_AND_NEW_ZEALAND
-                           -PtargetDir="/data/CCI-LC/output/" "/data/CCI-LC/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
+        aggregate-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
+                         -PpredefinedRegion=AUSTRALIA_AND_NEW_ZEALAND
+                         -PtargetDir="/data/CCI-LC/output/" "/data/CCI-LC/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
         The PFT (Plant Functional Type) conversion table
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
