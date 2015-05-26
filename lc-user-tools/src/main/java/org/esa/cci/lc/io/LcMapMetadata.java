@@ -13,7 +13,7 @@ public class LcMapMetadata {
 
     private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
     private static final String LC_ALTERNATIVE_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-(....)-v(.*)_AlternativeMap.*";
-    private static final String LC_ALTERNATIVE_MAP_ID_PATTERN2 = "ESACCI-LC-L4-LCCS-AlternativeMap.*-(.*m)-P(.*)Y-(....)-v(.*)";
+    private static final String LC_ALTERNATIVE_MAP_ID_PATTERN2 = "ESACCI-LC-L4-LCCS-AlternativeMap.*-(.*m)-P(.*)Y-.*(....)-v(.*)";
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
