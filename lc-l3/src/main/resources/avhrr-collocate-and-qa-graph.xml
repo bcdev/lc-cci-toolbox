@@ -1,0 +1,31 @@
+#set( $landmask = $parameters.getProperty("landmask") )
+#set( $filename = $inputPath.name )
+<graph id="g">
+    <version>1.0</version>
+
+    <header>
+      <target refid="qa" />
+      <source name="l1">${inputPath}</source>
+      <source name="land">hdfs://calvalus/calvalus/auxiliary/images/land_water_bitmask_geo_bc.nc</source>
+    </header>
+
+    <node id="collocate">
+        <operator>Collocate</operator>
+        <sources>
+            <masterProduct>l1</masterProduct>
+            <slaveProduct>land</slaveProduct>
+        </sources>
+        <parameters>
+          <renameMasterComponents>false</renameMasterComponents>
+          <renameSlaveComponents>false</renameSlaveComponents>
+          <targetProductName>${filename}</targetProductName>
+        </parameters>
+    </node>
+    <node id="qa">
+        <operator>lc.avhrr.qa</operator>
+        <sources>
+            <sourceProduct>collocate</sourceProduct>
+        </sources>
+    </node>
+
+</graph>
