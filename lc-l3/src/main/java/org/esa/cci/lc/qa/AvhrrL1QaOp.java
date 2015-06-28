@@ -1,6 +1,5 @@
 package org.esa.cci.lc.qa;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
@@ -11,7 +10,6 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -20,6 +18,8 @@ import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.util.BitSetter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class providing a QA for AVHRR L1b products
@@ -29,29 +29,64 @@ import java.io.IOException;
 @OperatorMetadata(alias = "lc.avhrr.qa")
 public class AvhrrL1QaOp extends Operator {
 
-    public static final String INVALID_EXPRESSION =
-            "counts_1 <= 0 or counts_2 <= 0 or counts_3 <= 0 or counts_4 <= 0 or counts_5 <= 0 or sun_zenith > 75";
+    public static final String NON_ZERO_TERM = "counts_1 > 0 and counts_2 > 0 and counts_3 > 0 and counts_4 > 0 and counts_5 > 0";
+    public static final String ACCEPTED_SZA_TERM = "sun_zenith <= 75";
+    public static final String LAND_TERM = "LAND==1";
+    public static final String WATER_TERM = "LAND==0";
+    public static final String VALID_LAND_TERM = NON_ZERO_TERM + " and " + ACCEPTED_SZA_TERM + " and " + LAND_TERM;
+    public static final String VALID_WATER_TERM = NON_ZERO_TERM + " and " + ACCEPTED_SZA_TERM + " and " + WATER_TERM;
+
     public static final String ZERO_EXPRESSION =
             "counts_1 <= 0 or counts_2 <= 0 or counts_3 <= 0 or counts_4 <= 0 or counts_5 <= 0";
     public static final String HIGH_SZA_EXPRESSION =
             "sun_zenith > 75";
+    public static final String INVALID_EXPRESSION =
+            ZERO_EXPRESSION + " or " + HIGH_SZA_EXPRESSION;
     public static final String NON_VEGETATED_LAND_EXPRESSION =
-            "counts_1 > 0 and counts_2 > 0 and counts_3 > 0 and counts_4 > 0 and counts_5 > 0" +
-            " and sun_zenith <= 75" +
+            VALID_LAND_TERM +
             " and albedo_1 > 0 and albedo_2 > 0" +
-            " and LAND==1" +
+            " and 1.438833 * 927 / log(1. + 0.000011910659 * pow(927,3) / radiance_4) > 270" + // no cloud at all
             " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) < -0.24";
     public static final String VEGETATED_OCEAN_EXPRESSION =
-            "counts_1 > 0 and counts_2 > 0 and counts_3 > 0 and counts_4 > 0 and counts_5 > 0" +
-            " and sun_zenith <= 75" +
+            VALID_WATER_TERM +
             " and albedo_1 > 0 and albedo_2 > 0" +
-            " and LAND==0" +
+            " and 1.438833 * 927 / log(1. + 0.000011910659 * pow(927,3) / radiance_4) > 270" + // no cloud at all
+            " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) >= 0.15";  // was 0.01 for MERIS
+    public static final String NON_VEGETATED_LAND_EXPRESSION2 =
+            VALID_LAND_TERM +
+            " and albedo_1 > 0 and albedo_2 > 0" +
+            " and albedo_1 / albedo_2 < 0.9" +  // no cloud over water
+            " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) < -0.24";
+    public static final String VEGETATED_OCEAN_EXPRESSION2 =
+            VALID_WATER_TERM +
+            " and albedo_1 > 0 and albedo_2 > 0" +
+            " and albedo_1 / albedo_2 > 1.1" + // no cloud over land
+            " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) >= 0.15";  // was 0.01 for MERIS
+    public static final String NON_VEGETATED_LAND_EXPRESSION3 =
+            VALID_LAND_TERM +
+            " and albedo_1 > 0 and albedo_2 > 0" +
+            " and albedo_1 / albedo_2 > 1.1" +  // no cloud over land
+            " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) < -0.24";
+    public static final String VEGETATED_OCEAN_EXPRESSION3 =
+            VALID_WATER_TERM +
+            " and albedo_1 > 0 and albedo_2 > 0" +
+            " and albedo_1 / albedo_2 < 0.9" + // no cloud over water
             " and (albedo_2 - albedo_1) / (albedo_2 + albedo_1) >= 0.15";  // was 0.01 for MERIS
     public static final String SMALL_COUNTS_EXPRESSION =
-            "counts_1 > 0 and counts_2 > 0 and counts_3 > 0 and counts_4 > 0 and counts_5 > 0" +
-            " and sun_zenith <= 75" +
-            " and LAND==1" +
+            VALID_LAND_TERM +
             " and (counts_2 < 40 or counts_1 < 50)";
+    public static final String RRCT_LAND_CLOUD_EXPRESSION =
+            VALID_LAND_TERM +
+            " and albedo_1 / albedo_2 <= 1.1";
+    public static final String RRCT_WATER_CLOUD_EXPRESSION =
+            VALID_WATER_TERM +
+            " and albedo_1 / albedo_2 >= 0.9";
+    public static final String TGCT_LAND_CLOUD_EXPRESSION =
+            VALID_LAND_TERM +
+            " and 1.438833 * 927 / log(1. + 0.000011910659 * pow(927,3) / radiance_4) <= 244";
+    public static final String TGCT_WATER_CLOUD_EXPRESSION =
+            VALID_WATER_TERM +
+            " and 1.438833 * 927 / log(1. + 0.000011910659 * pow(927,3) / radiance_4) <= 270";
     public static final int F_ZERO = 0;
     public static final int F_HIGHSZA = 1;
     public static final int F_COLOUR = 2;
@@ -60,6 +95,14 @@ public class AvhrrL1QaOp extends Operator {
     public static final int F_HSTRIPES = 5;
     public static final int F_VSTRIPES = 6;
     public static final int F_DUPLICATE = 7;
+    public static final int F_RRCTLAND = 8;
+    public static final int F_RRCTWATER = 9;
+    public static final int F_TGCTLAND = 10;
+    public static final int F_TGCTWATER = 11;
+    public static final int F_NONVEGLANDRRCTW = 12;
+    public static final int F_VEGWATERRRCTL = 13;
+    public static final int F_NONVEGLANDRRCTL = 14;
+    public static final int F_VEGWATERRRCTW = 15;
 
     @SourceProduct(alias = "l1b", description = "AVHRR L1b product with 'land' mask band")
     private Product sourceProduct;
@@ -95,18 +138,6 @@ public class AvhrrL1QaOp extends Operator {
         if (b == null) {
             throw new OperatorException("Input product does not contain specified L1 flag band. - product QA failed.");
         }
-        String nonVegetatedLandExpression;
-        String vegetatedOceanExpression;
-        String smallCountsExpression;
-        if ("land_water_fraction".equals(landFlagBandName)) {
-            nonVegetatedLandExpression = NON_VEGETATED_LAND_EXPRESSION.replaceAll("LAND==1", "land_water_fraction<50");
-            vegetatedOceanExpression = VEGETATED_OCEAN_EXPRESSION.replaceAll("LAND==0", "land_water_fraction>=50");
-            smallCountsExpression = SMALL_COUNTS_EXPRESSION.replaceAll("LAND==1", "land_water_fraction<50");
-        } else {
-            nonVegetatedLandExpression = NON_VEGETATED_LAND_EXPRESSION;
-            vegetatedOceanExpression = VEGETATED_OCEAN_EXPRESSION;
-            smallCountsExpression = SMALL_COUNTS_EXPRESSION;
-        }
 
         BandMathsOp invalidOp = BandMathsOp.createBooleanExpressionBand(INVALID_EXPRESSION, sourceProduct);
         final Product invalidProduct = invalidOp.getTargetProduct();
@@ -119,15 +150,15 @@ public class AvhrrL1QaOp extends Operator {
         }
         final RasterDataNode invalidRaster = invalidProduct.getRasterDataNode(invalidBand.getName());
 
-        final short[] qaFlagBuffer = new short[height * width];
+        final int[] qaFlagBuffer = new int[height * width];
         boolean isBad = false;
         String cause = "";
 
         // check for invalid pixels with zero radiance in some band
-        final int noOfZeroPixels = noOfMaskedPixels(sourceProduct, width, height, ZERO_EXPRESSION, qaFlagBuffer, (short) (1 << F_ZERO));
+        final int noOfZeroPixels = noOfMaskedPixels(sourceProduct, width, height, ZERO_EXPRESSION, qaFlagBuffer, 1 << F_ZERO);
 
         // check for invalid pixels with zero radiance in some band
-        final int noOfHighSzaPixels = noOfMaskedPixels(sourceProduct, width, height, HIGH_SZA_EXPRESSION, qaFlagBuffer, (short) (1 << F_HIGHSZA));
+        final int noOfHighSzaPixels = noOfMaskedPixels(sourceProduct, width, height, HIGH_SZA_EXPRESSION, qaFlagBuffer, 1 << F_HIGHSZA);
 
         // count invalid rows
         final int invalidDataRows = badDataRows(width, invalidRaster, 0, height);
@@ -139,7 +170,7 @@ public class AvhrrL1QaOp extends Operator {
         //}
 
         // check for horizontal stripes by gradient between segments of subsequent lines
-        final int noHorizontalStripePixels = noHorizontalStripePixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, (short) (1 << F_HSTRIPES));
+        final int noHorizontalStripePixels = noHorizontalStripePixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, 1 << F_HSTRIPES);
         final int firstHorizontalStripeDataRow = this.firstBadLine;
         if (noHorizontalStripePixels > stripesPixelThreshold) {
             isBad = true;
@@ -147,7 +178,7 @@ public class AvhrrL1QaOp extends Operator {
         }
 
         // check for duplicate lines by comparison between segments of subsequent lines
-        final int noDuplicateLinesPixels = noDuplicateLinesPixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, (short) (1 << F_DUPLICATE));
+        final int noDuplicateLinesPixels = noDuplicateLinesPixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, 1 << F_DUPLICATE);
         final int firstDuplicateLinesDataRow = this.firstBadLine;
         if (noDuplicateLinesPixels > stripesPixelThreshold) {
             isBad = true;
@@ -155,7 +186,7 @@ public class AvhrrL1QaOp extends Operator {
         }
 
         // check for geo-shift by counting non-vegetated land pixels
-        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, height, nonVegetatedLandExpression, qaFlagBuffer, (short) (1 << F_NONVEGLAND));
+        final int noOfNonVegetatedLandPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION, qaFlagBuffer, 1 << F_NONVEGLAND);
         final int firstNonVegetatedLandDataRow = this.firstBadLine;
         if (noOfNonVegetatedLandPixels > width * geoshiftLinesThreshold) {
             isBad = true;
@@ -163,15 +194,24 @@ public class AvhrrL1QaOp extends Operator {
         }
 
         // check for geo-shift by counting vegetated water pixels
-        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, height, vegetatedOceanExpression, qaFlagBuffer, (short) (1 << F_VEGWATER));
+        final int noOfVegetatedWaterPixels = noOfMaskedPixels(sourceProduct, width, height, VEGETATED_OCEAN_EXPRESSION, qaFlagBuffer, 1 << F_VEGWATER);
         final int firstVegetatedWaterDataRow = this.firstBadLine;
         if (noOfVegetatedWaterPixels > width * geoshiftLinesThreshold) {
             isBad = true;
             cause = "geocoding: " + noOfVegetatedWaterPixels  + " pixels vegetated water";
         }
 
+        final int noOfRrctLandPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTLAND);
+        final int noOfRrctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTWATER);
+        final int noOfTgctLandPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTLAND);
+        final int noOfTgctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTWATER);
+        final int noOfNonVegetatedLandRrctWPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION2, qaFlagBuffer, 1 << F_NONVEGLANDRRCTW);
+        final int noOfVegetatedWaterRrctLPixels = noOfMaskedPixels(sourceProduct, width, height, VEGETATED_OCEAN_EXPRESSION2, qaFlagBuffer, 1 << F_VEGWATERRRCTL);
+        final int noOfNonVegetatedLandRrctLPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION3, qaFlagBuffer, 1 << F_NONVEGLANDRRCTL);
+        final int noOfVegetatedWaterRrctWPixels = noOfMaskedPixels(sourceProduct, width, height, VEGETATED_OCEAN_EXPRESSION3, qaFlagBuffer, 1 << F_VEGWATERRRCTW);
+
         // check for wrong colours by counting valid pixels with zero radiance in some band
-        final int noOfSmallCountsPixels = noOfMaskedPixels(sourceProduct, width, height, smallCountsExpression, qaFlagBuffer, (short) (1 << F_COLOUR));
+        final int noOfSmallCountsPixels = noOfMaskedPixels(sourceProduct, width, height, SMALL_COUNTS_EXPRESSION, qaFlagBuffer, 1 << F_COLOUR);
         final int firstValidZeroDataRow = this.firstBadLine;
         if (noOfSmallCountsPixels > 3 * width) {
             isBad = true;
@@ -179,7 +219,7 @@ public class AvhrrL1QaOp extends Operator {
         }
 
         // check for vertical stripes by gradient between segments of adjacent columns
-        final int noVerticalStripePixels = noVerticalStripePixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, (short) (1 << F_VSTRIPES));
+        final int noVerticalStripePixels = noVerticalStripePixels(sourceProduct, invalidRaster, width, height, qaFlagBuffer, 1 << F_VSTRIPES);
         if (noVerticalStripePixels > stripesPixelThreshold) {
             isBad = true;
             cause = "stripes: " + noVerticalStripePixels + " vertical stripe pixels";
@@ -193,17 +233,20 @@ public class AvhrrL1QaOp extends Operator {
 
         final OperatorDescriptor descriptor = getSpi().getOperatorDescriptor();
         final String aliasName = descriptor.getAlias() != null ? descriptor.getAlias() : descriptor.getName();
-        final String legend = String.format("%s\t%s\t%s | \t%s\t%s\t%s\t%s | \t%s\t%s\t%s\t%s\t%s | \t%s\t%s",
+        final String legend = String.format("%s\t%s\t%s | \t%s\t%s\t%s\t%s | \t%s\t%s\t%s\t%s\t%s\t%s | \t%s\t%s\t%s | \t%s\t%s",
                                             "Name", "Lines", "QA",
                                             "InvalidLines", "ZeroPixels", "HighSzaPixels", "SmallValues",
-                                            "NonVegLand", "VegWater", "HStripes", "VStripes", "Duplicates",
+                                            "NonVegLand", "NonVegLCtW", "NonVegLCtL", "VegWater", "VegWCtL", "VegWCtW",
+                                            "HStripes", "VStripes", "Duplicates",
                                             //"FirstInvalidRow", "FirstZeroRadRow",
                                             //"FirstNonVegLandRow", "FirstVegWaterRow", "FirstHorizontalStripesRow",
                                             "Passed", "Cause");
-        final String qaRecord = String.format("%s\t%d\t%s | \t%d\t%d\t%d\t%d | \t%d\t%d\t%d\t%d\t%d | \t%b\t%s",
+        final String qaRecord = String.format("%s\t%d\t%s | \t%d\t%d\t%d\t%d | \t%d\t%d\t%d\t%d\t%d\t%d | \t%d\t%d\t%d | \t%b\t%s",
                                               sourceProduct.getName(), height, aliasName,
                                               invalidDataRows, noOfZeroPixels, noOfHighSzaPixels, noOfSmallCountsPixels,
-                                              noOfNonVegetatedLandPixels, noOfVegetatedWaterPixels, noHorizontalStripePixels, noVerticalStripePixels, noDuplicateLinesPixels,
+                                              noOfNonVegetatedLandPixels, noOfNonVegetatedLandRrctWPixels, noOfNonVegetatedLandRrctLPixels,
+                                              noOfVegetatedWaterPixels, noOfVegetatedWaterRrctLPixels, noOfVegetatedWaterRrctWPixels,
+                                              noHorizontalStripePixels, noVerticalStripePixels, noDuplicateLinesPixels,
                                               //firstInvalidDataRow, firstZeroDataRow,
                                               //firstNonVegetatedLandDataRow, firstVegetatedWaterDataRow, firstHorizontalStripeDataRow,
                                               !isBad, cause);
@@ -233,11 +276,23 @@ public class AvhrrL1QaOp extends Operator {
         flagCoding.addFlag("F_HSTRIPES", BitSetter.setFlag(0, F_HSTRIPES), "horizontal stripes (continuous count gradient)");
         flagCoding.addFlag("F_VSTRIPES", BitSetter.setFlag(0, F_VSTRIPES), "vertical stripes (continuous count gradient)");
         flagCoding.addFlag("F_DUPLICATE", BitSetter.setFlag(0, F_DUPLICATE), "duplicate line (continuous duplication of counts)");
+        flagCoding.addFlag("F_RRCTLAND", BitSetter.setFlag(0, F_RRCTLAND), "cloud over land");
+        flagCoding.addFlag("F_RRCTWATER", BitSetter.setFlag(0, F_RRCTWATER), "cloud over water");
+        flagCoding.addFlag("F_TGCTLAND", BitSetter.setFlag(0, F_TGCTLAND), "cloud over land");
+        flagCoding.addFlag("F_TGCTWATER", BitSetter.setFlag(0, F_TGCTWATER), "cloud over water");
+        flagCoding.addFlag("F_NONVEGLANDRRCTW", BitSetter.setFlag(0, F_NONVEGLANDRRCTW), "land, no water cloud, but NDVI < threshold (default -0.24)");
+        flagCoding.addFlag("F_VEGWATERRRCTL", BitSetter.setFlag(0, F_VEGWATERRRCTL), "water, no land cloud, but NDVI > threshold (default 0.15)");
+        flagCoding.addFlag("F_NONVEGLANDRRCTL", BitSetter.setFlag(0, F_NONVEGLANDRRCTL), "land, no land cloud, but NDVI < threshold (default -0.24)");
+        flagCoding.addFlag("F_VEGWATERRRCTW", BitSetter.setFlag(0, F_VEGWATERRRCTW), "water, no water cloud, but NDVI > threshold (default 0.15)");
         return flagCoding;
     }
 
-    private int noOfMaskedPixels(Product product, int width, int height, String bandMathExpression, short[] qaFlagBuffer, short flagBit) throws OperatorException {
+    private int noOfMaskedPixels(Product product, int width, int height, String bandMathExpression, int[] qaFlagBuffer, int flagBit) throws OperatorException {
         try {
+            if ("land_water_fraction".equals(landFlagBandName)) {
+                bandMathExpression = bandMathExpression.replaceAll(LAND_TERM, "land_water_fraction<50").
+                                                        replaceAll(WATER_TERM, "land_water_fraction>=50");
+            }
             BandMathsOp toBeCountedOp = BandMathsOp.createBooleanExpressionBand(bandMathExpression, product);
             Band toBeCountedBand = toBeCountedOp.getTargetProduct().getBandAt(0);
             int count = 0;
@@ -291,11 +346,10 @@ public class AvhrrL1QaOp extends Operator {
         return badDataRows;
     }
 
-    private int noVerticalStripePixels(Product product, RasterDataNode invalidRaster, int width, int height, short[] qaFlagBuffer, short flagBit) throws OperatorException {
+    private int noVerticalStripePixels(Product product, RasterDataNode invalidRaster, int width, int height, int[] qaFlagBuffer, int flagBit) throws OperatorException {
         try {
             int stripes = 0;
             int noBands = 0;
-            int[] counts = new int[width-1];  // counter of stripe length up to current line
             float[] gradients = new float[width-1];
             for (int x=0; x<width-1; ++x) {
                 gradients[x] = 0.0f;
@@ -307,6 +361,7 @@ public class AvhrrL1QaOp extends Operator {
                 if (! band.getDisplayName().startsWith("counts")) {
                     continue;
                 }
+                int[] counts = new int[width-1];  // counter of stripe length up to current line
                 ++noBands;
                 for (int y = 0; y < height; ++y) {
                     invalidRaster.getPixels(0, y, width, 1, flags);
@@ -322,6 +377,7 @@ public class AvhrrL1QaOp extends Operator {
                                         stripes += counts[x];
                                         for (int y1=y-counts[x]; y1<y; ++y1) {
                                             qaFlagBuffer[y1*width+x] |= flagBit;
+                                            qaFlagBuffer[y1*width+x+1] |= flagBit;
                                         }
                                     }
                                     counts[x] = 1;
@@ -335,6 +391,7 @@ public class AvhrrL1QaOp extends Operator {
                                         stripes += counts[x];
                                         for (int y1=y-counts[x]; y1<y; ++y1) {
                                             qaFlagBuffer[y1*width+x] |= flagBit;
+                                            qaFlagBuffer[y1*width+x+1] |= flagBit;
                                         }
                                     }
                                     counts[x] = 1;
@@ -345,6 +402,7 @@ public class AvhrrL1QaOp extends Operator {
                                     stripes += counts[x];
                                     for (int y1=y-counts[x]; y1<y; ++y1) {
                                         qaFlagBuffer[y1*width+x] |= flagBit;
+                                        qaFlagBuffer[y1*width+x+1] |= flagBit;
                                     }
                                 }
                                 gradients[x] = 0.0f;
@@ -355,6 +413,7 @@ public class AvhrrL1QaOp extends Operator {
                                 stripes += counts[x];
                                 for (int y1=y-counts[x]; y1<y; ++y1) {
                                     qaFlagBuffer[y1*width+x] |= flagBit;
+                                    qaFlagBuffer[y1*width+x+1] |= flagBit;
                                 }
                             }
                             gradients[x] = 0.0f;
@@ -367,6 +426,7 @@ public class AvhrrL1QaOp extends Operator {
                         stripes += counts[x];
                         for (int y1=height-counts[x]; y1<height; ++y1) {
                             qaFlagBuffer[y1*width+x] |= flagBit;
+                            qaFlagBuffer[y1*width+x+1] |= flagBit;
                         }
                     }
                 }
@@ -377,7 +437,7 @@ public class AvhrrL1QaOp extends Operator {
         }
     }
 
-    private int noHorizontalStripePixels(Product product, RasterDataNode invalidRaster, int width, int height, short[] qaFlagBuffer, short flagBit) {
+    private int noHorizontalStripePixels(Product product, RasterDataNode invalidRaster, int width, int height, int[] qaFlagBuffer, int flagBit) {
         try {
             int stripes = 0;
             int length = 0;
@@ -410,9 +470,10 @@ public class AvhrrL1QaOp extends Operator {
                                         stripes += length;
                                         for (int x1=x-length; x1<x; ++x1) {
                                             qaFlagBuffer[y*width+x1] |= flagBit;
+                                            qaFlagBuffer[(y-1)*width+x1] |= flagBit;
                                         }
-                                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                            this.firstBadLine = y;
+                                        if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                                            this.firstBadLine = y-1;
                                         }
                                     }
                                     length = 1;
@@ -426,9 +487,10 @@ public class AvhrrL1QaOp extends Operator {
                                         stripes += length;
                                         for (int x1=x-length; x1<x; ++x1) {
                                             qaFlagBuffer[y*width+x1] |= flagBit;
+                                            qaFlagBuffer[(y-1)*width+x1] |= flagBit;
                                         }
-                                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                            this.firstBadLine = y;
+                                        if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                                            this.firstBadLine = y-1;
                                         }
                                     }
                                     length = 1;
@@ -439,9 +501,10 @@ public class AvhrrL1QaOp extends Operator {
                                     stripes += length;
                                     for (int x1=x-length; x1<x; ++x1) {
                                         qaFlagBuffer[y*width+x1] |= flagBit;
+                                        qaFlagBuffer[(y-1)*width+x1] |= flagBit;
                                     }
-                                    if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                        this.firstBadLine = y;
+                                    if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                                        this.firstBadLine = y-1;
                                     }
                                 }
                                 gradient0 = 0.0f;
@@ -452,9 +515,10 @@ public class AvhrrL1QaOp extends Operator {
                                 stripes += length;
                                 for (int x1=x-length; x1<x; ++x1) {
                                     qaFlagBuffer[y*width+x1] |= flagBit;
+                                    qaFlagBuffer[(y-1)*width+x1] |= flagBit;
                                 }
-                                if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                    this.firstBadLine = y;
+                                if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                                    this.firstBadLine = y-1;
                                 }
                             }
                             gradient0 = 0.0f;
@@ -465,9 +529,10 @@ public class AvhrrL1QaOp extends Operator {
                         stripes += length;
                         for (int x1=width-length; x1<width; ++x1) {
                             qaFlagBuffer[y*width+x1] |= flagBit;
+                            qaFlagBuffer[(y-1)*width+x1] |= flagBit;
                         }
-                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                            this.firstBadLine = y;
+                        if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                            this.firstBadLine = y-1;
                         }
                     }
                     length = 0;
@@ -486,79 +551,87 @@ public class AvhrrL1QaOp extends Operator {
         }
     }
 
-    private int noDuplicateLinesPixels(Product product, RasterDataNode invalidRaster, int width, int height, short[] qaFlagBuffer, short flagBit) {
+    private int noDuplicateLinesPixels(Product product, RasterDataNode invalidRaster, int width, int height, int[] qaFlagBuffer, int flagBit) {
         try {
-            int stripes = 0;
-            int length = 0;
-            int noBands = 0;
-            this.firstBadLine = -1;
-            float[] radiances0 = new float[width];
-            float[] radiances = new float[width];
-            int[] flags0 = new int[width];
-            int[] flags = new int[width];
-            Band[] bands = product.getBands();
-            for (Band band : bands) {
-                if (! band.getDisplayName().startsWith("counts")) {
-                    continue;
-                }
-                ++noBands;
-                invalidRaster.getPixels(0, 0, width, 1, flags0);
-                band.readPixels(0, 0, width, 1, radiances0);
-                for (int y = 1; y < height; ++y) {
-                    invalidRaster.getPixels(0, y, width, 1, flags);
-                    band.readPixels(0, y, width, 1, radiances);
-                    for (int x=0; x<width-1; ++x) {
-                        if (flags[x] == 0 && flags0[x] == 0) {
-                            if (radiances[x] == radiances0[x]) {
-                                ++length;
-                            } else {
-                                if (length >= stripeMinLength) {
-                                    stripes += length;
-                                    for (int x1=x-length; x1<x; ++x1) {
-                                        qaFlagBuffer[y*width+x1] |= flagBit;
-                                    }
-                                    if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                        this.firstBadLine = y;
-                                    }
-                                }
-                                length = 0;
-                            }
-                        } else {
-                            if (length >= stripeMinLength) {
-                                stripes += length;
-                                    for (int x1=x-length; x1<x; ++x1) {
-                                        qaFlagBuffer[y*width+x1] |= flagBit;
-                                    }
-                                if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                                    this.firstBadLine = y;
-                                }
-                            }
-                            length = 0;
-                        }
-                    }
-                    if (length >= stripeMinLength) {
-                        stripes += length;
-                        for (int x1=width-length; x1<width; ++x1) {
-                            qaFlagBuffer[y*width+x1] |= flagBit;
-                        }
-                        if (this.firstBadLine == -1 || y < this.firstBadLine) {
-                            this.firstBadLine = y;
-                        }
-                    }
-                    length = 0;
-                    // switch lines
-                    final int[] flags1 = flags0;
-                    flags0 = flags;
-                    flags = flags1;
-                    final float[] radiances1 = radiances0;
-                    radiances0 = radiances;
-                    radiances = radiances1;
+            final List<Band> bands = new ArrayList<Band>(5);
+            for (Band band : product.getBands()) {
+                if (band.getDisplayName().startsWith("counts")) {
+                    bands.add(band);
                 }
             }
-            return stripes / noBands;
+            final int numBands = bands.size();
+
+            int stripes = 0;
+            int length = 0;
+            this.firstBadLine = -1;
+            float[][] radiances0 = new float[numBands][width];
+            float[][] radiances = new float[numBands][width];
+            int[] flags0 = new int[width];
+            int[] flags = new int[width];
+            // initialise with first line data
+            invalidRaster.getPixels(0, 0, width, 1, flags0);
+            for (int b = 0; b < numBands; ++b) {
+                bands.get(b).readPixels(0, 0, width, 1, radiances0[b]);
+            }
+            // line loop
+            for (int y = 1; y < height; ++y) {
+                // read line for all count bands
+                invalidRaster.getPixels(0, y, width, 1, flags);
+                for (int b = 0; b < numBands; ++b) {
+                    bands.get(b).readPixels(0, y, width, 1, radiances[b]);
+                }
+                // pixel loop
+                for (int x=0; x<width-1; ++x) {
+                    // check flag and compare pixel with previous line pixel, all bands
+                    if (flags[x] == 0 && flags0[x] == 0 && isEqualSpectrum(radiances, radiances0, x)) {
+                        ++length;
+                    } else {
+                        if (length >= stripeMinLength) {
+                            stripes += length;
+                            for (int x1=x-length; x1<x; ++x1) {
+                                qaFlagBuffer[y*width+x1] |= flagBit;
+                                qaFlagBuffer[(y-1)*width+x1] |= flagBit;
+                            }
+                            if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                                this.firstBadLine = y-1;
+                            }
+                        }
+                        length = 0;
+                    }
+                }
+                // handle duplicates at end of line
+                if (length >= stripeMinLength) {
+                    stripes += length;
+                    for (int x1=width-length; x1<width; ++x1) {
+                        qaFlagBuffer[y*width+x1] |= flagBit;
+                        qaFlagBuffer[(y-1)*width+x1] |= flagBit;
+                    }
+                    if (this.firstBadLine == -1 || y-1 < this.firstBadLine) {
+                        this.firstBadLine = y-1;
+                    }
+                }
+                length = 0;
+                // switch lines
+                final int[] flags1 = flags0;
+                flags0 = flags;
+                flags = flags1;
+                final float[][] radiances1 = radiances0;
+                radiances0 = radiances;
+                radiances = radiances1;
+            }
+            return stripes;
         } catch (IOException e) {
             throw new OperatorException(e.getMessage(), e);
         }
+    }
+
+    private static boolean isEqualSpectrum(float[][] radiances, float[][] radiances0, int x) {
+        for (int b = 0; b < radiances.length; ++b) {
+            if (radiances[b][x] != radiances0[b][x]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static class Spi extends OperatorSpi {
