@@ -30,10 +30,8 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.BorderExtenderConstant;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 
@@ -42,14 +40,50 @@ import java.util.Map;
  * all bands of the target product at once.
  */
 @OperatorMetadata(alias = "AvhrrGeoToolOP",
-                  description = "Algorithm for image to image registration of AVHRR products",
-                  authors = "",
-                  version = "1.0",
-                  copyright = "(C) 2011 by Brockmann Consult GmbH (beam@brockmann-consult.de)")
-
+        description = "Algorithm for image to image registration of AVHRR products",
+        authors = "",
+        version = "1.0",
+        copyright = "(C) 2011 by Brockmann Consult GmbH (beam@brockmann-consult.de)")
 
 
 public class AvhrrGeoToolOperator extends Operator {
+
+    static final int frontValue = 1;
+    static final int windowOverlap = 50;
+    static final int standardHistogramBins = 32;
+    static final double thresholdSegmentationGoodness = 0.7;
+
+    static final int corrKernelRadius = 1;
+    static final int maxShiftRadius = 10;
+    static final int gaussFilterKernelRadius = 2;
+
+    private static final String ALBEDO_BASED = "ALBEDO_BASED";
+    private static final String EDGE_DETECTION = "EDGE_DETECTION";
+
+    static String targetCopySourceBandNameReference;
+    static String targetCopySourceBandNameRegistered;
+
+
+
+    static String sourceBandReferenceName = "albedo_2";
+    static String landWaterBandReferenceName = "land_water_fraction";
+    ;
+    static String cloudAlbedo1BandReferenceName = "albedo_1";
+    static String cloudAlbedo2BandReferenceName = "albedo_2";
+    static String cloudBT4BandReferenceName = "radiance_4";
+    static String panoramaEffectBandReferenceName = "X_Band";
+
+    static String sourceBand2RegisterName = "albedo_2";
+    static String landWaterBand2RegisterName = "land_water_fraction";
+    ;
+    static String cloudAlbedo1Band2RegisterName = "albedo_1";
+    static String cloudAlbedo2Band2RegisterName = "albedo_2";
+    static String cloudBT4Band2RegisterName = "radiance_4";
+    static String panoramaEffectBand2RegisterName = "X_Band";
+
+
+    private String productName;
+
 
     @Parameter(valueSet = {ALBEDO_BASED, EDGE_DETECTION},
             defaultValue = ALBEDO_BASED, description = "chip matching algorithm")
@@ -57,52 +91,13 @@ public class AvhrrGeoToolOperator extends Operator {
 
     @SourceProduct
     private Product sourceProductReference;
+
+    @SourceProduct
     private Product sourceProduct2Register;
 
-    @Parameter(rasterDataNodeType = Band.class)
-    private String sourceBandReferenceName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String sourceBand2RegisterName;
-
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String landWaterBandReferenceName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String landWaterBand2RegisterName;
-
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudAlbedo1BandReferenceName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudAlbedo2BandReferenceName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudBT4BandReferenceName;
-
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudAlbedo1Band2RegisterName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudAlbedo2Band2RegisterName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String cloudBT4Band2RegisterName;
-
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String panoramaEffectBandReferenceName;
-
-    @Parameter(rasterDataNodeType = Band.class)
-    private String panoramaEffectBand2RegisterName;
-
-
-    
     @TargetProduct
     private Product targetProduct;
+
 
     private Band sourceBandReference;
     private Band sourceBand2Register;
@@ -116,32 +111,10 @@ public class AvhrrGeoToolOperator extends Operator {
     private Band cloudAlbedo2Band2Register;
     private Band cloudBT4BandReference;
     private Band cloudBT4Band2Register;
-
     private Band targetCopySourceBandReference;
-    static String targetCopySourceBandNameReference;
-    private Band targetCopySourceBand2Register;
-    static String targetCopySourceBandName2Register;
-    private Band targetMaxCorr;
-    static String targetMaxCorrBandName;
-    private Band targetMaxCorrDir;
-    static String targetMaxCorrDirBandName;
-    private Band targetFlagBandReference;
-    static String targetFlagBandNameReference;
-    private Band targetFlagBand2Register;
-    static String targetFlagBandName2Register;
+    private Band targetCopySourceBandRegistered;
 
 
-
-    private static final String ALBEDO_BASED = "ALBEDO_BASED";
-    private static final String EDGE_DETECTION = "EDGE_DETECTION";
-
-    static int corrKernelRadius = 1;
-    static int maxKernelRadius = 10;
-    static  int gaussFilterKernelRadius = 2;
-    static final int frontValue = 1;
-    static final int windowOverlap = 50;
-    static final int standardHistogramBins = 32;
-    static final double thresholdSegmentationGoodness = 0.7;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -158,14 +131,16 @@ public class AvhrrGeoToolOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        // copyGeocodingForSmallerTarget(maxKernelRadius);
-        //copyGeocodingForSmallerTarget(maxKernelRadius);
+        productName = sourceProductReference.getName() + "_img2Img";
+
+        targetProduct = new Product(productName, "beam_geotool_BC",
+                sourceProductReference.getSceneRasterWidth(), sourceProductReference.getSceneRasterHeight());
+
+        ProductUtils.copyGeoCoding(sourceProductReference, targetProduct);
+
         targetCopySourceBandNameReference = sourceBandReferenceName + "_Reference";
-        targetCopySourceBandName2Register = sourceBand2RegisterName + "_2Register";;
-        targetMaxCorrBandName = "maximum_of _correlation_coefficient";
-        targetMaxCorrDirBandName = "maximum_of _correlation_coefficient_drift";
-        targetFlagBandNameReference = "Flag_Reference";
-        targetFlagBandName2Register = "Flag_2Register";;
+        targetCopySourceBandNameRegistered = sourceBand2RegisterName + "_Registered";
+
 
 
         sourceBandReference = sourceProductReference.getBand(sourceBandReferenceName);
@@ -187,18 +162,11 @@ public class AvhrrGeoToolOperator extends Operator {
         cloudBT4Band2Register = sourceProduct2Register.getBand(cloudBT4Band2RegisterName);
 
 
-
         targetCopySourceBandReference = targetProduct.addBand(targetCopySourceBandNameReference, ProductData.TYPE_FLOAT64);
         targetCopySourceBandReference.setUnit(sourceBandReference.getUnit());
-        targetCopySourceBand2Register = targetProduct.addBand(targetCopySourceBandName2Register, ProductData.TYPE_FLOAT64);
-        targetCopySourceBand2Register.setUnit(sourceBand2Register.getUnit());
-        targetMaxCorr = targetProduct.addBand(targetMaxCorrBandName, ProductData.TYPE_FLOAT64);
-        targetMaxCorrDir = targetProduct.addBand(targetMaxCorrDirBandName, ProductData.TYPE_FLOAT64);
-        targetFlagBandReference = targetProduct.addBand(targetFlagBandNameReference, ProductData.TYPE_FLOAT64);
-        targetFlagBand2Register = targetProduct.addBand(targetFlagBandName2Register, ProductData.TYPE_FLOAT64);
+        targetCopySourceBandRegistered = targetProduct.addBand(targetCopySourceBandNameRegistered, ProductData.TYPE_FLOAT64);
+        targetCopySourceBandRegistered.setUnit(sourceBand2Register.getUnit());
 
-        targetProduct = new Product("beam_geotool_avhrr", "org.esa.beam", sourceProductReference.getSceneRasterWidth(),
-                sourceProductReference.getSceneRasterHeight());
 
         targetProduct.setPreferredTileSize
                 (new Dimension(sourceBandReference.getSceneRasterWidth(), sourceBandReference.getSceneRasterHeight()));
@@ -206,13 +174,13 @@ public class AvhrrGeoToolOperator extends Operator {
 
     private Product copyGeocodingForSmallerTarget(int maxKernelRadius) {
         targetProduct = new Product("beam_geotool_BC",
-                                    "org.esa.beam",
+                "org.esa.beam",
                 sourceProductReference.getSceneRasterWidth() - 2 * maxKernelRadius,
                 sourceProductReference.getSceneRasterHeight() - 2 * maxKernelRadius);
         ProductSubsetDef def = new ProductSubsetDef();
         Product sourceSubsetProduct = null;
         def.setRegion(new Rectangle(maxKernelRadius,
-                                    maxKernelRadius,
+                maxKernelRadius,
                 sourceProductReference.getSceneRasterWidth() - maxKernelRadius,
                 sourceProductReference.getSceneRasterHeight() - maxKernelRadius));
         try {
@@ -228,41 +196,50 @@ public class AvhrrGeoToolOperator extends Operator {
         return targetProduct;
     }
 
-
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         Rectangle sourceRectangleRef = new Rectangle(targetRectangle);
-        Rectangle sourceRectangle2Reg = new Rectangle(targetRectangle);
-        sourceRectangle2Reg.grow(maxKernelRadius, maxKernelRadius);
-        sourceRectangle2Reg.translate(maxKernelRadius, maxKernelRadius);
+        Rectangle sourceRectangle2Reg = new Rectangle(0, 0, sourceBand2Register.getSceneRasterWidth(), sourceBand2Register.getSceneRasterHeight());
 
-        Tile sourceTileReference = getSourceTile(sourceBandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile sourceTile2Register = getSourceTile(sourceBand2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        System.out.printf("source rectangle reference width height:  %d  %d   \n",sourceRectangleRef.width, sourceRectangleRef.height);
+        System.out.printf("source rectangle 2register width height:  %d  %d   \n",sourceRectangle2Reg.width, sourceRectangle2Reg.height);
 
-        Tile landWaterTileReference = getSourceTile(landWaterBandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile landWaterTile2Register = getSourceTile(landWaterBand2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile sourceTileReference = getSourceTile(sourceBandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile sourceTile2Register = getSourceTile(sourceBand2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile panoramaEffectTileReference = getSourceTile(panoramaEffectBandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile panoramaEffectTile2Register = getSourceTile(panoramaEffectBand2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile landWaterTileReference = getSourceTile(landWaterBandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile landWaterTile2Register = getSourceTile(landWaterBand2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile cloudAlbedo1TileReference = getSourceTile(cloudAlbedo1BandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudAlbedo1Tile2Register = getSourceTile(cloudAlbedo1Band2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile panoramaEffectTileReference = getSourceTile(panoramaEffectBandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile panoramaEffectTile2Register = getSourceTile(panoramaEffectBand2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile cloudAlbedo2TileReference = getSourceTile(cloudAlbedo2BandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudAlbedo2Tile2Register = getSourceTile(cloudAlbedo2Band2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile cloudAlbedo1TileReference = getSourceTile(cloudAlbedo1BandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile cloudAlbedo1Tile2Register = getSourceTile(cloudAlbedo1Band2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile cloudBT4TileReference = getSourceTile(cloudBT4BandReference, sourceRectangleRef, new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudBT4Tile2Register = getSourceTile(cloudBT4Band2Register, sourceRectangle2Reg, new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile cloudAlbedo2TileReference = getSourceTile(cloudAlbedo2BandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile cloudAlbedo2Tile2Register = getSourceTile(cloudAlbedo2Band2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+
+        Tile cloudBT4TileReference = getSourceTile(cloudBT4BandReference, sourceRectangleRef,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile cloudBT4Tile2Register = getSourceTile(cloudBT4Band2Register, sourceRectangle2Reg,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
 
 
         Tile targetTileCopySourceBandReference = targetTiles.get(targetCopySourceBandReference);
-        Tile targetTileCopySourceBand2Register = targetTiles.get(targetCopySourceBand2Register);
-        Tile targetTileMaxCorr = targetTiles.get(targetMaxCorr);
-        Tile targetTileMaxCorrDir = targetTiles.get(targetMaxCorrDir);
+        Tile targetTileCopySourceBandRegistered = targetTiles.get(targetCopySourceBandRegistered);
 
-        Tile targetTileFlagBandReference = targetTiles.get(targetFlagBandReference);
-        Tile targetTileFlagBand2Register = targetTiles.get(targetFlagBand2Register);
+
 
 
         final double[] sourceDataReference = sourceTileReference.getSamplesDouble();
@@ -298,11 +275,13 @@ public class AvhrrGeoToolOperator extends Operator {
 
 
         PreparingOfSourceBandAVHRR preparedSourceBand2Reg = new PreparingOfSourceBandAVHRR();
-        preparedSourceBand2Reg.cloudDetectionOfSourceBand(
-                landWaterData2Register,
+        preparedSourceBand2Reg.cloudDetectionOfSourceBand(landWaterData2Register,
                 cloudAlbedo1Data2Register,
                 cloudAlbedo2Data2Register,
                 cloudBT4Data2Register,
+                flagData2Register);
+
+        preparedSourceBand2Reg.preparationOfSourceBand(sourceData2Register,
                 flagData2Register);
 
         // copy source data for histogram method
@@ -311,8 +290,7 @@ public class AvhrrGeoToolOperator extends Operator {
 
 
         EdgeDetection detectionEdges2Register = new EdgeDetection();
-        double[] edgesArray2Register = detectionEdges2Register.computeEdges(
-                histogramSourceData2Register,
+        double[] edgesArray2Register = detectionEdges2Register.computeEdges(histogramSourceData2Register,
                 flagData2Register,
                 sourceData2RegWidth,
                 sourceData2RegHeight);
@@ -320,11 +298,13 @@ public class AvhrrGeoToolOperator extends Operator {
 
         if (ALBEDO_BASED.equals(operator)) {
             PreparingOfSourceBandAVHRR preparedSourceBandRef = new PreparingOfSourceBandAVHRR();
-            preparedSourceBandRef.cloudDetectionOfSourceBand(
-                    landWaterDataReference,
+            preparedSourceBandRef.cloudDetectionOfSourceBand(landWaterDataReference,
                     cloudAlbedo1DataReference,
                     cloudAlbedo2DataReference,
                     cloudBT4DataReference,
+                    flagDataReference);
+
+            preparedSourceBand2Reg.preparationOfSourceBand(sourceDataReference,
                     flagDataReference);
 
             // copy source data for histogram method
@@ -333,51 +313,83 @@ public class AvhrrGeoToolOperator extends Operator {
 
 
             EdgeDetection detectionEdgesReference = new EdgeDetection();
-            double[] edgesArrayReference = detectionEdgesReference.computeEdges(
-                    histogramSourceData2Register,
+            double[] edgesArrayReference = detectionEdgesReference.computeEdges(histogramSourceData2Register,
                     flagData2Register,
                     sourceDataRefWidth,
                     sourceDataRefHeight);
 
 
             Image2ImageRegistration image2image = new Image2ImageRegistration();
-            image2image.findingBestMatch(
-                    sourceDataReference,
+            image2image.findingBestMatch(sourceDataReference,
                     sourceData2Register,
                     flagDataReference,
                     flagData2Register,
                     sourceDataRefWidth,
                     sourceDataRefHeight,
                     sourceData2RegWidth,
-                    sourceData2RegHeight);
+                    sourceData2RegHeight,
+                    targetTileCopySourceBandReference,
+                    targetTileCopySourceBandRegistered);
 
         } else {
 
             Image2ImageRegistration image2image = new Image2ImageRegistration();
-            image2image.findingBestMatch(
-                    sourceDataReference,
+            image2image.findingBestMatch(sourceDataReference,
                     edgesArray2Register,
                     flagDataReference,
                     flagData2Register,
                     sourceDataRefWidth,
                     sourceDataRefHeight,
                     sourceData2RegWidth,
-                    sourceData2RegHeight);
+                    sourceData2RegHeight,
+                    targetTileCopySourceBandReference,
+                    targetTileCopySourceBandRegistered);
 
         }
 
-
         //System.out.printf("source rectangle width height:  %d  %d   \n",sourceRectangle.width, sourceRectangle.height);
-        //System.out.printf("collocate product width height:  %d  %d   \n",collocateProduct.getSceneRasterWidth(),collocateProduct.getSceneRasterHeight() );
     }
 
 
     static void makeFilledBand
             (
-                    double[] inputData,
+                    double[][] inputData,
                     int inputDataWidth,
-                    int inputDataHeight, Tile
-                    targetTileOutputBand, int mkr) {
+                    int inputDataHeight,
+                    Tile targetTileOutputBand,
+                    int mkr) {
+
+        for (int y = mkr; y < inputDataHeight - mkr; y++) {
+            for (int x = mkr; x < inputDataWidth - mkr; x++) {
+                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[x][y]);
+
+            }
+        }
+    }
+
+    static void makeFilledBand
+            (
+                    int[][] inputData,
+                    int inputDataWidth,
+                    int inputDataHeight,
+                    Tile targetTileOutputBand,
+                    int mkr) {
+
+        for (int y = mkr; y < inputDataHeight - mkr; y++) {
+            for (int x = mkr; x < inputDataWidth - mkr; x++) {
+                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[x][y]);
+
+            }
+        }
+    }
+
+    static void makeFilledBand
+            (
+                    int[] inputData,
+                    int inputDataWidth,
+                    int inputDataHeight,
+                    Tile targetTileOutputBand,
+                    int mkr) {
 
         for (int y = mkr; y < inputDataHeight - mkr; y++) {
             for (int x = mkr; x < inputDataWidth - mkr; x++) {
@@ -388,42 +400,10 @@ public class AvhrrGeoToolOperator extends Operator {
 
     static void makeFilledBand
             (
-                    double[][] inputData,
-                    int inputDataWidth,
-                    int inputDataHeight,
-                    Tile targetTileOutputBand1, Tile
-                    targetTileOutputBand2, int mkr) {
-
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand1.setSample(x - mkr, y - mkr, inputData[0][y * (inputDataWidth) + x]);
-                targetTileOutputBand2.setSample(x - mkr, y - mkr, inputData[1][y * (inputDataWidth) + x]);
-            }
-        }
-    }
-
-    static void makeFilledBand
-            (
-                    double[][] inputData,
+                    double[] inputData,
                     int inputDataWidth,
                     int inputDataHeight,
                     Tile targetTileOutputBand,
-                    int index,
-                    int mkr) {
-
-        for (int y = mkr; y < inputDataHeight - mkr; y++) {
-            for (int x = mkr; x < inputDataWidth - mkr; x++) {
-                targetTileOutputBand.setSample(x - mkr, y - mkr, inputData[index][y * (inputDataWidth) + x]);
-            }
-        }
-    }
-
-    static void makeFilledBand
-            (
-                    int[] inputData,
-                    int inputDataWidth,
-                    int inputDataHeight
-                    , Tile targetTileOutputBand,
                     int mkr) {
 
         for (int y = mkr; y < inputDataHeight - mkr; y++) {

@@ -31,7 +31,7 @@ public class GaussFilter implements Filter {
         }
 
     /*    FrontsOperator.Image2ImageRegistration(preparedData, sourceWidth, sourceHeight,
-                targetBandFilter, FrontsOperator.maxKernelRadius); */
+                targetBandFilter, FrontsOperator.maxShiftRadius); */
 
         System.arraycopy(preparedData, 0, sourceData, 0, sourceData.length);
     }

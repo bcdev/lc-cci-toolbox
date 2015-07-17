@@ -53,7 +53,7 @@ public class MedianFilter implements Filter {
             }
 
         /*org.esa.beam.FrontsOperator.Image2ImageRegistration(preparedData, sourceWidth, sourceHeight,
-                targetBandFilter, org.esa.beam.FrontsOperator.maxKernelRadius);*/
+                targetBandFilter, org.esa.beam.FrontsOperator.maxShiftRadius);*/
 
         System.arraycopy(preparedData, 0, sourceData, 0, sourceData.length);
 

@@ -1,118 +1,117 @@
 package org.esa.cci.lc;
 
 import java.util.Arrays;
+import org.esa.beam.framework.gpf.Tile;
 
 public class Image2ImageRegistration {
 
 
     public static void findingBestMatch(double[] sourceDataReference,
-                                            double[] sourceData2Register,
-                                            int[] flagDataReference,
-                                            int[] flagData2Register,
-                                            int sourceDataRefWidth,
-                                            int sourceDataRefHeight,
-                                            int sourceData2RegWidth,
-                                            int sourceData2RegHeight) {
-
-        /**************************************************************************/
-        /************************** Histogram Method  *****************************/
-        /**************************************************************************/
+                                        double[] sourceData2Register,
+                                        int[] flagDataReference,
+                                        int[] flagData2Registered,
+                                        int sourceDataRefWidth,
+                                        int sourceDataRefHeight,
+                                        int sourceData2RegWidth,
+                                        int sourceData2RegHeight,
+                                        Tile targetTileCopySourceBandReference,
+                                        Tile targetTileCopySourceBandRegistered) {
 
 
-        Filter filter = new GaussFilter();
-
-    /*
-        final double[][] sourceDataMoveReference = new double[sourceRefWidth][sourceRefHeight];
-        final double[][] sourceDataMove2Register = new double[sourceRefWidth][sourceRefHeight];
-        final double[][] correlationARRAY = new double[sourceRefWidth][sourceRefHeight];
-        final double[] correlationMaxARRAY = new double[sourceRefWidth * sourceRefHeight];
-        final double[] correlationDirARRAY = new double[sourceRefWidth * sourceRefHeight];
+        System.out.printf("source data reference length:  %d    \n",sourceDataReference.length);
+        System.out.printf("source data 2register length:  %d    \n",sourceData2Register.length);
 
 
-        //Image2ImageRegistration(flagArray, sourceRefWidth, sourceRefHeight, flagTile, FrontsOperator.maxKernelRadius);
-        //Image2ImageRegistration(sourceData, sourceRefWidth, sourceRefHeight, targetTileCopySourceBand, maxKernelRadius);
 
 
-        // Number of e.g. SST data
-        totalParameterNumber = 0;
-        totalParameterNumber = Image2ImageRegistration(sourceRefWidth, sourceRefHeight, sourceData);
-
-        // copy source data for histogram method
-        double[] histogramSourceData = new double[sourceData.length];
-        System.arraycopy(sourceData, 0, histogramSourceData, 0, sourceData.length);
+        final double[][] sourceDataMoveReference = new double[sourceDataRefWidth][sourceDataRefHeight];
+        final double[][] sourceDataMove2Register = new double[sourceDataRefWidth][sourceDataRefHeight];
 
 
-        Arrays.fill(correlationMaxARRAY, Double.MIN_VALUE);
-        Arrays.fill(correlationDirARRAY, Double.MIN_VALUE);
+        double correlationValue = Double.MIN_VALUE;
+        double  correlationMaxValue = Double.MIN_VALUE;
 
-        double[] kernelSizeArrayReference = new double[(2 * corrKernelRadius + 1) * (2 * corrKernelRadius + 1)];
-        double[] kernelSizeArray2Register = new double[(2 * corrKernelRadius + 1) * (2 * corrKernelRadius + 1)];
 
-        double direction = 0.0;
+        double[] ArrayReference = new double[sourceDataRefWidth * sourceDataRefHeight];
+        double[] Array2Register = new double[sourceDataRefWidth * sourceDataRefHeight];
 
-        Image2ImageRegistration(sourceDataReference, sourceRefWidth, sourceRefHeight, targetTileCopySourceBandReference, AvhrrGeoToolOperator.maxKernelRadius);
-        Image2ImageRegistration(sourceData2Register, sourceRefWidth, sourceRefHeight, targetTileCopySourceBand2Register, AvhrrGeoToolOperator.maxKernelRadius);
+        int directionX = -1;
+        int directionY = -1;
+        int shiftX = 0;
+        int shiftY = 0;
 
-        for (int j = 0; j < sourceRefHeight; j++) {
-            for (int i = 0; i < sourceRefWidth; i++) {
-                sourceDataMoveReference[i][j] = sourceDataReference[j * (sourceRefWidth) + i];
+        for (int j = 0; j < sourceDataRefHeight; j++) {
+            for (int i = 0; i < sourceDataRefWidth; i++) {
+                sourceDataMoveReference[i][j] = sourceDataReference[j * (sourceDataRefWidth) + i];
             }
         }
 
 
-        for (int k = -1; k < 2; k++) {
-            for (int l = -1; l < 2; l++) {
+        for (int k = 0; k < sourceData2RegWidth-sourceDataRefWidth + 1; k++) {
+            directionX += 1;
+            directionY = -1;
+            for (int m = 0; m < sourceData2RegHeight-sourceDataRefHeight + 1  ; m++) {
+               directionY += 1;
 
-                direction += 1;
+                //System.out.printf("shiftX:  %d    \n",directionX);
+                //System.out.printf("shiftY:  %d    \n",directionY);
 
-                for (int j = 0; j < sourceRefHeight; j++) {
-                    for (int i = 0; i < sourceRefWidth; i++) {
+                for (int j = 0; j < sourceDataRefHeight; j++) {
+                    for (int i = 0; i < sourceDataRefWidth; i++) {
                         sourceDataMove2Register[i][j] = Double.NaN;
-                        correlationARRAY[i][j] = Double.NaN;
+                        correlationValue = Double.NaN;
                     }
                 }
 
-                for (int j = 1; j < sourceRefHeight - 1; j++) {
-                    for (int i = 1; i < sourceRefWidth - 1; i++) {
-                        sourceDataMove2Register[i][j] = sourceData2Register[(j - l) * (sourceRefWidth) + (i - k)];
+                for (int j = 0; j < sourceDataRefHeight; j++) {
+                    for (int i = 0; i < sourceDataRefWidth; i++) {
+                        sourceDataMove2Register[i][j] = sourceData2Register[(j + directionY) * (sourceData2RegWidth) + (i + directionX)];
                     }
                 }
 
-                for (int j = 1; j < sourceRefHeight - 1; j++) {
-                    for (int i = 1; i < sourceRefWidth - 1; i++) {
 
-                        for (int jj = -corrKernelRadius; jj < corrKernelRadius + 1; jj++) {
-                            for (int ii = -corrKernelRadius; ii < corrKernelRadius + 1; ii++) {
-                                // System.out.printf("1. width height 3x3matrix width height:  %d  %d  %d   \n", i + ii, j + jj, (jj + corrKernelRadius) * (2 * corrKernelRadius + 1) + (ii + corrKernelRadius));
-
-                                kernelSizeArrayReference[(jj + corrKernelRadius) * (2 * corrKernelRadius + 1) + (ii + corrKernelRadius)] =
-                                        sourceDataMoveReference[i + ii][j + jj];
-                                kernelSizeArray2Register[(jj + corrKernelRadius) * (2 * corrKernelRadius + 1) + (ii + corrKernelRadius)] =
-                                        sourceDataMove2Register[i + ii][j + jj];
-                                //System.out.printf("2. width height 3x3matrix width height:  %d  %d  %d   \n", i + ii, j + jj, (jj + corrKernelRadius) * (2 * corrKernelRadius + 1) + (ii + corrKernelRadius));
-                            }
-                        }
-                        correlationARRAY[i][j] = AvhrrGeoToolCorrelation.getPearsonCorrelation1(kernelSizeArrayReference, kernelSizeArray2Register);
+                for (int j = 0; j < sourceDataRefHeight; j++) {
+                    for (int i = 0; i < sourceDataRefWidth; i++) {
+                        ArrayReference[j * (sourceDataRefWidth) + i] = sourceDataMoveReference[i][j];
+                        Array2Register[j * (sourceDataRefWidth) + i] = sourceDataMove2Register[i][j];
                     }
                 }
 
-                for (int j = 0; j < sourceRefHeight; j++) {
-                    for (int i = 0; i < sourceRefWidth; i++) {
+                correlationValue = AvhrrGeoToolCorrelation.getPearsonCorrelation1(
+                        ArrayReference,
+                        Array2Register);
 
-                        if (correlationARRAY[i][j] >= correlationMaxARRAY[j * sourceRefWidth + i]) {
 
-                            correlationMaxARRAY[j * sourceRefWidth + i] = correlationARRAY[i][j];
-                            correlationDirARRAY[j * sourceRefWidth + i] = direction;
 
-                            // sourceDataMoveSPOT[i][j] = sourceDataSPOT[(j - l) * (sourceRefWidth) + (i - k)];
-                        }
-                    }
+                if (correlationValue >= correlationMaxValue) {
+                    correlationMaxValue = correlationValue;
+                    shiftX = directionX;
+                    shiftY = directionY;
                 }
             }
         }
 
-        Image2ImageRegistration(correlationMaxARRAY, sourceRefWidth, sourceRefHeight, targetTileMaxCorr, AvhrrGeoToolOperator.maxKernelRadius);
-        Image2ImageRegistration(correlationDirARRAY, sourceRefWidth, sourceRefHeight, targetTileMaxCorrDir, AvhrrGeoToolOperator.maxKernelRadius);*/
+        System.out.printf("shiftX:  %d    \n",shiftX);
+        System.out.printf("shiftY:  %d    \n",shiftY);
+
+        for (int j = 0; j < sourceDataRefHeight; j++) {
+            for (int i = 0; i < sourceDataRefWidth; i++) {
+                sourceDataMove2Register[i][j] = sourceData2Register[(j + shiftY) * (sourceData2RegWidth) + (i + shiftX)];
+            }
+        }
+
+
+
+        AvhrrGeoToolOperator.makeFilledBand(sourceDataMove2Register,
+                sourceDataRefWidth,
+                sourceDataRefHeight,
+                targetTileCopySourceBandRegistered,
+                0);
+        AvhrrGeoToolOperator.makeFilledBand(sourceDataReference,
+                sourceDataRefWidth,
+                sourceDataRefHeight,
+                targetTileCopySourceBandReference,
+                0);
 
     }
 }
