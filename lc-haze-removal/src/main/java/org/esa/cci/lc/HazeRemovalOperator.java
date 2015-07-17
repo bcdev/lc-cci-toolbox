@@ -85,8 +85,8 @@ public class HazeRemovalOperator extends Operator {
     private Band targetBandHotLevel;
 
     static final int KernelRadius = 0;
-    static final double tasseledCapFactorBlue = 0.846; //S2 0.846  MERIS 0.223
-    static final double tasseledCapFactorRed = -0.464; //S2 -0.464 MERIS 0.120
+    static final double tasseledCapFactorBlue = 0.846; //S2  0.846  MERIS 0.223
+    static final double tasseledCapFactorRed = -0.464; //S2 -0.464  MERIS 0.012
 
     static final int standardHistogramBins = 255;
     static final int windowOverlap = 50;

@@ -1,26 +1,13 @@
 package org.esa.cci.lc;
 
-import javax.media.jai.Histogram;
-import javax.media.jai.Interpolation;
-import javax.media.jai.ROI;
-import javax.media.jai.ROIShape;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.AbsoluteDescriptor;
-import javax.media.jai.operator.BandSelectDescriptor;
-import javax.media.jai.operator.ExtremaDescriptor;
-import javax.media.jai.operator.FileLoadDescriptor;
-import javax.media.jai.operator.HistogramDescriptor;
-import javax.media.jai.operator.ScaleDescriptor;
-import javax.media.jai.operator.SubtractDescriptor;
-import javax.media.jai.operator.TranslateDescriptor;
-import java.awt.Rectangle;
+import javax.media.jai.*;
+import javax.media.jai.operator.*;
+import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/**
- * Hello world!
- */
+
 public class ImageReg {
     private static final Interpolation INTERPOLATION = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
     private static final String OUTPUT_FILE_NAME = "image-reg-output.csv";
@@ -40,7 +27,7 @@ public class ImageReg {
         RenderedOp source1 = FileLoadDescriptor.create(image1Path, null, null, null);
         RenderedOp source2 = FileLoadDescriptor.create(image2Path, null, null, null);
 
-        source1 = BandSelectDescriptor.create(source1, new int[] {band}, null);
+        source1 = BandSelectDescriptor.create(source1, new int[]{band}, null);
         source2 = BandSelectDescriptor.create(source2, new int[] {band}, null);
 
         PrintWriter writer = new PrintWriter(new FileWriter(OUTPUT_FILE_NAME));
