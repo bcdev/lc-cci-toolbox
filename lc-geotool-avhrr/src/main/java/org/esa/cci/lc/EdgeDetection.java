@@ -26,10 +26,8 @@ public class EdgeDetection {
         int windowSize = 48;
 
 
-        double[] frontsSumCayulaArray = new double[sourceWidth * sourceHeight];
         double[] frontsCayulaArray = new double[sourceWidth * sourceHeight];
-
-        Arrays.fill(frontsSumCayulaArray, 0);
+        Arrays.fill(frontsCayulaArray, 0.0);
 
         for (int wi = 16; wi < 60; wi += 8) {
             /* SIED Operator */
@@ -42,19 +40,18 @@ public class EdgeDetection {
                         sourceHeight,
                         flagArray,
                         wi,
-                        frontsData,
-                        frontsCayulaArray );
+                        frontsData);
 
-            for (int j = 0; j < sourceHeight-1; j++) {
-                for (int i = 0; i < sourceWidth-1; i++) {
+            for (int j = 0; j < sourceHeight; j++) {
+                for (int i = 0; i < sourceWidth; i++) {
                     int k = (j) * (sourceWidth) + (i);
-                    frontsSumCayulaArray[k] = frontsSumCayulaArray[k] + frontsCayulaArray[k];
-                    if (frontsSumCayulaArray[k] > 1) frontsSumCayulaArray[k] = 1;
+                    frontsCayulaArray[k] = frontsCayulaArray[k] + frontsData[k];
+                    if (frontsCayulaArray[k] > 1) frontsCayulaArray[k] = 1;
                 }
             }
         }
 
 
-        return frontsSumCayulaArray;
+        return frontsCayulaArray;
     }
 }

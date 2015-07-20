@@ -25,14 +25,14 @@ public class Convolution {
         for (int y = grid; y < sourceHeight - grid; y++) {
             for (int x = grid; x < sourceWidth - grid; x++) {
                 int d = flagArray[y * (sourceWidth) + x];
-                if (d < PreparingOfSourceBandAVHRR.CLOUD_FLAG) {
+                if (d < PreparationOfSourceBands.CLOUD_FLAG) {
                     //ocean clean
                     double sum = 0.0;
                     // It is the Convolution
                     for (int j = -radius; j < radius + 1; j++) {
                         for (int i = -radius; i < radius + 1; i++) {
                             int f = flagArray[(y + j) * (sourceWidth) + (x + i)];
-                            if (f > PreparingOfSourceBandAVHRR.OCEAN_FLAG) {
+                            if (f > PreparationOfSourceBands.OCEAN_FLAG) {
                                 // ocean cloudly
                                 for (int jj = -kernelRadiusNaN; jj < kernelRadiusNaN + 1; jj++) {
                                     for (int ii = -kernelRadiusNaN; ii < kernelRadiusNaN + 1; ii++) {
@@ -67,7 +67,7 @@ public class Convolution {
         int sumsum = 0;
         for (int j = 0; j < kernelSizeNaN; j++) {
             for (int i = 0; i < kernelSizeNaN; i++) {
-                if ((FlagArray[i][j] == PreparingOfSourceBandAVHRR.OCEAN_FLAG)) {
+                if ((FlagArray[i][j] == PreparationOfSourceBands.OCEAN_FLAG)) {
                     sum = sum + PointsArray[i][j];
                     sumsum++;
                 }

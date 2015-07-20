@@ -81,6 +81,8 @@ public class Image2ImageRegistration {
                         ArrayReference,
                         Array2Register);
 
+                System.out.printf("directionX directionY:  %d %d %f  \n",directionX, directionY, correlationValue);
+
 
 
                 if (correlationValue >= correlationMaxValue) {

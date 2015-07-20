@@ -14,23 +14,21 @@ public class SplitWindow {
                         int sourceHeight,
                         int[] flagArray,
                         int windowSize,
-                        double[]frontsData,
-                        double[] frontsCayulaArray /*
-                        Tile targetTileFronts*/) {
+                        double[] frontsData) {
 
         double[] windowData = new double[windowSize * windowSize];
         double[] frontsArray = new double[windowSize * windowSize];
-        //double[] frontsData = new double[sourceWidth * sourceHeight];
+
         Arrays.fill(frontsArray, 0);
         int  histogramBins = AvhrrGeoToolOperator.standardHistogramBins;
         int step = (int) (windowSize * AvhrrGeoToolOperator.windowOverlap / 100.);
         step = windowSize - step;
         int height_count = (int) Math.floor((double) (sourceHeight - windowSize) / (double) step);
         int width_count = (int) Math.floor((double) (sourceWidth - windowSize) / (double) step);
-        //System.out.printf("1  %d  %d\n", height_count, width_count);
+
         width_count = width_count * step;
         height_count = height_count * step;
-        //System.out.printf("_____________fensterchen:  %d    %d\n", width_count, height_count);
+
         //    image segmentation into overlapping windows
         for (int k = 0; k <= height_count; k = k + step) {
             for (int l = 0; l <= width_count; l = l + step) {
@@ -42,8 +40,7 @@ public class SplitWindow {
                 for (int j = 0; j < windowSize; j++) {
                     for (int i = 0; i < windowSize; i++) {
                         windowData[j * (windowSize) + i] = Double.NaN;
-                        //System.out.printf("%d  %d  %d  %d %f\n", k, l, i, j, sourceData[(j + k) * (sourceWidth) + (i + l)] );
-                        //System.out.printf("%d  %d  \n", (j + k) * (sourceWidth) + (i + l), (j * (windowSize) + i) );
+
                         if (Double.isNaN(sourceData[(j + k) * (sourceWidth) + (i + l)]) == false) {
                             counterNoNaN++;
                             windowData[j * (windowSize) + i] = sourceData[(j + k) * (sourceWidth) + (i + l)];
@@ -63,13 +60,12 @@ public class SplitWindow {
                     histogramBins = AvhrrGeoToolOperator.standardHistogramBins;
                 }
 
-                //System.out.printf("_____________BINS  %d    %d\n", windowSize, histogramBins);
+
                 // calculation of histogram
                 Histogram histogram = Histogram.computeHistogramDouble(windowData, IndexValidator.TRUE, histogramBins,
                         null, null, ProgressMonitor.NULL);
 
                 // bimodality test
-                //System.out.printf("_____________fensterchen_location:  %d    %d\n", l, k);
                 BiomodalityTest bimodality = new BiomodalityTest();
                 double[] splitValue = bimodality.computeBiomodalityTest(windowData,
                         windowSize,

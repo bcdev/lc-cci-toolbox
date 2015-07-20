@@ -60,34 +60,38 @@ public class AvhrrGeoToolOperator extends Operator {
     private static final String ALBEDO_BASED = "ALBEDO_BASED";
     private static final String EDGE_DETECTION = "EDGE_DETECTION";
 
+    private static final String AVHRR = "AVHRR";
+    private static final String MERIS = "MERIS";
+    private static final String COAST = "COAST";
+
     static String targetCopySourceBandNameReference;
     static String targetCopySourceBandNameRegistered;
 
+    private String sourceBandReferenceName;
+    private String landWaterBandReferenceName;
 
+    private String cloudAlbedo1BandReferenceName;
+    private String cloudAlbedo2BandReferenceName;
+    private String cloudBT4BandReferenceName;
+    private String panoramaEffectBandReferenceName;
 
-    static String sourceBandReferenceName = "albedo_2";
-    static String landWaterBandReferenceName = "land_water_fraction";
-    ;
-    static String cloudAlbedo1BandReferenceName = "albedo_1";
-    static String cloudAlbedo2BandReferenceName = "albedo_2";
-    static String cloudBT4BandReferenceName = "radiance_4";
-    static String panoramaEffectBandReferenceName = "X_Band";
-
-    static String sourceBand2RegisterName = "albedo_2";
-    static String landWaterBand2RegisterName = "land_water_fraction";
-    ;
-    static String cloudAlbedo1Band2RegisterName = "albedo_1";
-    static String cloudAlbedo2Band2RegisterName = "albedo_2";
-    static String cloudBT4Band2RegisterName = "radiance_4";
-    static String panoramaEffectBand2RegisterName = "X_Band";
-
+    private String sourceBand2RegisterName;
+    private String landWaterBand2RegisterName;
+    private String cloudAlbedo1Band2RegisterName;
+    private String cloudAlbedo2Band2RegisterName;
+    private String cloudBT4Band2RegisterName;
+    private String panoramaEffectBand2RegisterName;
 
     private String productName;
 
 
     @Parameter(valueSet = {ALBEDO_BASED, EDGE_DETECTION},
-            defaultValue = ALBEDO_BASED, description = "chip matching algorithm")
+            defaultValue = EDGE_DETECTION, description = "chip matching algorithm")
     private String operator;
+
+    @Parameter(valueSet = {MERIS, AVHRR, COAST},
+            defaultValue = AVHRR, description = "sensor type")
+    private String sensor;
 
     @SourceProduct
     private Product sourceProductReference;
@@ -115,7 +119,6 @@ public class AvhrrGeoToolOperator extends Operator {
     private Band targetCopySourceBandRegistered;
 
 
-
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product}
@@ -138,32 +141,65 @@ public class AvhrrGeoToolOperator extends Operator {
 
         ProductUtils.copyGeoCoding(sourceProductReference, targetProduct);
 
+        if (AVHRR.equals(sensor)) {
+            sourceBandReferenceName = "albedo_2";
+            landWaterBandReferenceName = "land_water_fraction";
+            cloudAlbedo1BandReferenceName = "albedo_1";
+            cloudAlbedo2BandReferenceName = "albedo_2";
+            cloudBT4BandReferenceName = "radiance_4";
+            panoramaEffectBandReferenceName = "X_Band";
+
+            sourceBand2RegisterName = "albedo_2";
+            landWaterBand2RegisterName = "land_water_fraction";
+            cloudAlbedo1Band2RegisterName = "albedo_1";
+            cloudAlbedo2Band2RegisterName = "albedo_2";
+            cloudBT4Band2RegisterName = "radiance_4";
+            panoramaEffectBand2RegisterName = "X_Band";
+
+            sourceBandReference = sourceProductReference.getBand(sourceBandReferenceName);
+            landWaterBandReference = sourceProductReference.getBand(landWaterBandReferenceName);
+            panoramaEffectBandReference = sourceProductReference.getBand(panoramaEffectBandReferenceName);
+            cloudAlbedo1BandReference = sourceProductReference.getBand(cloudAlbedo1BandReferenceName);
+            cloudAlbedo2BandReference = sourceProductReference.getBand(cloudAlbedo2BandReferenceName);
+            cloudBT4BandReference = sourceProductReference.getBand(cloudBT4BandReferenceName);
+
+            landWaterBand2Register = sourceProduct2Register.getBand(landWaterBand2RegisterName);
+            sourceBand2Register = sourceProduct2Register.getBand(sourceBand2RegisterName);
+            panoramaEffectBand2Register = sourceProduct2Register.getBand(panoramaEffectBand2RegisterName);
+            cloudAlbedo1Band2Register = sourceProduct2Register.getBand(cloudAlbedo1Band2RegisterName);
+            cloudAlbedo2Band2Register = sourceProduct2Register.getBand(cloudAlbedo2Band2RegisterName);
+            cloudBT4Band2Register = sourceProduct2Register.getBand(cloudBT4Band2RegisterName);
+        }
+
+
+        if (MERIS.equals(sensor)) {
+            sourceBandReferenceName = "sr_10_mean";
+
+            sourceBand2RegisterName = "albedo_2";
+            landWaterBand2RegisterName = "land_water_fraction";
+            cloudAlbedo1Band2RegisterName = "albedo_1";
+            cloudAlbedo2Band2RegisterName = "albedo_2";
+            cloudBT4Band2RegisterName = "radiance_4";
+            panoramaEffectBand2RegisterName = "X_Band";
+
+            sourceBandReference = sourceProductReference.getBand(sourceBandReferenceName);
+
+            landWaterBand2Register = sourceProduct2Register.getBand(landWaterBand2RegisterName);
+            sourceBand2Register = sourceProduct2Register.getBand(sourceBand2RegisterName);
+            panoramaEffectBand2Register = sourceProduct2Register.getBand(panoramaEffectBand2RegisterName);
+            cloudAlbedo1Band2Register = sourceProduct2Register.getBand(cloudAlbedo1Band2RegisterName);
+            cloudAlbedo2Band2Register = sourceProduct2Register.getBand(cloudAlbedo2Band2RegisterName);
+            cloudBT4Band2Register = sourceProduct2Register.getBand(cloudBT4Band2RegisterName);
+        }
+
         targetCopySourceBandNameReference = sourceBandReferenceName + "_Reference";
         targetCopySourceBandNameRegistered = sourceBand2RegisterName + "_Registered";
 
 
-
-        sourceBandReference = sourceProductReference.getBand(sourceBandReferenceName);
-        sourceBand2Register = sourceProduct2Register.getBand(sourceBand2RegisterName);
-
-        landWaterBandReference = sourceProductReference.getBand(landWaterBandReferenceName);
-        landWaterBand2Register = sourceProduct2Register.getBand(landWaterBand2RegisterName);
-
-        panoramaEffectBandReference = sourceProductReference.getBand(panoramaEffectBandReferenceName);
-        panoramaEffectBand2Register = sourceProduct2Register.getBand(panoramaEffectBand2RegisterName);
-
-        cloudAlbedo1BandReference = sourceProductReference.getBand(cloudAlbedo1BandReferenceName);
-        cloudAlbedo1Band2Register = sourceProduct2Register.getBand(cloudAlbedo1Band2RegisterName);
-
-        cloudAlbedo2BandReference = sourceProductReference.getBand(cloudAlbedo2BandReferenceName);
-        cloudAlbedo2Band2Register = sourceProduct2Register.getBand(cloudAlbedo2Band2RegisterName);
-
-        cloudBT4BandReference = sourceProductReference.getBand(cloudBT4BandReferenceName);
-        cloudBT4Band2Register = sourceProduct2Register.getBand(cloudBT4Band2RegisterName);
-
-
         targetCopySourceBandReference = targetProduct.addBand(targetCopySourceBandNameReference, ProductData.TYPE_FLOAT64);
-        targetCopySourceBandReference.setUnit(sourceBandReference.getUnit());
+        if (AVHRR.equals(sensor)) {
+            targetCopySourceBandReference.setUnit(sourceBandReference.getUnit());
+        }
         targetCopySourceBandRegistered = targetProduct.addBand(targetCopySourceBandNameRegistered, ProductData.TYPE_FLOAT64);
         targetCopySourceBandRegistered.setUnit(sourceBand2Register.getUnit());
 
@@ -202,63 +238,125 @@ public class AvhrrGeoToolOperator extends Operator {
         Rectangle sourceRectangleRef = new Rectangle(targetRectangle);
         Rectangle sourceRectangle2Reg = new Rectangle(0, 0, sourceBand2Register.getSceneRasterWidth(), sourceBand2Register.getSceneRasterHeight());
 
-        System.out.printf("source rectangle reference width height:  %d  %d   \n",sourceRectangleRef.width, sourceRectangleRef.height);
-        System.out.printf("source rectangle 2register width height:  %d  %d   \n",sourceRectangle2Reg.width, sourceRectangle2Reg.height);
+        System.out.printf("source rectangle reference width height:  %d  %d   \n", sourceRectangleRef.width, sourceRectangleRef.height);
+        System.out.printf("source rectangle 2register width height:  %d  %d   \n", sourceRectangle2Reg.width, sourceRectangle2Reg.height);
 
-        Tile sourceTileReference = getSourceTile(sourceBandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile sourceTile2Register = getSourceTile(sourceBand2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
+        Tile sourceTileReference = null;
+        Tile sourceTile2Register = null;
+        Tile landWaterTile2Register = null;
+        Tile landWaterTileReference = null;
+        Tile panoramaEffectTileReference = null;
+        Tile panoramaEffectTile2Register = null;
+        Tile cloudAlbedo1TileReference = null;
+        Tile cloudAlbedo1Tile2Register = null;
+        Tile cloudAlbedo2TileReference = null;
+        Tile cloudAlbedo2Tile2Register = null;
+        Tile cloudBT4TileReference = null;
+        Tile cloudBT4Tile2Register = null;
 
-        Tile landWaterTileReference = getSourceTile(landWaterBandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile landWaterTile2Register = getSourceTile(landWaterBand2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
+        double[] sourceDataReference = new double[0];
+        double[] sourceData2Register = new double[0];
+        double[] landWaterDataReference = new double[0];
+        double[] landWaterData2Register = new double[0];
+        double[] panoramaEffectDataReference = new double[0];
+        double[] panoramaEffectData2Register = new double[0];
+        double[] cloudAlbedo1DataReference = new double[0];
+        double[] cloudAlbedo1Data2Register = new double[0];
+        double[] cloudAlbedo2DataReference = new double[0];
+        double[] cloudAlbedo2Data2Register = new double[0];
+        double[] cloudBT4DataReference = new double[0];
+        double[] cloudBT4Data2Register = new double[0];
 
-        Tile panoramaEffectTileReference = getSourceTile(panoramaEffectBandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile panoramaEffectTile2Register = getSourceTile(panoramaEffectBand2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile cloudAlbedo1TileReference = getSourceTile(cloudAlbedo1BandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudAlbedo1Tile2Register = getSourceTile(cloudAlbedo1Band2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
+        if (MERIS.equals(sensor)) {
 
-        Tile cloudAlbedo2TileReference = getSourceTile(cloudAlbedo2BandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudAlbedo2Tile2Register = getSourceTile(cloudAlbedo2Band2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
+            sourceTileReference = getSourceTile(sourceBandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            sourceTile2Register = getSourceTile(sourceBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
 
-        Tile cloudBT4TileReference = getSourceTile(cloudBT4BandReference, sourceRectangleRef,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        Tile cloudBT4Tile2Register = getSourceTile(cloudBT4Band2Register, sourceRectangle2Reg,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
+            landWaterTile2Register = getSourceTile(landWaterBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            panoramaEffectTile2Register = getSourceTile(panoramaEffectBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudAlbedo1Tile2Register = getSourceTile(cloudAlbedo1Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudAlbedo2Tile2Register = getSourceTile(cloudAlbedo2Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudBT4Tile2Register = getSourceTile(cloudBT4Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+        } else {
+            sourceTileReference = getSourceTile(sourceBandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            sourceTile2Register = getSourceTile(sourceBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            landWaterTileReference = getSourceTile(landWaterBandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            landWaterTile2Register = getSourceTile(landWaterBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            panoramaEffectTileReference = getSourceTile(panoramaEffectBandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            panoramaEffectTile2Register = getSourceTile(panoramaEffectBand2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudAlbedo1TileReference = getSourceTile(cloudAlbedo1BandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            cloudAlbedo1Tile2Register = getSourceTile(cloudAlbedo1Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudAlbedo2TileReference = getSourceTile(cloudAlbedo2BandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            cloudAlbedo2Tile2Register = getSourceTile(cloudAlbedo2Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+
+            cloudBT4TileReference = getSourceTile(cloudBT4BandReference, sourceRectangleRef,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+            cloudBT4Tile2Register = getSourceTile(cloudBT4Band2Register, sourceRectangle2Reg,
+                    new BorderExtenderConstant(new double[]{Double.NaN}));
+        }
+
 
 
         Tile targetTileCopySourceBandReference = targetTiles.get(targetCopySourceBandReference);
         Tile targetTileCopySourceBandRegistered = targetTiles.get(targetCopySourceBandRegistered);
 
 
+        if (MERIS.equals(sensor)) {
+            sourceDataReference = sourceTileReference.getSamplesDouble();
+            sourceData2Register = sourceTile2Register.getSamplesDouble();
 
+            landWaterData2Register = landWaterTile2Register.getSamplesDouble();
+            panoramaEffectData2Register = panoramaEffectTile2Register.getSamplesDouble();
+            cloudAlbedo1Data2Register = cloudAlbedo1Tile2Register.getSamplesDouble();
+            cloudAlbedo2Data2Register = cloudAlbedo2Tile2Register.getSamplesDouble();
+            cloudBT4Data2Register = cloudBT4Tile2Register.getSamplesDouble();
 
-        final double[] sourceDataReference = sourceTileReference.getSamplesDouble();
-        final double[] sourceData2Register = sourceTile2Register.getSamplesDouble();
+        } else {
+            sourceDataReference = sourceTileReference.getSamplesDouble();
+            sourceData2Register = sourceTile2Register.getSamplesDouble();
 
-        final double[] landWaterDataReference = landWaterTileReference.getSamplesDouble();
-        final double[] landWaterData2Register = landWaterTile2Register.getSamplesDouble();
+            landWaterDataReference = landWaterTileReference.getSamplesDouble();
+            landWaterData2Register = landWaterTile2Register.getSamplesDouble();
 
-        final double[] panoramaEffectDataReference = panoramaEffectTileReference.getSamplesDouble();
-        final double[] panoramaEffectData2Register = panoramaEffectTile2Register.getSamplesDouble();
+            panoramaEffectDataReference = panoramaEffectTileReference.getSamplesDouble();
+            panoramaEffectData2Register = panoramaEffectTile2Register.getSamplesDouble();
 
-        final double[] cloudAlbedo1DataReference = cloudAlbedo1TileReference.getSamplesDouble();
-        final double[] cloudAlbedo1Data2Register = cloudAlbedo1Tile2Register.getSamplesDouble();
+            cloudAlbedo1DataReference = cloudAlbedo1TileReference.getSamplesDouble();
+            cloudAlbedo1Data2Register = cloudAlbedo1Tile2Register.getSamplesDouble();
 
-        final double[] cloudAlbedo2DataReference = cloudAlbedo2TileReference.getSamplesDouble();
-        final double[] cloudAlbedo2Data2Register = cloudAlbedo2Tile2Register.getSamplesDouble();
+            cloudAlbedo2DataReference = cloudAlbedo2TileReference.getSamplesDouble();
+            cloudAlbedo2Data2Register = cloudAlbedo2Tile2Register.getSamplesDouble();
 
-        final double[] cloudBT4DataReference = cloudBT4TileReference.getSamplesDouble();
-        final double[] cloudBT4Data2Register = cloudBT4Tile2Register.getSamplesDouble();
+            cloudBT4DataReference = cloudBT4TileReference.getSamplesDouble();
+            cloudBT4Data2Register = cloudBT4Tile2Register.getSamplesDouble();
+
+        }
 
 
         int sourceDataRefLength = sourceDataReference.length;
@@ -274,14 +372,14 @@ public class AvhrrGeoToolOperator extends Operator {
         int sourceData2RegHeight = sourceRectangle2Reg.height;
 
 
-        PreparingOfSourceBandAVHRR preparedSourceBand2Reg = new PreparingOfSourceBandAVHRR();
-        preparedSourceBand2Reg.cloudDetectionOfSourceBand(landWaterData2Register,
+        PreparationOfSourceBands preparedSourceBand2Reg = new PreparationOfSourceBands();
+        preparedSourceBand2Reg.cloudDetectionOfAvhrrSourceBand(landWaterData2Register,
                 cloudAlbedo1Data2Register,
                 cloudAlbedo2Data2Register,
                 cloudBT4Data2Register,
                 flagData2Register);
 
-        preparedSourceBand2Reg.preparationOfSourceBand(sourceData2Register,
+        preparedSourceBand2Reg.preparationOfAvhrrSourceBand(sourceData2Register,
                 flagData2Register);
 
         // copy source data for histogram method
@@ -293,30 +391,29 @@ public class AvhrrGeoToolOperator extends Operator {
         double[] edgesArray2Register = detectionEdges2Register.computeEdges(histogramSourceData2Register,
                 flagData2Register,
                 sourceData2RegWidth,
-                sourceData2RegHeight);
+                sourceData2RegWidth);
 
 
         if (ALBEDO_BASED.equals(operator)) {
-            PreparingOfSourceBandAVHRR preparedSourceBandRef = new PreparingOfSourceBandAVHRR();
-            preparedSourceBandRef.cloudDetectionOfSourceBand(landWaterDataReference,
-                    cloudAlbedo1DataReference,
-                    cloudAlbedo2DataReference,
-                    cloudBT4DataReference,
-                    flagDataReference);
 
-            preparedSourceBand2Reg.preparationOfSourceBand(sourceDataReference,
-                    flagDataReference);
+            if (AVHRR.equals(sensor)) {
 
-            // copy source data for histogram method
-            double[] histogramSourceDataReference = new double[sourceDataRefLength];
-            System.arraycopy(sourceDataReference, 0, histogramSourceDataReference, 0, sourceDataRefLength);
+                PreparationOfSourceBands preparedAvhrrSourceBandRef = new PreparationOfSourceBands();
+                preparedAvhrrSourceBandRef.cloudDetectionOfAvhrrSourceBand(landWaterDataReference,
+                        cloudAlbedo1DataReference,
+                        cloudAlbedo2DataReference,
+                        cloudBT4DataReference,
+                        flagDataReference);
 
+                preparedAvhrrSourceBandRef.preparationOfAvhrrSourceBand(sourceDataReference,
+                        flagDataReference);
 
-            EdgeDetection detectionEdgesReference = new EdgeDetection();
-            double[] edgesArrayReference = detectionEdgesReference.computeEdges(histogramSourceData2Register,
-                    flagData2Register,
-                    sourceDataRefWidth,
-                    sourceDataRefHeight);
+            } else {
+
+                PreparationOfSourceBands preparedMerisSourceBandRef = new PreparationOfSourceBands();
+                preparedMerisSourceBandRef.preparationOfMerisSourceBand(sourceDataReference,
+                        flagDataReference);
+            }
 
 
             Image2ImageRegistration image2image = new Image2ImageRegistration();
@@ -333,8 +430,19 @@ public class AvhrrGeoToolOperator extends Operator {
 
         } else {
 
+            // copy source data for histogram method
+            double[] histogramSourceDataReference = new double[sourceDataRefLength];
+            System.arraycopy(sourceDataReference, 0, histogramSourceDataReference, 0, sourceDataRefLength);
+
+
+            EdgeDetection detectionEdgesReference = new EdgeDetection();
+            double[] edgesArrayReference = detectionEdgesReference.computeEdges(histogramSourceDataReference,
+                    flagDataReference,
+                    sourceDataRefWidth,
+                    sourceDataRefHeight);
+
             Image2ImageRegistration image2image = new Image2ImageRegistration();
-            image2image.findingBestMatch(sourceDataReference,
+            image2image.findingBestMatch(edgesArrayReference,
                     edgesArray2Register,
                     flagDataReference,
                     flagData2Register,

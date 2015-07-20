@@ -1,6 +1,6 @@
 package org.esa.cci.lc;
 
-public class PreparingOfSourceBandAVHRR {
+public class PreparationOfSourceBands {
 
     static final int UNVALID_FLAG = 1000;
     static final int CLOUD_FLAG = 100;
@@ -12,11 +12,11 @@ public class PreparingOfSourceBandAVHRR {
     // todo invalid pixel
 
 
-    public void cloudDetectionOfSourceBand(  double[] landWaterData,
-                                       double[] cloudAlbedo1Data,
-                                       double[] cloudAlbedo2Data,
-                                       double[] cloudBT4Data,
-                                       int[] flagData) {
+    public void cloudDetectionOfAvhrrSourceBand(double[] landWaterData,
+                                                double[] cloudAlbedo1Data,
+                                                double[] cloudAlbedo2Data,
+                                                double[] cloudBT4Data,
+                                                int[] flagData) {
 
 
         double landWaterThreshold = 50.0;
@@ -28,7 +28,7 @@ public class PreparingOfSourceBandAVHRR {
 
     }
 
-    public void preparationOfSourceBand(  double[] sourceData,
+    public void preparationOfAvhrrSourceBand(double[] sourceData,
                                              int[] flagData) {
 
 
@@ -41,6 +41,23 @@ public class PreparingOfSourceBandAVHRR {
                 flagData[ij] = UNVALID_FLAG;
 
             }
+        }
+    }
+
+
+    public void preparationOfMerisSourceBand(double[] sourceData,
+                                             int[] flagData) {
+
+
+        int sourceLength = sourceData.length;
+
+        for (int ij = 0; ij < sourceLength - 1; ij++) {
+
+            if (Double.isNaN(sourceData[ij]) ==true ){
+                sourceData[ij] = Double.NaN;
+                flagData[ij] = UNVALID_FLAG;
+
+            }  else flagData[ij] = OCEAN_FLAG + LAND_FLAG;
         }
     }
 
