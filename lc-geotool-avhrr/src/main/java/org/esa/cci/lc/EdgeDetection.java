@@ -23,17 +23,18 @@ public class EdgeDetection {
                 AvhrrGeoToolOperator.gaussFilterKernelRadius);
 
 
-        int windowSize = 48;
+        int windowSize = (sourceWidth-sourceWidth%2)/2;
 
+        //System.out.printf("source width height windowsize:  %d  %d %d  \n",sourceWidth, sourceHeight, windowSize);
 
         double[] frontsCayulaArray = new double[sourceWidth * sourceHeight];
         Arrays.fill(frontsCayulaArray, 0.0);
+        double[] frontsData = new double[sourceWidth * sourceHeight];
 
-        for (int wi = 16; wi < 60; wi += 8) {
+        for (int wi = windowSize; wi < sourceWidth; wi += windowSize) {
             /* SIED Operator */
-            double[] frontsData = new double[sourceWidth * sourceHeight];
-
-            Arrays.fill(frontsCayulaArray, 0);
+            Arrays.fill(frontsData, 0.0);
+            //Arrays.fill(frontsCayulaArray, 0);
             SplitWindow splitWindow = new SplitWindow();
             splitWindow.compute(histogramSourceData,
                         sourceWidth,

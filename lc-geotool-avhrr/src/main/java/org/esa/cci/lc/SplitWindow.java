@@ -21,13 +21,17 @@ public class SplitWindow {
 
         Arrays.fill(frontsArray, 0);
         int  histogramBins = AvhrrGeoToolOperator.standardHistogramBins;
-        int step = (int) (windowSize * AvhrrGeoToolOperator.windowOverlap / 100.);
+        int step = (int) (windowSize * AvhrrGeoToolOperator.windowOverlap / 100. + 1);
         step = windowSize - step;
         int height_count = (int) Math.floor((double) (sourceHeight - windowSize) / (double) step);
         int width_count = (int) Math.floor((double) (sourceWidth - windowSize) / (double) step);
 
         width_count = width_count * step;
         height_count = height_count * step;
+
+
+
+        //System.out.printf("windowSize step height_count width_count: %d %d  %d %d  \n",windowSize,step, height_count, width_count);
 
         //    image segmentation into overlapping windows
         for (int k = 0; k <= height_count; k = k + step) {
@@ -72,9 +76,11 @@ public class SplitWindow {
                         histogramBins,
                         histogram);
 
+
                 if (splitValue[1] > 0.0) {
                     // cohesion algorithm
                     double[][] maskArray = new double[windowSize][windowSize];
+                    Arrays.fill(frontsArray, 0.0);
                     CohesionTest cohesion = new CohesionTest();
                     double[] cohesionValue = cohesion.computeCohesionTest(windowData,
                             windowSize,

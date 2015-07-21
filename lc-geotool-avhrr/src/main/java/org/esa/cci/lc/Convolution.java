@@ -22,18 +22,24 @@ public class Convolution {
         double[][] kernelSizeArray = new double[kernelSizeNaN][kernelSizeNaN];
         double[][] kernelSizeFlagArray = new double[kernelSizeNaN][kernelSizeNaN];
         double meanValue;
+
+        for (int y = 0; y < sourceHeight; y++) {
+            for (int x = 0; x < sourceWidth; x++) {
+                output[x][y] = Double.NaN;
+            }
+        }
         for (int y = grid; y < sourceHeight - grid; y++) {
             for (int x = grid; x < sourceWidth - grid; x++) {
                 int d = flagArray[y * (sourceWidth) + x];
-                if (d < PreparationOfSourceBands.CLOUD_FLAG) {
-                    //ocean clean
+                if (d < PreparationOfSourceBands.LAND_FLAG + PreparationOfSourceBands.OCEAN_FLAG) {
+                    //ocean + land clean
                     double sum = 0.0;
                     // It is the Convolution
                     for (int j = -radius; j < radius + 1; j++) {
                         for (int i = -radius; i < radius + 1; i++) {
                             int f = flagArray[(y + j) * (sourceWidth) + (x + i)];
-                            if (f > PreparationOfSourceBands.OCEAN_FLAG) {
-                                // ocean cloudly
+                            if (f > PreparationOfSourceBands.LAND_FLAG + PreparationOfSourceBands.OCEAN_FLAG) {
+                                // ocean + land cloudly
                                 for (int jj = -kernelRadiusNaN; jj < kernelRadiusNaN + 1; jj++) {
                                     for (int ii = -kernelRadiusNaN; ii < kernelRadiusNaN + 1; ii++) {
                                         kernelSizeArray[ii + kernelRadiusNaN][jj + kernelRadiusNaN] =
@@ -42,7 +48,8 @@ public class Convolution {
                                                 flagArray[(y + j + jj) * (sourceWidth) + x + i + ii];
                                     }
                                 }
-                                meanValue = kernel[i + radius][j + radius] * replaceFalseValue(kernelSizeArray, kernelSizeFlagArray, kernelSizeNaN);
+                                meanValue = kernel[i + radius][j + radius] *
+                                        replaceFalseValue(kernelSizeArray, kernelSizeFlagArray, kernelSizeNaN);
                             } else {
                                 meanValue = kernel[i + radius][j + radius] * sourceData[(y + j) * (sourceWidth) + x + i];
                             }
@@ -67,7 +74,9 @@ public class Convolution {
         int sumsum = 0;
         for (int j = 0; j < kernelSizeNaN; j++) {
             for (int i = 0; i < kernelSizeNaN; i++) {
-                if ((FlagArray[i][j] == PreparationOfSourceBands.OCEAN_FLAG)) {
+                if ((FlagArray[i][j] == PreparationOfSourceBands.OCEAN_FLAG ||
+                        FlagArray[i][j] == PreparationOfSourceBands.LAND_FLAG ||
+                        FlagArray[i][j] == PreparationOfSourceBands.LAND_FLAG + PreparationOfSourceBands.OCEAN_FLAG )) {
                     sum = sum + PointsArray[i][j];
                     sumsum++;
                 }

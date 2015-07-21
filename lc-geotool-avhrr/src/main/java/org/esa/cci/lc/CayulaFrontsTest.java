@@ -16,6 +16,7 @@ public class CayulaFrontsTest {
 
         for (int j = 0; j < windowSize; j++) {
             for (int i = 0; i < windowSize; i++) {
+
                 if (!Double.isNaN(maskArray[i][j])) {
                     if (maskArray[i][j] > 0.5 && j < windowSize - 1 && i < windowSize - 1) {
                         //System.out.printf("Neighbour %f %f %f  \n", maskArray[i][j], maskArray[i][j + 1], maskArray[i + 1][j]);
