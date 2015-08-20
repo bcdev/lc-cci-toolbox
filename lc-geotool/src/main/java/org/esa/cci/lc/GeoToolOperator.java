@@ -146,7 +146,8 @@ public class GeoToolOperator extends Operator {
 
         Rectangle sourceRectangle = new Rectangle(targetRectangle);
         sourceRectangle.grow(maxKernelRadius, maxKernelRadius);
-        sourceRectangle.translate(maxKernelRadius, maxKernelRadius);
+        // todo check translate requested?
+        //sourceRectangle.translate(maxKernelRadius, maxKernelRadius);
 
         Tile sourceTileMaster = getSourceTile(sourceBandMaster, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         Tile sourceTileSlave = getSourceTile(sourceBandSlave, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));

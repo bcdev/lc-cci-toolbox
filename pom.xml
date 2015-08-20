@@ -7,17 +7,18 @@
     <version>1.0</version>
     <modules>
         <module>lc-user-tools</module>
-
         <module>lc-compare-modis-meris</module>
         <module>lc-compare-spot</module>
         <module>lc-compare-spot-meris</module>
         <module>lc-compare-spot-meris-one2one</module>
         <module>lc-geotool</module>
+		<module>lc-geotool-avhrr</module>
         <module>lc-haze-removal</module>
         <module>lc-image-registration</module>
         <module>lc-land-water-tool</module>
         <module>lc-point-selection-tool</module>
         <module>lc-l3</module>
+        <module>lc_s3_land_water_mask</module>
     </modules>
     <packaging>pom</packaging>
 
