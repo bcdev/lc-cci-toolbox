@@ -48,10 +48,14 @@ public class AvhrrL1DestitchingTableOp extends Operator {
     private int minLinesSubset;
     @Parameter(defaultValue = "32400")
     private int reprojectedRasterWidth;
+    @Parameter(defaultValue = "350")
+    private int marginWidth;
+    @Parameter(defaultValue = "200")
+    private int subsetMinLines;
 
     static class Subset {
         int yMin;
-        int yMax;
+        int numLines;
         double lonMin = 180;
         double lonMax = -180;
         double latMin = 90;
@@ -64,9 +68,9 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         int ySubset = -1;
         int widthSubset = 0;
         int heightSubset = 0;
-        Subset(int yMin, int yMax) {
+        Subset(int yMin, int numLines) {
             this.yMin = yMin;
-            this.yMax = yMax;
+            this.numLines = numLines;
         }
     }
 
@@ -75,7 +79,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
 
         final int width = sourceProduct.getSceneRasterWidth();
         final int height = sourceProduct.getSceneRasterHeight();
-        qaProduct = new Product("AVHRR destitching metadata", "metadata", width, height);
+        qaProduct = new Product(sourceProduct.getFileLocation().getName(), "metadata", width, height);
         //ProductUtils.copyGeoCoding(sourceProduct, qaProduct);
 
         final ArrayList<Subset> subsets = new ArrayList<Subset>();
@@ -86,17 +90,14 @@ public class AvhrrL1DestitchingTableOp extends Operator {
             determineLonLatExtent(subset);
             determinePixelExtent(subset);
 
-            if (subset.heightSubset < minLinesSubset) {
-                continue;
-            }
             if (record.length() != 0) {
                 record.append('\n');
+                record.append(sourceProduct.getFileLocation().getName());
+                record.append('\t');
             }
-            record.append(sourceProduct.getFileLocation().getName());
-            record.append('\t');
             record.append(subset.yMin);
             record.append('\t');
-            record.append(subset.yMax);
+            record.append(subset.numLines);
             record.append('\t');
             record.append(subset.xSubset);
             record.append('\t');
@@ -108,7 +109,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         }
 
         final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s",
-                                            "Name", "yMin", "yMax", "x", "y", "width", "height");
+                                            "Name", "yMin", "numLines", "x", "y", "width", "height");
         System.out.println(legend);
         System.out.println(record);
         // add QA record to metadata of output
@@ -144,12 +145,18 @@ public class AvhrrL1DestitchingTableOp extends Operator {
             }
             // consider as gap if at least half the points in the line show the gap
             if (pixelGapCount * 2 >= tiePointRasterWidth) {
-                subsets.add(new Subset(yMin, y-1));
+                final int numLines = y - yMin;
+                if (numLines >= subsetMinLines) {
+                    subsets.add(new Subset(yMin, numLines));
+                }
                 yMin = y;
             }
         }
         // add final subset from last gap (or the beginning) to the end
-        subsets.add(new Subset(yMin, tiePointRasterHeight - 1));
+        final int numLines = tiePointRasterHeight - yMin;
+        if (subsets.isEmpty() || numLines >= subsetMinLines) {
+            subsets.add(new Subset(yMin, numLines));
+        }
     }
 
     private void determineLonLatExtent(Subset subset) {
@@ -171,9 +178,9 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         int[] isValid = new int[width];
 
         // determine image extend and extend of valid pixels
-        for (int y=subset.yMin; y<=subset.yMax; ++y) {
+        for (int y=subset.yMin; y<=subset.numLines; ++y) {
             isValid = validRaster.getPixels(0, y, width, 1, isValid);
-            for (int x=0; x<width; ++x) {
+            for (int x=marginWidth; x<width-marginWidth; ++x) {
                 pixelPos.setLocation(x, y);
                 geoCoding.getGeoPos(pixelPos, geoPos);
                 if (geoPos.getLon() < subset.lonMin) {
@@ -198,9 +205,6 @@ public class AvhrrL1DestitchingTableOp extends Operator {
                     subset.latMinValid = geoPos.getLat();
                 }
                 if (isValid[x] == 1.0 && geoPos.getLat() > subset.latMaxValid) {
-                    if (geoPos.getLat() > 84.0) {
-                        System.out.println(y + " " + x + " " + geoPos.getLat());
-                    }
                     subset.latMaxValid = geoPos.getLat();
                 }
             }
