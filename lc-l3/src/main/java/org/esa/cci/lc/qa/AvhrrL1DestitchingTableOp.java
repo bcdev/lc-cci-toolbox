@@ -178,7 +178,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         int[] isValid = new int[width];
 
         // determine image extend and extend of valid pixels
-        for (int y=subset.yMin; y<=subset.numLines; ++y) {
+        for (int y=subset.yMin; y<subset.yMin+subset.numLines; ++y) {
             isValid = validRaster.getPixels(0, y, width, 1, isValid);
             for (int x=marginWidth; x<width-marginWidth; ++x) {
                 pixelPos.setLocation(x, y);
