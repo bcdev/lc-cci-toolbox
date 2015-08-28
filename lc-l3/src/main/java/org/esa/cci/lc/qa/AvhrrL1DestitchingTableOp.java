@@ -32,7 +32,18 @@ import static org.esa.beam.util.Guardian.assertEquals;
 import static org.esa.beam.util.Guardian.assertGreaterThan;
 
 /**
- * Class providing a QA for AVHRR L1b products
+ * Operator that converts an AVHRR L1B 1km product into a QA metadata record of gap-free subsets.
+ * Some AVHRR products are stitched and fall apart into two or more subsets.
+ * The AVHRR product will run through a GPT graph of subset - reproject - subset later.
+ * This operator determines the parameters for this graph.
+ *
+ * This operator determines the gaps resulting in line subsets.
+ * Each subset is searched for its valid extent, dropping its border of 350 pixels,
+ * pixels with latitude values below -84 or above 84 degrees, and cloudy pixels.
+ *
+ * The operator adds a metadata string "QA" with a record for each subset. The record contains
+ * inputPath outputName yMin yLen x y width height
+ * with yMin yLen for the first subsetting and the other parameters for the second after reprojection.
  *
  * @author boe
  */
@@ -60,6 +71,10 @@ public class AvhrrL1DestitchingTableOp extends Operator {
     @Parameter(defaultValue = "200")
     private int subsetMinLines;
 
+    /**
+     * A Subset describes a continuous set of lines of the input product with no spatial gaps
+     * between subsequent lines.
+     */
     static class Subset {
         int yMin;
         int numLines;
@@ -81,58 +96,45 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         }
     }
 
+    /**
+     * Operator implementation method that determines the gaps and computes the extent of each subset
+     * in the target projection and the extent of the valid part of the subset.
+     * @throws OperatorException
+     */
     @Override
     public void initialize() throws OperatorException {
 
         final int width = sourceProduct.getSceneRasterWidth();
         final int height = sourceProduct.getSceneRasterHeight();
         final String name = sourceProduct.getFileLocation().getName();
-        final String absPath = "/calvalus/eodata/AVHRR_L1B/noaa" + name.substring(2,4) +
+        final String inputPath = "/calvalus/eodata/AVHRR_L1B/noaa" + name.substring(2,4) +
                 "/19" + name.substring(8,10) + "/" + name.substring(4,6) + "/" + name.substring(6,8) +
                 "/" + name;
-        qaProduct = new Product(absPath, "metadata", width, height);
-        //ProductUtils.copyGeoCoding(sourceProduct, qaProduct);
 
+        // find gaps and create subsets, at least one
         final ArrayList<Subset> subsets = new ArrayList<Subset>();
         determineSubsets(subsets);
 
-        final StringBuilder record = new StringBuilder();
+        // determine extent and write one line per subset for later concatenation
+        final StringBuilder accu = new StringBuilder();
         for (Subset subset : subsets) {
-            determineLonLatExtent(subset);
-            determinePixelExtent(subset);
-
-            if (record.length() != 0) {
-                record.append('\n');
-                record.append(absPath);
-                record.append('\t');
-            }
-            record.append(name.substring(0, 23));
-            record.append("_Line");
-            record.append(subset.yMin);
-            record.append(".l1b");
-            record.append('\t');
-            record.append(subset.yMin);
-            record.append('\t');
-            record.append(subset.numLines);
-            record.append('\t');
-            record.append(subset.xSubset);
-            record.append('\t');
-            record.append(subset.ySubset);
-            record.append('\t');
-            record.append(subset.widthSubset);
-            record.append('\t');
-            record.append(subset.heightSubset);
+            determineBoundingBox(subset);
+            determineValidBox(subset);
+            determineValidPixelSubsetAfterReprojection(subset);
+            formatSubsetRecord(subset, inputPath, name.substring(0, 23), accu);
         }
 
         final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
-                                            "Name", "output", "yMin", "numLines", "x", "y", "width", "height");
+                                            "Name", "output", "yMin", "yLen", "x", "y", "width", "height");
         System.out.println(legend);
-        System.out.println(record);
-        // add QA record to metadata of output
-        final MetadataElement qa = new MetadataElement("QA");
-        qa.addAttribute(new MetadataAttribute("record", new ProductData.ASCII(record.toString()), false));
-        qaProduct.getMetadataRoot().addElement(qa);
+        System.out.println(accu);
 
+        // add QA accu to metadata of output
+        qaProduct = new Product(inputPath, "metadata", width, height);
+        //ProductUtils.copyGeoCoding(sourceProduct, qaProduct);
+        final MetadataElement qa = new MetadataElement("QA");
+        qa.addAttribute(new MetadataAttribute("accu", new ProductData.ASCII(accu.toString()), false));
+        qaProduct.getMetadataRoot().addElement(qa);
         setTargetProduct(qaProduct);
     }
 
@@ -175,7 +177,43 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         }
     }
 
-    private void determineLonLatExtent(Subset subset) {
+    private void determineBoundingBox(Subset subset) {
+        // determine extent the same way as SubsetOp and ReprojectionOp
+        final SubsetOp subsetOp = new SubsetOp();
+        subsetOp.setParameterDefaultValues();
+        subsetOp.setSourceProduct(sourceProduct);
+        subsetOp.setRegion(new Rectangle(350, subset.yMin, 1348, subset.numLines));
+        final Product subsetProduct = subsetOp.getTargetProduct();
+        Rectangle2D mapBoundary;
+        try {
+            final CoordinateReferenceSystem sourceCrs = subsetProduct.getGeoCoding().getImageCRS();
+            final CoordinateReferenceSystem targetCrs = CRS.decode("EPSG:4326", true);
+            final int sourceW = subsetProduct.getSceneRasterWidth();
+            final int sourceH = subsetProduct.getSceneRasterHeight();
+            final Rectangle2D rect = XRectangle2D.createFromExtremums(0.5, 0.5, sourceW - 0.5, sourceH - 0.5);
+            int pointsPerSide = Math.max(sourceH, sourceW) / 10;
+            pointsPerSide = Math.max(9, pointsPerSide);
+            final ReferencedEnvelope sourceEnvelope = new ReferencedEnvelope(rect, sourceCrs);
+            final ReferencedEnvelope targetEnvelope = sourceEnvelope.transform(targetCrs, true, pointsPerSide);
+            double minX = targetEnvelope.getMinX();
+            double width = targetEnvelope.getWidth();
+            if (subsetProduct.getGeoCoding().isCrossingMeridianAt180()) {
+                minX = -180.0;
+                width = 360;
+            }
+            mapBoundary = new Rectangle2D.Double(minX, targetEnvelope.getMinY(), width, targetEnvelope.getHeight());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        subset.lonMin = mapBoundary.getX();
+        subset.lonMax = mapBoundary.getX() + mapBoundary.getWidth();
+        subset.latMin = mapBoundary.getY();
+        subset.latMax = mapBoundary.getY() + mapBoundary.getHeight();
+        // print out extends,
+        System.out.println("lonMin " + subset.lonMin + " lonMax " + subset.lonMax + " latMin " + subset.latMin + " latMax " + subset.latMax);
+    }
+
+    private void determineValidBox(Subset subset) {
         BandMathsOp validOp = BandMathsOp.createBooleanExpressionBand(filter, sourceProduct);
         final Product validProduct = validOp.getTargetProduct();
         Band validBand = validProduct.getBandAt(0);
@@ -198,19 +236,6 @@ public class AvhrrL1DestitchingTableOp extends Operator {
             isValid = validRaster.getPixels(0, y, width, 1, isValid);
             for (int x=marginWidth; x<width-marginWidth; ++x) {
                 pixelPos.setLocation(x+0.5f, y+0.5f);
-                geoCoding.getGeoPos(pixelPos, geoPos);
-                if (geoPos.getLon() < subset.lonMin) {
-                    subset.lonMin = geoPos.getLon();
-                }
-                if (geoPos.getLon() > subset.lonMax) {
-                    subset.lonMax = geoPos.getLon();
-                }
-                if (geoPos.getLat() < subset.latMin) {
-                    subset.latMin = geoPos.getLat();
-                }
-                if (geoPos.getLat() > subset.latMax) {
-                    subset.latMax = geoPos.getLat();
-                }
                 if (isValid[x] == 1.0 && geoPos.getLon() < subset.lonMinValid) {
                     subset.lonMinValid = geoPos.getLon();
                 }
@@ -226,37 +251,23 @@ public class AvhrrL1DestitchingTableOp extends Operator {
             }
         }
 
-        final SubsetOp subsetOp = new SubsetOp();
-        subsetOp.setParameterDefaultValues();
-        subsetOp.setSourceProduct(sourceProduct);
-        subsetOp.setRegion(new Rectangle(350, subset.yMin, 1348, subset.numLines));
-        final Product subsetProduct = subsetOp.getTargetProduct();
-        final Rectangle2D mapBoundary = createMapBoundary(subsetProduct);
-
-        System.out.println("lonMin " + subset.lonMin + " lonMax " + subset.lonMax + " latMin " + subset.latMin + " latMax " + subset.latMax);
         System.out.println("valMin " + subset.lonMinValid + " valMax " + subset.lonMaxValid + " valMin " + subset.latMinValid + " valMax " + subset.latMaxValid);
-        System.out.println("boxMin " + mapBoundary.getX() + " boxMax " + (mapBoundary.getX()+mapBoundary.getWidth()) + " boxMin " + mapBoundary.getY() + " boxMax " + (mapBoundary.getY()+mapBoundary.getHeight()));
-        // subset must not extent reprojected input
-        subset.lonMin = mapBoundary.getX();
-        subset.lonMax = mapBoundary.getX() + mapBoundary.getWidth();
-        subset.latMin = mapBoundary.getY();
-        subset.latMax = mapBoundary.getY() + mapBoundary.getHeight();
-        // valid subset must not extent reprojected input
-        if (subset.lonMinValid < mapBoundary.getX()) {
-            subset.lonMinValid = mapBoundary.getX();
+        // clip valid subset to reprojected input
+        if (subset.lonMinValid < subset.lonMin) {
+            subset.lonMinValid = subset.lonMin;
         }
-        if (subset.lonMaxValid > mapBoundary.getX() + mapBoundary.getWidth()) {
-            subset.lonMaxValid = mapBoundary.getX() + mapBoundary.getWidth();
+        if (subset.lonMaxValid > subset.lonMax) {
+            subset.lonMaxValid = subset.lonMax;
         }
-        if (subset.latMinValid < mapBoundary.getY()) {
-            subset.latMinValid = mapBoundary.getY();
+        if (subset.latMinValid < subset.latMin) {
+            subset.latMinValid = subset.latMin;
         }
-        if (subset.latMaxValid > mapBoundary.getY() + mapBoundary.getHeight()) {
-            subset.latMaxValid = mapBoundary.getY() + mapBoundary.getHeight();
+        if (subset.latMaxValid > subset.latMax) {
+            subset.latMaxValid = subset.latMax;
         }
     }
 
-    private void determinePixelExtent(Subset subset) {
+    private void determineValidPixelSubsetAfterReprojection(Subset subset) {
         // conversion to subset of valid image within complete reprojected image
         subset.xSubset = (int) ((subset.lonMinValid - subset.lonMin) * reprojectedRasterWidth / 360.0 + 0.5);
         subset.ySubset = (int) ((subset.latMinValid - subset.latMin) * reprojectedRasterWidth / 360.0 + 0.5);
@@ -273,28 +284,29 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         }
     }
 
-    /** copied from ReprojectionOp */
-    private static Rectangle2D createMapBoundary(final Product product) {
-        try {
-            final CoordinateReferenceSystem sourceCrs = product.getGeoCoding().getImageCRS();
-            final CoordinateReferenceSystem targetCrs = CRS.decode("EPSG:4326", true);
-            final int sourceW = product.getSceneRasterWidth();
-            final int sourceH = product.getSceneRasterHeight();
-            final Rectangle2D rect = XRectangle2D.createFromExtremums(0.5, 0.5, sourceW - 0.5, sourceH - 0.5);
-            int pointsPerSide = Math.max(sourceH, sourceW) / 10;
-            pointsPerSide = Math.max(9, pointsPerSide);
-            final ReferencedEnvelope sourceEnvelope = new ReferencedEnvelope(rect, sourceCrs);
-            final ReferencedEnvelope targetEnvelope = sourceEnvelope.transform(targetCrs, true, pointsPerSide);
-            double minX = targetEnvelope.getMinX();
-            double width = targetEnvelope.getWidth();
-            if (product.getGeoCoding().isCrossingMeridianAt180()) {
-                minX = -180.0;
-                width = 360;
-            }
-            return new Rectangle2D.Double(minX, targetEnvelope.getMinY(), width, targetEnvelope.getHeight());
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+    private void formatSubsetRecord(Subset subset, String inputPath, String outputBasename, StringBuilder accu) {
+        // the first line gets its inputPath prefix during aggregation
+        if (accu.length() != 0) {
+            accu.append('\n');
+            accu.append(inputPath);
+            accu.append('\t');
         }
+        accu.append(outputBasename);
+        accu.append("_Line");
+        accu.append(subset.yMin);
+        accu.append(".l1b");
+        accu.append('\t');
+        accu.append(subset.yMin);
+        accu.append('\t');
+        accu.append(subset.numLines);
+        accu.append('\t');
+        accu.append(subset.xSubset);
+        accu.append('\t');
+        accu.append(subset.ySubset);
+        accu.append('\t');
+        accu.append(subset.widthSubset);
+        accu.append('\t');
+        accu.append(subset.heightSubset);
     }
 
     public static class Spi extends OperatorSpi {
