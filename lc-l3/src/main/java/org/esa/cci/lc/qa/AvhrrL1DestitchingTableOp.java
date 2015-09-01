@@ -70,12 +70,20 @@ public class AvhrrL1DestitchingTableOp extends Operator {
     private int marginWidth;
     @Parameter(defaultValue = "200")
     private int subsetMinLines;
+    @Parameter(defaultValue = "true")
+    private boolean cutAtAntimeridian;
+    @Parameter(defaultValue = "-60")
+    private float cutAtLatitude;
 
     /**
      * A Subset describes a continuous set of lines of the input product with no spatial gaps
      * between subsequent lines.
      */
     static class Subset {
+        static final int WEST = -1; // between -180 and -30 longitude
+        static final int GLOBE = 0; // no anti-meridian crossing
+        static final int EAST = 1;  // between -30 and 180 longitude
+        int hemisphere;
         int yMin;
         int numLines;
         double lonMin = 180;
@@ -90,9 +98,10 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         int ySubset = -1;
         int widthSubset = 0;
         int heightSubset = 0;
-        Subset(int yMin, int numLines) {
+        Subset(int yMin, int numLines, int hemisphere) {
             this.yMin = yMin;
             this.numLines = numLines;
+            this.hemisphere = hemisphere;
         }
     }
 
@@ -119,9 +128,10 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         final StringBuilder accu = new StringBuilder();
         for (Subset subset : subsets) {
             determineBoundingBox(subset);
-            determineValidBox(subset);
-            determineValidPixelSubsetAfterReprojection(subset);
-            formatSubsetRecord(subset, inputPath, name.substring(0, 23), accu);
+            if (determineValidBox(subset)) {
+                determineValidPixelSubsetAfterReprojection(subset);
+                formatSubsetRecord(subset, inputPath, name.substring(0, 23), accu);
+            }
         }
 
         final String legend = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
@@ -133,7 +143,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         qaProduct = new Product(inputPath, "metadata", width, height);
         //ProductUtils.copyGeoCoding(sourceProduct, qaProduct);
         final MetadataElement qa = new MetadataElement("QA");
-        qa.addAttribute(new MetadataAttribute("accu", new ProductData.ASCII(accu.toString()), false));
+        qa.addAttribute(new MetadataAttribute("record", new ProductData.ASCII(accu.toString()), false));
         qaProduct.getMetadataRoot().addElement(qa);
         setTargetProduct(qaProduct);
     }
@@ -146,11 +156,10 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         assertEquals("tie point raster height", sourceProduct.getTiePointGrid("latitude").getRasterHeight(), tiePointRasterHeight);
         assertEquals("tie point raster width", sourceProduct.getTiePointGrid("latitude").getRasterWidth(), tiePointRasterWidth);
         assertGreaterThan("tie point raster width", tiePointRasterWidth, 0);
-        final double[] longitude = new double[tiePointRasterHeight * tiePointRasterWidth];
-        final double[] latitude = new double[tiePointRasterHeight * tiePointRasterWidth];
-        sourceProduct.getTiePointGrid("longitude").getPixels(0, 0, tiePointRasterWidth, tiePointRasterHeight, longitude);
-        sourceProduct.getTiePointGrid("latitude").getPixels(0, 0, tiePointRasterWidth, tiePointRasterHeight, latitude);
+        final float[] longitude = sourceProduct.getTiePointGrid("longitude").getTiePoints();
+        final float[] latitude = sourceProduct.getTiePointGrid("latitude").getTiePoints();
         int yMin = 0;
+        boolean antiMeridianCrossed = false;
         for (int y = 1; y < tiePointRasterHeight; ++y) {
             int pixelGapCount = 0;
             for (int x = 0; x < tiePointRasterWidth; ++x) {
@@ -160,20 +169,39 @@ public class AvhrrL1DestitchingTableOp extends Operator {
                         > gapLatitudeDelta) {
                     ++pixelGapCount;
                 }
+                // check whether subsequent pixels in a row are on different sides of the antimeridian
+                if (! antiMeridianCrossed
+                        && x > 0
+                        && ((longitude[(y-1)*tiePointRasterWidth+x-1] < -90 && longitude[(y-1)*tiePointRasterWidth+x] >= 90)
+                            || (longitude[(y-1)*tiePointRasterWidth+x-1] >= 90 && longitude[(y-1)*tiePointRasterWidth+x] < -90))) {
+                    antiMeridianCrossed = true;
+                    System.out.println("antimeridian crossed y=" + y + " x=" + x);
+                }
             }
             // consider as gap if at least half the points in the line show the gap
             if (pixelGapCount * 2 >= tiePointRasterWidth) {
                 final int numLines = y - yMin;
                 if (numLines >= subsetMinLines) {
-                    subsets.add(new Subset(yMin, numLines));
+                    if (cutAtAntimeridian && antiMeridianCrossed) {
+                        subsets.add(new Subset(yMin, numLines, Subset.WEST));
+                        subsets.add(new Subset(yMin, numLines, Subset.EAST));
+                    } else {
+                        subsets.add(new Subset(yMin, numLines, Subset.GLOBE));
+                    }
                 }
+                antiMeridianCrossed = false;
                 yMin = y;
             }
         }
         // add final subset from last gap (or the beginning) to the end
         final int numLines = tiePointRasterHeight - yMin;
         if (subsets.isEmpty() || numLines >= subsetMinLines) {
-            subsets.add(new Subset(yMin, numLines));
+            if (cutAtAntimeridian && antiMeridianCrossed) {
+                subsets.add(new Subset(yMin, numLines, Subset.WEST));
+                subsets.add(new Subset(yMin, numLines, Subset.EAST));
+            } else {
+                subsets.add(new Subset(yMin, numLines, Subset.GLOBE));
+            }
         }
     }
 
@@ -213,7 +241,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         System.out.println("lonMin " + subset.lonMin + " lonMax " + subset.lonMax + " latMin " + subset.latMin + " latMax " + subset.latMax);
     }
 
-    private void determineValidBox(Subset subset) {
+    private boolean determineValidBox(Subset subset) {
         BandMathsOp validOp = BandMathsOp.createBooleanExpressionBand(filter, sourceProduct);
         final Product validProduct = validOp.getTargetProduct();
         Band validBand = validProduct.getBandAt(0);
@@ -236,6 +264,12 @@ public class AvhrrL1DestitchingTableOp extends Operator {
             isValid = validRaster.getPixels(0, y, width, 1, isValid);
             for (int x=marginWidth; x<width-marginWidth; ++x) {
                 pixelPos.setLocation(x+0.5f, y+0.5f);
+                geoCoding.getGeoPos(pixelPos, geoPos);
+                if ((subset.hemisphere == Subset.WEST && geoPos.getLon() >= -30.0f)
+                    || (subset.hemisphere == Subset.EAST && geoPos.getLon() < -30.0f)
+                    || geoPos.getLat() < cutAtLatitude) {
+                    continue;
+                }
                 if (isValid[x] == 1.0 && geoPos.getLon() < subset.lonMinValid) {
                     subset.lonMinValid = geoPos.getLon();
                 }
@@ -253,6 +287,12 @@ public class AvhrrL1DestitchingTableOp extends Operator {
 
         System.out.println("valMin " + subset.lonMinValid + " valMax " + subset.lonMaxValid + " valMin " + subset.latMinValid + " valMax " + subset.latMaxValid);
         // clip valid subset to reprojected input
+        if (subset.hemisphere == Subset.WEST) {
+            subset.lonMinValid = -180.0;
+        }
+        if (subset.hemisphere == Subset.EAST) {
+            subset.lonMaxValid = 180.0;
+        }
         if (subset.lonMinValid < subset.lonMin) {
             subset.lonMinValid = subset.lonMin;
         }
@@ -265,12 +305,13 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         if (subset.latMaxValid > subset.latMax) {
             subset.latMaxValid = subset.latMax;
         }
+        return subset.lonMinValid <= subset.lonMaxValid;
     }
 
     private void determineValidPixelSubsetAfterReprojection(Subset subset) {
         // conversion to subset of valid image within complete reprojected image
         subset.xSubset = (int) ((subset.lonMinValid - subset.lonMin) * reprojectedRasterWidth / 360.0 + 0.5);
-        subset.ySubset = (int) ((subset.latMinValid - subset.latMin) * reprojectedRasterWidth / 360.0 + 0.5);
+        subset.ySubset = (int) ((subset.latMax - subset.latMaxValid) * reprojectedRasterWidth / 360.0 + 0.5);
         subset.widthSubset = (int) ((subset.lonMaxValid - subset.lonMinValid) * reprojectedRasterWidth / 360 + 0.5);
         subset.heightSubset = (int) ((subset.latMaxValid - subset.latMinValid) * reprojectedRasterWidth / 360 + 0.5);
         // clipping in case geocoding is not strictly between -180 and 180
@@ -294,6 +335,11 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         accu.append(outputBasename);
         accu.append("_Line");
         accu.append(subset.yMin);
+        if (subset.hemisphere == Subset.WEST) {
+            accu.append("W");
+        } else if (subset.hemisphere == Subset.EAST) {
+            accu.append("E");
+        }
         accu.append(".l1b");
         accu.append('\t');
         accu.append(subset.yMin);
