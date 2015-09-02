@@ -305,7 +305,7 @@ public class AvhrrL1DestitchingTableOp extends Operator {
         if (subset.latMaxValid > subset.latMax) {
             subset.latMaxValid = subset.latMax;
         }
-        return subset.lonMinValid <= subset.lonMaxValid;
+        return subset.lonMinValid < subset.lonMaxValid && subset.latMinValid < subset.latMaxValid;
     }
 
     private void determineValidPixelSubsetAfterReprojection(Subset subset) {
