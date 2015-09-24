@@ -20,7 +20,7 @@ the predefined regions WESTERN_EUROPE_AND_MEDITERRANEAN and AFRICA.
 
 Installation
 ~~~~~~~~~~~~
-As a prerequisite the CCI-LC User Tools require an installed Java SE JRE version 7 or higher
+As a prerequisite the CCI-LC User Tools require an installed Java SE 64Bit JRE version 7 or higher
 on the system. It can be obtained from the web page at
 http://www.oracle.com/technetwork/java/javase/downloads/index.html.
 
