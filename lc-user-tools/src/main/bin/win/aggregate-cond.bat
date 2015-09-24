@@ -5,7 +5,7 @@ if "%1"=="" GOTO HELP
 for /f %%j in ("java.exe") do (
     set JAVA_LOCATION=%%~dp$PATH:j
 )
-if %JAVA_LOCATION%.==. GOTO JAVA_NO_INSTALLED
+if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 

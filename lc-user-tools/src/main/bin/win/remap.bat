@@ -4,7 +4,7 @@ rem remap.bat /data/lc-map-example/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc [/d
 for /f %%j in ("java.exe") do (
     set JAVA_LOCATION=%%~dp$PATH:j
 )
-if %JAVA_LOCATION%.==. GOTO JAVA_NO_INSTALLED
+if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 
