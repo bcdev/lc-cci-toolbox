@@ -1,3 +1,4 @@
 org.esa.cci.lc.qa.MerisL1QaOp$Spi
 org.esa.cci.lc.qa.AvhrrL1QaOp$Spi
 org.esa.cci.lc.qa.AvhrrL1DestitchingTableOp$Spi
+org.esa.cci.lc.elevation.AddElevationOp$Spi
