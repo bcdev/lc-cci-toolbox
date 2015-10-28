@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.7</version>
+    <version>3.10</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,9 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.10:
+    - if Java is not installed a "1.6)" file has been created containing "java not installed" message
+    - fixed evaluation of JAVA_LOCATION in batch scripts
     Changes in 3.8:
     - variable metadata of WB NetCDF corrected, fill value NaN replaced by -1 for count bands
     - checks added to ensure that cross walking tables contain the correct sequence and number of LCCS classes.
