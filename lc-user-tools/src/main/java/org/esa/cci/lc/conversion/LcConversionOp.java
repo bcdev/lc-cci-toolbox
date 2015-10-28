@@ -29,7 +29,7 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Convert",
-        version = "3.8",
+        version = "3.9",
         internal = true,
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
