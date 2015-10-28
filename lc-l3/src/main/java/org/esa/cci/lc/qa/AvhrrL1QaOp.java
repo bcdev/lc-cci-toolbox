@@ -16,6 +16,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.descriptor.OperatorDescriptor;
 import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.util.BitSetter;
+import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -106,6 +107,7 @@ public class AvhrrL1QaOp extends Operator {
 //    public static final int F_VEGWATERRRCTW = 15;
     public static final int F_NONVEGLANDLINE = 12;
     public static final int F_VEGWATERLINE = 13;
+    public static final int F_BADGEOCODING = 14;
 
     @SourceProduct(alias = "l1b", description = "AVHRR L1b product with 'land' mask band")
     private Product sourceProduct;
@@ -131,6 +133,8 @@ public class AvhrrL1QaOp extends Operator {
     private int compactAreaMinSize;
     @Parameter(defaultValue = "2")
     private int compactAreaMaxGap;
+    @Parameter(defaultValue = "true")
+    private boolean copyInputBands;
 
     // set by counting methods as a side effect, second return value
     private int numCompactPixels = -1;
@@ -190,6 +194,7 @@ public class AvhrrL1QaOp extends Operator {
         if (numCompactNonVegetatedLandPixels > width * geoshiftLinesThreshold) {
             isBad = true;
             cause = "geocoding: " + noOfNonVegetatedLandPixels  + " pixels non-vegetated land";
+            invalidateProduct(qaFlagBuffer, width, height, 1 << F_BADGEOCODING);
         }
 
         // check for geo-shift by counting vegetated water pixels
@@ -198,12 +203,13 @@ public class AvhrrL1QaOp extends Operator {
         if (numCompactVegetatedWaterPixels > width * geoshiftLinesThreshold) {
             isBad = true;
             cause = "geocoding: " + noOfVegetatedWaterPixels  + " pixels vegetated water";
+            invalidateProduct(qaFlagBuffer, width, height, 1 << F_BADGEOCODING);
         }
 
-        final int noOfRrctLandPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTLAND);
-        final int noOfRrctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTWATER);
-        final int noOfTgctLandPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTLAND);
-        final int noOfTgctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTWATER);
+//        final int noOfRrctLandPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTLAND);
+//        final int noOfRrctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, RRCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_RRCTWATER);
+//        final int noOfTgctLandPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_LAND_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTLAND);
+//        final int noOfTgctWaterPixels = noOfMaskedPixels(sourceProduct, width, height, TGCT_WATER_CLOUD_EXPRESSION, qaFlagBuffer, 1 << F_TGCTWATER);
 //        final int noOfNonVegetatedLandRrctWPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION2, qaFlagBuffer, 1 << F_NONVEGLANDRRCTW);
 //        final int noOfVegetatedWaterRrctLPixels = noOfMaskedPixels(sourceProduct, width, height, VEGETATED_OCEAN_EXPRESSION2, qaFlagBuffer, 1 << F_VEGWATERRRCTL);
 //        final int noOfNonVegetatedLandRrctLPixels = noOfMaskedPixels(sourceProduct, width, height, NON_VEGETATED_LAND_EXPRESSION3, qaFlagBuffer, 1 << F_NONVEGLANDRRCTL);
@@ -249,28 +255,44 @@ public class AvhrrL1QaOp extends Operator {
         System.out.println(legend);
         System.out.println(qaRecord);
         // add QA record to metadata of output
+        final Product qaProduct;
+        if (copyInputBands) {
+            qaProduct = sourceProduct;
+        } else {
+            qaProduct = new Product(sourceProduct.getName() + ".qa", "QAMask", width, height);
+            ProductUtils.copyGeoCoding(sourceProduct, qaProduct);
+        }
         final MetadataElement qa = new MetadataElement("QA");
         qa.addAttribute(new MetadataAttribute("record", new ProductData.ASCII(qaRecord), false));
-        sourceProduct.getMetadataRoot().addElement(qa);
+        qaProduct.getMetadataRoot().addElement(qa);
         // add QA flag band and flag coding
-        final Band qaFlagBand = sourceProduct.addBand("qa_flags", ProductData.TYPE_INT32);
+        final Band qaFlagBand = qaProduct.addBand("qa_flags", ProductData.TYPE_INT32);
         qaFlagBand.setData(ProductData.createInstance(qaFlagBuffer));
-        FlagCoding flagCoding = createFlagCoding("qa_flags");
+        final FlagCoding flagCoding = createFlagCoding("qa_flags");
         qaFlagBand.setSampleCoding(flagCoding);
-        sourceProduct.getFlagCodingGroup().add(flagCoding);
+        qaProduct.getFlagCodingGroup().add(flagCoding);
 
-        sourceProduct.addMask("M_ZERO", "qa_flags.F_ZERO", "all counts zero", Color.cyan, 0.2f);
-        sourceProduct.addMask("M_COLOUR", "qa_flags.F_COLOUR", "counts 1 or 2 are low (below 50)", Color.cyan, 0.4f);
-        sourceProduct.addMask("M_DUPLICATE", "qa_flags.F_DUPLICATE", "duplicate line (continuous duplication of counts)", Color.cyan, 0.6f);
-        sourceProduct.addMask("M_HIGHSZA", "qa_flags.F_HIGHSZA", "SZA is above threshold (default=75)", Color.orange, 0.5f);
-        sourceProduct.addMask("M_NONVEGLAND", "qa_flags.F_NONVEGLAND", "land but NDVI < threshold (default -0.2)", Color.magenta, 0.3f);
-        sourceProduct.addMask("M_VEGWATER", "qa_flags.F_VEGWATER", "water but NDVI > threshold (default 0.15)", Color.magenta, 0.3f);
-        sourceProduct.addMask("M_HSTRIPES", "qa_flags.F_HSTRIPES", "horizontal stripes (continuous count gradient)", Color.red, 0.5f);
-        sourceProduct.addMask("M_VSTRIPES", "qa_flags.F_VSTRIPES", "vertical stripes (continuous count gradient)", Color.red, 0.5f);
-        sourceProduct.addMask("M_NONVEGLANDLINE", "qa_flags.F_NONVEGLANDLINE", "land, no water cloud, but NDVI < threshold (default -0.2), larger line segment", Color.magenta, 0.7f);
-        sourceProduct.addMask("M_VEGWATERLINE", "qa_flags.F_VEGWATERLINE", "water, no land cloud, but NDVI > threshold (default 0.15), larger line segment", Color.magenta, 0.7f);
+        qaProduct.addMask("M_ZERO", "qa_flags.F_ZERO", "all counts zero", Color.cyan, 0.2f);
+        qaProduct.addMask("M_COLOUR", "qa_flags.F_COLOUR", "counts 1 or 2 are low (below 50)", Color.cyan, 0.4f);
+        qaProduct.addMask("M_DUPLICATE", "qa_flags.F_DUPLICATE", "duplicate line (continuous duplication of counts)", Color.cyan, 0.6f);
+        qaProduct.addMask("M_HIGHSZA", "qa_flags.F_HIGHSZA", "SZA is above threshold (default=75)", Color.orange, 0.5f);
+        qaProduct.addMask("M_NONVEGLAND", "qa_flags.F_NONVEGLAND", "land but NDVI < threshold (default -0.2)", Color.magenta, 0.3f);
+        qaProduct.addMask("M_VEGWATER", "qa_flags.F_VEGWATER", "water but NDVI > threshold (default 0.15)", Color.magenta, 0.3f);
+        qaProduct.addMask("M_HSTRIPES", "qa_flags.F_HSTRIPES", "horizontal stripes (continuous count gradient)", Color.red, 0.5f);
+        qaProduct.addMask("M_VSTRIPES", "qa_flags.F_VSTRIPES", "vertical stripes (continuous count gradient)", Color.red, 0.5f);
+        qaProduct.addMask("M_NONVEGLANDLINE", "qa_flags.F_NONVEGLANDLINE", "land, no water cloud, but NDVI < threshold (default -0.2), larger line segment", Color.magenta, 0.7f);
+        qaProduct.addMask("M_VEGWATERLINE", "qa_flags.F_VEGWATERLINE", "water, no land cloud, but NDVI > threshold (default 0.15), larger line segment", Color.magenta, 0.7f);
+        qaProduct.addMask("M_BADGEOCODING", "qa_flags.F_BADGEOCODING", "corrupted geocoding, too much veg water or non-veg land", Color.magenta, 0.9f);
 
-        setTargetProduct(sourceProduct);
+        setTargetProduct(qaProduct);
+    }
+
+    private void invalidateProduct(int[] qaFlagBuffer, int width, int height, int flagBit) {
+        for (int y=0; y<height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                qaFlagBuffer[y * width + x] |= flagBit;
+            }
+        }
     }
 
     private int noFlaggedPixels(int[] qaFlagBuffer, int height, int width, int flag) {
@@ -305,6 +327,7 @@ public class AvhrrL1QaOp extends Operator {
 //        flagCoding.addFlag("F_VEGWATERRRCTW", BitSetter.setFlag(0, F_VEGWATERRRCTW), "water, no water cloud, but NDVI > threshold (default 0.15)");
         flagCoding.addFlag("F_NONVEGLANDLINE", BitSetter.setFlag(0, F_NONVEGLANDLINE), "land, no water cloud, but NDVI < threshold (default -0.2), larger line segment");
         flagCoding.addFlag("F_VEGWATERLINE", BitSetter.setFlag(0, F_VEGWATERLINE), "water, no land cloud, but NDVI > threshold (default 0.15), larger line segment");
+        flagCoding.addFlag("F_BADGEOCODING", BitSetter.setFlag(0, F_BADGEOCODING), "corrupted geocoding, too much veg water or non-veg land");
         return flagCoding;
     }
 
