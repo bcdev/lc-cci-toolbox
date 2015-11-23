@@ -47,8 +47,8 @@ public class LCCS {
         this.classDescriptions = classDescriptions;
         this.flagMeanings = flagMeanings;
         this.noDataClassValue = classValues[0];
-        this.classValueToIndexMap = new TreeMap<Short, Short>();
-        this.indexToClassValueMap = new TreeMap<Short, Short>();
+        this.classValueToIndexMap = new TreeMap<>();
+        this.indexToClassValueMap = new TreeMap<>();
         for (short i = 0; i < classValues.length; i++) {
             short classValue = classValues[i];
             classValueToIndexMap.put(classValue, i);
@@ -60,8 +60,7 @@ public class LCCS {
     }
 
     static LCCS load(Reader reader) throws IOException {
-        CsvReader csvReader = new CsvReader(reader, new char[]{'|'});
-        try {
+        try (CsvReader csvReader = new CsvReader(reader, new char[]{'|'})) {
             List<String[]> records = csvReader.readStringRecords();
             short[] classValues = new short[records.size()];
             String[] classDescriptions = new String[records.size()];
@@ -73,8 +72,6 @@ public class LCCS {
                 flagMeaning[i] = record[2];
             }
             return new LCCS(classValues, classDescriptions, flagMeaning);
-        } finally {
-            csvReader.close();
         }
     }
 
