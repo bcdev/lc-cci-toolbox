@@ -9,7 +9,6 @@ import org.esa.beam.binning.VariableContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +43,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
         AreaCalculator areaCalculator = (AreaCalculator) propertySet.getValue("areaCalculator");
 
-        PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
+        Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
 
         String[] spatialFeatureNames = createSpatialFeatureNames();
         String[] outputFeatureNames = createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames);
@@ -64,23 +63,21 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
         File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
 
-        PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
+        Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
         String[] spatialFeatureNames = createSpatialFeatureNames();
         return createOutputFeatureNames(outputLCCSClasses, numMajorityClasses, pftLut, spatialFeatureNames);
     }
 
-    private static PftLut getPftLut(boolean outputPFTClasses, File userPFTConversionTable) {
-        PftLut pftLut = null;
+    private static Lccs2PftLut getPftLut(boolean outputPFTClasses, File userPFTConversionTable) {
+        Lccs2PftLut pftLut = null;
         if (outputPFTClasses) {
             try {
-                InputStream resourceAsStream;
                 if (userPFTConversionTable != null) {
-                    resourceAsStream = new FileInputStream(userPFTConversionTable);
+                    InputStreamReader reader = new InputStreamReader(new FileInputStream(userPFTConversionTable));
+                    pftLut = new Lccs2PftLutBuilder().withLccs2PftTableReader(reader).create();
                 } else {
-                    resourceAsStream = LcMapAggregator.class.getResourceAsStream("Default_LCCS2PFT_LUT.csv");
+                    pftLut = new Lccs2PftLutBuilder().create();
                 }
-                InputStreamReader reader = new InputStreamReader(resourceAsStream);
-                pftLut = PftLut.load(reader);
                 final int numLccsClasses = LCCS.getInstance().getNumClasses();
                 final int numConversionFactors = pftLut.getConversionFactors().length;
                 if (numConversionFactors != numLccsClasses) {
@@ -104,7 +101,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         return spatialFeatureNames;
     }
 
-    private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, PftLut pftLut,
+    private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, Lccs2PftLut pftLut,
                                                      String[] spatialFeatureNames) {
         List<String> outputFeatureNames = new ArrayList<String>();
         if (outputLCCSClasses) {

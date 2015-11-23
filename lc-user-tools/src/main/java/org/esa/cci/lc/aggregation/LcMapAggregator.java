@@ -23,10 +23,10 @@ class LcMapAggregator extends AbstractAggregator {
     private AreaCalculator areaCalculator;
     private boolean outputLCCSClasses;
     private int numMajorityClasses;
-    private PftLut pftLut;
+    private Lccs2PftLut pftLut;
 
     public LcMapAggregator(boolean outputLCCSClasses, int numMajorityClasses,
-                           AreaCalculator calculator, PftLut pftLut, String[] spatialFeatureNames, String[] outputFeatureNames) {
+                           AreaCalculator calculator, Lccs2PftLut pftLut, String[] spatialFeatureNames, String[] outputFeatureNames) {
         super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;

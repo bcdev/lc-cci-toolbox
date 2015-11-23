@@ -16,7 +16,8 @@
 
 package org.esa.cci.lc.conversion;
 
-import org.esa.cci.lc.aggregation.PftLut;
+import org.esa.cci.lc.aggregation.Lccs2PftLut;
+import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 
 import java.io.File;
 import java.io.FileReader;
@@ -68,7 +69,8 @@ public class RemapGraphCreator {
             GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
             try (Reader fr = new FileReader(lutFile)) {
-                PftLut lut = PftLut.load(fr, false, true);
+                final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().withLccs2PftTableReader(fr);
+                Lccs2PftLut lut = lutBuilder.readAllColumns(true).useScaleFactor(1.0f).create();
                 graphWriter.init(lut.getPFTNames());
                 graphWriter.writeHeader();
 
