@@ -19,13 +19,13 @@ public class PftLut {
     private final String[] pftNames;
     private final float[][] conversionFactors;
 
-    public static PftLut load(Reader reader) throws IOException {
-        return load(reader, true, false);
+    public static PftLut load(Reader lccs2PftTableReader) throws IOException {
+        return load(lccs2PftTableReader, true, false);
     }
 
-    public static PftLut load(Reader reader, boolean applyScaling, boolean readAllColumns) throws IOException {
+    public static PftLut load(Reader lccs2PftTableReader, boolean applyScaling, boolean readAllColumns) throws IOException {
         final LCCS lccs = LCCS.getInstance();
-        BufferedReader bufReader = new BufferedReader(reader);
+        BufferedReader bufReader = new BufferedReader(lccs2PftTableReader);
         String comment = readComment(bufReader);
         try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
             String[] pftNames = ensureValidNames(csvReader.readRecord());
