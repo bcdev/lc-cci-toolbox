@@ -51,6 +51,7 @@ public class Lccs2PftLutBuilder {
      *                       {@code True} is used in the remap case.
      * @return the current builder
      */
+    // todo - remove if remap tests are still working (done by Grit) (mp - 2015.11.24)
     public Lccs2PftLutBuilder readAllColumns(boolean readAllColumns) {
         this.readAllColumns = readAllColumns;
         return this;

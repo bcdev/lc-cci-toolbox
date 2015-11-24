@@ -21,7 +21,8 @@ import org.junit.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author thomas
@@ -36,8 +37,10 @@ public class RemapGraphCreatorTest {
         graphWriter.init(new String[]{"chl", "sst", "tsm"});
         graphWriter.writeHeader();
 
-        graphWriter.extendExpression("source_band", new float[]{5F, 3F, 9F, 2F});
-        graphWriter.extendExpression("source_band", new float[]{15F, 0F, Float.NaN, 37F});
+        final float[] record = new float[]{3F, 9F, 2F};
+        graphWriter.extendExpression("source_band", 5, record);
+        final float[] record1 = new float[]{0F, Float.NaN, 37F};
+        graphWriter.extendExpression("source_band", 15, record1);
 
         graphWriter.finishExpressions();
 

@@ -16,6 +16,7 @@
 
 package org.esa.cci.lc.conversion;
 
+import org.esa.cci.lc.aggregation.LCCS;
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
@@ -26,8 +27,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Simple main class that creates a GPT-compliant band maths graph XML file from an input CSV table.</p>
@@ -71,13 +72,16 @@ public class RemapGraphCreator {
 
             try (Reader fr = new FileReader(lutFile)) {
                 final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().withLccs2PftTableReader(fr);
-                Lccs2PftLut lut = lutBuilder.readAllColumns(true).useScaleFactor(1.0f).create();
+                Lccs2PftLut lut = lutBuilder.readAllColumns(false).useScaleFactor(1.0f).create();
                 graphWriter.init(lut.getPFTNames());
                 graphWriter.writeHeader();
 
+                final LCCS lccs = LCCS.getInstance();
+                final short[] classValues = lccs.getClassValues();
                 float[][] conversionFactors = lut.getConversionFactors();
-                for (float[] conversionFactorsRecord : conversionFactors) {
-                    graphWriter.extendExpression(SOURCE_BAND_NAME, conversionFactorsRecord);
+                for (int i = 0; i < conversionFactors.length; i++) {
+                    float[] conversionFactorsRecord = conversionFactors[i];
+                    graphWriter.extendExpression(SOURCE_BAND_NAME, classValues[i], conversionFactorsRecord);
                 }
 
                 graphWriter.finishExpressions();
@@ -132,7 +136,7 @@ public class RemapGraphCreator {
 
         private final Writer writer;
         private final String lutName;
-        private Map<Integer, TargetBandSpec> targetBandSpecs;
+        private List<TargetBandSpec> targetBandSpecs;
 
         GraphWriter(Writer writer, String lutName) {
             this.writer = writer;
@@ -151,14 +155,14 @@ public class RemapGraphCreator {
             targetBandSpecs = createTargetBandSpecs(header);
         }
 
-        void extendExpression(String sourceBand, float[] record) {
-            for (int i = 1; i < record.length; i++) {
+        void extendExpression(String sourceBandName, int lccsClass, float[] record) {
+            for (int i = 0; i < record.length; i++) {
                 if (Float.isNaN(record[i])) {
                     continue;
                 }
                 TargetBandSpec targetBandSpec = targetBandSpecs.get(i);
                 targetBandSpec.expression +=
-                        sourceBand + " == " + format(record[0]) + " ? " + format(record[i]) + " : ";
+                        sourceBandName + " == " + format(lccsClass) + " ? " + format(record[i]) + " : ";
             }
         }
 
@@ -168,13 +172,13 @@ public class RemapGraphCreator {
         }
 
         void finishExpressions() {
-            for (TargetBandSpec targetBandSpec : targetBandSpecs.values()) {
+            for (TargetBandSpec targetBandSpec : targetBandSpecs) {
                 targetBandSpec.expression += "0";
             }
         }
 
         void writeTargetBands() throws IOException {
-            for (TargetBandSpec targetBandSpec : targetBandSpecs.values()) {
+            for (TargetBandSpec targetBandSpec : targetBandSpecs) {
                 writer.append(String.format(
                         "<targetBand>\n" +
                         "    <name>%s</name>\n" +
@@ -190,12 +194,12 @@ public class RemapGraphCreator {
             }
         }
 
-        private Map<Integer, TargetBandSpec> createTargetBandSpecs(String[] header) {
-            Map<Integer, TargetBandSpec> map = new HashMap<>();
-            for (int i = 0; i < header.length; i++) {
-                map.put(i + 1, new TargetBandSpec(header[i]));
+        private List<TargetBandSpec> createTargetBandSpecs(String[] header) {
+            List<TargetBandSpec> list = new ArrayList<>();
+            for (String aHeader : header) {
+                list.add(new TargetBandSpec(aHeader));
             }
-            return map;
+            return list;
         }
 
     }
