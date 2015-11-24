@@ -85,7 +85,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                                                      numLccsClasses, numConversionFactors);
                     throw new IllegalStateException(msg);
                 }
-            } catch (IOException e) {
+            } catch (IOException | Lccs2PftLutException e) {
                 throw new IllegalStateException(e);
             }
         }

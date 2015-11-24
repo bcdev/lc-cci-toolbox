@@ -57,7 +57,7 @@ public class Lccs2PftLutBuilder {
     }
 
 
-    public Lccs2PftLut create() throws IOException {
+    public Lccs2PftLut create() throws Lccs2PftLutException {
         final Reader reader = getReader();
 
         return PftLut.load(reader, isReadAllColumns(), getScaleFactor());
@@ -89,29 +89,19 @@ public class Lccs2PftLutBuilder {
         private final String[] pftNames;
         private final float[][] conversionFactors;
 
-        public static Lccs2PftLut load(Reader lccs2PftTableReader, boolean readAllColumns, float scaleFactor) throws IOException {
+        public static Lccs2PftLut load(Reader lccs2PftTableReader, boolean readAllColumns, float scaleFactor) throws Lccs2PftLutException {
             final LCCS lccs = LCCS.getInstance();
             BufferedReader bufReader = new BufferedReader(lccs2PftTableReader);
-            String comment = readComment(bufReader);
             try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
+                String comment = readComment(bufReader);
                 String[] pftNames = ensureValidNames(csvReader.readRecord());
                 List<String[]> records = csvReader.readStringRecords();
                 int conversionFactorCount = pftNames.length + (readAllColumns ? 1 : 0);
                 float[][] conversionFactors = new float[records.size()][conversionFactorCount];
                 for (int i = 0; i < records.size() && i < lccs.getClassValues().length; i++) {
                     String[] record = records.get(i);
-                    if (!String.valueOf(lccs.getClassValue((short) i)).equals(record[0])) {
-                        final String format = String.format(
-                                "Error reading the PFT conversion table. In row %d the name %s of the LCCS class " +
-                                        "should be %d.", i, record[0], lccs.getClassValue((short) i));
-                        throw new IOException(format);
-                    }
-                    if (record.length - 1 != pftNames.length) {
-                        final String format = String.format(
-                                "Error reading the PFT conversion table. In row %d the number of conversion factors " +
-                                        "should be %d.", i, pftNames.length);
-                        throw new IOException(format);
-                    }
+                    ensureCorrectClasses(i, lccs.getClassValue((short) i), record[0]);
+                    ensureCorrectNumFactors(i, pftNames, record);
                     int firstColumn = readAllColumns ? 0 : 1;
                     for (int j = firstColumn; j < record.length; j++) {
                         float pftFactor = Float.NaN;
@@ -123,13 +113,10 @@ public class Lccs2PftLutBuilder {
                         conversionFactors[i][conversionFactorIndex] = pftFactor;
                     }
                 }
-                if (records.size() != lccs.getClassValues().length) {
-                    final String format = String.format(
-                            "Error reading the PFT conversion table. Number of rows %d does not match " +
-                                    "LCCS class count %d.", records.size(), lccs.getClassValues().length);
-                    throw new IOException(format);
-                }
+                ensureExpectedClassCount(lccs, conversionFactors);
                 return new PftLut(pftNames, conversionFactors, comment);
+            } catch (IOException e) {
+                throw new Lccs2PftLutException("Error while reading Lccs2PftLut", e);
             }
         }
 
@@ -173,5 +160,33 @@ public class Lccs2PftLutBuilder {
             }
             return comment;
         }
+
+        private static void ensureExpectedClassCount(LCCS lccs, float[][] conversionFactors) throws Lccs2PftLutException {
+            if (conversionFactors.length != lccs.getClassValues().length) {
+                final String msg = String.format(
+                        "Error reading the PFT conversion table. Number of rows %d does not match " +
+                                "LCCS class count %d.", conversionFactors.length, lccs.getClassValues().length);
+                throw new Lccs2PftLutException(msg);
+            }
+        }
+
+        private static void ensureCorrectNumFactors(int i, String[] pftNames, String[] record) throws Lccs2PftLutException {
+            if (record.length - 1 != pftNames.length) {
+                final String msg = String.format(
+                        "Error reading the PFT conversion table in row %d. Found %d conversion factors " +
+                                "but expected %d.", i, record.length - 1, pftNames.length);
+                throw new Lccs2PftLutException(msg);
+            }
+        }
+
+        private static void ensureCorrectClasses(int rowIndex, int expectedClass, String actualClass) throws Lccs2PftLutException {
+            if (!String.valueOf(expectedClass).equals(actualClass)) {
+                final String msg = String.format(
+                        "Error reading the PFT conversion table in row %d. Found %s but expected %d",
+                        rowIndex, actualClass, expectedClass);
+                throw new Lccs2PftLutException(msg);
+            }
+        }
+
     }
 }

@@ -18,6 +18,7 @@ package org.esa.cci.lc.conversion;
 
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
+import org.esa.cci.lc.aggregation.Lccs2PftLutException;
 
 import java.io.File;
 import java.io.FileReader;
@@ -84,7 +85,7 @@ public class RemapGraphCreator {
 
             }
             graphWriter.writeFooter(outputFileName);
-        } catch (IOException e) {
+        } catch (IOException | Lccs2PftLutException e) {
             throw new IllegalStateException(e);
         }
         return outputFile;

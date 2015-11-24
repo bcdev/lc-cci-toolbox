@@ -140,7 +140,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                     if (pftLut.getComment() != null) {
                         lcProperties.put("pft_table_comment", pftLut.getComment());
                     }
-                } catch (IOException e) {
+                } catch (IOException | Lccs2PftLutException e) {
                     throw new OperatorException("Could not read specified PFT table.", e);
                 }
             } else {
