@@ -123,6 +123,7 @@ class LcMapAggregator extends AbstractAggregator {
             for (int i = 0; i < temporalVector.size(); i++) {
                 float classArea = temporalVector.get(i);
                 if (!Float.isNaN(classArea)) {
+                    // todo - use LCCS_CLASSES.getClassValue(i) to retrieve classPftFactors from pftLut (mp - 20151125)
                     float[] classPftFactors = conversionFactors[i];
                     for (int j = 0; j < classPftFactors.length; j++) {
                         float factor = classPftFactors[j];
