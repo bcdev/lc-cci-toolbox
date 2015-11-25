@@ -181,7 +181,7 @@ public class Lccs2PftLutBuilder {
                 }
 
                 final float expectedSum = 100 * scaleFactor;
-                if (!MathUtils.equalValues(expectedSum, sum, 0)) {
+                if (!MathUtils.equalValues(expectedSum, sum, 1.0e-6)) {
                     final String msg = String.format(
                             "Error reading the PFT conversion table in row %d. Sum of factors is %.1f but expexted %.1f",
                             i + 1, sum, expectedSum);
