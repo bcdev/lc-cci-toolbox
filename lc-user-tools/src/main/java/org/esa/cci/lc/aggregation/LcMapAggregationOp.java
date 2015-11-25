@@ -136,7 +136,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                                  String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName()));
                 try {
                     final FileReader fileReader = new FileReader(userPFTConversionTable);
-                    Lccs2PftLut pftLut = new Lccs2PftLutBuilder().withLccs2PftTableReader(fileReader).create();
+                    final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().withLccs2PftTableReader(fileReader);
+                    lutBuilder.useScaleFactor(1 / 100.0f);
+                    Lccs2PftLut pftLut = lutBuilder.create();
                     if (pftLut.getComment() != null) {
                         lcProperties.put("pft_table_comment", pftLut.getComment());
                     }

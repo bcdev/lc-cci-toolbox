@@ -72,7 +72,7 @@ public class RemapGraphCreator {
 
             try (Reader fr = new FileReader(lutFile)) {
                 final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().withLccs2PftTableReader(fr);
-                Lccs2PftLut lut = lutBuilder.readAllColumns(false).useScaleFactor(1.0f).create();
+                Lccs2PftLut lut = lutBuilder.readAllColumns(false).create();
                 graphWriter.init(lut.getPFTNames());
                 graphWriter.writeHeader();
 

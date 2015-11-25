@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class Lccs2PftLutBuilder {
 
-    static final float DEFAULT_SCALE_FACTOR = 1 / 100.0f;
+    static final float DEFAULT_SCALE_FACTOR = 1.0f;
 
     private static final String DEFAULT_LCCS2_PFT_LUT_FILENAME = "Default_LCCS2PFT_LUT.csv";
 
@@ -38,7 +38,7 @@ public class Lccs2PftLutBuilder {
     }
 
     /**
-     * @param scaleFactor used to scale the values read from the table. Default is {@code 1/100}.
+     * @param scaleFactor used to scale the values read from the table. Default is {@code 1.0}.
      * @return the current builder
      */
     public Lccs2PftLutBuilder useScaleFactor(float scaleFactor) {

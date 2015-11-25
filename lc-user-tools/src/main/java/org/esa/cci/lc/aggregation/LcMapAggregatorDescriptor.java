@@ -72,12 +72,13 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         Lccs2PftLut pftLut = null;
         if (outputPFTClasses) {
             try {
+                Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
+                lutBuilder.useScaleFactor(1 / 100.0f);
                 if (userPFTConversionTable != null) {
                     InputStreamReader reader = new InputStreamReader(new FileInputStream(userPFTConversionTable));
-                    pftLut = new Lccs2PftLutBuilder().withLccs2PftTableReader(reader).create();
-                } else {
-                    pftLut = new Lccs2PftLutBuilder().create();
+                    lutBuilder = lutBuilder.withLccs2PftTableReader(reader);
                 }
+                pftLut = lutBuilder.create();
                 final int numLccsClasses = LCCS.getInstance().getNumClasses();
                 final int numConversionFactors = pftLut.getConversionFactors().length;
                 if (numConversionFactors != numLccsClasses) {
