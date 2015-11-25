@@ -79,13 +79,6 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                     lutBuilder = lutBuilder.useLccs2PftTable(reader);
                 }
                 pftLut = lutBuilder.create();
-                final int numLccsClasses = LCCS.getInstance().getNumClasses();
-                final int numConversionFactors = pftLut.getConversionFactors().length;
-                if (numConversionFactors != numLccsClasses) {
-                    final String msg = String.format("PFT conversion table not valid. Should have %d conversion factors but has %d",
-                                                     numLccsClasses, numConversionFactors);
-                    throw new IllegalStateException(msg);
-                }
             } catch (IOException | Lccs2PftLutException e) {
                 throw new IllegalStateException(e);
             }
