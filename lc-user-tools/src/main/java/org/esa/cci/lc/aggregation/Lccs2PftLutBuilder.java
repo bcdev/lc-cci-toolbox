@@ -30,7 +30,7 @@ public class Lccs2PftLutBuilder {
      * @param lccs2PftTableReader reader which is used to read in the Lccs2Pft-Look-Up-Table.
      * @return the current builder
      */
-    public Lccs2PftLutBuilder withLccs2PftTableReader(Reader lccs2PftTableReader) {
+    public Lccs2PftLutBuilder useLccs2PftTable(Reader lccs2PftTableReader) {
         reader = lccs2PftTableReader;
         return this;
     }

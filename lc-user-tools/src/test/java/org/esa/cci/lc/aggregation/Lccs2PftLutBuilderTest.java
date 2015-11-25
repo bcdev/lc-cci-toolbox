@@ -62,7 +62,7 @@ public class Lccs2PftLutBuilderTest {
 
     private Lccs2PftLut testPftLut(float scaleFactor, Reader reader) throws IOException, Lccs2PftLutException {
         Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
-        lutBuilder = lutBuilder.withLccs2PftTableReader(reader);
+        lutBuilder = lutBuilder.useLccs2PftTable(reader);
         lutBuilder = lutBuilder.useScaleFactor(scaleFactor);
         Lccs2PftLut pftLut = lutBuilder.create();
         checkDefaultLUT(pftLut, scaleFactor);

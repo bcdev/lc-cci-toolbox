@@ -76,7 +76,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                 lutBuilder.useScaleFactor(1 / 100.0f);
                 if (userPFTConversionTable != null) {
                     InputStreamReader reader = new InputStreamReader(new FileInputStream(userPFTConversionTable));
-                    lutBuilder = lutBuilder.withLccs2PftTableReader(reader);
+                    lutBuilder = lutBuilder.useLccs2PftTable(reader);
                 }
                 pftLut = lutBuilder.create();
                 final int numLccsClasses = LCCS.getInstance().getNumClasses();
