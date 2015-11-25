@@ -60,40 +60,6 @@ public class Lccs2PftLutBuilderTest {
         }
     }
 
-    @Test
-    public void testLutWithReadAllColumns() throws Exception {
-        Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
-        lutBuilder = lutBuilder.withLccs2PftTableReader(createStream(PFT_TEST_TABLE_DEFAULT));
-        lutBuilder.readAllColumns(true);
-        Lccs2PftLut pftLut = lutBuilder.create();
-        assertNotNull(pftLut);
-
-        String[] pftNames = pftLut.getPFTNames();
-        assertEquals(4, pftNames.length);
-        assertEquals("PFT_1", pftNames[0]);
-        assertEquals("PFT_4", pftNames[3]);
-
-        float[][] factors = pftLut.getConversionFactors();
-        assertEquals(37, factors.length);
-        assertEquals(5, factors[0].length);
-        assertEquals(DEFAULT_SCALE_FACTOR * 0f, factors[0][0], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 7.6f, factors[0][1], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 90f, factors[0][2], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[0][3], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 2.4f, factors[0][4], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 10, factors[1][0], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[1][1], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 60.0f, factors[1][2], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 40.0, factors[1][3], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[1][4], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 11, factors[2][0], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[2][1], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[2][2], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[2][3], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * Float.NaN, factors[2][4], 01.0e-6);
-        assertEquals(DEFAULT_SCALE_FACTOR * 100.0f, factors[4][3], 01.0e-6);
-    }
-
     private Lccs2PftLut testPftLut(float scaleFactor, Reader reader) throws IOException, Lccs2PftLutException {
         Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
         lutBuilder = lutBuilder.withLccs2PftTableReader(reader);

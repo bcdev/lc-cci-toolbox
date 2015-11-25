@@ -20,12 +20,10 @@ public class Lccs2PftLutBuilder {
 
     private Reader reader;
     private float scaleFactor;
-    private boolean readAllColumns;
 
     public Lccs2PftLutBuilder() {
         this.reader = null;
         this.scaleFactor = DEFAULT_SCALE_FACTOR;
-        this.readAllColumns = false;
     }
 
     /**
@@ -46,22 +44,10 @@ public class Lccs2PftLutBuilder {
         return this;
     }
 
-    /**
-     * @param readAllColumns uses all columns. Default is {@code false}.
-     *                       {@code True} is used in the remap case.
-     * @return the current builder
-     */
-    // todo - remove if remap tests are still working (done by Grit) (mp - 2015.11.24)
-    public Lccs2PftLutBuilder readAllColumns(boolean readAllColumns) {
-        this.readAllColumns = readAllColumns;
-        return this;
-    }
-
-
     public Lccs2PftLut create() throws Lccs2PftLutException {
         final Reader reader = getReader();
 
-        return PftLut.load(reader, isReadAllColumns(), getScaleFactor());
+        return PftLut.load(reader, getScaleFactor());
     }
 
     private Reader getReader() {
@@ -77,10 +63,6 @@ public class Lccs2PftLutBuilder {
         return scaleFactor;
     }
 
-    private boolean isReadAllColumns() {
-        return readAllColumns;
-    }
-
     private static class PftLut implements Lccs2PftLut {
 
         private static final String COMMENT_PREFIX = "#";
@@ -90,28 +72,25 @@ public class Lccs2PftLutBuilder {
         private final String[] pftNames;
         private final float[][] conversionFactors;
 
-        public static Lccs2PftLut load(Reader lccs2PftTableReader, boolean readAllColumns, float scaleFactor) throws Lccs2PftLutException {
+        public static Lccs2PftLut load(Reader lccs2PftTableReader, float scaleFactor) throws Lccs2PftLutException {
             final LCCS lccs = LCCS.getInstance();
             BufferedReader bufReader = new BufferedReader(lccs2PftTableReader);
             try (CsvReader csvReader = new CsvReader(bufReader, SEPARATORS, true, COMMENT_PREFIX)) {
                 String comment = readComment(bufReader);
                 String[] pftNames = ensureValidNames(csvReader.readRecord());
                 List<String[]> records = csvReader.readStringRecords();
-                int conversionFactorCount = pftNames.length + (readAllColumns ? 1 : 0);
-                float[][] conversionFactors = new float[records.size()][conversionFactorCount];
+                float[][] conversionFactors = new float[records.size()][pftNames.length];
                 for (int i = 0; i < records.size() && i < lccs.getClassValues().length; i++) {
                     String[] record = records.get(i);
                     ensureCorrectClasses(i, lccs.getClassValue((short) i), record[0]);
                     ensureCorrectNumFactors(i, pftNames, record);
-                    int firstColumn = readAllColumns ? 0 : 1;
-                    for (int j = firstColumn; j < record.length; j++) {
+                    for (int j = 1; j < record.length; j++) {
                         float pftFactor = Float.NaN;
                         String stringValue = record[j];
                         if (!stringValue.isEmpty()) {
                             pftFactor = Float.parseFloat(stringValue) * scaleFactor;
                         }
-                        int conversionFactorIndex = readAllColumns ? j : j - 1;
-                        conversionFactors[i][conversionFactorIndex] = pftFactor;
+                        conversionFactors[i][(j - 1)] = pftFactor;
                     }
                 }
                 ensureExpectedClassCount(lccs, conversionFactors);
