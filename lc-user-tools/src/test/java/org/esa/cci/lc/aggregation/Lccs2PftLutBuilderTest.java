@@ -50,6 +50,17 @@ public class Lccs2PftLutBuilderTest {
     }
 
     @Test
+    public void testLutWithFactorsDoNotSumTo100() throws Exception {
+        URL missingClasses = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_NOT_100_SUM.csv");
+        try {
+            testPftLut(1.0f, createStream(missingClasses));
+            fail("Expected Exception. Sum of factors for class 0 is only 90.");
+        } catch (Lccs2PftLutException e) {
+            assertTrue(e.getMessage().contains("90"));
+        }
+    }
+
+    @Test
     public void testLutWRONGClasses() throws Exception {
         URL missingClasses = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_WRONG_CLASS.csv");
         try {
@@ -91,7 +102,7 @@ public class Lccs2PftLutBuilderTest {
         assertEquals(scaleFactor * Float.NaN, factors[2][0], 01.0e-6);
         assertEquals(scaleFactor * Float.NaN, factors[2][1], 01.0e-6);
         assertEquals(scaleFactor * Float.NaN, factors[2][2], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[2][3], 01.0e-6);
+        assertEquals(scaleFactor * 100.0f, factors[2][3], 01.0e-6);
         assertEquals(scaleFactor * 100.0f, factors[4][2], 01.0e-6);
     }
 

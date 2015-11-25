@@ -1,6 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.util.io.CsvReader;
+import org.esa.beam.util.math.MathUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -94,6 +95,7 @@ public class Lccs2PftLutBuilder {
                     }
                 }
                 ensureExpectedClassCount(lccs, conversionFactors);
+                ensureFactorSumIs100(conversionFactors, scaleFactor);
                 return new PftLut(pftNames, conversionFactors, comment);
             } catch (IOException e) {
                 throw new Lccs2PftLutException("Error while reading Lccs2PftLut", e);
@@ -167,6 +169,28 @@ public class Lccs2PftLutBuilder {
                 throw new Lccs2PftLutException(msg);
             }
         }
+
+        private static void ensureFactorSumIs100(float[][] conversionFactorsArray, float scaleFactor) throws Lccs2PftLutException {
+            for (int i = 0; i < conversionFactorsArray.length; i++) {
+                float[] conversionFactors = conversionFactorsArray[i];
+                float sum = 0;
+                for (float conversionFactor : conversionFactors) {
+                    if (!Float.isNaN(conversionFactor)) {
+                        sum += conversionFactor;
+                    }
+                }
+
+                final float expectedSum = 100 * scaleFactor;
+                if (!MathUtils.equalValues(expectedSum, sum, 0)) {
+                    final String msg = String.format(
+                            "Error reading the PFT conversion table in row %d. Sum of factors is %.1f but expexted %.1f",
+                            i + 1, sum, expectedSum);
+                    throw new Lccs2PftLutException(msg);
+                }
+            }
+
+        }
+
 
     }
 }
