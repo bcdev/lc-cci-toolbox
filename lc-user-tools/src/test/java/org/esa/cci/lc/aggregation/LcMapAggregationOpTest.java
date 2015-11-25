@@ -14,7 +14,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 
@@ -79,8 +79,7 @@ public class LcMapAggregationOpTest {
         aggrOp.setGridName(PlanetaryGridName.REGULAR_GAUSSIAN_GRID);
         aggrOp.setNumRows(80);
         aggrOp.setPredefinedRegion(PredefinedRegion.GREENLAND);
-
-        aggrOp.initialize();
+        initOp(aggrOp);
     }
 
     @Test
@@ -124,11 +123,11 @@ public class LcMapAggregationOpTest {
     }
 
     @Test
-    public void testNumRows_LessThanTwo() {
+    public void testNumRows_LessThanTwo() throws IOException {
         LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(1);
         try {
-            aggrOp.initialize();
+            initOp(aggrOp);
         } catch (OperatorException oe) {
             String message = oe.getMessage().toLowerCase();
             assertThat(message, containsString("rows"));
@@ -136,11 +135,11 @@ public class LcMapAggregationOpTest {
     }
 
     @Test
-    public void testNumRows_OddValue() {
+    public void testNumRows_OddValue() throws IOException {
         LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setNumRows(23);
         try {
-            aggrOp.initialize();
+            initOp(aggrOp);
         } catch (OperatorException oe) {
             String message = oe.getMessage().toLowerCase();
             assertThat(message, containsString("rows"));
@@ -148,13 +147,13 @@ public class LcMapAggregationOpTest {
     }
 
     @Test
-    public void testNoOutputSelected() {
+    public void testNoOutputSelected() throws IOException {
         LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setOutputLCCSClasses(false);
         aggrOp.setOutputPFTClasses(false);
         aggrOp.setNumMajorityClasses(0);
         try {
-            aggrOp.initialize();
+            initOp(aggrOp);
         } catch (OperatorException oe) {
             String message = oe.getMessage();
             assertThat(message, containsString("LCCS"));
