@@ -37,11 +37,11 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
 
         PropertySet propertySet = aggregatorConfig.asPropertySet();
-        boolean outputLCCSClasses = (Boolean) propertySet.getValue("outputLCCSClasses");
-        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
-        File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
-        AreaCalculator areaCalculator = (AreaCalculator) propertySet.getValue("areaCalculator");
+        boolean outputLCCSClasses = propertySet.getValue("outputLCCSClasses");
+        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
+        boolean outputPFTClasses = propertySet.getValue("outputPFTClasses");
+        File userPFTConversionTable = propertySet.getValue("userPFTConversionTable");
+        AreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
 
         Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
 
@@ -58,10 +58,10 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
     @Override
     public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
         PropertySet propertySet = aggregatorConfig.asPropertySet();
-        boolean outputLCCSClasses = (Boolean) propertySet.getValue("outputLCCSClasses");
-        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        boolean outputPFTClasses = (Boolean) propertySet.getValue("outputPFTClasses");
-        File userPFTConversionTable = (File) propertySet.getValue("userPFTConversionTable");
+        boolean outputLCCSClasses = propertySet.getValue("outputLCCSClasses");
+        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
+        boolean outputPFTClasses = propertySet.getValue("outputPFTClasses");
+        File userPFTConversionTable = propertySet.getValue("userPFTConversionTable");
 
         Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
         String[] spatialFeatureNames = createSpatialFeatureNames();
@@ -97,7 +97,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
 
     private static String[] createOutputFeatureNames(boolean outputLCCSClasses, int numMajorityClasses, Lccs2PftLut pftLut,
                                                      String[] spatialFeatureNames) {
-        List<String> outputFeatureNames = new ArrayList<String>();
+        List<String> outputFeatureNames = new ArrayList<>();
         if (outputLCCSClasses) {
             outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
         }
