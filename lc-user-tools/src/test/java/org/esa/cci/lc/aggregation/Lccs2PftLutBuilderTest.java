@@ -19,7 +19,7 @@ public class Lccs2PftLutBuilderTest {
 
     @Test
     public void testLutWithoutComment() throws Exception {
-        testPftLut(DEFAULT_SCALE_FACTOR, createStream(PFT_TEST_TABLE_DEFAULT));
+        checkPftLut(DEFAULT_SCALE_FACTOR, createStream(PFT_TEST_TABLE_DEFAULT));
     }
 
     private Reader createStream(URL resourceUrl) throws IOException {
@@ -29,20 +29,20 @@ public class Lccs2PftLutBuilderTest {
     @Test
     public void testLutWithComment() throws Exception {
         URL withComment = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_WITH_COMMENT.csv");
-        final Lccs2PftLut pftLut = testPftLut(DEFAULT_SCALE_FACTOR, createStream(withComment));
+        final Lccs2PftLut pftLut = checkPftLut(DEFAULT_SCALE_FACTOR, createStream(withComment));
         assertEquals("This ia a comment", pftLut.getComment());
     }
 
     @Test
     public void testLutWithScaleFactor() throws Exception {
-        testPftLut(12.0f, createStream(PFT_TEST_TABLE_DEFAULT));
+        checkPftLut(12.0f, createStream(PFT_TEST_TABLE_DEFAULT));
     }
 
     @Test
     public void testLutMissingClasses() throws Exception {
         URL missingClasses = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_MISSING_CLASS.csv");
         try {
-            testPftLut(1.0f, createStream(missingClasses));
+            checkPftLut(1.0f, createStream(missingClasses));
             fail("Expected Exception. Class 72 is missing.");
         } catch (Lccs2PftLutException e) {
             assertTrue(e.getMessage().contains("72"));
@@ -53,7 +53,7 @@ public class Lccs2PftLutBuilderTest {
     public void testLutWithFactorsDoNotSumTo100() throws Exception {
         URL missingClasses = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_NOT_100_SUM.csv");
         try {
-            testPftLut(1.0f, createStream(missingClasses));
+            checkPftLut(1.0f, createStream(missingClasses));
             fail("Expected Exception. Sum of factors for class 0 is only 90.");
         } catch (Lccs2PftLutException e) {
             assertTrue(e.getMessage().contains("90"));
@@ -64,14 +64,14 @@ public class Lccs2PftLutBuilderTest {
     public void testLutWRONGClasses() throws Exception {
         URL missingClasses = Lccs2PftLutBuilderTest.class.getResource("PFT_TEST_TABLE_WRONG_CLASS.csv");
         try {
-            testPftLut(1.0f, createStream(missingClasses));
+            checkPftLut(1.0f, createStream(missingClasses));
             fail("Expected Exception. Class 154 is unknown.");
         } catch (Lccs2PftLutException e) {
             assertTrue(e.getMessage().contains("154"));
         }
     }
 
-    private Lccs2PftLut testPftLut(float scaleFactor, Reader reader) throws IOException, Lccs2PftLutException {
+    private Lccs2PftLut checkPftLut(float scaleFactor, Reader reader) throws IOException, Lccs2PftLutException {
         Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
         lutBuilder = lutBuilder.useLccs2PftTable(reader);
         lutBuilder = lutBuilder.useScaleFactor(scaleFactor);
