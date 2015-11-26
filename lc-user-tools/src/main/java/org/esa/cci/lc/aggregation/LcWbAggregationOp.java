@@ -2,9 +2,6 @@ package org.esa.cci.lc.aggregation;
 
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -129,22 +126,6 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);
         binningOp.setOutputType(outputType == null ? "Product" : outputType);
         binningOp.setOutputFormat(outputFormat);
-    }
-
-    private PlanetaryGrid createPlanetaryGrid() {
-        PlanetaryGrid planetaryGrid;
-        PlanetaryGridName gridName = getGridName();
-        int numRows = getNumRows();
-        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
-            planetaryGrid = new PlateCarreeGrid(numRows);
-        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new RegularGaussianGrid(numRows);
-//        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {   // not yet supported
-//            planetaryGrid = new ReducedGaussianGrid(numRows);
-        } else {
-            planetaryGrid = new SEAGrid(numRows);
-        }
-        return planetaryGrid;
     }
 
     void setOutputFormat(String outputFormat) {

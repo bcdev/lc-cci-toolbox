@@ -3,9 +3,6 @@ package org.esa.cci.lc.aggregation;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -58,6 +55,21 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                              "If not given, the standard LC-CCI table is used.",
             label = "User Defined PFT Conversion Table")
     private File userPFTConversionTable;
+
+    @Parameter(description = "A map containing additional classes which can be used to refine " +
+            "the conversion from LCCS to PFT classes",
+            label = "Additional User Map")
+    private File additionalUserMap;
+
+    @Parameter(description = "Whether or not to add the classes of the user map to the output. " +
+            "This option is only applicable if the additional user map is given too.",
+            label = "Output User Map Classes", defaultValue = "false")
+    private boolean outputUserMapClasses;
+
+    @Parameter(description = "The conversion table from LCCS to PFTs considering the additional user map.  " +
+            "This option is only applicable if the additional user map is given too.",
+            label = "Additional User Map PFT Conversion Table")
+    private File additionalUserMapPFTConversionTable;
 
     @Parameter(description = "Whether or not to add the accuracy variable to the output.",
             label = "Output Accuracy Value", defaultValue = "true")
@@ -184,22 +196,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFormat(getOutputFormat());
     }
 
-    private PlanetaryGrid createPlanetaryGrid() {
-        PlanetaryGrid planetaryGrid;
-        PlanetaryGridName gridName = getGridName();
-        int numRows = getNumRows();
-        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
-            planetaryGrid = new PlateCarreeGrid(numRows);
-        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
-            planetaryGrid = new RegularGaussianGrid(numRows);
-//        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {   // not yet supported
-//            planetaryGrid = new ReducedGaussianGrid(numRows);
-        } else {
-            planetaryGrid = new SEAGrid(numRows);
-        }
-        return planetaryGrid;
-    }
-
     public boolean isOutputLCCSClasses() {
         return outputLCCSClasses;
     }
@@ -229,6 +225,10 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         if (numMajorityClasses == 0 && !outputLCCSClasses && !outputPFTClasses) {
             throw new OperatorException("Either LCCS classes, majority classes or PFT classes have to be selected.");
         }
+        if (userPFTConversionTable != null && !userPFTConversionTable.isFile()) {
+            throw new OperatorException(String.format("The path to the PFT conversion table is not valid [%s].",
+                                                      userPFTConversionTable));
+        }
         LCCS lccs = LCCS.getInstance();
         if (numMajorityClasses > lccs.getNumClasses()) {
             throw new OperatorException("Number of majority classes exceeds number of LC classes.");
@@ -239,6 +239,23 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                 throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
             }
         }
+        if (outputUserMapClasses && additionalUserMap == null) {
+            throw new OperatorException("If the user map classes shall be included the user map file must be specified too.");
+        }
+        if (additionalUserMapPFTConversionTable != null) {
+            if (!additionalUserMapPFTConversionTable.isFile()) {
+                throw new OperatorException(String.format("The path to the additional user map PFT conversion table is not valid [%s].",
+                                                          additionalUserMap));
+            }
+            if (additionalUserMap == null) {
+                throw new OperatorException("The additional user map conversion table is specified but not the user map file.");
+            }
+        }
+        if (additionalUserMap != null && !additionalUserMap.isFile()) {
+            throw new OperatorException(String.format("The path to the additional user map is not valid [%s].",
+                                                      additionalUserMap));
+        }
+
     }
 
     /**

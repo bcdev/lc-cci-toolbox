@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.beam.binning.PlanetaryGrid;
 import org.esa.beam.binning.support.PlateCarreeGrid;
 import org.esa.beam.binning.support.RegularGaussianGrid;
 import org.esa.beam.binning.support.SEAGrid;
@@ -271,6 +272,22 @@ public abstract class AbstractLcAggregationOp extends Operator {
 
     protected void addAggregationTypeToLcProperties(String type) {
         lcProperties.put("aggregationType", type);
+    }
+
+    protected PlanetaryGrid createPlanetaryGrid() {
+        PlanetaryGrid planetaryGrid;
+        PlanetaryGridName gridName = getGridName();
+        int numRows = getNumRows();
+        if (PlanetaryGridName.GEOGRAPHIC_LAT_LON.equals(gridName)) {
+            planetaryGrid = new PlateCarreeGrid(numRows);
+        } else if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(gridName)) {
+            planetaryGrid = new RegularGaussianGrid(numRows);
+//        } else if (PlanetaryGridName.REDUCED_GAUSSIAN_GRID.equals(gridName)) {   // not yet supported
+//            planetaryGrid = new ReducedGaussianGrid(numRows);
+        } else {
+            planetaryGrid = new SEAGrid(numRows);
+        }
+        return planetaryGrid;
     }
 
     protected String getPlanetaryGridClassName() {
