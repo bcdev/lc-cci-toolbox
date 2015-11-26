@@ -119,12 +119,11 @@ class LcMapAggregator extends AbstractAggregator {
         }
 
         if (pftLut != null) {
-            float[][] conversionFactors = pftLut.getConversionFactors();
             for (int i = 0; i < temporalVector.size(); i++) {
                 float classArea = temporalVector.get(i);
                 if (!Float.isNaN(classArea)) {
                     final int lccsClass = LCCS_CLASSES.getClassValue(i);
-                    float[] classPftFactors = getPftConversionFactors(lccsClass);
+                    float[] classPftFactors = pftLut.getConversionFactors(lccsClass);
                     for (int j = 0; j < classPftFactors.length; j++) {
                         float factor = classPftFactors[j];
                         if (!Float.isNaN(factor)) {
@@ -140,10 +139,6 @@ class LcMapAggregator extends AbstractAggregator {
                 }
             }
         }
-    }
-
-    private float[] getPftConversionFactors(int lccsClass) {
-        return pftLut.getConversionFactors(lccsClass);
     }
 
     private void initVector(WritableVector outputVector, float initValue) {
