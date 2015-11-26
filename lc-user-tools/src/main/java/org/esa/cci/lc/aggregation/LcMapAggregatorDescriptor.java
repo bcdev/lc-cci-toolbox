@@ -41,6 +41,10 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         int numMajorityClasses = propertySet.getValue("numMajorityClasses");
         boolean outputPFTClasses = propertySet.getValue("outputPFTClasses");
         File userPFTConversionTable = propertySet.getValue("userPFTConversionTable");
+        // todo - use in LcMapAggregator configuration (mp - 20151126)
+        File additionalUserMap = propertySet.getValue("additionalUserMap");
+        boolean outputUserMapClasses = propertySet.getValue("outputUserMapClasses");
+        File additionalUserMapPFTConversionTable = propertySet.getValue("additionalUserMapPFTConversionTable");
         AreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
 
         Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
@@ -62,6 +66,8 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
         int numMajorityClasses = propertySet.getValue("numMajorityClasses");
         boolean outputPFTClasses = propertySet.getValue("outputPFTClasses");
         File userPFTConversionTable = propertySet.getValue("userPFTConversionTable");
+        // todo - use creating feature name for additional map (mp - 20151126)
+        boolean outputUserMapClasses = propertySet.getValue("outputUserMapClasses");
 
         Lccs2PftLut pftLut = getPftLut(outputPFTClasses, userPFTConversionTable);
         String[] spatialFeatureNames = createSpatialFeatureNames();

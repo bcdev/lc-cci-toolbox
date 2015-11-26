@@ -148,8 +148,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                                  String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName()));
                 try {
                     final FileReader fileReader = new FileReader(userPFTConversionTable);
+                    // lutBuilder only used to read the comment of table.
                     final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().useLccs2PftTable(fileReader);
-                    lutBuilder.useScaleFactor(1 / 100.0f);
                     Lccs2PftLut pftLut = lutBuilder.create();
                     if (pftLut.getComment() != null) {
                         lcProperties.put("pft_table_comment", pftLut.getComment());
@@ -158,7 +158,10 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                     throw new OperatorException("Could not read specified PFT table.", e);
                 }
             } else {
-                lcProperties.put("pft_table", "LCCCI conform PFT conversion table used.");
+                lcProperties.put("pft_table", "LC-CCI conform PFT conversion table used.");
+            }
+            if (additionalUserMapPFTConversionTable != null) {
+                throw new IllegalStateException("Not yet implemented!");
             }
         } else {
             lcProperties.put("pft_table", "No PFT computed.");
@@ -180,6 +183,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setSuperSampling(1);
         LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
                                                                                 outputPFTClasses, userPFTConversionTable,
+                                                                                additionalUserMap, outputUserMapClasses,
+                                                                                additionalUserMapPFTConversionTable,
                                                                                 areaCalculator);
         AggregatorConfig[] aggregatorConfigs;
         if (outputAccuracy) {
@@ -202,6 +207,14 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
     public void setOutputLCCSClasses(boolean outputLCCSClasses) {
         this.outputLCCSClasses = outputLCCSClasses;
+    }
+
+    public boolean isOutputUserMapClasses() {
+        return outputUserMapClasses;
+    }
+
+    public void setOutputUserMapClasses(boolean outputUserMapClasses) {
+        this.outputUserMapClasses = outputUserMapClasses;
     }
 
     int getNumMajorityClasses() {

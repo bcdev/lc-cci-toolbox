@@ -111,15 +111,12 @@ public class LcMapAggregationOpTest {
     @Test
     public void testDefaultValues() {
         LcMapAggregationOp aggrOp = (LcMapAggregationOp) aggregationSpi.createOperator();
-        assertThat(aggrOp.getGridName(), isNull());
+        assertThat(aggrOp.getGridName(), new IsNull());
         assertThat(aggrOp.isOutputLCCSClasses(), is(true));
         assertThat(aggrOp.getNumMajorityClasses(), is(5));
         assertThat(aggrOp.isOutputPFTClasses(), is(true));
         assertThat(aggrOp.getNumRows(), is(2160));
-    }
-
-    private IsNull isNull() {
-        return new IsNull();
+        assertThat(aggrOp.isOutputUserMapClasses(), is(false));
     }
 
     @Test
