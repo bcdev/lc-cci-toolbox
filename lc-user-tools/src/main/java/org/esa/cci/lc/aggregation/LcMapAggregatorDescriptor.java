@@ -88,7 +88,7 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
 
     private static String[] createSpatialFeatureNames() {
         String[] spatialFeatureNames = new String[LCCS_CLASSES.getNumClasses()];
-        short[] classValues = LCCS_CLASSES.getClassValues();
+        int[] classValues = LCCS_CLASSES.getClassValues();
         for (int i = 0; i < spatialFeatureNames.length; i++) {
             spatialFeatureNames[i] = "class_area_" + classValues[i];
         }

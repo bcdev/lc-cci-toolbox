@@ -20,12 +20,12 @@ public class LCCS {
      */
     private static final String CLASS_DEFINTIONS_FILE = "LCCS_class_defintions.csv";
     private static LCCS singleton = null;
-    private final short[] classValues;
+    private final int[] classValues;
     private final String[] classDescriptions;
     private final String[] flagMeanings;
-    private final short noDataClassValue;
-    private final Map<Short, Short> classValueToIndexMap;
-    private final Map<Short, Short> indexToClassValueMap;
+    private final int noDataClassValue;
+    private final Map<Integer, Integer> classValueToIndexMap;
+    private final Map<Integer, Integer> indexToClassValueMap;
 
     public static LCCS getInstance() {
         if (singleton == null) {
@@ -38,7 +38,7 @@ public class LCCS {
         return singleton;
     }
 
-    LCCS(short[] classValues, String[] classDescriptions, String[] flagMeanings) {
+    LCCS(int[] classValues, String[] classDescriptions, String[] flagMeanings) {
         Guardian.assertEquals("classValues.length == classDescriptions.length",
                               classValues.length == classDescriptions.length, true);
         Guardian.assertEquals("classValues.length == flagMeaning.length",
@@ -49,11 +49,11 @@ public class LCCS {
         this.noDataClassValue = classValues[0];
         this.classValueToIndexMap = new TreeMap<>();
         this.indexToClassValueMap = new TreeMap<>();
-        for (short i = 0; i < classValues.length; i++) {
-            short classValue = classValues[i];
+        for (int i = 0; i < classValues.length; i++) {
+            int classValue = classValues[i];
             classValueToIndexMap.put(classValue, i);
         }
-        for (Map.Entry<Short, Short> entry : classValueToIndexMap.entrySet()) {
+        for (Map.Entry<Integer, Integer> entry : classValueToIndexMap.entrySet()) {
             indexToClassValueMap.put(entry.getValue(), entry.getKey());
         }
 
@@ -62,7 +62,7 @@ public class LCCS {
     static LCCS load(Reader reader) throws IOException {
         try (CsvReader csvReader = new CsvReader(reader, new char[]{'|'})) {
             List<String[]> records = csvReader.readStringRecords();
-            short[] classValues = new short[records.size()];
+            int[] classValues = new int[records.size()];
             String[] classDescriptions = new String[records.size()];
             String[] flagMeaning = new String[records.size()];
             for (int i = 0; i < records.size(); i++) {
@@ -79,7 +79,7 @@ public class LCCS {
         return classValues.length;
     }
 
-    public short[] getClassValues() {
+    public int[] getClassValues() {
         return classValues;
     }
 
@@ -91,14 +91,14 @@ public class LCCS {
         return flagMeanings;
     }
 
-    int getClassIndex(short classValue) {
+    int getClassIndex(int classValue) {
         if (!classValueToIndexMap.containsKey(classValue)) {
             classValue = noDataClassValue;
         }
         return classValueToIndexMap.get(classValue);
     }
 
-    int getClassValue(short classIndex) {
+    int getClassValue(int classIndex) {
         return indexToClassValueMap.get(classIndex);
     }
 }

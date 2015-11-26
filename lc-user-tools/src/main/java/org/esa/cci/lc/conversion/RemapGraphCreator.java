@@ -77,7 +77,7 @@ public class RemapGraphCreator {
                 graphWriter.writeHeader();
 
                 final LCCS lccs = LCCS.getInstance();
-                final short[] classValues = lccs.getClassValues();
+                final int[] classValues = lccs.getClassValues();
                 float[][] conversionFactors = lut.getConversionFactors();
                 // todo - use LCCS_CLASSES.getClassValue(i) to retrieve classPftFactors from pftLut (mp - 20151125)
                 for (int i = 0; i < conversionFactors.length; i++) {

@@ -192,7 +192,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
                 //final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                short[] lccsClassFlagValues = LCCS.getInstance().getClassValues();
+                int[] lccsClassFlagValues = LCCS.getInstance().getClassValues();
                 final ArrayByte.D1 valids = new ArrayByte.D1(lccsClassFlagValues.length);
                 for (int i = 0; i < lccsClassFlagValues.length; ++i) {
                     valids.set(i, (byte) lccsClassFlagValues[i]);

@@ -4,7 +4,8 @@ import org.junit.Test;
 
 import java.io.StringReader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Marco Peters
@@ -13,12 +14,12 @@ public class LCCSTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testValuesAndDescriptionsMustBeOfSameSize() throws Exception {
-        new LCCS(new short[]{1, 2, 3}, new String[]{"Failure"}, new String[]{"kaputt"});
+        new LCCS(new int[]{1, 2, 3}, new String[]{"Failure"}, new String[]{"kaputt"});
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValuesAndMeaningsMustBeOfSameSize() throws Exception {
-        new LCCS(new short[]{1, 2, 3}, new String[]{"one", "two", "three"}, new String[]{"kaputt"});
+        new LCCS(new int[]{1, 2, 3}, new String[]{"one", "two", "three"}, new String[]{"kaputt"});
     }
 
     @Test()
@@ -38,7 +39,7 @@ public class LCCSTest {
         LCCS lccs = LCCS.load(new StringReader(TEST_STRING));
 
         assertEquals(7, lccs.getNumClasses());
-        short[] classValues = lccs.getClassValues();
+        int[] classValues = lccs.getClassValues();
         assertEquals(7, classValues.length);
         assertEquals(0, classValues[0]);
         assertEquals(12, classValues[3]);
