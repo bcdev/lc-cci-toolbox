@@ -9,7 +9,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.Debug;
 import org.esa.cci.lc.io.LcCondMetadata;
@@ -29,12 +28,14 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Convert",
-        version = "3.9",
+        version = "3.10",
         internal = true,
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
-        description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names")
-public class LcConversionOp extends Operator implements Output {
+        description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names",
+        autoWriteDisabled = true
+)
+public class LcConversionOp extends Operator {
 
     private static final String LC_MAP_FORMAT = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_WB_FORMAT = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;

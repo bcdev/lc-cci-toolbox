@@ -10,7 +10,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
@@ -24,11 +23,13 @@ import java.io.File;
 
 @OperatorMetadata(
         alias = "LCCCI.Subset",
-        version = "0.8",
+        version = "3.10",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
-        description = "Allows to subset LC map and condition products.")
-public class LcSubsetOp extends Operator implements Output {
+        description = "Allows to subset LC map and condition products.",
+        autoWriteDisabled = true
+)
+public class LcSubsetOp extends Operator {
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
