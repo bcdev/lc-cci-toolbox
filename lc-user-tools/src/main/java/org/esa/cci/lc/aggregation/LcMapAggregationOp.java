@@ -35,7 +35,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Map",
-        version = "3.8",
+        version = "3.10",
         authors = "Marco Peters",
         copyright = "(c) 2014 by Brockmann Consult",
         description = "Allows to aggregate LC map products.",
@@ -43,24 +43,24 @@ import java.util.Locale;
 public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
     @Parameter(description = "Whether or not to add LCCS classes to the output.",
-               label = "Output LCCS classes", defaultValue = "true")
+            label = "Output LCCS Classes", defaultValue = "true")
     private boolean outputLCCSClasses;
 
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5",
-               label = "Number of majority classes")
+            label = "Number of Majority Classes")
     private int numMajorityClasses;
 
     @Parameter(description = "Whether or not to add PFT classes to the output.",
-               label = "Output PFT classes", defaultValue = "true")
+            label = "Output PFT Classes", defaultValue = "true")
     private boolean outputPFTClasses;
 
     @Parameter(description = "The user defined conversion table from LCCS to PFTs. " +
                              "If not given, the standard LC-CCI table is used.",
-               label = "User defined PFT conversion table")
+            label = "User Defined PFT Conversion Table")
     private File userPFTConversionTable;
 
     @Parameter(description = "Whether or not to add the accuracy variable to the output.",
-               label = "Output accuracy value", defaultValue = "true")
+            label = "Output Accuracy Value", defaultValue = "true")
     private boolean outputAccuracy;
 
     boolean outputTargetProduct;

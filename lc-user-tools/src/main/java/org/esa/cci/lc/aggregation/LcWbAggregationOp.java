@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.WB",
-        version = "3.8",
+        version = "3.10",
         authors = "Marco Peters, Martin Boettcher",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Allows to aggregate LC WB products.",
@@ -37,11 +37,11 @@ import java.util.Locale;
 public class LcWbAggregationOp extends AbstractLcAggregationOp {
 
     @Parameter(description = "Whether or not to add the count variables to the output.",
-               label = "Output count values", defaultValue = "true")
+            label = "Output Count Values", defaultValue = "true")
     private boolean outputWbClasses;
 
     @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "1",
-               label = "Number of majority classes")
+            label = "Number of Majority Classes")
     private int numMajorityClasses;
 
     boolean outputTargetProduct;
