@@ -120,7 +120,18 @@ public class Lccs2PftLutBuilder {
 
         @Override
         public float[][] getConversionFactors() {
-            return conversionFactors;
+            return conversionFactors.clone();
+        }
+
+        @Override
+        public float[] getConversionFactors(int lccsClass) {
+            final int classIndex = LCCS.getInstance().getClassIndex(lccsClass);
+            return conversionFactors[classIndex].clone();
+        }
+
+        @Override
+        public float[] getConversionFactors(int lccsClass, int additionalUserClass) {
+            throw new IllegalStateException("Not implemented yet!");
         }
 
         private static String[] ensureValidNames(String[] pftNames) {
