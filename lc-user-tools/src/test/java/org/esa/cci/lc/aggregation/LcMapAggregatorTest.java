@@ -282,7 +282,9 @@ public class LcMapAggregatorTest {
         LcMapAggregatorDescriptor lcMapAggregatorDescriptor = new LcMapAggregatorDescriptor();
 
         LcMapAggregatorConfig config = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
-                                                                 outputPFTClasses, lccs2PFTFile, areaCalculator);
+                                                                 outputPFTClasses, lccs2PFTFile,
+                                                                 null, false, null,
+                                                                 areaCalculator);
         return (LcMapAggregator) lcMapAggregatorDescriptor.createAggregator(varCtx, config);
     }
 
