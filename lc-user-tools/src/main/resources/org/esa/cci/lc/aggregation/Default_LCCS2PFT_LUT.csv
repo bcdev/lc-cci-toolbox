@@ -1,3 +1,4 @@
+# Default LCCS to PFT lookup table
 LCCS Class|Tree Broadleaf Evergreen|Tree Broadleaf Deciduous|Tree Needleleaf Evergreen|Tree Needleleaf Deciduous|Shrub Broadleaf Evergreen|Shrub Broadleaf Deciduous|Shrub Needleleaf Evergreen|Shrub Needleleaf Deciduous |Natural Grass|Managed Grass|Bare Soil|Water|Snow/Ice|No Data
 0||||||||||||||100
 10||||||||||100||||
