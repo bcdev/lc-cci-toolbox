@@ -159,7 +159,7 @@ public class LcMapAggregatorTest {
     public void testAggregation_WithUserPFTs() throws URISyntaxException {
         int numMajorityClasses = 0;
         BinContext ctx = createCtx();
-        URL resource = LcMapAggregatorTest.class.getResource("Test_User_LCCS_2PFT.csv");
+        URL resource = LcMapAggregatorTest.class.getResource("TEST_LCCS2PFT_USER.csv");
         File lccs2PFTFile = new File(resource.toURI());
 
         int numObs = 10;

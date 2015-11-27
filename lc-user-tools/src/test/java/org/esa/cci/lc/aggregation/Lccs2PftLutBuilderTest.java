@@ -88,22 +88,20 @@ public class Lccs2PftLutBuilderTest {
         assertEquals("PFT_1", pftNames[0]);
         assertEquals("PFT_4", pftNames[3]);
 
-        float[][] factors = pftLut.getConversionFactors();
-        assertEquals(37, factors.length);
-        assertEquals(4, factors[0].length);
-        assertEquals(scaleFactor * 7.6f, factors[0][0], 01.0e-6);
-        assertEquals(scaleFactor * 90f, factors[0][1], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[0][2], 01.0e-6);
-        assertEquals(scaleFactor * 2.4f, factors[0][3], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[1][0], 01.0e-6);
-        assertEquals(scaleFactor * 60.0f, factors[1][1], 01.0e-6);
-        assertEquals(scaleFactor * 40.0, factors[1][2], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[1][3], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[2][0], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[2][1], 01.0e-6);
-        assertEquals(scaleFactor * Float.NaN, factors[2][2], 01.0e-6);
-        assertEquals(scaleFactor * 100.0f, factors[2][3], 01.0e-6);
-        assertEquals(scaleFactor * 100.0f, factors[4][2], 01.0e-6);
+        assertEquals(4, pftLut.getConversionFactors(0).length);
+        assertEquals(scaleFactor * 7.6f, pftLut.getConversionFactors(0)[0], 01.0e-6);
+        assertEquals(scaleFactor * 90f, pftLut.getConversionFactors(0)[1], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(0)[2], 01.0e-6);
+        assertEquals(scaleFactor * 2.4f, pftLut.getConversionFactors(0)[3], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(10)[0], 01.0e-6);
+        assertEquals(scaleFactor * 60.0f, pftLut.getConversionFactors(10)[1], 01.0e-6);
+        assertEquals(scaleFactor * 40.0, pftLut.getConversionFactors(10)[2], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(10)[3], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(11)[0], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(11)[1], 01.0e-6);
+        assertEquals(scaleFactor * Float.NaN, pftLut.getConversionFactors(11)[2], 01.0e-6);
+        assertEquals(scaleFactor * 100.0f, pftLut.getConversionFactors(11)[3], 01.0e-6);
+        assertEquals(scaleFactor * 100.0f, pftLut.getConversionFactors(20)[2], 01.0e-6);
     }
 
 

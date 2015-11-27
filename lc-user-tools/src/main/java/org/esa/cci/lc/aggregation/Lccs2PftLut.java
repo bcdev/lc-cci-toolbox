@@ -8,8 +8,6 @@ public interface Lccs2PftLut {
 
     String[] getPFTNames();
 
-    float[][] getConversionFactors();
-
     float[] getConversionFactors(int lccsClass);
 
     float[] getConversionFactors(int lccsClass, int additionalUserClass);

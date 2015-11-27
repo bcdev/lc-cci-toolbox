@@ -59,12 +59,7 @@ class BasicPftLut implements Lccs2PftLut {
 
     @Override
     public String[] getPFTNames() {
-        return pftNames;
-    }
-
-    @Override
-    public float[][] getConversionFactors() {
-        return conversionFactors.clone();
+        return pftNames.clone();
     }
 
     @Override
@@ -75,7 +70,7 @@ class BasicPftLut implements Lccs2PftLut {
 
     @Override
     public float[] getConversionFactors(int lccsClass, int additionalUserClass) {
-        throw new IllegalStateException("Not implemented yet!");
+        return getConversionFactors(lccsClass);
     }
 
     private static String[] ensureValidNames(String[] pftNames) {
@@ -143,7 +138,6 @@ class BasicPftLut implements Lccs2PftLut {
                 throw new Lccs2PftLutException(msg);
             }
         }
-
     }
 
 

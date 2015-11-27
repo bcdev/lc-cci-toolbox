@@ -51,8 +51,7 @@ public class Lccs2PftLutBuilder {
 
         Lccs2PftLut lut = BasicPftLut.load(reader, getScaleFactor());
         if (additionalLutReader != null) {
-            // todo - not yet implemented (mp - 20151126)
-            lut = AdditionalMapPftLut.load(/*lut, additionalLutReader*/);
+            lut = AdditionalMapPftLut.create(lut, additionalLutReader, scaleFactor);
         }
         return lut;
     }
