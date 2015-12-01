@@ -128,7 +128,7 @@ class AdditionalMapPftLut implements Lccs2PftLut {
         final float expectedSum = 100 * scaleFactor;
         if (!MathUtils.equalValues(expectedSum, sum, 1.0e-6)) {
             final String msg = String.format(
-                    "Error reading the additional user map PFT conversion table in class [%d, %d]. Sum of factors is %.1f but expexted %.1f",
+                    "Error reading the additional user map PFT conversion table in class [%d, %d]. Sum of factors is %f but expected %f",
                     lccsClass, additionalMap, sum, expectedSum);
             throw new Lccs2PftLutException(msg);
         }
