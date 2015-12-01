@@ -133,7 +133,8 @@ public class LcMapAggregatorDescriptor implements AggregatorDescriptor {
                                                      String[] spatialFeatureNames) {
         List<String> outputFeatureNames = new ArrayList<>();
         if (outputLCCSClasses) {
-            outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
+            final int numClasses = LCCS_CLASSES.getClassValues().length;
+            outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames).subList(0, numClasses));
         }
         if (outputUserMapClasses) {
             outputFeatureNames.add("user_map");
