@@ -68,7 +68,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
             label = "Output User Map Classes", defaultValue = "false")
     private boolean outputUserMapClasses;
 
-    @Parameter(description = "The conversion table from LCCS to PFTs considering the additional user map.  " +
+    @Parameter(description = "The conversion table from LCCS to PFTs considering the additional user map. " +
             "This option is only applicable if the additional user map is given too.",
             label = "Additional User Map PFT Conversion Table")
     private File additionalUserMapPFTConversionTable;
@@ -151,7 +151,12 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                 try {
                     final FileReader fileReader = new FileReader(userPFTConversionTable);
                     // lutBuilder only used to read the comment of table.
-                    final Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder().useLccs2PftTable(fileReader);
+                    Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
+                    lutBuilder = lutBuilder.useLccs2PftTable(fileReader);
+                    if (additionalUserMapPFTConversionTable != null) {
+                        final FileReader additionalMapReader = new FileReader(additionalUserMapPFTConversionTable);
+                        lutBuilder = lutBuilder.useAdditionalUserMap(additionalMapReader);
+                    }
                     Lccs2PftLut pftLut = lutBuilder.create();
                     if (pftLut.getComment() != null) {
                         lcProperties.put("pft_table_comment", pftLut.getComment());
@@ -161,9 +166,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                 }
             } else {
                 lcProperties.put("pft_table", "LC-CCI conform PFT conversion table used.");
-            }
-            if (additionalUserMapPFTConversionTable != null) {
-                throw new IllegalStateException("Not yet implemented!");
             }
         } else {
             lcProperties.put("pft_table", "No PFT computed.");
