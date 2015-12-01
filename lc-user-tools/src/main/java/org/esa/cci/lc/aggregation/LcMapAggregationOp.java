@@ -18,6 +18,8 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
@@ -181,10 +183,13 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
+        URL userPFTConversionTableUrl = convertFileToUrl(userPFTConversionTable);
+        URL additionalUserMapUrl = convertFileToUrl(additionalUserMap);
+        URL additionalUserMapPFTConversionUrl = convertFileToUrl(additionalUserMapPFTConversionTable);
         LcMapAggregatorConfig lcMapAggregatorConfig = new LcMapAggregatorConfig(outputLCCSClasses, numMajorityClasses,
-                                                                                outputPFTClasses, userPFTConversionTable,
-                                                                                additionalUserMap, outputUserMapClasses,
-                                                                                additionalUserMapPFTConversionTable,
+                                                                                outputPFTClasses, userPFTConversionTableUrl,
+                                                                                additionalUserMapUrl, outputUserMapClasses,
+                                                                                additionalUserMapPFTConversionUrl,
                                                                                 areaCalculator);
         AggregatorConfig[] aggregatorConfigs;
         if (outputAccuracy) {
@@ -199,6 +204,17 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
         binningOp.setOutputFormat(getOutputFormat());
+    }
+
+    private URL convertFileToUrl(File file) {
+        if (file != null) {
+            try {
+                return file.toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new OperatorException("Can not convert file to URL.", e);
+            }
+        }
+        return null;
     }
 
     public boolean isOutputLCCSClasses() {

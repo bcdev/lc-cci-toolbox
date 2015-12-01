@@ -5,7 +5,7 @@ import com.bc.ceres.binding.Converter;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
-import java.io.File;
+import java.net.URL;
 
 /**
  * @author Marco Peters
@@ -21,13 +21,13 @@ class LcMapAggregatorConfig extends AggregatorConfig {
     @Parameter
     private boolean outputPFTClasses;
     @Parameter
-    private File userPFTConversionTable;
+    private URL userPFTConversionTable;
     @Parameter
-    private File additionalUserMap;
+    private URL additionalUserMap;
     @Parameter
     private boolean outputUserMapClasses;
     @Parameter
-    private File additionalUserMapPFTConversionTable;
+    private URL additionalUserMapPFTConversionTable;
 
     @Parameter(converter = AreaCalculatorConverter.class)
     private AreaCalculator areaCalculator;
@@ -38,9 +38,9 @@ class LcMapAggregatorConfig extends AggregatorConfig {
     }
 
     LcMapAggregatorConfig(boolean outputLCCSClasses, int numMajorityClasses,
-                          boolean outputPFTClasses, File userPFTConversionTable,
-                          File additionalUserMap, boolean outputUserMapClasses,
-                          File additionalUserMapPFTConversionTable,
+                          boolean outputPFTClasses, URL userPFTConversionTable,
+                          URL additionalUserMap, boolean outputUserMapClasses,
+                          URL additionalUserMapPFTConversionTable,
                           AreaCalculator areaCalculator) {
         super(LcMapAggregatorDescriptor.NAME);
         this.outputLCCSClasses = outputLCCSClasses;
@@ -51,6 +51,38 @@ class LcMapAggregatorConfig extends AggregatorConfig {
         this.outputUserMapClasses = outputUserMapClasses;
         this.additionalUserMapPFTConversionTable = additionalUserMapPFTConversionTable;
         this.areaCalculator = areaCalculator;
+    }
+
+    public URL getAdditionalUserMap() {
+        return additionalUserMap;
+    }
+
+    public URL getAdditionalUserMapPFTConversionTable() {
+        return additionalUserMapPFTConversionTable;
+    }
+
+    public AreaCalculator getAreaCalculator() {
+        return areaCalculator;
+    }
+
+    public int getNumMajorityClasses() {
+        return numMajorityClasses;
+    }
+
+    public boolean isOutputLCCSClasses() {
+        return outputLCCSClasses;
+    }
+
+    public boolean isOutputPFTClasses() {
+        return outputPFTClasses;
+    }
+
+    public boolean isOutputUserMapClasses() {
+        return outputUserMapClasses;
+    }
+
+    public URL getUserPFTConversionTable() {
+        return userPFTConversionTable;
     }
 
     public String getSourceVarName() {

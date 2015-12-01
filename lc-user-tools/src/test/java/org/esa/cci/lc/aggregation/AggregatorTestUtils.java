@@ -14,7 +14,7 @@ public class AggregatorTestUtils {
     }
 
     public static Observation obs(float... values) {
-        return obs(90.0, 180.0, values);
+        return obs(0.0, 0.0, values);
     }
 
     public static Observation obs(double lat, double lon, float... values) {

@@ -5,7 +5,12 @@ import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Product;
 
+import java.awt.Rectangle;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -16,20 +21,24 @@ import java.util.TreeMap;
  *
  * @author Marco Peters
  */
-@SuppressWarnings("FieldCanBeLocal")
 class LcMapAggregator extends AbstractAggregator {
 
     private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private AreaCalculator areaCalculator;
     private boolean outputLCCSClasses;
     private int numMajorityClasses;
+    private final Product additionalUserMap;
+    private final boolean outputUserMapClasses;
     private Lccs2PftLut pftLut;
 
     public LcMapAggregator(boolean outputLCCSClasses, int numMajorityClasses,
+                           Product additionalUserMap, boolean outputUserMapClasses,
                            AreaCalculator calculator, Lccs2PftLut pftLut, String[] spatialFeatureNames, String[] outputFeatureNames) {
         super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames);
         this.outputLCCSClasses = outputLCCSClasses;
         this.numMajorityClasses = numMajorityClasses;
+        this.additionalUserMap = additionalUserMap;
+        this.outputUserMapClasses = outputUserMapClasses;
         this.pftLut = pftLut;
         this.areaCalculator = calculator;
     }
@@ -56,20 +65,26 @@ class LcMapAggregator extends AbstractAggregator {
         } else {
             spatialVector.set(index, oldValue + areaFraction);
         }
+
+        final int userMapIndex = spatialVector.size() - 1;
+        if (Float.isNaN(spatialVector.get(userMapIndex)) && (outputUserMapClasses || additionalUserMap != null)) {
+            spatialVector.set(userMapIndex, getUserMapValue(obsLatitude, obsLongitude));
+        }
     }
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
         // normalizing the data because of aggregating with float data and the float inaccuracy
         float sum = 0;
-        for (int i = 0; i < spatialVector.size(); i++) {
+
+        for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
             float v = spatialVector.get(i);
             if (!Float.isNaN(v)) {
                 sum += v;
             }
         }
         if (sum != 1.0f) {
-            for (int i = 0; i < spatialVector.size(); i++) {
+            for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
                 spatialVector.set(i, spatialVector.get(i) / sum);
             }
         }
@@ -99,31 +114,45 @@ class LcMapAggregator extends AbstractAggregator {
         initVector(outputVector, Float.NaN);
         SortedMap<Float, Integer> sortedMap = new TreeMap<>(Collections.reverseOrder());
         int outputVectorIndex = 0;
-        for (short i = 0; i < temporalVector.size(); i++) {
+        for (short i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
             float classArea = temporalVector.get(i);
-            if (!Float.isNaN(classArea)) {
+            if (numMajorityClasses > 0 && !Float.isNaN(classArea)) {
                 sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
             }
             if (outputLCCSClasses) {
                 outputVector.set(outputVectorIndex++, classArea);
             }
         }
+        Integer userMapValue = null;
+        if (additionalUserMap != null) {
+            userMapValue = (int) Math.floor(temporalVector.get(LCCS_CLASSES.getNumClasses() + 1));
+            if (outputUserMapClasses) {
+                outputVector.set(outputVectorIndex++, userMapValue);
+            }
+        }
 
-        Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
-        for (int i = 0; i < numMajorityClasses; i++) {
-            if (i >= classesSortedByOccurrence.length) {
-                outputVector.set(outputVectorIndex++, Float.NaN);
-            } else {
-                outputVector.set(outputVectorIndex++, classesSortedByOccurrence[i]);
+        if (numMajorityClasses > 0) {
+            Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
+            for (int i = 0; i < numMajorityClasses; i++) {
+                if (i >= classesSortedByOccurrence.length) {
+                    outputVector.set(outputVectorIndex++, Float.NaN);
+                } else {
+                    outputVector.set(outputVectorIndex++, classesSortedByOccurrence[i]);
+                }
             }
         }
 
         if (pftLut != null) {
-            for (int i = 0; i < temporalVector.size(); i++) {
+            for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
                 float classArea = temporalVector.get(i);
                 if (!Float.isNaN(classArea)) {
                     final int lccsClass = LCCS_CLASSES.getClassValue(i);
-                    float[] classPftFactors = pftLut.getConversionFactors(lccsClass);
+                    float[] classPftFactors;
+                    if (userMapValue != null) {
+                        classPftFactors = pftLut.getConversionFactors(lccsClass, userMapValue);
+                    } else {
+                        classPftFactors = pftLut.getConversionFactors(lccsClass);
+                    }
                     for (int j = 0; j < classPftFactors.length; j++) {
                         float factor = classPftFactors[j];
                         if (!Float.isNaN(factor)) {
@@ -147,4 +176,14 @@ class LcMapAggregator extends AbstractAggregator {
         }
     }
 
+    public int getUserMapValue(double obsLatitude, double obsLongitude) {
+        final Band firstBand = additionalUserMap.getBandAt(0);
+        final PixelPos pixelPos = firstBand.getGeoCoding().getPixelPos(new GeoPos((float) obsLatitude, (float) obsLongitude), null);
+        final int pixX = (int) Math.floor(pixelPos.getX());
+        final int pixY = (int) Math.floor(pixelPos.getY());
+        if (firstBand.getGeophysicalImage().getBounds().contains(pixX, pixY)) {
+            firstBand.getGeophysicalImage().getData(new Rectangle(pixX, pixY, 1, 1)).getSample(pixX, pixY, 0);
+        }
+        return firstBand.getSampleInt(pixX, pixY);
+    }
 }
