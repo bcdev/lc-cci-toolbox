@@ -97,6 +97,9 @@ Use the scripts in the same manner.
         aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
                          -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
                          -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
+                         -PadditionalUserMap=<filePath> -PoutputUserMapClasses=<boolean>
+                         -PadditionalUserMapPFTConversionTable=<filePath>
+                         -PoutputAccuracy=<boolean>
                          -PtargetDir=<dirPath> <sourceFilePath>
 
         Parameter Description:
@@ -117,6 +120,15 @@ Use the scripts in the same manner.
             -PuserPFTConversionTable=<filePath>
                 Specifies the path to a user defined PFT conversion table. If not given the default
                 CCI-LC conversion table will be used. For a description of the file format see further down.
+            -PadditionalUserMap=<filePath>
+                A map containing additional classes which can be used to refine the conversion from
+                LCCS to PFT classes.
+            -PoutputUserMapClasses=<boolean>
+                Whether or not to add the classes of the user map to the output.
+                This option is only applicable if the additional user map is given too.
+            -PadditionalUserMapPFTConversionTable=<filePath>
+                The conversion table from LCCS to PFTs considering the additional user map.
+                This option is only applicable if the additional user map is given too.
             -PoutputAccuracy=<boolean>
                 Specifies the computation of the accuracy shall be performed and the result added to the
                 output. This parameter can be omitted. The default is true.
