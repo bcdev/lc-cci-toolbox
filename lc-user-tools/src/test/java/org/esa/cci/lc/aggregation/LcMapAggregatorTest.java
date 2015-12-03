@@ -215,7 +215,7 @@ public class LcMapAggregatorTest {
                                                       createMockedAreaCalculator(numObs));
 
         int numSpatialFeatures = aggregator.getSpatialFeatureNames().length;
-        VectorImpl spatialVector = vec(new float[numSpatialFeatures + 1]);
+        VectorImpl spatialVector = vec(new float[numSpatialFeatures]);
         aggregator.initSpatial(ctx, spatialVector);
 
         int class10 = 10;
@@ -242,6 +242,7 @@ public class LcMapAggregatorTest {
         VectorImpl outputVector = vec(new float[numSpatialFeatures + numMajorityClasses + numPFTs]);
         aggregator.computeOutput(temporalVector, outputVector);
         int startIndex = outputVector.size() - numPFTs;
+        assertEquals(11, outputVector.get(startIndex - 1), 1.0e-6);
         assertEquals(0.542222f, outputVector.get(startIndex + 0), 1.0e-6); // Tree Broadleaf Evergreen ( 5/numObs * 60% class170 + 2/numObs * 94% class50)
         assertEquals(0.122222f, outputVector.get(startIndex + 4), 1.0e-6);  // Shrub_Broadleaf_Evergreen ( 2/numObs * 5% class50 + 5/numObs * 20% class170)
         assertEquals(0.002222f, outputVector.get(startIndex + 5), 1.0e-6);  // Shrub_Broadleaf_Deciduous ( 2/numObs * 1% class50)

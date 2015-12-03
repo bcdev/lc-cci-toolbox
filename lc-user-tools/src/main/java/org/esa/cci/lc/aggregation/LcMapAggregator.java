@@ -68,7 +68,8 @@ class LcMapAggregator extends AbstractAggregator {
 
         final int userMapIndex = spatialVector.size() - 1;
         if (Float.isNaN(spatialVector.get(userMapIndex)) && (outputUserMapClasses || additionalUserMap != null)) {
-            spatialVector.set(userMapIndex, getUserMapValue(obsLatitude, obsLongitude));
+            final float userMapValue = getUserMapValue(obsLatitude, obsLongitude);
+            spatialVector.set(userMapIndex, userMapValue);
         }
     }
 
@@ -123,9 +124,12 @@ class LcMapAggregator extends AbstractAggregator {
                 outputVector.set(outputVectorIndex++, classArea);
             }
         }
-        Integer userMapValue = null;
+        Integer userMapValue = Integer.MIN_VALUE;
         if (additionalUserMap != null) {
-            userMapValue = (int) Math.floor(temporalVector.get(LCCS_CLASSES.getNumClasses() + 1));
+            final float tempUserMapValue = temporalVector.get(LCCS_CLASSES.getNumClasses());
+            if (!Float.isNaN(tempUserMapValue)) {
+                userMapValue = (int) Math.floor(tempUserMapValue);
+            }
             if (outputUserMapClasses) {
                 outputVector.set(outputVectorIndex++, userMapValue);
             }
@@ -148,11 +152,7 @@ class LcMapAggregator extends AbstractAggregator {
                 if (!Float.isNaN(classArea)) {
                     final int lccsClass = LCCS_CLASSES.getClassValue(i);
                     float[] classPftFactors;
-                    if (userMapValue != null) {
-                        classPftFactors = pftLut.getConversionFactors(lccsClass, userMapValue);
-                    } else {
-                        classPftFactors = pftLut.getConversionFactors(lccsClass);
-                    }
+                    classPftFactors = pftLut.getConversionFactors(lccsClass, userMapValue);
                     for (int j = 0; j < classPftFactors.length; j++) {
                         float factor = classPftFactors[j];
                         if (!Float.isNaN(factor)) {
@@ -176,14 +176,14 @@ class LcMapAggregator extends AbstractAggregator {
         }
     }
 
-    public int getUserMapValue(double obsLatitude, double obsLongitude) {
+    public float getUserMapValue(double obsLatitude, double obsLongitude) {
         final Band firstBand = additionalUserMap.getBandAt(0);
         final PixelPos pixelPos = firstBand.getGeoCoding().getPixelPos(new GeoPos((float) obsLatitude, (float) obsLongitude), null);
         final int pixX = (int) Math.floor(pixelPos.getX());
         final int pixY = (int) Math.floor(pixelPos.getY());
         if (firstBand.getGeophysicalImage().getBounds().contains(pixX, pixY)) {
-            firstBand.getGeophysicalImage().getData(new Rectangle(pixX, pixY, 1, 1)).getSample(pixX, pixY, 0);
+            return firstBand.getGeophysicalImage().getData(new Rectangle(pixX, pixY, 1, 1)).getSample(pixX, pixY, 0);
         }
-        return firstBand.getSampleInt(pixX, pixY);
+        return Float.NaN;
     }
 }
