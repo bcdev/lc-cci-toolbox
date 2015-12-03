@@ -11,6 +11,8 @@
     <changelog>
         <![CDATA[
     Changes in 3.10:
+    - aggreagte-map tool can now be used with additional user map and conversion table in order to improve PFTs
+    - remap tool did not use all LCCS classes. Only the same number as the number of PFT classes was used.
     - if Java is not installed a "1.6)" file has been created containing "java not installed" message
     - fixed evaluation of JAVA_LOCATION in batch scripts
     Changes in 3.8:
