@@ -65,9 +65,8 @@ public class RemapGraphCreator {
         createGraphFile(lutFile, outputFileName);
     }
 
-    static File createGraphFile(String lutFile, String outputFileName) {
-        File outputFile = new File(GRAPH_FILENAME);
-        try (Writer writer = new FileWriter(outputFile)) {
+    private static void createGraphFile(String lutFile, String outputFileName) {
+        try (Writer writer = new FileWriter(new File(GRAPH_FILENAME))) {
             GraphWriter graphWriter = new GraphWriter(writer, lutFile);
 
             try (Reader fr = new FileReader(lutFile)) {
@@ -91,7 +90,6 @@ public class RemapGraphCreator {
         } catch (IOException | Lccs2PftLutException e) {
             throw new IllegalStateException(e);
         }
-        return outputFile;
     }
 
     static class GraphWriter {
