@@ -12,12 +12,11 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;
+import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -54,7 +53,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
     private boolean outputPFTClasses;
 
     @Parameter(description = "The user defined conversion table from LCCS to PFTs. " +
-                             "If not given, the standard LC-CCI table is used.",
+            "If not given, the standard LC-CCI table is used.",
             label = "User Defined PFT Conversion Table")
     private File userPFTConversionTable;
 
@@ -89,7 +88,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         final String mapType = source.getFileLocation() != null ? LcMapMetadata.mapTypeOf(source.getFileLocation().getName()) : "unknown";
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
         final HashMap<String, String> lcProperties = getLcProperties();
-        addPFTTableToLcProperties(lcProperties);
+        LcHelper.addPFTTableInfoToLcProperties(lcProperties, outputPFTClasses, userPFTConversionTable, additionalUserMapPFTConversionTable);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGridClassName);
         addMetadataToLcProperties(globalAttributes);
@@ -128,8 +127,8 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
         int numRows = getNumRows();
         String aggrResolution = getGridName().equals(PlanetaryGridName.GEOGRAPHIC_LAT_LON)
-                                ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
-                                : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
+                ? String.format(Locale.ENGLISH, "aggregated-%.6fDeg", 180.0 / numRows)
+                : String.format(Locale.ENGLISH, "aggregated-N" + numRows / 2);
         final String regionIdentifier = getRegionIdentifier();
         lcProperties.put("type", typeString);
         String id;
@@ -141,35 +140,6 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         lcProperties.put("id", id);
         return id;
 
-    }
-
-    private void addPFTTableToLcProperties(HashMap<String, String> lcProperties) {
-        if (outputPFTClasses) {
-            if (userPFTConversionTable != null) {
-                lcProperties.put("pft_table",
-                                 String.format("User defined PFT conversion table used (%s).", userPFTConversionTable.getName()));
-                try {
-                    final FileReader fileReader = new FileReader(userPFTConversionTable);
-                    // lutBuilder only used to read the comment of table.
-                    Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
-                    lutBuilder = lutBuilder.useLccs2PftTable(fileReader);
-                    if (additionalUserMapPFTConversionTable != null) {
-                        final FileReader additionalMapReader = new FileReader(additionalUserMapPFTConversionTable);
-                        lutBuilder = lutBuilder.useAdditionalUserMap(additionalMapReader);
-                    }
-                    Lccs2PftLut pftLut = lutBuilder.create();
-                    if (pftLut.getComment() != null) {
-                        lcProperties.put("pft_table_comment", pftLut.getComment());
-                    }
-                } catch (IOException | Lccs2PftLutException e) {
-                    throw new OperatorException("Could not read specified PFT table.", e);
-                }
-            } else {
-                lcProperties.put("pft_table", "LC-CCI conform PFT conversion table used.");
-            }
-        } else {
-            lcProperties.put("pft_table", "No PFT computed.");
-        }
     }
 
     private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {

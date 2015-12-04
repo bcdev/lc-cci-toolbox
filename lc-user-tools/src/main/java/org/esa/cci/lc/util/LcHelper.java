@@ -6,10 +6,15 @@ import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.cci.lc.aggregation.Lccs2PftLut;
+import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
+import org.esa.cci.lc.aggregation.Lccs2PftLutException;
 import org.esa.cci.lc.io.LcWriterUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class LcHelper {
@@ -81,5 +86,39 @@ public class LcHelper {
             }
         }
         return targetDir;
+    }
+
+    public static void addPFTTableInfoToLcProperties(HashMap<String, String> lcProperties, boolean outputPFTClasses, File userPFTConversionTable, File additionalUserMapPFTConversionTable) {
+        if (outputPFTClasses) {
+            try {
+                // lutBuilder only used to read the comment of table.
+                Lccs2PftLutBuilder lutBuilder = new Lccs2PftLutBuilder();
+                String pftTableEntry;
+                if (userPFTConversionTable != null) {
+                    pftTableEntry = String.format("User defined PFT conversion table used (%s)",
+                                                  userPFTConversionTable.getName());
+                    lutBuilder = lutBuilder.useLccs2PftTable(new FileReader(userPFTConversionTable));
+                } else {
+                    pftTableEntry = "LC-CCI conform PFT conversion table";
+                }
+                if (additionalUserMapPFTConversionTable != null) {
+                    pftTableEntry += String.format(" + additional user map PFT conversion table (%s)",
+                                                   additionalUserMapPFTConversionTable.getName());
+                    lutBuilder = lutBuilder.useAdditionalUserMap(new FileReader(additionalUserMapPFTConversionTable));
+                }
+                Lccs2PftLut pftLut = lutBuilder.create();
+                if (pftLut.getComment() != null) {
+                    lcProperties.put("pft_table_comment", pftLut.getComment());
+                }
+                lcProperties.put("pft_table", pftTableEntry);
+            } catch (IOException | Lccs2PftLutException e) {
+                throw new OperatorException("Could not read specified PFT table.", e);
+            }
+            if (userPFTConversionTable == null && additionalUserMapPFTConversionTable == null) {
+                lcProperties.put("pft_table", "LC-CCI conform PFT conversion table used.");
+            }
+        } else {
+            lcProperties.put("pft_table", "No PFT computed.");
+        }
     }
 }

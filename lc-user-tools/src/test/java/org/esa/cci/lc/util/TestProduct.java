@@ -1,4 +1,4 @@
-package org.esa.cci.lc.aggregation;
+package org.esa.cci.lc.util;
 
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
@@ -9,14 +9,14 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.File;
 
-abstract class TestProduct {
+public abstract class TestProduct {
     protected TestProduct() {
     }
 
-    static Product createMapSourceProduct(Dimension size) {
+    public static Product createMapSourceProduct(Dimension size) {
         final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"));
         product.addBand("lccs_class", "X", ProductData.TYPE_UINT8);
@@ -25,12 +25,7 @@ abstract class TestProduct {
         product.addBand("observation_count", "10", ProductData.TYPE_INT8);
         product.addBand("algorithmic_confidence_level", "10", ProductData.TYPE_FLOAT32);
         product.addBand("overall_confidence_level", "10", ProductData.TYPE_INT8);
-        try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height, -179.95, 89.95, 0.1, 0.1));
-        } catch (FactoryException | TransformException e) {
-            // should not come here, creation og GC should work
-            e.printStackTrace();
-        }
+        setWgs84GeoCoding(product, size);
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2"), true));
         globalAttributes.addAttribute(new MetadataAttribute("time_coverage_duration", ProductData.createInstance("P5Y"), true));
@@ -49,17 +44,12 @@ abstract class TestProduct {
         return product;
     }
 
-    static Product createConditionSourceProduct(Dimension size) {
+    public static Product createConditionSourceProduct(Dimension size) {
         final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20000108-v2.0.nc"));
         product.addBand("snow_occ", "X", ProductData.TYPE_UINT8);
         product.addBand("snow_nYearObs", "Y", ProductData.TYPE_INT8);
-        try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height, -179.95, 89.95, 0.1, 0.1));
-        } catch (FactoryException | TransformException e) {
-            // should not come here, creation og GC should work
-            e.printStackTrace();
-        }
+        setWgs84GeoCoding(product, size);
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-20000108-v2.0"), true));
         globalAttributes.addAttribute(new MetadataAttribute("type", ProductData.createInstance("ESACCI-LC-L4-Snow-Cond-500m-P13Y7D"), true));
@@ -78,4 +68,27 @@ abstract class TestProduct {
         product.getMetadataRoot().addElement(globalAttributes);
         return product;
     }
+
+
+    public static Product createAdditionalUserMapProduct(Dimension size) {
+        final Product product = new Product("user map", "um", size.width, size.height);
+        product.setFileLocation(new File("/over/the/rainbow/koeppen-geiger.tif"));
+        product.addBand("band_1", "X", ProductData.TYPE_UINT8);
+        setWgs84GeoCoding(product, size);
+        return product;
+    }
+
+    private static void setWgs84GeoCoding(Product product, Dimension size) {
+        try {
+            final double pixelSizeX = 360.0 / size.getWidth();
+            final double pixelSizeY = 180.0 / size.getHeight();
+            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height,
+                                                  -180.0 + pixelSizeX / 2, 90.0 - pixelSizeY / 2,
+                                                  pixelSizeX, pixelSizeY));
+        } catch (FactoryException | TransformException e) {
+            // should not come here, creation og GC should work
+            e.printStackTrace();
+        }
+    }
+
 }

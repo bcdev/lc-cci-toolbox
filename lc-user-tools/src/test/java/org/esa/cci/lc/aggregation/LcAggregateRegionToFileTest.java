@@ -13,12 +13,13 @@ import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.cci.lc.util.TestProduct;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

@@ -9,9 +9,9 @@ import java.io.Reader;
  */
 public class Lccs2PftLutBuilder {
 
-    static final float DEFAULT_SCALE_FACTOR = 1.0f;
+    public static final String DEFAULT_LCCS2_PFT_LUT_FILENAME = "Default_LCCS2PFT_LUT.csv";
 
-    private static final String DEFAULT_LCCS2_PFT_LUT_FILENAME = "Default_LCCS2PFT_LUT.csv";
+    static final float DEFAULT_SCALE_FACTOR = 1.0f;
 
     private Reader lutReader;
     private float scaleFactor;

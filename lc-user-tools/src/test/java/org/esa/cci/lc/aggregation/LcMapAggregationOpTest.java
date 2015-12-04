@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.cci.lc.util.TestProduct;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
