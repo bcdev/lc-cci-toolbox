@@ -3,12 +3,15 @@ package org.esa.cci.lc.conversion;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
@@ -22,9 +25,12 @@ import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
 import org.esa.cci.lc.util.LcHelper;
 
+import java.awt.Rectangle;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,10 +50,13 @@ public class RemapOp extends Operator {
 
     private static final String LCCS_CLASS_BAND_NAME = "lccs_class";
     private static final String USER_MAP_BAND_NAME = "user_map";
+    private static final int SCALING_FACTOR = 100;
 
     @SourceProduct()
     private Product sourceProduct;
 
+    // todo - maybe it's better to have it as paramater. Then we have -PadditionalUserMap="" on the command line;
+    // same as for the map aggregation
     @SourceProduct(description = "A map containing additional classes which can be used to refine " +
             "the conversion from LCCS to PFT classes", optional = true)
     private Product additionalUserMap;
@@ -67,6 +76,7 @@ public class RemapOp extends Operator {
 
     // for testing
     boolean writeProduct = true;
+    private Lccs2PftLut pftLut;
 
     @Override
     public void initialize() throws OperatorException {
@@ -88,7 +98,64 @@ public class RemapOp extends Operator {
             final Band mapBand = additionalUserMap.getBandAt(0);
             targetProduct.addBand(USER_MAP_BAND_NAME, mapBand.getDataType());
         }
-        final Lccs2PftLut pftLut = createPftLut();
+        updateMetadata();
+
+        pftLut = createPftLut();
+        final String[] pftNames = pftLut.getPFTNames();
+        for (String pftName : pftNames) {
+            final Band pftBand = targetProduct.addBand(pftName, ProductData.TYPE_INT16);
+            pftBand.setNoDataValue(0.0);
+            pftBand.setNoDataValueUsed(true);
+            pftBand.setScalingFactor(1 / SCALING_FACTOR);
+        }
+
+        writeTarget();
+    }
+
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        int lineStride = targetTile.getScanlineStride();
+        int lineOffset = targetTile.getScanlineOffset();
+        Band userMap = additionalUserMap.getBandAt(0);
+        GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
+
+        if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
+            ProductData dataBuffer = targetTile.getDataBuffer();
+            for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+                int index = lineOffset;
+                for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                    dataBuffer.setElemIntAt(index++, getUserMapSample(userMap, targetBandGeoCoding, x, y));
+                }
+                lineOffset += lineStride;
+            }
+        } else {
+            Band lccsBand = sourceProduct.getBand(LCCS_CLASS_BAND_NAME);
+            Raster lccsData = lccsBand.getGeophysicalImage().getData(targetTile.getRectangle());
+            int[] dataBufferInt = targetTile.getDataBufferInt();
+            int pftIndex = Arrays.binarySearch(pftLut.getPFTNames(), targetBand.getName());
+            for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+                int index = lineOffset;
+                for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                    int userClass = getUserMapSample(userMap, targetBand.getGeoCoding(), x, y);
+                    int lccsClass = lccsData.getSample(x, y, 0);
+                    float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
+                    dataBufferInt[index++] = (int) Math.floor(conversionFactors[pftIndex] * SCALING_FACTOR);
+                }
+                lineOffset += lineStride;
+            }
+        }
+
+    }
+
+    private int getUserMapSample(Band userMap, GeoCoding geoCoding, int x, int y) {
+        final GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(x, y), null);
+        final PixelPos pixelPos = userMap.getGeoCoding().getPixelPos(geoPos, null);
+        final Rectangle rect = new Rectangle((int) Math.floor(pixelPos.x), (int) Math.floor(pixelPos.y), 1, 1);
+        final Raster source = userMap.getGeophysicalImage().getData(rect);
+        return source.getSample(rect.x, rect.y, 0);
+    }
+
+    private void updateMetadata() {
         final HashMap<String, String> lcProperties = new HashMap<>();
         LcHelper.addPFTTableInfoToLcProperties(lcProperties, true, userPFTConversionTable,
                                                additionalUserMapPFTConversionTable);
@@ -98,15 +165,6 @@ public class RemapOp extends Operator {
             gAttribs.addAttribute(new MetadataAttribute(entry.getKey(),
                                                         new ProductData.ASCII(entry.getValue()), true));
         }
-        final String[] pftNames = pftLut.getPFTNames();
-        for (String pftName : pftNames) {
-            final Band pftBand = targetProduct.addBand(pftName, ProductData.TYPE_INT16);
-            pftBand.setNoDataValue(0.0);
-            pftBand.setNoDataValueUsed(true);
-            pftBand.setScalingFactor(0.01);
-        }
-
-        writeTarget();
     }
 
     private Lccs2PftLut createPftLut() {
@@ -124,21 +182,6 @@ public class RemapOp extends Operator {
         }
     }
 
-    @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        int lineStride = targetTile.getScanlineStride();
-        int lineOffset = targetTile.getScanlineOffset();
-        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-            int index = lineOffset;
-            for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-                // use index here to access raw data buffer...
-                index++;
-            }
-            lineOffset += lineStride;
-        }
-
-    }
-
     private void writeTarget() {
         if (writeProduct) {
             final String targetFileName = FileUtils.getFilenameWithoutExtension(sourceProduct.getFileLocation()) + "_updated.nc";
@@ -150,7 +193,9 @@ public class RemapOp extends Operator {
             // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
             // if only 2GB of heap space is available:
             // Exception in thread "SunTileScheduler0Standard2" java.lang.OutOfMemoryError: Java heap space
-            System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN"); // todo - try other setting (mp - 20151204)
+            // todo - try other setting (mp - 20151204)
+            // SCHEDULE_ROW_COLUMN_BAND or SCHEDULE_ROW_BAND_COLUMN
+            System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
             writeOp.writeProduct(ProgressMonitor.NULL);
         }
     }
@@ -204,4 +249,16 @@ public class RemapOp extends Operator {
             throw new OperatorException("The additional user map must have at least one band.");
         }
     }
+
+    /**
+     * The Service Provider Interface (SPI) for the operator.
+     * It provides operator meta-data and is a factory for new operator instances.
+     */
+    public static class Spi extends OperatorSpi {
+
+        public Spi() {
+            super(RemapOp.class);
+        }
+    }
+
 }
