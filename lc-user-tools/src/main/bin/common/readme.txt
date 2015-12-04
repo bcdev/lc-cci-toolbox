@@ -31,12 +31,13 @@ http://www.oracle.com/technetwork/java/javase/downloads/index.html.
 
 Execution
 ~~~~~~~~~
-All start scripts are available in windows and unix versions.
-Use the scripts in the same manner.
+All provided scripts are available in windows (*.bat) and unix (*.sh) versions.
+The scripts need to be invoked from the command line.  Navigate to the bin directory of the folder where you
+have unpacked the tools to. Write the command as described as follows.
 
     Conversion Tool Usage (converts Tiff to NetCDF-4 files)
     ~~~~~~~~~~~~~~~~~~~~~~~~
-        convert.sh -PtargetDir=<dirPath> <pathToMapTifFile|pathToConditionTifFile>
+        convert(.sh/.bat) -PtargetDir=<dirPath> <pathToMapTifFile|pathToConditionTifFile>
 
         In case of a CCI-LC Map file the corresponding flag files must be in the same directory as the Map file.
         They are automatically detected and added to the output NetCDF-4 file.
@@ -59,7 +60,7 @@ Use the scripts in the same manner.
 
       CCI-LC Condition Products
       ~~~~~~~~~~~~~~~~~~~~~~~~~
-        aggregate-cond.sh -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
+        aggregate-cond(.sh/.bat) -PgridName=<name> -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
 
         Parameter Description:
             -PgridName=<name>
@@ -94,7 +95,7 @@ Use the scripts in the same manner.
 
       CCI-LC Map Products
       ~~~~~~~~~~~~~~~~~~~
-        aggregate-map.sh -PgridName=<name> -PnumRows=<integer>
+        aggregate-map(.sh/.bat) -PgridName=<name> -PnumRows=<integer>
                          -PoutputLCCSClasses=<boolean> -PnumMajorityClasses=<integer>
                          -PoutputPFTClasses=<boolean> -PuserPFTConversionTable=<filePath>
                          -PadditionalUserMap=<filePath> -PoutputUserMapClasses=<boolean>
@@ -134,7 +135,7 @@ Use the scripts in the same manner.
                 output. This parameter can be omitted. The default is true.
 
         A real example might look like the following:
-        aggregate-map.sh -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
+        aggregate-map(.sh/.bat) -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
                          -PpredefinedRegion=AUSTRALIA_AND_NEW_ZEALAND
                          -PtargetDir="/data/CCI-LC/output/" "/data/CCI-LC/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"
 
@@ -168,9 +169,9 @@ Use the scripts in the same manner.
 
     Subset Tool Usage
     ~~~~~~~~~~~~~~~~~~
-        subset.sh -PpredefinedRegion=<regionName> -PtargetDir=<dirPath> <sourceFilePath>
+        subset(.sh/.bat) -PpredefinedRegion=<regionName> -PtargetDir=<dirPath> <sourceFilePath>
                 or
-        subset.sh -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> -PtargetDir=<dirPath> <sourceFilePath>
+        subset(.sh/.bat) -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> -PtargetDir=<dirPath> <sourceFilePath>
 
         -PpredefinedRegion=<regionName>
             Specifies one of the available predefined regions.
@@ -201,7 +202,7 @@ Use the scripts in the same manner.
 
     Classes Remapping Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~~~
-        remap.sh <map-netcdf-file> [classes_LUT]
+        remap(.sh/.bat) <map-netcdf-file> [classes_LUT]
 
         This tool splits up the information found in the band "lccs_class" into the classes given via a CSV file.
 
