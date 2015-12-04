@@ -105,7 +105,7 @@ public class LcConversionOp extends Operator {
             targetDir = sourceFile.getParentFile();
         }
 
-        File targetFile = new File(targetDir, String.format(id + ".nc"));
+        File targetFile = new File(targetDir, id + ".nc");
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
