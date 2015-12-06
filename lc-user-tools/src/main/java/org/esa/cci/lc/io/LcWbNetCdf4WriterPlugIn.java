@@ -78,7 +78,9 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String lonMin = String.valueOf(upperLeft.getLon());
             final String lonMax = String.valueOf(lowerRight.getLon());
 
-            final String spatialResolutionDegrees = "300m".equals(spatialResolution) ? "0.002778" : "0.011112";
+            final String spatialResolutionDegrees = "1000m".equals(spatialResolution) ? "0.011112" :
+                    "300m".equals(spatialResolution) ? "0.002778" :
+                    "150m".equals(spatialResolution) ? "0.001389" : ("180*"+spatialResolution+"/19440km");
             int epochInt = Integer.parseInt(epoch);
             int temporalResolutionInt = Integer.parseInt(temporalResolution);
             final String startYear = String.valueOf(epochInt);
@@ -100,7 +102,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                                       temporalCoverageYears, temporalResolution, "Y",
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable,
-                                                      "ESA 2014 - UCLouvain and Gamma-RS");
+                                                      "ESA 2015 - UCLouvain and Gamma-RS");
 
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());

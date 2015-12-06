@@ -43,11 +43,9 @@ import java.util.regex.Pattern;
  * @author Martin Böttcher
  */
 public class LcWbTiffReader extends AbstractProductReader {
-    // ESACCI-LC-L4-WB-Map-300m-P6Y-2005-2010-v3.0.tif
-    // ESACCI-LC-L4-WB-NObsImsWS-300m-P6Y-2005-2010-v2.0.tif
-    // ESACCI-LC-L4-WB-NObsImsGM-300m-P6Y-2005-2010-v2.0.tif
+    // ESACCI-LC-L4-WB-Map-150m-P13Y-2000-v4.0.tif
     public static final String LC_WB_FILENAME_PATTERN =
-            "ESACCI-LC-L4-WB-Map-(.*m)-P(.*)Y-(....)-(....)-v(.*)\\.(tiff?)";
+            "ESACCI-LC-L4-WB-Map-(.*m)-P(.*)Y-(....)-v(.*)\\.(tiff?)";
     public static final String[] FLAG_NAMES = new String[]{"NObsImsWS", "NObsImsGM"};
     public static final String[] LC_VARIABLE_NAMES = new String[] {
             "wb_class",
@@ -81,8 +79,8 @@ public class LcWbTiffReader extends AbstractProductReader {
         final String spatialResolution = m.group(1);
         final String temporalResolution = m.group(2);
         final String epoch = m.group(3);
-        final String version = m.group(5);
-        final String extension = m.group(6);
+        final String version = m.group(4);
+        final String extension = m.group(5);
 
         final Product lcWbProduct = readProduct(productDir, lcWbFilename, plugIn);
 
