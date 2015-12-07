@@ -105,6 +105,16 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                                       startTime, endTime,
                                                       version, latMax, latMin, lonMin, lonMax, writeable, "University catholique de Louvain");
 
+            final String pftTable = lcMapMetadata.getPftTable();
+            if (pftTable != null) {
+                writeable.addGlobalAttribute("pft_table", pftTable);
+            }
+            final String pftTableComment = lcMapMetadata.getPftTableComment();
+            if (pftTableComment != null) {
+                writeable.addGlobalAttribute("pft_table_comment", pftTableComment);
+            }
+
+
             writeable.addDimension("lat", product.getSceneRasterHeight());
             writeable.addDimension("lon", product.getSceneRasterWidth());
         }
