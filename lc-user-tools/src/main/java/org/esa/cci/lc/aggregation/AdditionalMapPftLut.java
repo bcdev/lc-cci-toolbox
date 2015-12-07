@@ -57,7 +57,8 @@ class AdditionalMapPftLut implements Lccs2PftLut {
 
     @Override
     public String getComment() {
-        return basicPftLut.getComment() + " + " + comment;
+        String additionalComment = comment != null ? " + " + comment : "";
+        return basicPftLut.getComment() + additionalComment;
     }
 
     @Override
