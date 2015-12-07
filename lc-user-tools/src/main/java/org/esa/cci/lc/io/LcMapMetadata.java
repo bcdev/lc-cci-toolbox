@@ -24,6 +24,8 @@ public class LcMapMetadata {
     private String spatialResolution;
     private String temporalResolution;
     private String mapType;
+    private String pftTable;
+    private String pftTableComment;
 
     public LcMapMetadata(Product sourceProduct) {
         mapType = sourceProduct.getFileLocation() != null ? mapTypeOf(sourceProduct.getFileLocation().getName()) : "unknown";
@@ -32,6 +34,12 @@ public class LcMapMetadata {
             MetadataElement globalAttributes = metadataRoot.getElement(GLOBAL_ATTRIBUTES_ELEMENT_NAME);
             type = globalAttributes.getAttributeString("type");
             id = globalAttributes.getAttributeString("id");
+            if (globalAttributes.containsAttribute("pft_table")) {
+                pftTable = globalAttributes.getAttributeString("pft_table");
+            }
+            if (globalAttributes.containsAttribute("pft_table_comment")) {
+                pftTableComment = globalAttributes.getAttributeString("pft_table_comment");
+            }
             Matcher idMatcher = lcMapIdMatcher(id);
 
             spatialResolution = idMatcher.group(1);
@@ -45,7 +53,12 @@ public class LcMapMetadata {
             if (metadataRoot.containsAttribute("id")) {
                 id = metadataRoot.getAttributeString("id");
             }
-            epoch = metadataRoot.getAttributeString("epoch");
+            if (metadataRoot.containsAttribute("pft_table")) {
+                pftTable = metadataRoot.getAttributeString("pft_table");
+            }
+            if (metadataRoot.containsAttribute("pft_table_comment")) {
+                pftTableComment = metadataRoot.getAttributeString("pft_table_comment");
+            }
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
@@ -104,4 +117,11 @@ public class LcMapMetadata {
 
     public String getMapType() { return mapType; }
 
+    public String getPftTable() {
+        return pftTable;
+    }
+
+    public String getPftTableComment() {
+        return pftTableComment;
+    }
 }
