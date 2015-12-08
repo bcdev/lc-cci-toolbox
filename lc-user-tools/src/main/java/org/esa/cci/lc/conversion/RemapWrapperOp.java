@@ -70,7 +70,7 @@ public class RemapWrapperOp extends Operator {
                 throw new OperatorException("Not able to read additionalUserMap", ioe);
             }
         }
-        targetProduct = GPF.createProduct("LCCCI.Remap", parameters, productMap);
+        targetProduct = GPF.createProduct("LCCCI.Remapping", parameters, productMap);
 
         writeTarget();
     }
