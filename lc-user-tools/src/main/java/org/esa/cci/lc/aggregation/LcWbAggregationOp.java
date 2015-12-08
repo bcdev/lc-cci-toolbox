@@ -26,6 +26,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.WB",
+        internal = true,
         version = "3.10",
         authors = "Marco Peters, Martin Boettcher",
         copyright = "(c) 2015 by Brockmann Consult",

@@ -28,8 +28,8 @@ import java.io.File;
  */
 @OperatorMetadata(
         alias = "LCCCI.Convert",
-        version = "3.10",
         internal = true,
+        version = "3.10",
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names",

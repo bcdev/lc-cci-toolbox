@@ -33,6 +33,7 @@ import java.util.Locale;
  */
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.Map",
+        internal = true,
         version = "3.10",
         authors = "Marco Peters",
         copyright = "(c) 2014 by Brockmann Consult",

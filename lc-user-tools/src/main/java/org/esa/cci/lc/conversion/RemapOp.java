@@ -17,9 +17,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.io.FileUtils;
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
@@ -30,9 +28,9 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This operator converts the lCCS classes to PFT classes staying without resampling them onto a different grid.
@@ -40,23 +38,22 @@ import java.util.Map;
  * @author Marco Peters
  */
 @OperatorMetadata(
-        alias = "LCCCI.Remap",
+        alias = "LCCCI.Remapping",
+        internal = true,
         version = "3.10",
         authors = "Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
-        description = "Remaps the LCCS classes to pft classes on the same grid as the input.",
-        autoWriteDisabled = true)
+        description = "Remaps the LCCS classes to pft classes on the same grid as the input."
+)
 public class RemapOp extends Operator {
 
     private static final String LCCS_CLASS_BAND_NAME = "lccs_class";
     private static final String USER_MAP_BAND_NAME = "user_map";
-    private static final int SCALING_FACTOR = 100;
+    private static final double SCALING_FACTOR = 100.0;
 
     @SourceProduct()
     private Product sourceProduct;
 
-    // todo - maybe it's better to have it as paramater. Then we have -PadditionalUserMap="" on the command line;
-    // same as for the map aggregation
     @SourceProduct(description = "A map containing additional classes which can be used to refine " +
             "the conversion from LCCS to PFT classes", optional = true)
     private Product additionalUserMap;
@@ -74,9 +71,8 @@ public class RemapOp extends Operator {
             label = "Additional User Map PFT Conversion Table")
     private File additionalUserMapPFTConversionTable;
 
-    // for testing
-    boolean writeProduct = true;
     private Lccs2PftLut pftLut;
+    private Map<String, Integer> pftNameIndexMap;
 
     @Override
     public void initialize() throws OperatorException {
@@ -106,53 +102,101 @@ public class RemapOp extends Operator {
             final Band pftBand = targetProduct.addBand(pftName, ProductData.TYPE_INT16);
             pftBand.setNoDataValue(0.0);
             pftBand.setNoDataValueUsed(true);
-            pftBand.setScalingFactor(1 / SCALING_FACTOR);
+            pftBand.setScalingFactor(1.0 / SCALING_FACTOR);
         }
 
-        writeTarget();
+        pftNameIndexMap = new TreeMap<>();
+        for (int i = 0; i < pftNames.length; i++) {
+            pftNameIndexMap.put(pftNames[i], i);
+        }
     }
+
+//    @Override
+//    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+//        try {
+//            int lineStride = targetTile.getScanlineStride();
+//            int lineOffset = targetTile.getScanlineOffset();
+//            GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
+//
+//            if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
+//                ProductData dataBuffer = targetTile.getDataBuffer();
+//                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+//                    int index = lineOffset;
+//                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+//                        dataBuffer.setElemIntAt(index++, getUserMapSample(targetBandGeoCoding, x, y));
+//                    }
+//                    lineOffset += lineStride;
+//                }
+//            } else {
+//                Tile lccsTile = getSourceTile(sourceProduct.getBand(LCCS_CLASS_BAND_NAME), targetTile.getRectangle());
+//                ProductData inBuffer = lccsTile.getDataBuffer();
+//                ProductData outBuffer = targetTile.getDataBuffer();
+//                int pftIndex = pftNameIndexMap.get(targetBand.getName());
+//                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+//                    int index = lineOffset;
+//                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+//                        int userClass = getUserMapSample(targetBandGeoCoding, x, y);
+//                        int lccsClass = inBuffer.getElemIntAt(index);
+//                        float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
+//                        final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
+//                        outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
+//                        index++;
+//                    }
+//                    lineOffset += lineStride;
+//                }
+//            }
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
 
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        int lineStride = targetTile.getScanlineStride();
-        int lineOffset = targetTile.getScanlineOffset();
-        Band userMap = additionalUserMap.getBandAt(0);
-        GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+        for (Map.Entry<Band, Tile> entry : targetTiles.entrySet()) {
+            try {
+                final Tile targetTile = entry.getValue();
+                final Band targetBand = entry.getKey();
+                int lineStride = targetTile.getScanlineStride();
+                int lineOffset = targetTile.getScanlineOffset();
+                GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
 
-        if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
-            ProductData dataBuffer = targetTile.getDataBuffer();
-            for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-                int index = lineOffset;
-                for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-                    dataBuffer.setElemIntAt(index++, getUserMapSample(userMap, targetBandGeoCoding, x, y));
+                Tile lccsTile = getSourceTile(sourceProduct.getBand(LCCS_CLASS_BAND_NAME), targetTile.getRectangle());
+                ProductData inBuffer = lccsTile.getDataBuffer();
+                ProductData outBuffer = targetTile.getDataBuffer();
+                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+                    int index = lineOffset;
+                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                        final int userClass = getUserMapSample(targetBandGeoCoding, x, y);
+                        if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
+                            outBuffer.setElemIntAt(index, userClass);
+                        } else {
+                            int pftIndex = pftNameIndexMap.get(targetBand.getName());
+                            int lccsClass = inBuffer.getElemIntAt(index);
+                            float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
+                            final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
+                            outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
+                        }
+                        index++;
+                    }
+                    lineOffset += lineStride;
                 }
-                lineOffset += lineStride;
-            }
-        } else {
-            Band lccsBand = sourceProduct.getBand(LCCS_CLASS_BAND_NAME);
-            Raster lccsData = lccsBand.getGeophysicalImage().getData(targetTile.getRectangle());
-            int[] dataBufferInt = targetTile.getDataBufferInt();
-            int pftIndex = Arrays.binarySearch(pftLut.getPFTNames(), targetBand.getName());
-            for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-                int index = lineOffset;
-                for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-                    int userClass = getUserMapSample(userMap, targetBand.getGeoCoding(), x, y);
-                    int lccsClass = lccsData.getSample(x, y, 0);
-                    float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
-                    dataBufferInt[index++] = (int) Math.floor(conversionFactors[pftIndex] * SCALING_FACTOR);
-                }
-                lineOffset += lineStride;
+            } catch (Throwable t) {
+                t.printStackTrace();
             }
         }
-
     }
 
-    private int getUserMapSample(Band userMap, GeoCoding geoCoding, int x, int y) {
-        final GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(x, y), null);
-        final PixelPos pixelPos = userMap.getGeoCoding().getPixelPos(geoPos, null);
-        final Rectangle rect = new Rectangle((int) Math.floor(pixelPos.x), (int) Math.floor(pixelPos.y), 1, 1);
-        final Raster source = userMap.getGeophysicalImage().getData(rect);
-        return source.getSample(rect.x, rect.y, 0);
+    private int getUserMapSample(GeoCoding geoCoding, int x, int y) {
+        if (additionalUserMap != null) {
+            Band userMap = additionalUserMap.getBandAt(0);
+            final GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(x, y), null);
+            final PixelPos pixelPos = userMap.getGeoCoding().getPixelPos(geoPos, null);
+            final Rectangle rect = new Rectangle((int) Math.floor(pixelPos.x), (int) Math.floor(pixelPos.y), 1, 1);
+            final Raster source = userMap.getGeophysicalImage().getData(rect);
+            return source.getSample(rect.x, rect.y, 0);
+        } else {
+            return -1;
+        }
     }
 
     private void updateMetadata() {
@@ -179,24 +223,6 @@ public class RemapOp extends Operator {
             return lutBuilder.create();
         } catch (FileNotFoundException | Lccs2PftLutException e) {
             throw new OperatorException("Could not create PFT look-up table.", e);
-        }
-    }
-
-    private void writeTarget() {
-        if (writeProduct) {
-            final String targetFileName = FileUtils.getFilenameWithoutExtension(sourceProduct.getFileLocation()) + "_updated.nc";
-            final String targetDir = sourceProduct.getFileLocation().getParent();
-            final String formatName = "NetCDF4-LC-Map";
-            File targetFile = new File(targetDir, targetFileName);
-            WriteOp writeOp = new WriteOp(targetProduct, targetFile, formatName);
-            writeOp.setClearCacheAfterRowWrite(true);
-            // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
-            // if only 2GB of heap space is available:
-            // Exception in thread "SunTileScheduler0Standard2" java.lang.OutOfMemoryError: Java heap space
-            // todo - try other setting (mp - 20151204)
-            // SCHEDULE_ROW_COLUMN_BAND or SCHEDULE_ROW_BAND_COLUMN
-            System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
-            writeOp.writeProduct(ProgressMonitor.NULL);
         }
     }
 

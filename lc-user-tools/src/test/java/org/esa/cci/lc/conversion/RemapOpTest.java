@@ -45,7 +45,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_MissingBand() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         testSource.removeBand(testSource.getBand("lccs_class"));
         remapOp.setSourceProduct(testSource);
 
@@ -54,7 +54,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_MissingGeoCoding() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         testSource.setGeoCoding(null);
         remapOp.setSourceProduct(testSource);
 
@@ -63,7 +63,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_GeoCodingNotProvidingGeoPos() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         final int width = testSource.getSceneRasterWidth();
         final int height = testSource.getSceneRasterHeight();
         testSource.setGeoCoding(new NotGeoPosProvidingGeoCoding(width, height));
@@ -75,7 +75,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testUserMap_hasOneBand() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         remapOp.setSourceProduct(testSource);
         testUserMap.removeBand(testUserMap.getBandAt(0));
         remapOp.setSourceProduct("additionalUserMap", testUserMap);
@@ -85,7 +85,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testUserMap_GeoCodingNotProvidingPixelPos() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         remapOp.setSourceProduct(testSource);
         final int width = testUserMap.getSceneRasterWidth();
         final int height = testUserMap.getSceneRasterHeight();
@@ -97,7 +97,7 @@ public class RemapOpTest {
 
     @Test()
     public void testTargetProduct_DefaultSignature() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         remapOp.setSourceProduct(testSource);
 
         final Product targetProduct = remapOp.getTargetProduct();
@@ -110,7 +110,7 @@ public class RemapOpTest {
 
     @Test()
     public void testTargetProduct_AdditionalMapSignature() throws Exception {
-        final RemapOp remapOp = createRemapOp();
+        final RemapOp remapOp = new RemapOp();
         remapOp.setSourceProduct(testSource);
         remapOp.setSourceProduct("additionalUserMap", testUserMap);
         final File additionalMapFile = new File(RESOURCE_PATH_ADDITIONAL_MAP.toURI());
@@ -138,12 +138,6 @@ public class RemapOpTest {
         checkPftBandsArePresent(targetProduct, lut);
     }
 
-
-    private RemapOp createRemapOp() {
-        final RemapOp remapOp = new RemapOp();
-        remapOp.writeProduct = false;
-        return remapOp;
-    }
 
     private void checkPftBandsArePresent(Product targetProduct, Lccs2PftLut lut) {
         final String[] pftNames = lut.getPFTNames();
