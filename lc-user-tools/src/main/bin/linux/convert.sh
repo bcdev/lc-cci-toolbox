@@ -3,7 +3,6 @@
 
 if [ -z "$1" ]; then
     echo "Land Cover CCI Conversion Tool (Tiff to NetCDF-4)"
-    echo "call: convert.sh <classification-tif-file>|<condition-tif-file>"
     echo ""
     echo "For further information see the readme.txt"
     exit 1

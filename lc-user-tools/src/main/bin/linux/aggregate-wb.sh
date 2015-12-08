@@ -3,7 +3,6 @@
 
 if [ -z "$1" ]; then
     echo "Land Cover CCI Aggregation Tool"
-    echo "call: aggregation.sh <wb-netcdf-file>"
     echo ""
     echo "For further information see the readme.txt"
     exit 1

@@ -1,5 +1,6 @@
 @echo off
-rem remap.bat /data/lc-map-example/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc [/data/lc-map-example/Default_LCCS2PFT_LUT_update.txt]
+
+if "%1"=="" GOTO HELP
 
 for /f %%j in ("java.exe") do (
     set JAVA_LOCATION=%%~dp$PATH:j
@@ -8,35 +9,18 @@ if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 
-if [%1]==[] GOTO HELP
-if [%2]==[] (set lut="..\resources\Default_LCCS2PFT_LUT.csv") else (set lut=%2)
-
-java ^
-    -Xmx250M -Dceres.context=beam ^
-    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
-    -Dbeam.mainClass=org.esa.cci.lc.conversion.RemapGraphCreator ^
-    -jar %TOOL_HOME%\ceres-launcher.jar ^
-    %lut% %1_updated.nc
-
-if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
-
-java ^
-    -Xmx16G -Dceres.context=beam ^
-    -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
-    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
+java -Xmx14G -Dceres.context=beam ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
-    -jar %TOOL_HOME%\ceres-launcher.jar ^
-    remap_graph.xml %1
-
-del remap_graph.xml
+    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
+    -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
+    -jar "%TOOL_HOME%\ceres-launcher.jar" ^
+    LCCCI.Remap -e -c 1024M %*
 
 exit /B %ERRORLEVEL%
 
-
 :HELP
-echo Land Cover CCI Classes Remapping Tool
-echo call: remap.bat ^<map-netcdf-file^> ^[classes_LUT^]
-echo.
+echo Land Cover CCI Aggregation Tool
+echo
 echo For further information see the readme.txt
 exit /B 1
 

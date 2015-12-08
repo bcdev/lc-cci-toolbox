@@ -3,9 +3,6 @@
 
 if [ -z "$1" ]; then
     echo "Land Cover CCI NetCDF 4 Subsetting Tool"
-    echo "call: subset.sh -Pnorth=<degree> -Peast=<degree> -Psouth=<degree> -Pwest=<degree> <netcdf-file>"
-    echo "or"
-    echo "call: subset.sh -PpredefinedRegion=<EUROPE|ASIA> <netcdf-file>"
     echo ""
     echo "For further information see the readme.txt"
     exit 1

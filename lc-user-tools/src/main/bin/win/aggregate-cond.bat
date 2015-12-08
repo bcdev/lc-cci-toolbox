@@ -20,7 +20,6 @@ exit /B %ERRORLEVEL%
 
 :HELP
 echo Land Cover CCI Aggregation Tool
-echo call: aggregation.bat ^<map-netcdf-file^>
 echo
 echo For further information see the readme.txt
 exit /B 1
