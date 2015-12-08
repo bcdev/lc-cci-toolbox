@@ -133,6 +133,9 @@ have unpacked the tools to. Write the command as described as follows.
             -PoutputAccuracy=<boolean>
                 Specifies the computation of the accuracy shall be performed and the result added to the
                 output. This parameter can be omitted. The default is true.
+            <sourceFilePath>
+                Is the path to the source NetCDF-4 file.
+
 
         A real example might look like the following:
         aggregate-map(.sh/.bat) -PgridName=REGULAR_GAUSSIAN_GRID -PnumRows=320 -PoutputLCCSClasses=false -PnumMajorityClasses=3
@@ -164,7 +167,6 @@ have unpacked the tools to. Write the command as described as follows.
             40|5|...|25|40|||
             ...
             220||...||||100|
-
 
 
     Subset Tool Usage
@@ -202,27 +204,49 @@ have unpacked the tools to. Write the command as described as follows.
 
     Classes Remapping Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~~~
-        remap(.sh/.bat) <map-netcdf-file> [classes_LUT]
 
-        This tool splits up the information found in the band "lccs_class" into the classes given via a CSV file.
+        remap(.sh/.bat) -PuserPFTConversionTable=<filePath>
+                        -PadditionalUserMap=<filePath>
+                        -PadditionalUserMapPFTConversionTable=<filePath>
+                        <sourceFilePath>
 
-        Either such a file is provided as second parameter, or a default classification will be used.
-        The input CSV needs to adhere to the following format:
-            <Source Name>|<target band name 1>|<target band name 2>| ...
-            120|20|30| ...
-            150|10|| ...
+            -PuserPFTConversionTable=<filePath>
+                Specifies the path to a user defined PFT conversion table. If not given the default
+                CCI-LC conversion table will be used. For a description of the file format see further down.
+            -PadditionalUserMap=<filePath>
+                A map containing additional classes which can be used to refine the conversion from
+                LCCS to PFT classes.
+            -PadditionalUserMapPFTConversionTable=<filePath>
+                The conversion table from LCCS to PFTs considering the additional user map.
+                This option is only applicable if the additional user map is given too.
+            <sourceFilePath>
+                The source file to create a regional subset from.
 
-        Such a file would be interpreted as follows: It applies to each pixel that if the source band has the value 120,
-        the target band 1 is assigned the value 20 and the target band 2 the value 30. If the source band has the value
-        150, the target band 1 is assigned the value 10 and the target band 2 the no-data-value.
-        Note that the separator character is expected to be '|'.
 
-        Parameter Description:
-            <map-netcdf-file>
-                Specifies the input file.
+        This tool splits up the information found in the band "lccs_class" into the PFTs given via look-up
+        table files.
+        The basis for the look-up table is the csv file provided as userPFTConversionTable.
+        If additionally the additionalUserMapPFTConversionTable csv file is specified, it is used to improve the
+        conversion to PFTs by using the also the additionalUserMap.
 
-            [classes_LUT] (optional)
-                Points to the LUT file that will be used for remapping.
+        For an example of the userPFTConversionTable please have a look at the section 'Aggregation Tool Usage'.
+        The additionalUserMapPFTConversionTable has a similar structure.
+        # Koeppen-Geiger Map
+        LCCS_Class|Köppen_Geiger_Class|PFT_1|PFT_2|_PFT3|...|No_data
+        10|11|||||||||14|86||||
+        10|12|||||||||11|89||||
+        10|13|||||||||10|90||||
+        10|14|||||||||4|96||||
+        10|21|||||||||6|94||||
+        10|22|||||||||20|80||||
+        10|26|||||||||13|87||||
+        20|11|||||||||15|85||||
+        20|12|||||||||21|79||||
+        20|26|||||||||2|98||||
+
+        The first column is again the LCCS class, the second the class in the additional user map.
+        If one LCCS class, user class combination is missing the algorithm falls back to the userPFTConversionTable,
+        if given or to the defaults of th CCI-LC conversion table
 
 
 Output File Naming Convention
