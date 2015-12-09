@@ -83,12 +83,7 @@ public class RemapWrapperOp extends Operator {
         WriteOp writeOp = new WriteOp(targetProduct, targetFile, formatName);
         writeOp.setClearCacheAfterRowWrite(true);
         writeOp.setWriteEntireTileRows(false);
-        // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
-        // if only 2GB of heap space is available:
-        // Exception in thread "SunTileScheduler0Standard2" java.lang.OutOfMemoryError: Java heap space
-        // todo - try other setting (mp - 20151204)
-        // SCHEDULE_ROW_COLUMN_BAND or SCHEDULE_ROW_BAND_COLUMN
-        System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
+        System.setProperty("beam.gpf.executionOrder", "SCHEDULE_ROW_COLUMN_BAND");
         writeOp.writeProduct(ProgressMonitor.NULL);
     }
 

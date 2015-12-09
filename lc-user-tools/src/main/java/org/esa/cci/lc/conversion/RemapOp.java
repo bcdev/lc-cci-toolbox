@@ -28,6 +28,7 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -111,70 +112,36 @@ public class RemapOp extends Operator {
         }
     }
 
-//    @Override
-//    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-//        try {
-//            int lineStride = targetTile.getScanlineStride();
-//            int lineOffset = targetTile.getScanlineOffset();
-//            GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
-//
-//            if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
-//                ProductData dataBuffer = targetTile.getDataBuffer();
-//                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-//                    int index = lineOffset;
-//                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-//                        dataBuffer.setElemIntAt(index++, getUserMapSample(targetBandGeoCoding, x, y));
-//                    }
-//                    lineOffset += lineStride;
-//                }
-//            } else {
-//                Tile lccsTile = getSourceTile(sourceProduct.getBand(LCCS_CLASS_BAND_NAME), targetTile.getRectangle());
-//                ProductData inBuffer = lccsTile.getDataBuffer();
-//                ProductData outBuffer = targetTile.getDataBuffer();
-//                int pftIndex = pftNameIndexMap.get(targetBand.getName());
-//                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-//                    int index = lineOffset;
-//                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-//                        int userClass = getUserMapSample(targetBandGeoCoding, x, y);
-//                        int lccsClass = inBuffer.getElemIntAt(index);
-//                        float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
-//                        final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
-//                        outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
-//                        index++;
-//                    }
-//                    lineOffset += lineStride;
-//                }
-//            }
-//        } catch (Throwable t) {
-//            t.printStackTrace();
-//        }
-//    }
-
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-        for (Map.Entry<Band, Tile> entry : targetTiles.entrySet()) {
             try {
-                final Tile targetTile = entry.getValue();
-                final Band targetBand = entry.getKey();
-                int lineStride = targetTile.getScanlineStride();
-                int lineOffset = targetTile.getScanlineOffset();
-                GeoCoding targetBandGeoCoding = targetBand.getGeoCoding();
+                Collection<Band> keys = targetTiles.keySet();
+                final Band proxyBand = keys.toArray(new Band[keys.size()])[0];
+                Collection<Tile> values = targetTiles.values();
+                final Tile proxyTile = values.toArray(new Tile[values.size()])[0];
+                int lineStride = proxyTile.getScanlineStride();
+                int lineOffset = proxyTile.getScanlineOffset();
+                GeoCoding targetBandGeoCoding = proxyBand.getGeoCoding();
 
-                Tile lccsTile = getSourceTile(sourceProduct.getBand(LCCS_CLASS_BAND_NAME), targetTile.getRectangle());
+                Tile lccsTile = getSourceTile(sourceProduct.getBand(LCCS_CLASS_BAND_NAME), proxyTile.getRectangle());
                 ProductData inBuffer = lccsTile.getDataBuffer();
-                ProductData outBuffer = targetTile.getDataBuffer();
-                for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+                for (int y = proxyTile.getMinY(); y <= proxyTile.getMaxY(); y++) {
                     int index = lineOffset;
-                    for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                    for (int x = proxyTile.getMinX(); x <= proxyTile.getMaxX(); x++) {
                         final int userClass = getUserMapSample(targetBandGeoCoding, x, y);
-                        if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
-                            outBuffer.setElemIntAt(index, userClass);
-                        } else {
-                            int pftIndex = pftNameIndexMap.get(targetBand.getName());
-                            int lccsClass = inBuffer.getElemIntAt(index);
-                            float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
-                            final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
-                            outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
+                        for (Map.Entry<Band, Tile> entry : targetTiles.entrySet()) {
+                            final Tile targetTile = entry.getValue();
+                            final Band targetBand = entry.getKey();
+                            ProductData outBuffer = targetTile.getDataBuffer();
+                            if (USER_MAP_BAND_NAME.equals(targetBand.getName())) {
+                                outBuffer.setElemIntAt(index, userClass);
+                            } else {
+                                int pftIndex = pftNameIndexMap.get(targetBand.getName());
+                                int lccsClass = inBuffer.getElemIntAt(index);
+                                float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
+                                final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
+                                outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
+                            }
                         }
                         index++;
                     }
@@ -183,7 +150,6 @@ public class RemapOp extends Operator {
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-        }
     }
 
     private int getUserMapSample(GeoCoding geoCoding, int x, int y) {
