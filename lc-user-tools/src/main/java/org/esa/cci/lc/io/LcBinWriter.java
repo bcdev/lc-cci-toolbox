@@ -17,7 +17,7 @@ import org.esa.beam.util.logging.BeamLogManager;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import ucar.ma2.DataType;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,11 +63,10 @@ public class LcBinWriter implements BinWriter {
             int sceneHeight = planetaryGrid.getNumRows();
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
-            Dimension tileSize = new Dimension(128, 128);
             addGlobalAttributes(writeable);
             CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
-            ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
+            ArrayList<NVariable> variables = addFeatureVariables(writeable, LcWriterUtils.TILE_SIZE);
             writeable.create();
             fillVariables(temporalBins, variables, sceneWidth, sceneHeight);
             coordinateEncoder.fillCoordinateVars(writeable);
@@ -151,7 +150,7 @@ public class LcBinWriter implements BinWriter {
 
     private ArrayList<NVariable> addFeatureVariables(NFileWriteable writeable, Dimension tileSize) throws IOException {
         final int aggregatorCount = binningContext.getBinManager().getAggregatorCount();
-        final ArrayList<NVariable> featureVars = new ArrayList<NVariable>(60);
+        final ArrayList<NVariable> featureVars = new ArrayList<>(60);
         for (int i = 0; i < aggregatorCount; i++) {
             final Aggregator aggregator = binningContext.getBinManager().getAggregator(i);
             final String[] featureNames = aggregator.getOutputFeatureNames();
