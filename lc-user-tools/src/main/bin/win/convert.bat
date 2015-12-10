@@ -11,7 +11,6 @@ set TOOL_HOME="%CD%"
 
 java ^
     -Xmx4G -Dceres.context=beam ^
-    -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^

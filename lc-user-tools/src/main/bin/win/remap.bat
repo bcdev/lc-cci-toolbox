@@ -12,7 +12,6 @@ set TOOL_HOME="%CD%"
 java -Xmx14G -Dceres.context=beam ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
-    -Dbeam.reader.tileHeight=1024 -Dbeam.reader.tileWidth=1024 ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
     LCCCI.Remap -e -c 1024M %*
 
