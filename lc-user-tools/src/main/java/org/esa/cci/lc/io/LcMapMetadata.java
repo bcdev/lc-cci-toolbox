@@ -59,6 +59,7 @@ public class LcMapMetadata {
             if (metadataRoot.containsAttribute("pft_table_comment")) {
                 pftTableComment = metadataRoot.getAttributeString("pft_table_comment");
             }
+            epoch = metadataRoot.getAttributeString("epoch");
             version = metadataRoot.getAttributeString("version");
             spatialResolution = metadataRoot.getAttributeString("spatialResolution");
             temporalResolution = metadataRoot.getAttributeString("temporalResolution");
