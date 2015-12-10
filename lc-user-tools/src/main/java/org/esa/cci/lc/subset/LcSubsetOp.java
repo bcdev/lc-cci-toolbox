@@ -82,6 +82,7 @@ public class LcSubsetOp extends Operator {
         }
 
         subsetProduct = LcHelper.createProductSubset(getSourceProduct(), north, east, south, west, getRegionIdentifier());
+        subsetProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
 
         updateIdMetadataAttribute(id);
         final String formatName;

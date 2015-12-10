@@ -25,9 +25,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class RemapOpTest {
+public class RemapInternalOpTest {
 
-    private static final URL RESOURCE_PATH_ADDITIONAL_MAP = RemapOpTest.class.getResource("/org/esa/cci/lc/aggregation/TEST_LCCS2PFT_KG_ADDITIONAL.csv");
+    private static final URL RESOURCE_PATH_ADDITIONAL_MAP = RemapInternalOpTest.class.getResource("/org/esa/cci/lc/aggregation/TEST_LCCS2PFT_KG_ADDITIONAL.csv");
     private Product testSource;
     private Product testUserMap;
 
@@ -45,7 +45,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_MissingBand() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         testSource.removeBand(testSource.getBand("lccs_class"));
         remapOp.setSourceProduct(testSource);
 
@@ -54,7 +54,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_MissingGeoCoding() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         testSource.setGeoCoding(null);
         remapOp.setSourceProduct(testSource);
 
@@ -63,7 +63,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testSource_GeoCodingNotProvidingGeoPos() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         final int width = testSource.getSceneRasterWidth();
         final int height = testSource.getSceneRasterHeight();
         testSource.setGeoCoding(new NotGeoPosProvidingGeoCoding(width, height));
@@ -75,7 +75,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testUserMap_hasOneBand() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         remapOp.setSourceProduct(testSource);
         testUserMap.removeBand(testUserMap.getBandAt(0));
         remapOp.setSourceProduct("additionalUserMap", testUserMap);
@@ -85,7 +85,7 @@ public class RemapOpTest {
 
     @Test(expected = OperatorException.class)
     public void testUserMap_GeoCodingNotProvidingPixelPos() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         remapOp.setSourceProduct(testSource);
         final int width = testUserMap.getSceneRasterWidth();
         final int height = testUserMap.getSceneRasterHeight();
@@ -97,7 +97,7 @@ public class RemapOpTest {
 
     @Test()
     public void testTargetProduct_DefaultSignature() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         remapOp.setSourceProduct(testSource);
 
         final Product targetProduct = remapOp.getTargetProduct();
@@ -110,7 +110,7 @@ public class RemapOpTest {
 
     @Test()
     public void testTargetProduct_AdditionalMapSignature() throws Exception {
-        final RemapOp remapOp = new RemapOp();
+        final RemapInternalOp remapOp = new RemapInternalOp();
         remapOp.setSourceProduct(testSource);
         remapOp.setSourceProduct("additionalUserMap", testUserMap);
         final File additionalMapFile = new File(RESOURCE_PATH_ADDITIONAL_MAP.toURI());

@@ -66,6 +66,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         targetDir = LcHelper.ensureTargetDir(targetDir, getSourceProduct());
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, LcHelper.TILE_SIZE_STRING);
     }
 
     public File getTargetDir() {

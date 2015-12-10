@@ -95,7 +95,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                          "This dataset contains the global ESA CCI land cover water bodies map derived from satellite data.");
             writeable.addGlobalAttribute("type", lcWbMetadata.getType());
             writeable.addGlobalAttribute("id", lcWbMetadata.getId());
-            LcWriterUtils.addGenericGlobalAttributes(writeable);
+            final Dimension tileSize = product.getPreferredTileSize();
+            LcWriterUtils.addGenericGlobalAttributes(writeable, String.format("%d:%d", tileSize.width, tileSize.height));
             LcWriterUtils.addSpecificGlobalAttributes("ASAR",
                                                       "lc-wb-classification-1.0",
                                                       spatialResolutionDegrees, spatialResolution,
@@ -133,14 +134,15 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
+                    final Dimension tileSize = p.getPreferredTileSize();
                     if (WB_CLASS_BAND_NAME.equals(band.getName())) {
-                        addWbClassVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariableString);
+                        addWbClassVariable(ncFile, band, tileSize, ancillaryVariableString);
                     } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName()) ||
                                GM_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
-                        addObservationCountVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addObservationCountVariable(ncFile, band, tileSize);
                     }else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addGeneralVariable(ncFile, band, tileSize);
                     }
                 }
             }

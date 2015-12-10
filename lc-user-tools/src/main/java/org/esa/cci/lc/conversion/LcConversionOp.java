@@ -17,6 +17,7 @@ import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcWbMetadata;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
+import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
 
@@ -106,6 +107,7 @@ public class LcConversionOp extends Operator {
         }
 
         File targetFile = new File(targetDir, id + ".nc");
+        sourceProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times

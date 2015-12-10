@@ -14,6 +14,7 @@ import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.cci.lc.util.LcHelper;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import ucar.ma2.DataType;
 
@@ -61,12 +62,13 @@ public class LcBinWriter implements BinWriter {
         try {
             int sceneWidth = planetaryGrid.getNumCols(0);
             int sceneHeight = planetaryGrid.getNumRows();
+            Dimension tileSize = LcHelper.convertToDimension(lcProperties.get(LcHelper.PROP_NAME_TILE_SIZE));
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
             addGlobalAttributes(writeable);
             CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
-            ArrayList<NVariable> variables = addFeatureVariables(writeable, LcWriterUtils.TILE_SIZE);
+            ArrayList<NVariable> variables = addFeatureVariables(writeable, tileSize);
             writeable.create();
             fillVariables(temporalBins, variables, sceneWidth, sceneHeight);
             coordinateEncoder.fillCoordinateVars(writeable);
@@ -123,7 +125,7 @@ public class LcBinWriter implements BinWriter {
         writeable.addGlobalAttribute("type", lcProperties.remove("type"));
         writeable.addGlobalAttribute("id", lcProperties.remove("id"));
 
-        LcWriterUtils.addGenericGlobalAttributes(writeable);
+        LcWriterUtils.addGenericGlobalAttributes(writeable, lcProperties.remove(LcHelper.PROP_NAME_TILE_SIZE));
         LcWriterUtils.addSpecificGlobalAttributes(lcProperties.remove("source"),
                                                   lcProperties.remove("history"),
                                                   lcProperties.remove("spatialResolutionDegrees"),

@@ -21,6 +21,7 @@ import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StringUtils;
 import org.esa.cci.lc.aggregation.LCCS;
+import org.esa.cci.lc.util.LcHelper;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
@@ -96,7 +97,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                                          "This dataset contains the global ESA CCI land cover classification map derived from satellite data of one epoch.");
             writeable.addGlobalAttribute("type", lcMapMetadata.getType());
             writeable.addGlobalAttribute("id", lcMapMetadata.getId());
-            LcWriterUtils.addGenericGlobalAttributes(writeable);
+            final Dimension tileSize = product.getPreferredTileSize();
+            LcWriterUtils.addGenericGlobalAttributes(writeable, LcHelper.format(tileSize));
 
             LcWriterUtils.addSpecificGlobalAttributes("MERIS FR L1B version 5.05, MERIS RR L1B version 8.0, SPOT VGT P",
                                                       "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0",
@@ -148,26 +150,27 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 String ancillaryVariableString = getAncillaryVariableString(p);
+                final Dimension tileSize = p.getPreferredTileSize();
                 for (Band band : p.getBands()) {
                     if (LCCS_CLASS_BAND_NAME.equals(band.getName())) {
-                        addLccsClassVariable(ncFile, band, LcWriterUtils.TILE_SIZE, ancillaryVariableString);
+                        addLccsClassVariable(ncFile, band, tileSize, ancillaryVariableString);
                     } else if (PROCESSED_FLAG_BAND_NAME.equals(band.getName())) {
-                        addProcessedFlagVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addProcessedFlagVariable(ncFile, band, tileSize);
                     } else if (CURRENT_PIXEL_STATE_BAND_NAME.equals(band.getName())) {
-                        addCurrentPixelStateVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addCurrentPixelStateVariable(ncFile, band, tileSize);
                     } else if (OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
-                        addObservationCountVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addObservationCountVariable(ncFile, band, tileSize);
                     } else if (ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addAlgorithmicConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addAlgorithmicConfidenceLevelVariable(ncFile, band, tileSize);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addOverallConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addOverallConfidenceLevelVariable(ncFile, band, tileSize);
                     } else if (LABEL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
-                        addLabelConfidenceLevelVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addLabelConfidenceLevelVariable(ncFile, band, tileSize);
                     } else if (LABEL_SOURCE_BAND_NAME.equals(band.getName())) {
-                        addLabelSourceVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addLabelSourceVariable(ncFile, band, tileSize);
                     } else {
                         // this branch is passed if an aggregated product is subsetted
-                        addGeneralVariable(ncFile, band, LcWriterUtils.TILE_SIZE);
+                        addGeneralVariable(ncFile, band, tileSize);
                     }
                 }
             }

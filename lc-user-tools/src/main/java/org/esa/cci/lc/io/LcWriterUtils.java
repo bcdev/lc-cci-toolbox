@@ -4,8 +4,8 @@ import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;
 import com.bc.ceres.core.runtime.internal.ModuleReader;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
+import org.esa.cci.lc.util.LcHelper;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -27,9 +27,6 @@ public class LcWriterUtils {
         LcWriterUtils.COMPACT_ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    static final Dimension TILE_SIZE = new Dimension(512, 512);
-
-
     private static String getModuleVersion() throws IOException {
         String lcUserToolsVersion;
         ModuleReader moduleReader = new ModuleReader(Logger.getAnonymousLogger());
@@ -43,7 +40,7 @@ public class LcWriterUtils {
         return lcUserToolsVersion;
     }
 
-    static void addGenericGlobalAttributes(NFileWriteable writeable) throws IOException {
+    static void addGenericGlobalAttributes(NFileWriteable writeable, String tileSize) throws IOException {
         writeable.addGlobalAttribute("project", "Climate Change Initiative - European Space Agency");
         writeable.addGlobalAttribute("references", "http://www.esa-landcover-cci.org/");
         writeable.addGlobalAttribute("institution", "Universite catholique de Louvain");
@@ -57,7 +54,7 @@ public class LcWriterUtils {
         writeable.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
         writeable.addGlobalAttribute("naming_authority", "org.esa-cci");
         writeable.addGlobalAttribute("cdm_data_type", "grid");
-        writeable.addGlobalAttribute("TileSize", TILE_SIZE.width + ":" + TILE_SIZE.height);
+        writeable.addGlobalAttribute(LcHelper.PROP_NAME_TILE_SIZE, tileSize);
 
     }
 

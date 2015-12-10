@@ -11,6 +11,7 @@ import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
 import org.esa.cci.lc.io.LcWriterUtils;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +19,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class LcHelper {
+
+    public static final Dimension TILE_SIZE = new Dimension(512, 512);
+    public static final String TILE_SIZE_STRING = format(TILE_SIZE);
+    public static final String PROP_NAME_TILE_SIZE = "TileSize";
+
 
     // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2005-v1.1.nc
     // ESACCI-LC-L4-WB-Map-300m-P5Y-2005-v1.1.nc
@@ -120,5 +126,18 @@ public class LcHelper {
         } else {
             lcProperties.put("pft_table", "No PFT computed.");
         }
+    }
+
+    public static Dimension convertToDimension(String tileSizeString) {
+        if (tileSizeString == null || !tileSizeString.contains(":") || tileSizeString.split(":").length != 2) {
+            String msg = String.format("Not able to convert missing or invalid value (%s)", tileSizeString);
+            throw new IllegalStateException(msg);
+        }
+        String[] tileSizes = tileSizeString.split(":");
+        return new Dimension(Integer.parseInt(tileSizes[1]), Integer.parseInt(tileSizes[0]));
+    }
+
+    public static String format(Dimension tileSize) {
+        return String.format("%d:%d", tileSize.width, tileSize.height);
     }
 }
