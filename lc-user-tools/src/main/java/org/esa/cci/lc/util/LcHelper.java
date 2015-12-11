@@ -20,7 +20,9 @@ import java.util.HashMap;
 
 public class LcHelper {
 
-    public static final Dimension TILE_SIZE = new Dimension(512, 512);
+    // number of tiles per image in netcdf must be smaller then Short.MAX_VALUE
+    // therefore we set 2048 as tile size
+    public static final Dimension TILE_SIZE = new Dimension(2048, 2048);
     public static final String TILE_SIZE_STRING = format(TILE_SIZE);
     public static final String PROP_NAME_TILE_SIZE = "TileSize";
 
