@@ -206,7 +206,7 @@ public class LcAggregateRegionToFileTest {
         aggregationOp.setOutputFile(tempOutputPath.toAbsolutePath().toString());
         aggregationOp.setOutputFormat(null);
         aggregationOp.outputTargetProduct = false;
-        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(3600, 1800)));
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProductNetCdf(new Dimension(3600, 1800)));
         return aggregationOp;
     }
 

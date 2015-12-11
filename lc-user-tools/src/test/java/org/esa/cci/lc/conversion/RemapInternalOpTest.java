@@ -33,7 +33,7 @@ public class RemapInternalOpTest {
 
     @Before
     public void setUp() throws Exception {
-        testSource = TestProduct.createMapSourceProduct(new Dimension(360, 180));
+        testSource = TestProduct.createMapSourceProductNetCdf(new Dimension(360, 180));
         testUserMap = TestProduct.createAdditionalUserMapProduct(new Dimension(36, 18));
     }
 

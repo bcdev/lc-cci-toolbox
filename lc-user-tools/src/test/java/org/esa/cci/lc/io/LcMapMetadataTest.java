@@ -1,11 +1,15 @@
 package org.esa.cci.lc.io;
 
+import org.esa.cci.lc.util.TestProduct;
 import org.junit.Test;
 
+import java.awt.Dimension;
 import java.util.regex.Matcher;
 
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Marco Peters
@@ -38,5 +42,29 @@ public class LcMapMetadataTest {
         assertThat(idMatcher.group(3), is("2002"));
         assertThat(idMatcher.group(4), is("2.0"));
 
+    }
+
+    @Test
+    public void testCreationWithNetCDF() throws Exception {
+        final LcMapMetadata lcMapMetadata = new LcMapMetadata(TestProduct.createMapSourceProductNetCdf(new Dimension(10, 10)));
+        checkLcMetadata(lcMapMetadata);
+    }
+
+    @Test
+    public void testCreationWithGeoTiff() throws Exception {
+        final LcMapMetadata lcMapMetadata = new LcMapMetadata(TestProduct.createMapSourceProductGeoTiff(new Dimension(10, 10)));
+        checkLcMetadata(lcMapMetadata);
+    }
+
+    private void checkLcMetadata(LcMapMetadata lcMapMetadata) {
+        assertEquals("2010", lcMapMetadata.getEpoch());
+        assertEquals("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2", lcMapMetadata.getId());
+        assertEquals("Map", lcMapMetadata.getMapType());
+        assertNull(lcMapMetadata.getPftTable());
+        assertNull(lcMapMetadata.getPftTableComment());
+        assertEquals("300m", lcMapMetadata.getSpatialResolution());
+        assertEquals("5", lcMapMetadata.getTemporalResolution());
+        assertEquals("ESACCI-LC-L4-LCCS-Map-300m-P5Y", lcMapMetadata.getType());
+        assertEquals("2", lcMapMetadata.getVersion());
     }
 }

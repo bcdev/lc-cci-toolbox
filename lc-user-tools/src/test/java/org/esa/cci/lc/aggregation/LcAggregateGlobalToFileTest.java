@@ -166,7 +166,7 @@ public class LcAggregateGlobalToFileTest {
         aggregationOp.setOutputFile(tempOutputPath.toAbsolutePath().toString());
         aggregationOp.setOutputFormat(null);
         aggregationOp.outputTargetProduct = false;
-        aggregationOp.setSourceProduct(TestProduct.createMapSourceProduct(new Dimension(360, 180)));
+        aggregationOp.setSourceProduct(TestProduct.createMapSourceProductNetCdf(new Dimension(360, 180)));
         return aggregationOp;
     }
 
