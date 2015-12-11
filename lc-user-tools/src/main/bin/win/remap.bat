@@ -9,7 +9,7 @@ if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 
-java -Xmx14G -Dceres.context=beam ^
+java -Xmx8G -Dceres.context=beam ^
     -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
     -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
