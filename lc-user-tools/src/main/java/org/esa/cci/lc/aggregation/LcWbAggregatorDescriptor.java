@@ -31,9 +31,9 @@ public class LcWbAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
 
         PropertySet propertySet = aggregatorConfig.asPropertySet();
-        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        boolean outputWbClasses = (Boolean) propertySet.getValue("outputWbClasses");
-        AreaCalculator areaCalculator = (AreaCalculator) propertySet.getValue("areaCalculator");
+        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
+        boolean outputWbClasses = propertySet.getValue("outputWbClasses");
+        AreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
 
         String[] spatialFeatureNames = createSpatialFeatureNames();
         String[] outputFeatureNames = createOutputFeatureNames(outputWbClasses, numMajorityClasses, spatialFeatureNames);
@@ -48,20 +48,19 @@ public class LcWbAggregatorDescriptor implements AggregatorDescriptor {
     @Override
     public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
         PropertySet propertySet = aggregatorConfig.asPropertySet();
-        int numMajorityClasses = (Integer) propertySet.getValue("numMajorityClasses");
-        boolean outputWbClasses = (Boolean) propertySet.getValue("outputWbClasses");
+        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
+        boolean outputWbClasses = propertySet.getValue("outputWbClasses");
         String[] spatialFeatureNames = createSpatialFeatureNames();
         return createOutputFeatureNames(outputWbClasses, numMajorityClasses, spatialFeatureNames);
     }
 
     private static String[] createSpatialFeatureNames() {
-        String[] spatialFeatureNames = new String[] { "class_area_invalid", "class_area_terrestrial", "class_area_water" };
-        return spatialFeatureNames;
+        return new String[]{"class_area_invalid", "class_area_terrestrial", "class_area_water"};
     }
 
     private static String[] createOutputFeatureNames(boolean outputWbClasses, int numMajorityClasses,
                                                      String[] spatialFeatureNames) {
-        List<String> outputFeatureNames = new ArrayList<String>();
+        List<String> outputFeatureNames = new ArrayList<>();
         if (outputWbClasses) {
             outputFeatureNames.addAll(Arrays.asList(spatialFeatureNames));
         }

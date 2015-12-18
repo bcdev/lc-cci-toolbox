@@ -34,11 +34,11 @@ import java.util.Locale;
         autoWriteDisabled = true)
 public class LcWbAggregationOp extends AbstractLcAggregationOp {
 
-    @Parameter(description = "Whether or not to add the count variables to the output.",
-            label = "Output Count Values", defaultValue = "true")
+    @Parameter(description = "Whether or not to add the WB class areas to the output.",
+            label = "Output WB Class Areas", defaultValue = "true")
     private boolean outputWbClasses;
 
-    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "1",
+    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "2",
             label = "Number of Majority Classes")
     private int numMajorityClasses;
 
@@ -165,11 +165,12 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         if (numMajorityClasses > 3) {
             throw new OperatorException("Number of majority classes exceeds number of WB classes.");
         }
-        final String[] lcVariableNames = new String[] { "wb_class", "ws_observation_count", "gm_observation_count" };
-        for (String variableName : lcVariableNames) {
-            if (!getSourceProduct().containsBand(variableName)) {
-                throw new OperatorException(String.format("Missing band '%s' in source product.", variableName));
-            }
+        ensureSourceProductContainsBand("wb_class");
+    }
+
+    private void ensureSourceProductContainsBand(String lcVariableName) {
+        if (!getSourceProduct().containsBand(lcVariableName)) {
+            throw new OperatorException(String.format("Missing band '%s' in source product.", lcVariableName));
         }
     }
 
