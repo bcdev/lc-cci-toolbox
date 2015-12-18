@@ -104,7 +104,7 @@ public class LcWbAggregationOpTest {
     public void testDefaultValues() {
         LcWbAggregationOp aggrOp = (LcWbAggregationOp) aggregationSpi.createOperator();
         assertThat(aggrOp.getGridName(), isNull());
-        assertThat(aggrOp.getNumMajorityClasses(), is(1));
+        assertThat(aggrOp.getNumMajorityClasses(), is(2));
         assertThat(aggrOp.getNumRows(), is(2160));
     }
 
