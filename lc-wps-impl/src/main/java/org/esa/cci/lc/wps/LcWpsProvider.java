@@ -5,6 +5,7 @@ import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.schema.*;
 import com.bc.wps.utilities.WpsLogger;
+import org.esa.cci.lc.wps.operations.LcDescribeProcessOperation;
 import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
 
 import javax.xml.bind.JAXBException;
@@ -31,8 +32,9 @@ public class LcWpsProvider implements WpsServiceInstance {
     }
 
     @Override
-    public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String s) throws WpsServiceException {
-        return null;
+    public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String processId) throws WpsServiceException {
+        LcDescribeProcessOperation describeProcessOperation = new LcDescribeProcessOperation();
+        return describeProcessOperation.getProcesses(processId);
     }
 
     @Override

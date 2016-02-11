@@ -14,6 +14,7 @@
 
     <properties>
         <bc-wps-api.version>1.0-SNAPSHOT</bc-wps-api.version>
+        <lc-cci-toolbox.version>3.10</lc-cci-toolbox.version>
     </properties>
 
     <dependencies>
@@ -29,6 +30,13 @@
             <artifactId>bc-wps-commons</artifactId>
             <scope>provided</scope>
             <version>${bc-wps-api.version}</version>
+        </dependency>
+
+        <!-- LC CCI User Tools dependencies -->
+        <dependency>
+            <groupId>org.esa.cci.lc</groupId>
+            <artifactId>lc-user-tools</artifactId>
+            <version>${lc-cci-toolbox.version}</version>
         </dependency>
     </dependencies>
 

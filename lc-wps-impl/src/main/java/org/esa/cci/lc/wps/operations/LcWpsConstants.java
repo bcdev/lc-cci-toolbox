@@ -5,6 +5,8 @@ package org.esa.cci.lc.wps.operations;
  */
 public class LcWpsConstants {
 
+    // TODO update this class with the right information for LC CCI
+
     public static String COMPANY_NAME = "Brockmann-Consult";
 
     public static String COMPANY_WEBSITE = "http://www.brockmann-consult.de";
