@@ -3,21 +3,31 @@ package org.esa.cci.lc.wps;
 import com.bc.wps.api.WpsRequestContext;
 import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
-import com.bc.wps.api.schema.Capabilities;
-import com.bc.wps.api.schema.Execute;
-import com.bc.wps.api.schema.ExecuteResponse;
-import com.bc.wps.api.schema.ProcessDescriptionType;
+import com.bc.wps.api.schema.*;
+import com.bc.wps.utilities.WpsLogger;
+import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
 
+import javax.xml.bind.JAXBException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author hans
  */
 public class LcWpsProvider implements WpsServiceInstance {
 
+    private Logger logger = WpsLogger.getLogger();
+
     @Override
     public Capabilities getCapabilities(WpsRequestContext wpsRequestContext) throws WpsServiceException {
-        return null;
+        LcGetCapabilitiesOperation getCapabilitiesOperation = new LcGetCapabilitiesOperation();
+        try {
+            return getCapabilitiesOperation.getCapabilities();
+        } catch (JAXBException exception) {
+            logger.log(Level.SEVERE, "Unable to perform GetCapabilities operation successfully", exception);
+            throw new WpsServiceException("Unable to perform GetCapabilities operation successfully", exception);
+        }
     }
 
     @Override
