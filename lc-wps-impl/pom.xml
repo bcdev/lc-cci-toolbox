@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>lc-cci-toolbox</artifactId>
+        <groupId>org.esa.cci.lc</groupId>
+        <version>1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>lc-wps-impl</artifactId>
+    <name>LC CCI WPS Implementation</name>
+
+    <properties>
+        <bc-wps-api.version>1.0-SNAPSHOT</bc-wps-api.version>
+    </properties>
+
+    <dependencies>
+        <!-- BC WPS dependencies -->
+        <dependency>
+            <groupId>com.bc.wps</groupId>
+            <artifactId>bc-wps-api</artifactId>
+            <scope>provided</scope>
+            <version>${bc-wps-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.bc.wps</groupId>
+            <artifactId>bc-wps-commons</artifactId>
+            <scope>provided</scope>
+            <version>${bc-wps-api.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

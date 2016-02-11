@@ -18,6 +18,7 @@
         <module>lc-land-water-tool</module>
         <module>lc-point-selection-tool</module>
         <module>lc-l3</module>
+        <module>lc-wps-impl</module>
         <!-- <module>lc_s3_land_water_mask</module> -->
     </modules>
     <packaging>pom</packaging>
