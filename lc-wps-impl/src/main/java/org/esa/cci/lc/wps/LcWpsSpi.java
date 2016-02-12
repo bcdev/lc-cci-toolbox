@@ -11,17 +11,17 @@ public class LcWpsSpi implements WpsServiceProvider {
 
     @Override
     public String getId() {
-        return "calvalus";
+        return "lc-cci";
     }
 
     @Override
     public String getName() {
-        return "Calvalus WPS Server";
+        return "LC CCI WPS Server";
     }
 
     @Override
     public String getDescription() {
-        return "This is a Calvalus WPS implementation";
+        return "This is a LC CCI User Tools WPS implementation";
     }
 
     @Override
