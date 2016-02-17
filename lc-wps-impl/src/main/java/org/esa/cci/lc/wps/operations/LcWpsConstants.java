@@ -35,9 +35,9 @@ public class LcWpsConstants {
 
     public static String PROJECT_MANAGER_POSITION_NAME = "Project Manager";
 
-    public static String WPS_SERVICE_ID = "Calvalus WPS server";
+    public static String WPS_SERVICE_ID = "LC CCI WPS server";
 
-    public static String WPS_SERVICE_ABSTRACT = "Web Processing Service for Calvalus";
+    public static String WPS_SERVICE_ABSTRACT = "Web Processing Service for LC CCI User Toolbox";
 
     public static String WPS_SERVICE_TYPE = "WPS";
 
@@ -49,8 +49,8 @@ public class LcWpsConstants {
 
     public static String WPS_L3_PARAMETERS_SCHEMA_LOCATION = "http://www.brockmann-consult.de/calwps/calwpsL3Parameters-schema.xsd";
 
-    public static String WPS_GET_REQUEST_URL = "http://www.brockmann-consult.de/bc-wps/calvalus?";
+    public static String WPS_GET_REQUEST_URL = "http://www.brockmann-consult.de/bc-wps/lc-cci?";
 
-    public static String WPS_POST_REQUEST_URL = "http://www.brockmann-consult.de/bc-wps/calvalus";
+    public static String WPS_POST_REQUEST_URL = "http://www.brockmann-consult.de/bc-wps/lc-cci";
 
 }

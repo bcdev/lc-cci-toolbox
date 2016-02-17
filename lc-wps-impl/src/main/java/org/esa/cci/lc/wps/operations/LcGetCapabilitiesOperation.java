@@ -1,15 +1,51 @@
 package org.esa.cci.lc.wps.operations;
 
-import com.bc.wps.api.WpsRequestContext;
-import com.bc.wps.api.schema.*;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_ADDRESS;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_ADMINISTRATIVE_AREA;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_CITY;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_CONTACT_INSTRUCTION;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_COUNTRY;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_EMAIL_ADDRESS;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_FAX_NUMBER;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_NAME;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_PHONE_NUMBER;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_POST_CODE;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_SERVICE_HOURS;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.COMPANY_WEBSITE;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.PROJECT_MANAGER_NAME;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.PROJECT_MANAGER_POSITION_NAME;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_DEFAULT_LANG;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_GET_REQUEST_URL;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_POST_REQUEST_URL;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_SERVICE_ABSTRACT;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_SERVICE_ID;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_SERVICE_TYPE;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_SUPPORTED_LANG;
+import static org.esa.cci.lc.wps.operations.LcWpsConstants.WPS_VERSION;
+
+import com.bc.wps.api.schema.AddressType;
+import com.bc.wps.api.schema.Capabilities;
+import com.bc.wps.api.schema.CodeType;
+import com.bc.wps.api.schema.ContactType;
+import com.bc.wps.api.schema.DCP;
+import com.bc.wps.api.schema.HTTP;
+import com.bc.wps.api.schema.LanguageStringType;
+import com.bc.wps.api.schema.Languages;
+import com.bc.wps.api.schema.LanguagesType;
+import com.bc.wps.api.schema.OnlineResourceType;
+import com.bc.wps.api.schema.Operation;
+import com.bc.wps.api.schema.OperationsMetadata;
+import com.bc.wps.api.schema.ProcessBriefType;
+import com.bc.wps.api.schema.ProcessOfferings;
+import com.bc.wps.api.schema.RequestMethodType;
+import com.bc.wps.api.schema.ResponsiblePartySubsetType;
+import com.bc.wps.api.schema.ServiceIdentification;
+import com.bc.wps.api.schema.ServiceProvider;
+import com.bc.wps.api.schema.TelephoneType;
 import com.bc.wps.api.utils.CapabilitiesBuilder;
 import com.bc.wps.api.utils.WpsTypeConverter;
 
 import javax.xml.bind.JAXBException;
-import java.io.IOException;
-import java.util.List;
-
-import static org.esa.cci.lc.wps.operations.LcWpsConstants.*;
 
 /**
  * @author hans
@@ -17,14 +53,13 @@ import static org.esa.cci.lc.wps.operations.LcWpsConstants.*;
 public class LcGetCapabilitiesOperation {
 
     public Capabilities getCapabilities() throws JAXBException {
-
         return CapabilitiesBuilder.create()
-                .withOperationsMetadata(getOperationsMetadata())
-                .withServiceIdentification(getServiceIdentification())
-                .withServiceProvider(getServiceProvider())
-                .withProcessOfferings(getProcessOfferings())
-                .withLanguages(getLanguages())
-                .build();
+                    .withOperationsMetadata(getOperationsMetadata())
+                    .withServiceIdentification(getServiceIdentification())
+                    .withServiceProvider(getServiceProvider())
+                    .withProcessOfferings(getProcessOfferings())
+                    .withLanguages(getLanguages())
+                    .build();
     }
 
     protected OperationsMetadata getOperationsMetadata() {
