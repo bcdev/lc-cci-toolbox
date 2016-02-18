@@ -44,14 +44,8 @@ public class LcDescribeProcessOperation {
         return processes;
     }
 
-    private LcSubsetOp createLcSubsetOp() {
-        return (LcSubsetOp) new LcSubsetOp.Spi().createOperator();
-    }
-
     private DataInputs getDataInputs() {
         DataInputs dataInputs = new DataInputs();
-
-//        LcSubsetOp lcSubsetOp = createLcSubsetOp();
 
         List<String> allowedRegionNameList = new ArrayList<>();
         for (PredefinedRegion regionName : PredefinedRegion.values()) {

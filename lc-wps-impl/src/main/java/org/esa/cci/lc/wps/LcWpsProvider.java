@@ -5,10 +5,19 @@ import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.schema.*;
 import com.bc.wps.utilities.WpsLogger;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.cci.lc.subset.LcSubsetOp;
+import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.wps.operations.LcDescribeProcessOperation;
+import org.esa.cci.lc.wps.operations.LcExecuteOperation;
 import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +48,8 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public ExecuteResponse doExecute(WpsRequestContext wpsRequestContext, Execute execute) throws WpsServiceException {
-        return null;
+        LcExecuteOperation executeOperation = new LcExecuteOperation();
+        return executeOperation.doExecute(execute);
     }
 
     @Override
