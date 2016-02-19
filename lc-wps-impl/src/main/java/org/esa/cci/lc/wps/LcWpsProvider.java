@@ -43,7 +43,12 @@ public class LcWpsProvider implements WpsServiceInstance {
     @Override
     public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String processId) throws WpsServiceException {
         LcDescribeProcessOperation describeProcessOperation = new LcDescribeProcessOperation();
-        return describeProcessOperation.getProcesses(processId);
+        try {
+            return describeProcessOperation.getProcesses(processId);
+        }catch (IOException exception) {
+            logger.log(Level.SEVERE, "Unable to perform DescribeProcess operation successfully", exception);
+            throw new WpsServiceException("Unable to perform DescribeProcess operation successfully", exception);
+        }
     }
 
     @Override
