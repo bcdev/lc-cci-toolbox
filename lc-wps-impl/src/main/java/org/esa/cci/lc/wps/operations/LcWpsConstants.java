@@ -51,6 +51,8 @@ public class LcWpsConstants {
 
     public static String WPS_POST_REQUEST_URL = "http://www.brockmann-consult.de/bc-wps/lc-cci";
 
+    public static String WPS_APPLICATION_PATH = "/webapps/bc-wps";
+
     public static String WPS_ROOT = System.getProperty("catalina.base") + "/webapps/bc-wps";
 
 }
