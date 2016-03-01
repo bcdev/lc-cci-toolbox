@@ -17,6 +17,7 @@ import org.esa.beam.util.StringUtils;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.wps.ExecuteRequestExtractor;
 import org.esa.cci.lc.wps.exceptions.MissingInputParameterException;
+import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -43,9 +44,7 @@ import java.util.logging.Logger;
  */
 public class LcExecuteOperation {
 
-    public static final String LC_CCI_INPUT_DIRECTORY = "/lc-cci_input";
-    public static final String LC_CCI_OUTPUT_DIRECTORY = "/lc-cci_output";
-    private static final String APP_NAME = "/bc-wps";
+    private static final String CATALINA_BASE = System.getProperty("catalina.base");
     private Logger logger = WpsLogger.getLogger();
 
     public ExecuteResponse doExecute(Execute executeRequest, WpsServerContext serverContext)
@@ -55,7 +54,7 @@ public class LcExecuteOperation {
 
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
         final Product sourceProduct;
-        Path dir = Paths.get(LcWpsConstants.WPS_ROOT + LC_CCI_INPUT_DIRECTORY);
+        Path dir = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path"), PropertiesWrapper.get("lc.cci.input.directory"));
         List<File> files = new ArrayList<>();
         DirectoryStream<Path> stream = Files.newDirectoryStream(dir, inputParameters.get("sourceProduct"));
         for (Path entry : stream) {
@@ -71,7 +70,9 @@ public class LcExecuteOperation {
 
         sourceProduct = ProductIO.readProduct(sourceProductPath);
         HashMap<String, Object> parameters = new HashMap<>();
-        File targetDir = new File(LcWpsConstants.WPS_ROOT + LC_CCI_OUTPUT_DIRECTORY, new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+        File targetDir = new File(CATALINA_BASE + PropertiesWrapper.get("wps.application.path")
+                                  + "/" + PropertiesWrapper.get("lc.cci.output.directory"),
+                                  new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
         if (!targetDir.mkdir()) {
             throw new FileSystemException("Unable to create a new directory '" + targetDir.getAbsolutePath() + "'.");
         }
@@ -105,23 +106,28 @@ public class LcExecuteOperation {
         statusType.setProcessSucceeded("The request has been processed successfully.");
         successfulResponse.setStatus(statusType);
 
+        List<String> resultUrls = getProductUrls(serverContext, targetDir);
+        ExecuteResponse.ProcessOutputs productUrl = getProcessOutputs(resultUrls);
+        successfulResponse.setProcessOutputs(productUrl);
+        OutputDefinitionsType outputDefinitionsType = new OutputDefinitionsType();
+        successfulResponse.setOutputDefinitions(outputDefinitionsType);
+        return successfulResponse;
+    }
+
+    private List<String> getProductUrls(WpsServerContext serverContext, File targetDir) {
         List<String> resultUrls = new ArrayList<>();
         String[] resultProductNames = targetDir.list();
         for (String filename : resultProductNames) {
             String productUrl = "http://"
                                 + serverContext.getHostAddress()
                                 + ":" + serverContext.getPort()
-                                + APP_NAME
-                                + LC_CCI_OUTPUT_DIRECTORY
+                                + "/" + PropertiesWrapper.get("wps.application.name")
+                                + "/" + PropertiesWrapper.get("lc.cci.output.directory")
                                 + "/" + targetDir.getName()
                                 + "/" + filename;
             resultUrls.add(productUrl);
         }
-        ExecuteResponse.ProcessOutputs productUrl = getProcessOutputs(resultUrls);
-        successfulResponse.setProcessOutputs(productUrl);
-        OutputDefinitionsType outputDefinitionsType = new OutputDefinitionsType();
-        successfulResponse.setOutputDefinitions(outputDefinitionsType);
-        return successfulResponse;
+        return resultUrls;
     }
 
     private ExecuteResponse.ProcessOutputs getProcessOutputs(List<String> resultUrls) {

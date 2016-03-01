@@ -9,6 +9,7 @@ import com.bc.wps.api.schema.OperationsMetadata;
 import com.bc.wps.api.schema.ProcessOfferings;
 import com.bc.wps.api.schema.ServiceIdentification;
 import com.bc.wps.api.schema.ServiceProvider;
+import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 import org.junit.*;
 
 /**
@@ -21,6 +22,8 @@ public class LcGetCapabilitiesOperationTest {
     @Before
     public void setUp() throws Exception {
         getCapabilitiesOperation = new LcGetCapabilitiesOperation();
+
+        PropertiesWrapper.loadConfigFile("lc-cci-wps-test.properties");
     }
 
     @Test

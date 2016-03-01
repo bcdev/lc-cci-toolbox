@@ -11,6 +11,7 @@ import com.bc.wps.utilities.WpsLogger;
 import org.esa.cci.lc.wps.operations.LcDescribeProcessOperation;
 import org.esa.cci.lc.wps.operations.LcExecuteOperation;
 import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
+import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -30,8 +31,9 @@ public class LcWpsProvider implements WpsServiceInstance {
     public Capabilities getCapabilities(WpsRequestContext wpsRequestContext) throws WpsServiceException {
         LcGetCapabilitiesOperation getCapabilitiesOperation = new LcGetCapabilitiesOperation();
         try {
+            PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
             return getCapabilitiesOperation.getCapabilities();
-        } catch (JAXBException exception) {
+        } catch (JAXBException |IOException exception) {
             logger.log(Level.SEVERE, "Unable to perform GetCapabilities operation successfully", exception);
             throw new WpsServiceException("Unable to perform GetCapabilities operation successfully", exception);
         }
@@ -41,6 +43,7 @@ public class LcWpsProvider implements WpsServiceInstance {
     public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String processId) throws WpsServiceException {
         LcDescribeProcessOperation describeProcessOperation = new LcDescribeProcessOperation();
         try {
+            PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
             return describeProcessOperation.getProcesses(processId);
         } catch (IOException exception) {
             logger.log(Level.SEVERE, "Unable to perform DescribeProcess operation successfully", exception);
@@ -52,6 +55,7 @@ public class LcWpsProvider implements WpsServiceInstance {
     public ExecuteResponse doExecute(WpsRequestContext wpsRequestContext, Execute execute) throws WpsServiceException {
         LcExecuteOperation executeOperation = new LcExecuteOperation();
         try {
+            PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
             return executeOperation.doExecute(execute, wpsRequestContext.getServerContext());
         } catch (IOException | DatatypeConfigurationException exception) {
             logger.log(Level.SEVERE, "Unable to perform Execute operation successfully", exception);
