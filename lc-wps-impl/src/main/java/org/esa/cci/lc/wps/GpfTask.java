@@ -41,9 +41,9 @@ public class GpfTask implements Callable<Boolean> {
         status.setState(ProductionState.RUNNING);
         status.setProgress(10);
         try {
-            logger.log(Level.INFO, "starting subsetting operation...");
+            logger.log(Level.INFO, "[" + jobId + "] starting subsetting operation...");
             GPF.createProduct("LCCCI.Subset", parameters, sourceProduct);
-            logger.log(Level.INFO, "subsetting operation completed...");
+            logger.log(Level.INFO, "[" + jobId + "] subsetting operation completed...");
 
             List<String> resultUrls = GpfProductionService.getProductUrls(hostName, portNumber, targetDir);
             status.setState(ProductionState.SUCCESSFUL);
@@ -55,13 +55,13 @@ public class GpfTask implements Callable<Boolean> {
             status.setState(ProductionState.FAILED);
             status.setMessage("GPF process failed : " + exception.getMessage());
             GpfProductionService.getProductionStatusMap().put(jobId, status);
-            logger.log(Level.SEVERE, "GPF process failed...", exception);
+            logger.log(Level.SEVERE, "[" + jobId + "] GPF process failed...", exception);
             return false;
         } catch (Exception exception) {
             status.setState(ProductionState.FAILED);
             status.setMessage("Processing failed : " + exception.getMessage());
             GpfProductionService.getProductionStatusMap().put(jobId, status);
-            logger.log(Level.SEVERE, "Processing failed...", exception);
+            logger.log(Level.SEVERE, "[" + jobId + "] Processing failed...", exception);
             return false;
         }
 

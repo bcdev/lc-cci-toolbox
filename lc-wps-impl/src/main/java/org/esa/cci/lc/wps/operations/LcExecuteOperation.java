@@ -1,5 +1,6 @@
 package org.esa.cci.lc.wps.operations;
 
+import com.bc.wps.api.WpsRequestContext;
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.schema.Execute;
@@ -46,9 +47,10 @@ public class LcExecuteOperation {
     private static final String CATALINA_BASE = System.getProperty("catalina.base");
     private Logger logger = WpsLogger.getLogger();
 
-    public ExecuteResponse doExecute(Execute executeRequest, WpsServerContext serverContext)
+    public ExecuteResponse doExecute(Execute executeRequest, WpsRequestContext requestContext)
                 throws WpsServiceException, IOException, DatatypeConfigurationException, OperatorException {
 
+        WpsServerContext serverContext = requestContext.getServerContext();
         ResponseFormType responseFormType = executeRequest.getResponseForm();
         ResponseDocumentType responseDocumentType = responseFormType.getResponseDocument();
         boolean isAsynchronous = responseDocumentType.isStatus();
@@ -61,7 +63,7 @@ public class LcExecuteOperation {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
 
         final Product sourceProduct = getSourceProduct(inputParameters);
-        String jobId = GpfProductionService.createJobId();
+        String jobId = GpfProductionService.createJobId(requestContext.getUserName());
         File targetDir = getTargetDirectory(jobId);
         HashMap<String, Object> parameters = getSubsettingParameters(inputParameters, targetDir);
 
@@ -75,11 +77,12 @@ public class LcExecuteOperation {
     private ExecuteResponse processAsynchronous(String jobId, Map<String, Object> parameters,
                                                 Product sourceProduct, File targetDir, WpsServerContext serverContext)
                 throws DatatypeConfigurationException {
-        logger.log(Level.INFO, "starting asynchronous process...");
+        logger.log(Level.INFO, "[" + jobId + "] starting asynchronous process...");
         ProductionStatus status = new ProductionStatus(jobId, ProductionState.ACCEPTED, 0, "The request has been queued.", null);
         GpfProductionService.getProductionStatusMap().put(jobId, status);
         GpfTask gpfTask = new GpfTask(jobId, parameters, sourceProduct, targetDir, serverContext.getHostAddress(), serverContext.getPort());
         GpfProductionService.getWorker().submit(gpfTask);
+        logger.log(Level.INFO, "[" + jobId + "] job has been queued...");
 
         LcExecuteResponse executeResponse = new LcExecuteResponse();
         return executeResponse.getAcceptedResponse(status, serverContext);
@@ -89,15 +92,17 @@ public class LcExecuteOperation {
                 throws IOException, DatatypeConfigurationException {
 
         try {
-            logger.log(Level.INFO, "starting synchronous process...");
+            logger.log(Level.INFO, "[" + jobId + "] starting synchronous process...");
             GPF.createProduct("LCCCI.Subset", parameters, sourceProduct);
 
+            logger.log(Level.INFO, "[" + jobId + "] constructing result URLs...");
             List<String> resultUrls = GpfProductionService.getProductUrls(serverContext.getHostAddress(), serverContext.getPort(), targetDir);
             ProductionStatus status = new ProductionStatus(jobId,
                                                            ProductionState.SUCCESSFUL,
                                                            100,
                                                            "The request has been processed successfully.",
                                                            resultUrls);
+            logger.log(Level.INFO, "[" + jobId + "] job has been completed, creating successful response...");
             LcExecuteResponse executeResponse = new LcExecuteResponse();
             return executeResponse.getSuccessfulResponse(status);
         } catch (OperatorException exception) {
@@ -111,7 +116,8 @@ public class LcExecuteOperation {
         }
     }
 
-    private HashMap<String, Object> getSubsettingParameters(Map<String, String> inputParameters, File targetDir) throws MissingInputParameterException {
+    private HashMap<String, Object> getSubsettingParameters(Map<String, String> inputParameters, File targetDir)
+                throws MissingInputParameterException {
         HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("targetDir", targetDir);
         String predefinedRegionName = inputParameters.get("predefinedRegion");
@@ -123,9 +129,9 @@ public class LcExecuteOperation {
         }
         if (predefinedRegion != null) {
             parameters.put("predefinedRegion", predefinedRegion);
-        } else if (StringUtils.isNotNullAndNotEmpty(inputParameters.get("north")) ||
-                   StringUtils.isNotNullAndNotEmpty(inputParameters.get("west")) ||
-                   StringUtils.isNotNullAndNotEmpty(inputParameters.get("east")) ||
+        } else if (StringUtils.isNotNullAndNotEmpty(inputParameters.get("north")) &&
+                   StringUtils.isNotNullAndNotEmpty(inputParameters.get("west")) &&
+                   StringUtils.isNotNullAndNotEmpty(inputParameters.get("east")) &&
                    StringUtils.isNotNullAndNotEmpty(inputParameters.get("south"))) {
             parameters.put("north", inputParameters.get("north"));
             parameters.put("west", inputParameters.get("west"));

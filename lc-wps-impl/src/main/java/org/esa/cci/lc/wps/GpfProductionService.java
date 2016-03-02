@@ -41,8 +41,8 @@ public class GpfProductionService implements ServletContextListener {
         return productionStatusMap;
     }
 
-    public static String createJobId() {
-        return new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    public static String createJobId(String userName) {
+        return userName + "-" + new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
     }
 
     public static List<String> getProductUrls(String hostAddress, int portNumber, File targetDir) {

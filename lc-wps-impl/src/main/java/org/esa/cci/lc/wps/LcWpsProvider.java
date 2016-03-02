@@ -61,7 +61,7 @@ public class LcWpsProvider implements WpsServiceInstance {
         LcExecuteOperation executeOperation = new LcExecuteOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
-            return executeOperation.doExecute(execute, wpsRequestContext.getServerContext());
+            return executeOperation.doExecute(execute, wpsRequestContext);
         } catch (IOException | DatatypeConfigurationException exception) {
             logger.log(Level.SEVERE, "Unable to perform Execute operation successfully", exception);
             throw new WpsServiceException("Unable to perform Execute operation successfully", exception);
