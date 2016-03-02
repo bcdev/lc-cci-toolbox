@@ -2,26 +2,27 @@ package org.esa.cci.lc.wps.operations;
 
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceException;
-import com.bc.wps.api.schema.CodeType;
 import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
-import com.bc.wps.api.schema.OutputDataType;
-import com.bc.wps.api.schema.OutputDefinitionsType;
-import com.bc.wps.api.schema.OutputReferenceType;
-import com.bc.wps.api.schema.StatusType;
+import com.bc.wps.api.schema.ResponseDocumentType;
+import com.bc.wps.api.schema.ResponseFormType;
 import com.bc.wps.utilities.WpsLogger;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.StringUtils;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.wps.ExecuteRequestExtractor;
+import org.esa.cci.lc.wps.GpfProductionService;
+import org.esa.cci.lc.wps.GpfTask;
+import org.esa.cci.lc.wps.LcExecuteResponse;
+import org.esa.cci.lc.wps.ProductionState;
+import org.esa.cci.lc.wps.ProductionStatus;
 import org.esa.cci.lc.wps.exceptions.MissingInputParameterException;
 import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,13 +31,11 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -48,34 +47,72 @@ public class LcExecuteOperation {
     private Logger logger = WpsLogger.getLogger();
 
     public ExecuteResponse doExecute(Execute executeRequest, WpsServerContext serverContext)
-                throws WpsServiceException, IOException, DatatypeConfigurationException {
+                throws WpsServiceException, IOException, DatatypeConfigurationException, OperatorException {
+
+        ResponseFormType responseFormType = executeRequest.getResponseForm();
+        ResponseDocumentType responseDocumentType = responseFormType.getResponseDocument();
+        boolean isAsynchronous = responseDocumentType.isStatus();
+        boolean isLineage = responseDocumentType.isLineage();
+        String processId = executeRequest.getIdentifier().getValue();
+
         ExecuteRequestExtractor requestExtractor = new ExecuteRequestExtractor(executeRequest);
         Map<String, String> inputParameters = requestExtractor.getInputParametersMap();
 
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
-        final Product sourceProduct;
-        Path dir = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path"), PropertiesWrapper.get("lc.cci.input.directory"));
-        List<File> files = new ArrayList<>();
-        DirectoryStream<Path> stream = Files.newDirectoryStream(dir, inputParameters.get("sourceProduct"));
-        for (Path entry : stream) {
-            files.add(entry.toFile());
-        }
 
-        String sourceProductPath;
-        if (files.size() != 0) {
-            sourceProductPath = files.get(0).getAbsolutePath();
+        final Product sourceProduct = getSourceProduct(inputParameters);
+        String jobId = GpfProductionService.createJobId();
+        File targetDir = getTargetDirectory(jobId);
+        HashMap<String, Object> parameters = getSubsettingParameters(inputParameters, targetDir);
+
+        if (isAsynchronous) {
+            return processAsynchronous(jobId, parameters, sourceProduct, targetDir, serverContext);
         } else {
-            throw new FileNotFoundException("The source product '" + inputParameters.get("sourceProduct") + "' cannot be found");
+            return processSynchronous(jobId, parameters, sourceProduct, targetDir, serverContext);
         }
+    }
 
-        sourceProduct = ProductIO.readProduct(sourceProductPath);
-        HashMap<String, Object> parameters = new HashMap<>();
-        File targetDir = new File(CATALINA_BASE + PropertiesWrapper.get("wps.application.path")
-                                  + "/" + PropertiesWrapper.get("lc.cci.output.directory"),
-                                  new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
-        if (!targetDir.mkdir()) {
-            throw new FileSystemException("Unable to create a new directory '" + targetDir.getAbsolutePath() + "'.");
+    private ExecuteResponse processAsynchronous(String jobId, Map<String, Object> parameters,
+                                                Product sourceProduct, File targetDir, WpsServerContext serverContext)
+                throws DatatypeConfigurationException {
+        logger.log(Level.INFO, "starting asynchronous process...");
+        ProductionStatus status = new ProductionStatus(jobId, ProductionState.ACCEPTED, 0, "The request has been queued.", null);
+        GpfProductionService.getProductionStatusMap().put(jobId, status);
+        GpfTask gpfTask = new GpfTask(jobId, parameters, sourceProduct, targetDir, serverContext.getHostAddress(), serverContext.getPort());
+        GpfProductionService.getWorker().submit(gpfTask);
+
+        LcExecuteResponse executeResponse = new LcExecuteResponse();
+        return executeResponse.getAcceptedResponse(status, serverContext);
+    }
+
+    private ExecuteResponse processSynchronous(String jobId, Map<String, Object> parameters, Product sourceProduct, File targetDir, WpsServerContext serverContext)
+                throws IOException, DatatypeConfigurationException {
+
+        try {
+            logger.log(Level.INFO, "starting synchronous process...");
+            GPF.createProduct("LCCCI.Subset", parameters, sourceProduct);
+
+            List<String> resultUrls = GpfProductionService.getProductUrls(serverContext.getHostAddress(), serverContext.getPort(), targetDir);
+            ProductionStatus status = new ProductionStatus(jobId,
+                                                           ProductionState.SUCCESSFUL,
+                                                           100,
+                                                           "The request has been processed successfully.",
+                                                           resultUrls);
+            LcExecuteResponse executeResponse = new LcExecuteResponse();
+            return executeResponse.getSuccessfulResponse(status);
+        } catch (OperatorException exception) {
+            ProductionStatus status = new ProductionStatus(jobId,
+                                                           ProductionState.FAILED,
+                                                           0,
+                                                           "Processing failed : " + exception.getMessage(),
+                                                           null);
+            LcExecuteResponse executeResponse = new LcExecuteResponse();
+            return executeResponse.getFailedResponse(status);
         }
+    }
+
+    private HashMap<String, Object> getSubsettingParameters(Map<String, String> inputParameters, File targetDir) throws MissingInputParameterException {
+        HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("targetDir", targetDir);
         String predefinedRegionName = inputParameters.get("predefinedRegion");
         PredefinedRegion predefinedRegion = null;
@@ -97,60 +134,36 @@ public class LcExecuteOperation {
         } else {
             throw new MissingInputParameterException("The region is not properly defined in the request.");
         }
-        GPF.createProduct("LCCCI.Subset", parameters, sourceProduct);
-
-        ExecuteResponse successfulResponse = new ExecuteResponse();
-        StatusType statusType = new StatusType();
-        XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
-        statusType.setCreationTime(currentTime);
-        statusType.setProcessSucceeded("The request has been processed successfully.");
-        successfulResponse.setStatus(statusType);
-
-        List<String> resultUrls = getProductUrls(serverContext, targetDir);
-        ExecuteResponse.ProcessOutputs productUrl = getProcessOutputs(resultUrls);
-        successfulResponse.setProcessOutputs(productUrl);
-        OutputDefinitionsType outputDefinitionsType = new OutputDefinitionsType();
-        successfulResponse.setOutputDefinitions(outputDefinitionsType);
-        return successfulResponse;
+        return parameters;
     }
 
-    private List<String> getProductUrls(WpsServerContext serverContext, File targetDir) {
-        List<String> resultUrls = new ArrayList<>();
-        String[] resultProductNames = targetDir.list();
-        for (String filename : resultProductNames) {
-            String productUrl = "http://"
-                                + serverContext.getHostAddress()
-                                + ":" + serverContext.getPort()
-                                + "/" + PropertiesWrapper.get("wps.application.name")
-                                + "/" + PropertiesWrapper.get("lc.cci.output.directory")
-                                + "/" + targetDir.getName()
-                                + "/" + filename;
-            resultUrls.add(productUrl);
+    private File getTargetDirectory(String jobId) throws FileSystemException {
+        File targetDir = new File(CATALINA_BASE + PropertiesWrapper.get("wps.application.path")
+                                  + "/" + PropertiesWrapper.get("lc.cci.output.directory"),
+                                  jobId);
+        if (!targetDir.mkdir()) {
+            throw new FileSystemException("Unable to create a new directory '" + targetDir.getAbsolutePath() + "'.");
         }
-        return resultUrls;
+        return targetDir;
     }
 
-    private ExecuteResponse.ProcessOutputs getProcessOutputs(List<String> resultUrls) {
-        ExecuteResponse.ProcessOutputs productUrl = new ExecuteResponse.ProcessOutputs();
-
-        for (String productionResultUrl : resultUrls) {
-            OutputDataType url = new OutputDataType();
-            CodeType outputId = new CodeType();
-            outputId.setValue("productionResults");
-            url.setIdentifier(outputId);
-            OutputReferenceType urlLink = new OutputReferenceType();
-            urlLink.setHref(productionResultUrl);
-            urlLink.setMimeType("binary");
-            url.setReference(urlLink);
-
-            productUrl.getOutput().add(url);
+    private Product getSourceProduct(Map<String, String> inputParameters) throws IOException {
+        final Product sourceProduct;
+        Path dir = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path"), PropertiesWrapper.get("lc.cci.input.directory"));
+        List<File> files = new ArrayList<>();
+        DirectoryStream<Path> stream = Files.newDirectoryStream(dir, inputParameters.get("sourceProduct"));
+        for (Path entry : stream) {
+            files.add(entry.toFile());
         }
-        return productUrl;
-    }
 
-    private XMLGregorianCalendar getXmlGregorianCalendar() throws DatatypeConfigurationException {
-        GregorianCalendar gregorianCalendar = new GregorianCalendar();
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
-    }
+        String sourceProductPath;
+        if (files.size() != 0) {
+            sourceProductPath = files.get(0).getAbsolutePath();
+        } else {
+            throw new FileNotFoundException("The source product '" + inputParameters.get("sourceProduct") + "' cannot be found");
+        }
 
+        sourceProduct = ProductIO.readProduct(sourceProductPath);
+        return sourceProduct;
+    }
 }

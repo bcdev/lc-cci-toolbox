@@ -1,6 +1,7 @@
 package org.esa.cci.lc.wps;
 
 import com.bc.wps.api.WpsRequestContext;
+import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.schema.Capabilities;
@@ -8,9 +9,11 @@ import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
 import com.bc.wps.api.schema.ProcessDescriptionType;
 import com.bc.wps.utilities.WpsLogger;
+import org.esa.cci.lc.wps.exceptions.JobNotFoundException;
 import org.esa.cci.lc.wps.operations.LcDescribeProcessOperation;
 import org.esa.cci.lc.wps.operations.LcExecuteOperation;
 import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
+import org.esa.cci.lc.wps.operations.LcGetStatusOperation;
 import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.xml.bind.JAXBException;
@@ -33,7 +36,7 @@ public class LcWpsProvider implements WpsServiceInstance {
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
             return getCapabilitiesOperation.getCapabilities();
-        } catch (JAXBException |IOException exception) {
+        } catch (JAXBException | IOException exception) {
             logger.log(Level.SEVERE, "Unable to perform GetCapabilities operation successfully", exception);
             throw new WpsServiceException("Unable to perform GetCapabilities operation successfully", exception);
         }
@@ -41,6 +44,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String processId) throws WpsServiceException {
+        logger.log(Level.INFO, "processing request for user : " + wpsRequestContext.getUserName());
         LcDescribeProcessOperation describeProcessOperation = new LcDescribeProcessOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
@@ -53,6 +57,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public ExecuteResponse doExecute(WpsRequestContext wpsRequestContext, Execute execute) throws WpsServiceException {
+        logger.log(Level.INFO, "processing request for user : " + wpsRequestContext.getUserName());
         LcExecuteOperation executeOperation = new LcExecuteOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
@@ -64,8 +69,15 @@ public class LcWpsProvider implements WpsServiceInstance {
     }
 
     @Override
-    public ExecuteResponse getStatus(WpsRequestContext wpsRequestContext, String s) throws WpsServiceException {
-        return null;
+    public ExecuteResponse getStatus(WpsRequestContext wpsRequestContext, String jobId) throws WpsServiceException {
+        LcGetStatusOperation getStatusOperation = new LcGetStatusOperation();
+        try {
+            PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
+            return getStatusOperation.getStatus(jobId);
+        } catch (IOException | JobNotFoundException | DatatypeConfigurationException exception) {
+            logger.log(Level.SEVERE, "Unable to perform GetStatus operation successfully", exception);
+            throw new WpsServiceException("Unable to perform GetStatus operation successfully", exception);
+        }
     }
 
     @Override
