@@ -32,6 +32,39 @@
             <version>${bc-wps-api.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-visat</artifactId>
+            <version>5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-netcdf</artifactId>
+            <version>5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-binning</artifactId>
+            <version>5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- LC CCI User Tools dependencies -->
         <dependency>
             <groupId>org.esa.beam</groupId>
@@ -42,22 +75,8 @@
             <groupId>org.esa.cci.lc</groupId>
             <artifactId>lc-user-tools</artifactId>
             <version>3.10</version>
-            <!-- activate these exclusions when calvalus-wps-impl jar is already in the lib folder -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.esa.beam</groupId>
-                    <artifactId>beam-visat</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.esa.beam</groupId>
-                    <artifactId>beam-netcdf</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.esa.beam</groupId>
-                    <artifactId>beam-binning</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
+
 
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -102,12 +121,41 @@
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/commons/*</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <artifactSet>
                                 <excludes>
                                     <exclude>javax.help:javahelp:jar:*</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>lc-cci-wps-bundle</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/lc-cci-wps.xml</descriptor>
+                            </descriptors>
+                            <finalName>lc-cci-wps-bundle</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <attach>false</attach>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
