@@ -42,6 +42,27 @@
             <groupId>org.esa.cci.lc</groupId>
             <artifactId>lc-user-tools</artifactId>
             <version>3.10</version>
+            <!-- activate these exclusions when calvalus-wps-impl jar is already in the lib folder -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.esa.beam</groupId>
+                    <artifactId>beam-visat</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.esa.beam</groupId>
+                    <artifactId>beam-netcdf</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.esa.beam</groupId>
+                    <artifactId>beam-binning</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>1.18</version>
         </dependency>
 
         <!-- Test frameworks -->

@@ -1,6 +1,7 @@
 package org.esa.cci.lc.wps;
 
 import com.bc.wps.utilities.WpsLogger;
+import com.bc.wps.utilities.WpsServletContainer;
 import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.servlet.ServletContextEvent;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -29,6 +31,8 @@ public class GpfProductionService implements ServletContextListener {
 
     public synchronized static ExecutorService getWorker() {
         if (worker == null) {
+            logger.log(Level.INFO, "registering GpfProductionService");
+            WpsServletContainer.addServletContextListener(new GpfProductionService());
             worker = Executors.newFixedThreadPool(4);
         }
         return worker;
