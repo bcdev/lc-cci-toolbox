@@ -47,7 +47,7 @@ public class LcExecuteResponse {
         return executeResponse;
     }
 
-    public ExecuteResponse getAcceptedWithLineageResponse(String jobId,
+    public ExecuteResponse getAcceptedWithLineageResponse(ProductionStatus status,
                                                           DataInputsType dataInputs,
                                                           List<DocumentOutputDefinitionType> rawDataOutput,
                                                           WpsServerContext context)
@@ -57,7 +57,7 @@ public class LcExecuteResponse {
         statusType.setCreationTime(currentTime);
         statusType.setProcessAccepted("The request has been accepted. The status of the process can be found in the URL.");
         executeResponse.setStatus(statusType);
-        String getStatusUrl = getStatusUrl(jobId, context);
+        String getStatusUrl = getStatusUrl(status.getJobId(), context);
         executeResponse.setStatusLocation(getStatusUrl);
         executeResponse.setDataInputs(dataInputs);
         OutputDefinitionsType outputDefinitionsType = new OutputDefinitionsType();
@@ -80,7 +80,7 @@ public class LcExecuteResponse {
         return executeResponse;
     }
 
-    public ExecuteResponse getSuccessfulWithLineageResponse(List<String> resultUrls,
+    public ExecuteResponse getSuccessfulWithLineageResponse(ProductionStatus status,
                                                             DataInputsType dataInputs,
                                                             List<DocumentOutputDefinitionType> outputType)
                 throws DatatypeConfigurationException {
@@ -90,7 +90,7 @@ public class LcExecuteResponse {
         statusType.setProcessSucceeded("The request has been processed successfully.");
         executeResponse.setStatus(statusType);
 
-        ExecuteResponse.ProcessOutputs productUrl = getProcessOutputs(resultUrls);
+        ExecuteResponse.ProcessOutputs productUrl = getProcessOutputs(status.getResultUrls());
         executeResponse.setProcessOutputs(productUrl);
         executeResponse.setDataInputs(dataInputs);
         OutputDefinitionsType outputDefinitionsType = new OutputDefinitionsType();

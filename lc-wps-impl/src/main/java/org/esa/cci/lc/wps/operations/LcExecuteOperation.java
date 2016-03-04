@@ -3,6 +3,7 @@ package org.esa.cci.lc.wps.operations;
 import com.bc.wps.api.WpsRequestContext;
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceException;
+import com.bc.wps.api.schema.DocumentOutputDefinitionType;
 import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
 import com.bc.wps.api.schema.ResponseDocumentType;
@@ -28,7 +29,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,62 +64,91 @@ public class LcExecuteOperation {
 
         final Product sourceProduct = getSourceProduct(inputParameters);
         String jobId = GpfProductionService.createJobId(requestContext.getUserName());
-        File targetDir = getTargetDirectory(jobId);
-        HashMap<String, Object> parameters = getSubsettingParameters(inputParameters, targetDir);
+        Path targetDirPath = getTargetDirectoryPath(jobId);
+        HashMap<String, Object> parameters = getSubsettingParameters(inputParameters, targetDirPath);
+        LcExecuteResponse executeResponse = new LcExecuteResponse();
 
         if (isAsynchronous) {
-            return processAsynchronous(jobId, parameters, sourceProduct, targetDir, serverContext);
+            ProductionStatus status = processAsynchronous(jobId, parameters, sourceProduct, targetDirPath, serverContext);
+            if (isLineage) {
+                return createLineageAsyncExecuteResponse(executeRequest, status, serverContext);
+            }
+            return executeResponse.getAcceptedResponse(status, serverContext);
         } else {
-            return processSynchronous(jobId, parameters, sourceProduct, targetDir, serverContext);
+            ProductionStatus status = processSynchronous(jobId, parameters, sourceProduct, targetDirPath, serverContext);
+            if (status.getState() != ProductionState.SUCCESSFUL) {
+                return executeResponse.getFailedResponse(status);
+            }
+            if (isLineage) {
+                return createLineageSyncExecuteResponse(executeRequest, status);
+            }
+            return executeResponse.getSuccessfulResponse(status);
         }
     }
 
-    private ExecuteResponse processAsynchronous(String jobId, Map<String, Object> parameters,
-                                                Product sourceProduct, File targetDir, WpsServerContext serverContext)
-                throws DatatypeConfigurationException {
+    private ProductionStatus processAsynchronous(String jobId, Map<String, Object> parameters,
+                                                 Product sourceProduct, Path targetDirPath, WpsServerContext serverContext) {
         logger.log(Level.INFO, "[" + jobId + "] starting asynchronous process...");
         ProductionStatus status = new ProductionStatus(jobId, ProductionState.ACCEPTED, 0, "The request has been queued.", null);
         GpfProductionService.getProductionStatusMap().put(jobId, status);
-        GpfTask gpfTask = new GpfTask(jobId, parameters, sourceProduct, targetDir, serverContext.getHostAddress(), serverContext.getPort());
+        GpfTask gpfTask = new GpfTask(jobId,
+                                      parameters,
+                                      sourceProduct,
+                                      targetDirPath.toFile(),
+                                      serverContext.getHostAddress(),
+                                      serverContext.getPort());
         GpfProductionService.getWorker().submit(gpfTask);
         logger.log(Level.INFO, "[" + jobId + "] job has been queued...");
 
-        LcExecuteResponse executeResponse = new LcExecuteResponse();
-        return executeResponse.getAcceptedResponse(status, serverContext);
+        return status;
     }
 
-    private ExecuteResponse processSynchronous(String jobId, Map<String, Object> parameters, Product sourceProduct, File targetDir, WpsServerContext serverContext)
-                throws IOException, DatatypeConfigurationException {
-
+    private ProductionStatus processSynchronous(String jobId, Map<String, Object> parameters,
+                                                Product sourceProduct, Path targetDirPath,
+                                                WpsServerContext serverContext) {
         try {
             logger.log(Level.INFO, "[" + jobId + "] starting synchronous process...");
             GPF.createProduct("LCCCI.Subset", parameters, sourceProduct);
 
             logger.log(Level.INFO, "[" + jobId + "] constructing result URLs...");
-            List<String> resultUrls = GpfProductionService.getProductUrls(serverContext.getHostAddress(), serverContext.getPort(), targetDir);
-            ProductionStatus status = new ProductionStatus(jobId,
-                                                           ProductionState.SUCCESSFUL,
-                                                           100,
-                                                           "The request has been processed successfully.",
-                                                           resultUrls);
+            List<String> resultUrls = GpfProductionService.getProductUrls(serverContext.getHostAddress(),
+                                                                          serverContext.getPort(),
+                                                                          targetDirPath.toFile());
             logger.log(Level.INFO, "[" + jobId + "] job has been completed, creating successful response...");
-            LcExecuteResponse executeResponse = new LcExecuteResponse();
-            return executeResponse.getSuccessfulResponse(status);
+            return new ProductionStatus(jobId,
+                                        ProductionState.SUCCESSFUL,
+                                        100,
+                                        "The request has been processed successfully.",
+                                        resultUrls);
         } catch (OperatorException exception) {
-            ProductionStatus status = new ProductionStatus(jobId,
-                                                           ProductionState.FAILED,
-                                                           0,
-                                                           "Processing failed : " + exception.getMessage(),
-                                                           null);
-            LcExecuteResponse executeResponse = new LcExecuteResponse();
-            return executeResponse.getFailedResponse(status);
+            return new ProductionStatus(jobId,
+                                        ProductionState.FAILED,
+                                        0,
+                                        "Processing failed : " + exception.getMessage(),
+                                        null);
         }
     }
 
-    private HashMap<String, Object> getSubsettingParameters(Map<String, String> inputParameters, File targetDir)
+    protected ExecuteResponse createLineageAsyncExecuteResponse(Execute executeRequest, ProductionStatus status,
+                                                                WpsServerContext serverContext)
+                throws DatatypeConfigurationException {
+        LcExecuteResponse executeAcceptedResponse = new LcExecuteResponse();
+        List<DocumentOutputDefinitionType> outputType = executeRequest.getResponseForm().getResponseDocument().getOutput();
+        return executeAcceptedResponse.getAcceptedWithLineageResponse(status, executeRequest.getDataInputs(),
+                                                                      outputType, serverContext);
+    }
+
+    protected ExecuteResponse createLineageSyncExecuteResponse(Execute executeRequest, ProductionStatus status)
+                throws DatatypeConfigurationException {
+        LcExecuteResponse executeSuccessfulResponse = new LcExecuteResponse();
+        List<DocumentOutputDefinitionType> outputType = executeRequest.getResponseForm().getResponseDocument().getOutput();
+        return executeSuccessfulResponse.getSuccessfulWithLineageResponse(status, executeRequest.getDataInputs(), outputType);
+    }
+
+    private HashMap<String, Object> getSubsettingParameters(Map<String, String> inputParameters, Path targetDirPath)
                 throws MissingInputParameterException {
         HashMap<String, Object> parameters = new HashMap<>();
-        parameters.put("targetDir", targetDir);
+        parameters.put("targetDir", targetDirPath.toString());
         String predefinedRegionName = inputParameters.get("predefinedRegion");
         PredefinedRegion predefinedRegion = null;
         for (PredefinedRegion region : PredefinedRegion.values()) {
@@ -143,14 +172,12 @@ public class LcExecuteOperation {
         return parameters;
     }
 
-    private File getTargetDirectory(String jobId) throws FileSystemException {
-        File targetDir = new File(CATALINA_BASE + PropertiesWrapper.get("wps.application.path")
-                                  + "/" + PropertiesWrapper.get("lc.cci.output.directory"),
-                                  jobId);
-        if (!targetDir.mkdir()) {
-            throw new FileSystemException("Unable to create a new directory '" + targetDir.getAbsolutePath() + "'.");
-        }
-        return targetDir;
+    private Path getTargetDirectoryPath(String jobId) throws IOException {
+        Path targetDirectoryPath = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path")
+                                             + "/" + PropertiesWrapper.get("lc.cci.output.directory"),
+                                             jobId);
+        Files.createDirectories(targetDirectoryPath);
+        return targetDirectoryPath;
     }
 
     private Product getSourceProduct(Map<String, String> inputParameters) throws IOException {

@@ -32,6 +32,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public Capabilities getCapabilities(WpsRequestContext wpsRequestContext) throws WpsServiceException {
+        logger.log(Level.INFO, "processing GetCapabilities request for user : " + wpsRequestContext.getUserName());
         LcGetCapabilitiesOperation getCapabilitiesOperation = new LcGetCapabilitiesOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
@@ -44,7 +45,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public List<ProcessDescriptionType> describeProcess(WpsRequestContext wpsRequestContext, String processId) throws WpsServiceException {
-        logger.log(Level.INFO, "processing request for user : " + wpsRequestContext.getUserName());
+        logger.log(Level.INFO, "processing DescribeProcess request for user : " + wpsRequestContext.getUserName());
         LcDescribeProcessOperation describeProcessOperation = new LcDescribeProcessOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
@@ -57,7 +58,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public ExecuteResponse doExecute(WpsRequestContext wpsRequestContext, Execute execute) throws WpsServiceException {
-        logger.log(Level.INFO, "processing request for user : " + wpsRequestContext.getUserName());
+        logger.log(Level.INFO, "processing Execute request for user : " + wpsRequestContext.getUserName());
         LcExecuteOperation executeOperation = new LcExecuteOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
@@ -70,6 +71,7 @@ public class LcWpsProvider implements WpsServiceInstance {
 
     @Override
     public ExecuteResponse getStatus(WpsRequestContext wpsRequestContext, String jobId) throws WpsServiceException {
+        logger.log(Level.INFO, "processing GetStatus request for user : " + wpsRequestContext.getUserName());
         LcGetStatusOperation getStatusOperation = new LcGetStatusOperation();
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
