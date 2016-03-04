@@ -1,5 +1,6 @@
 package org.esa.cci.lc.wps;
 
+import com.bc.wps.api.WpsRuntimeException;
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.schema.CodeType;
 import com.bc.wps.api.schema.DataInputsType;
@@ -34,7 +35,7 @@ public class LcExecuteResponse {
         this.executeResponse.setLang("en");
     }
 
-    public ExecuteResponse getAcceptedResponse(ProductionStatus status, WpsServerContext context) throws DatatypeConfigurationException {
+    public ExecuteResponse getAcceptedResponse(ProductionStatus status, WpsServerContext context) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -50,8 +51,7 @@ public class LcExecuteResponse {
     public ExecuteResponse getAcceptedWithLineageResponse(ProductionStatus status,
                                                           DataInputsType dataInputs,
                                                           List<DocumentOutputDefinitionType> rawDataOutput,
-                                                          WpsServerContext context)
-                throws DatatypeConfigurationException {
+                                                          WpsServerContext context) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -67,7 +67,7 @@ public class LcExecuteResponse {
         return executeResponse;
     }
 
-    public ExecuteResponse getSuccessfulResponse(ProductionStatus status) throws DatatypeConfigurationException {
+    public ExecuteResponse getSuccessfulResponse(ProductionStatus status) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -82,8 +82,7 @@ public class LcExecuteResponse {
 
     public ExecuteResponse getSuccessfulWithLineageResponse(ProductionStatus status,
                                                             DataInputsType dataInputs,
-                                                            List<DocumentOutputDefinitionType> outputType)
-                throws DatatypeConfigurationException {
+                                                            List<DocumentOutputDefinitionType> outputType) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -100,7 +99,7 @@ public class LcExecuteResponse {
         return executeResponse;
     }
 
-    public ExecuteResponse getFailedResponse(ProductionStatus status) throws DatatypeConfigurationException {
+    public ExecuteResponse getFailedResponse(ProductionStatus status) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -119,7 +118,7 @@ public class LcExecuteResponse {
         return executeResponse;
     }
 
-    public ExecuteResponse getStartedResponse(ProductionStatus status) throws DatatypeConfigurationException {
+    public ExecuteResponse getStartedResponse(ProductionStatus status) {
         StatusType statusType = new StatusType();
         XMLGregorianCalendar currentTime = getXmlGregorianCalendar();
         statusType.setCreationTime(currentTime);
@@ -151,9 +150,13 @@ public class LcExecuteResponse {
         return productUrl;
     }
 
-    private XMLGregorianCalendar getXmlGregorianCalendar() throws DatatypeConfigurationException {
+    private XMLGregorianCalendar getXmlGregorianCalendar() {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+        try {
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+        } catch (DatatypeConfigurationException exception) {
+            throw new WpsRuntimeException("Unable to create a date in WPS response XML", exception);
+        }
     }
 
     private String getStatusUrl(String jobId, WpsServerContext context) {

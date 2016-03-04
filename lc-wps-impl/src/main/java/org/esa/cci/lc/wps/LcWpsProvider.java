@@ -1,7 +1,6 @@
 package org.esa.cci.lc.wps;
 
 import com.bc.wps.api.WpsRequestContext;
-import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.schema.Capabilities;
@@ -10,6 +9,7 @@ import com.bc.wps.api.schema.ExecuteResponse;
 import com.bc.wps.api.schema.ProcessDescriptionType;
 import com.bc.wps.utilities.WpsLogger;
 import org.esa.cci.lc.wps.exceptions.JobNotFoundException;
+import org.esa.cci.lc.wps.exceptions.ProcessorNotFoundException;
 import org.esa.cci.lc.wps.operations.LcDescribeProcessOperation;
 import org.esa.cci.lc.wps.operations.LcExecuteOperation;
 import org.esa.cci.lc.wps.operations.LcGetCapabilitiesOperation;
@@ -63,7 +63,7 @@ public class LcWpsProvider implements WpsServiceInstance {
         try {
             PropertiesWrapper.loadConfigFile("lc-cci-wps.properties");
             return executeOperation.doExecute(execute, wpsRequestContext);
-        } catch (IOException | DatatypeConfigurationException exception) {
+        } catch (IOException | ProcessorNotFoundException exception) {
             logger.log(Level.SEVERE, "Unable to perform Execute operation successfully", exception);
             throw new WpsServiceException("Unable to perform Execute operation successfully", exception);
         }
