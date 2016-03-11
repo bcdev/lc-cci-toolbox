@@ -1,0 +1,81 @@
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wps:Capabilities service="WPS" xml:lang="en" version="1.0.0" xmlns:bc="http://www.brockmann-consult.de/calwps/calwpsL3Parameters-schema.xsd" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<ows:ServiceIdentification>
+		<ows:Title>LC CCI WPS server</ows:Title>
+		<ows:Abstract>Web Processing Service for LC CCI User Toolbox</ows:Abstract>
+		<ows:ServiceType>WPS</ows:ServiceType>
+		<ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
+	</ows:ServiceIdentification>
+	<ows:ServiceProvider>
+		<xs:ProviderName>Brockmann-Consult</xs:ProviderName>
+		<ows:ProviderSite xlink:href="http://www.brockmann-consult.de"/>
+		<ows:ServiceContact>
+			<wps:IndividualName>Dr. Martin Boettcher</wps:IndividualName>
+			<wps:PositionName>Project Manager</wps:PositionName>
+			<wps:ContactInfo>
+				<wps:Phone>
+					<wps:Voice>+49 4152 889300</wps:Voice>
+					<wps:Facsimile>+49 4152 889333</wps:Facsimile>
+				</wps:Phone>
+				<wps:Address>
+					<wps:DeliveryPoint>Max-Planck-Str. 2</wps:DeliveryPoint>
+					<wps:City>Geesthacht</wps:City>
+					<wps:AdministrativeArea>SH</wps:AdministrativeArea>
+					<wps:PostalCode>21502</wps:PostalCode>
+					<wps:Country>Germany</wps:Country>
+					<wps:ElectronicMailAddress>info@brockmann-consult.de</wps:ElectronicMailAddress>
+				</wps:Address>
+				<wps:OnlineResource xlink:href="http://www.brockmann-consult.de"/>
+				<wps:HoursOfService>24x7</wps:HoursOfService>
+				<wps:ContactInstructions>Don't hesitate to call</wps:ContactInstructions>
+			</wps:ContactInfo>
+			<wps:Role>PointOfContact</wps:Role>
+		</ows:ServiceContact>
+	</ows:ServiceProvider>
+	<ows:OperationsMetadata>
+		<ows:Operation name="GetCapabilities">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://www.brockmann-consult.de/bc-wps/lc-cci?"/>
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+		<ows:Operation name="DescribeProcess">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://www.brockmann-consult.de/bc-wps/lc-cci?"/>
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+		<ows:Operation name="Execute">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Post xlink:href="http://www.brockmann-consult.de/bc-wps/lc-cci"/>
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+		<ows:Operation name="GetStatus">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://www.brockmann-consult.de/bc-wps/lc-cci?"/>
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+	</ows:OperationsMetadata>
+	<wps:ProcessOfferings>
+		<wps:Process>
+			<ows:Identifier>subsetting</ows:Identifier>
+			<ows:Title>Subsetting service</ows:Title>
+			<ows:Abstract>This is a Subsetting Tool for LC-CCI</ows:Abstract>
+		</wps:Process>
+	</wps:ProcessOfferings>
+	<wps:Languages>
+		<wps:Default>
+			<ows:Language>EN</ows:Language>
+		</wps:Default>
+		<wps:Supported>
+			<ows:Language>EN</ows:Language>
+		</wps:Supported>
+	</wps:Languages>
+</wps:Capabilities>

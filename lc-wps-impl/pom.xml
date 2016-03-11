@@ -157,6 +157,21 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>lc-cci-wps-tutorial</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/lc-cci-wps-tutorial.xml</descriptor>
+                            </descriptors>
+                            <finalName>lc-cci-wps-tutorial</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <attach>false</attach>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

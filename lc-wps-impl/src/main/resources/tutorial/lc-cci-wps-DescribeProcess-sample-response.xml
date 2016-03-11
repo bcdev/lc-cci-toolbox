@@ -1,0 +1,67 @@
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wps:ProcessDescriptions service="WPS" version="1.0.0" xml:lang="en" xmlns:bc="http://www.brockmann-consult.de/calwps/calwpsL3Parameters-schema.xsd" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<wps:ProcessDescription storeSupported="true" statusSupported="true" wps:processVersion="1.0">
+		<ows:Identifier>subsetting</ows:Identifier>
+		<ows:Title>Subsetting service</ows:Title>
+		<ows:Abstract>This is a Subsetting Tool for LC-CCI</ows:Abstract>
+		<wps:DataInputs>
+			<wps:Input>
+				<ows:Identifier>regionName</ows:Identifier>
+				<ows:Title>Predefined region name</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>string</ows:DataType>
+					<ows:AllowedValues>
+						<wps:Value xsi:type="xs:string">NORTH_AMERICA</wps:Value>
+						<wps:Value xsi:type="xs:string">CENTRAL_AMERICA</wps:Value>
+						<wps:Value xsi:type="xs:string">SOUTH_AMERICA</wps:Value>
+						<wps:Value xsi:type="xs:string">WESTERN_EUROPE_AND_MEDITERRANEAN</wps:Value>
+						<wps:Value xsi:type="xs:string">ASIA</wps:Value>
+						<wps:Value xsi:type="xs:string">AFRICA</wps:Value>
+						<wps:Value xsi:type="xs:string">SOUTH_EAST_ASIA</wps:Value>
+						<wps:Value xsi:type="xs:string">AUSTRALIA_AND_NEW_ZEALAND</wps:Value>
+						<wps:Value xsi:type="xs:string">GREENLAND</wps:Value>
+					</ows:AllowedValues>
+				</wps:LiteralData>
+			</wps:Input>
+			<wps:Input>
+				<ows:Identifier>north</ows:Identifier>
+				<ows:Title>The northern latitude</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>float</ows:DataType>
+				</wps:LiteralData>
+			</wps:Input>
+			<wps:Input>
+				<ows:Identifier>south</ows:Identifier>
+				<ows:Title>The southern latitude</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>float</ows:DataType>
+				</wps:LiteralData>
+			</wps:Input>
+			<wps:Input>
+				<ows:Identifier>east</ows:Identifier>
+				<ows:Title>The eastern longitude</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>float</ows:DataType>
+				</wps:LiteralData>
+			</wps:Input>
+			<wps:Input>
+				<ows:Identifier>west</ows:Identifier>
+				<ows:Title>The western longitude</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>float</ows:DataType>
+				</wps:LiteralData>
+			</wps:Input>
+			<wps:Input>
+				<ows:Identifier>sourceProduct</ows:Identifier>
+				<ows:Title>LC CCI map or conditions product</ows:Title>
+				<wps:LiteralData>
+					<ows:DataType>string</ows:DataType>
+					<ows:AllowedValues>
+						<wps:Value xsi:type="xs:string">ESACCI-LC-L4-LCCS-Map-300m-P5Y-2000-v1.3.nc</wps:Value>
+					</ows:AllowedValues>
+				</wps:LiteralData>
+			</wps:Input>
+		</wps:DataInputs>
+	</wps:ProcessDescription>
+</wps:ProcessDescriptions>
