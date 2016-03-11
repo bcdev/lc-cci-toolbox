@@ -3,17 +3,12 @@ package org.esa.cci.lc.wps.operations;
 import static com.bc.wps.api.utils.WpsTypeConverter.str2CodeType;
 import static com.bc.wps.api.utils.WpsTypeConverter.str2LanguageStringType;
 
-import com.bc.wps.api.schema.ComplexDataCombinationType;
-import com.bc.wps.api.schema.ComplexDataCombinationsType;
-import com.bc.wps.api.schema.ComplexDataDescriptionType;
 import com.bc.wps.api.schema.InputDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType.DataInputs;
-import com.bc.wps.api.schema.SupportedComplexDataInputType;
 import com.bc.wps.api.utils.InputDescriptionTypeBuilder;
-import com.bc.wps.api.utils.WpsTypeConverter;
-import com.bc.wps.utilities.WpsLogger;
 import org.esa.cci.lc.subset.PredefinedRegion;
+import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * @author hans
@@ -31,7 +25,7 @@ import java.util.logging.Logger;
 public class LcDescribeProcessOperation {
 
     public static final String INPUT_PRODUCT_NAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-{2000,2005,2010}-v1.[34].nc";
-    public static final String LC_CCI_INPUT_DIRECTORY = "/lc-cci_input";
+    private static final String CATALINA_BASE = System.getProperty("catalina.base");
 
     public List<ProcessDescriptionType> getProcesses(String processId) throws IOException {
         // TODO add a better way to input available processes
@@ -110,7 +104,7 @@ public class LcDescribeProcessOperation {
         dataInputs.getInput().add(west);
 
         List<String> inputSourceProductList = new ArrayList<>();
-        Path dir = Paths.get(LcWpsConstants.WPS_ROOT + LC_CCI_INPUT_DIRECTORY);
+        Path dir = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path"), PropertiesWrapper.get("lc.cci.input.directory"));
         List<File> files = new ArrayList<>();
         DirectoryStream<Path> stream = Files.newDirectoryStream(dir, INPUT_PRODUCT_NAME_PATTERN);
         for (Path entry : stream) {
