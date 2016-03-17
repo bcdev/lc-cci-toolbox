@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 # This is a script to send GetCapabilities request to LC CCI WPS. The response is displayed on the screen.
 # Usage : getCapabilities.sh
 # Example : getCapabilities.sh
 
-read -p "Enter User Name: " USER
+read -p "Enter User Name: " WPS_USER
 
-wget -q --user=$USER --ask-password -O- "www.brockmann-consult.de/bc-wps/wps/lc-cci?Service=WPS&Request=GetCapabilities"
+wget -q --user=$WPS_USER --ask-password -O- "www.brockmann-consult.de/bc-wps/wps/lc-cci?Service=WPS&Request=GetCapabilities"
