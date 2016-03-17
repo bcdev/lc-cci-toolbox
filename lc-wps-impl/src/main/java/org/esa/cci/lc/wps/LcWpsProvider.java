@@ -37,7 +37,7 @@ public class LcWpsProvider implements WpsServiceInstance {
             return getCapabilitiesOperation.getCapabilities();
         } catch (JAXBException exception) {
             logger.log(Level.SEVERE, "Unable to perform GetCapabilities operation successfully", exception);
-            throw new WpsServiceException("Unable to perform GetCapabilities operation successfully", exception);
+            throw new WpsServiceException(exception);
         }
     }
 
@@ -49,7 +49,7 @@ public class LcWpsProvider implements WpsServiceInstance {
             return describeProcessOperation.getProcesses(processId);
         } catch (IOException exception) {
             logger.log(Level.SEVERE, "Unable to perform DescribeProcess operation successfully", exception);
-            throw new WpsServiceException("Unable to perform DescribeProcess operation successfully", exception);
+            throw new WpsServiceException(exception);
         }
     }
 
@@ -61,7 +61,7 @@ public class LcWpsProvider implements WpsServiceInstance {
             return executeOperation.doExecute(execute, wpsRequestContext);
         } catch (IOException | ProcessorNotFoundException exception) {
             logger.log(Level.SEVERE, "Unable to perform Execute operation successfully", exception);
-            throw new WpsServiceException("Unable to perform Execute operation successfully", exception);
+            throw new WpsServiceException(exception);
         }
     }
 
@@ -73,7 +73,7 @@ public class LcWpsProvider implements WpsServiceInstance {
             return getStatusOperation.getStatus(jobId);
         } catch (JobNotFoundException | DatatypeConfigurationException exception) {
             logger.log(Level.SEVERE, "Unable to perform GetStatus operation successfully", exception);
-            throw new WpsServiceException("Unable to perform GetStatus operation successfully", exception);
+            throw new WpsServiceException(exception);
         }
     }
 
