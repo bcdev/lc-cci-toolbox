@@ -21,7 +21,7 @@ import com.bc.wps.api.schema.ServiceProvider;
 import com.bc.wps.api.schema.TelephoneType;
 import com.bc.wps.api.utils.CapabilitiesBuilder;
 import com.bc.wps.api.utils.WpsTypeConverter;
-import org.esa.cci.lc.wps.utils.PropertiesWrapper;
+import com.bc.wps.utilities.PropertiesWrapper;
 
 import javax.xml.bind.JAXBException;
 

@@ -1,8 +1,12 @@
 package org.esa.cci.lc.wps;
 
+import com.bc.wps.api.WpsRuntimeException;
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.WpsServiceProvider;
+import com.bc.wps.utilities.PropertiesWrapper;
+
+import java.io.IOException;
 
 /**
  * @author hans
@@ -26,6 +30,12 @@ public class LcWpsSpi implements WpsServiceProvider {
 
     @Override
     public WpsServiceInstance createServiceInstance(WpsServerContext wpsServerContext) {
+        String propertiesFileName = "lc-cci-wps.properties";
+        try {
+            PropertiesWrapper.loadConfigFile(propertiesFileName);
+        } catch (IOException exception) {
+            throw new WpsRuntimeException("Unable to load " + propertiesFileName + " file", exception);
+        }
         return new LcWpsProvider();
     }
 }

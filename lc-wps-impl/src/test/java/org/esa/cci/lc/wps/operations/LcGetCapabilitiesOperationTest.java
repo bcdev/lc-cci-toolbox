@@ -9,7 +9,7 @@ import com.bc.wps.api.schema.OperationsMetadata;
 import com.bc.wps.api.schema.ProcessOfferings;
 import com.bc.wps.api.schema.ServiceIdentification;
 import com.bc.wps.api.schema.ServiceProvider;
-import org.esa.cci.lc.wps.utils.PropertiesWrapper;
+import com.bc.wps.utilities.PropertiesWrapper;
 import org.junit.*;
 
 /**

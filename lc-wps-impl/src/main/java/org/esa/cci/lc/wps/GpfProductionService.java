@@ -1,8 +1,8 @@
 package org.esa.cci.lc.wps;
 
+import com.bc.wps.utilities.PropertiesWrapper;
 import com.bc.wps.utilities.WpsLogger;
 import com.bc.wps.utilities.WpsServletContainer;
-import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

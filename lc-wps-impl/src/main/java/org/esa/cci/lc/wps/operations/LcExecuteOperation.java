@@ -7,6 +7,7 @@ import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
 import com.bc.wps.api.schema.ResponseDocumentType;
 import com.bc.wps.api.schema.ResponseFormType;
+import com.bc.wps.utilities.PropertiesWrapper;
 import com.bc.wps.utilities.WpsLogger;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
@@ -24,7 +25,6 @@ import org.esa.cci.lc.wps.exceptions.ProcessorNotFoundException;
 import org.esa.cci.lc.wps.processes.LcCciProcess;
 import org.esa.cci.lc.wps.processes.LcCciProcessBuilder;
 import org.esa.cci.lc.wps.processes.LcCciProcessFactory;
-import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import java.io.File;
 import java.io.FileNotFoundException;

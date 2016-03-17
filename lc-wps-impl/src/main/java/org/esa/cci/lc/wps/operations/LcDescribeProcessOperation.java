@@ -7,8 +7,8 @@ import com.bc.wps.api.schema.InputDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType.DataInputs;
 import com.bc.wps.api.utils.InputDescriptionTypeBuilder;
+import com.bc.wps.utilities.PropertiesWrapper;
 import org.esa.cci.lc.subset.PredefinedRegion;
-import org.esa.cci.lc.wps.utils.PropertiesWrapper;
 
 import java.io.File;
 import java.io.IOException;
