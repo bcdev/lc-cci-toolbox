@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import com.bc.wps.api.schema.ProcessDescriptionType;
+import com.bc.wps.utilities.PropertiesWrapper;
 import org.junit.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class LcDescribeProcessOperationTest {
 
     @Before
     public void setUp() throws Exception {
+        PropertiesWrapper.loadConfigFile("lc-cci-wps-test.properties");
     }
 
     @Test
