@@ -2,7 +2,7 @@
 
 # This is a script to send an execute request to LC CCI WPS with a given xml request file
 # Usage : execute.sh [execute request XML] [response XML file]
-# Example : execute.sh lc-cci-wps-Execute-request.xml response.xml
+# Example : execute.sh lc-cci-wps-Execute-request-asynchronous.xml response.xml
 
 EXECUTE_XML=$1
 RESPONSE_FILE=$2
