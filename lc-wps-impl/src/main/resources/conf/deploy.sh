@@ -8,4 +8,5 @@ sudo service bc-tomcat stop
 sudo -u $RUN_AS mkdir -p $CATALINA_HOME/conf/lc-cci
 sudo -u $RUN_AS cp lc-cci-wps.properties $CATALINA_HOME/conf/lc-cci
 sudo -u $RUN_AS cp *.jar $CATALINA_HOME/webapps/bc-wps/WEB-INF/lib
+sudo -u $RUN_AS ln -sf /home/hans/lc-cci_input $CATALINA_HOME/webapps/bc-wps/lc-cci_input
 sudo service bc-tomcat start
