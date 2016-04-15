@@ -1,7 +1,7 @@
 package org.esa.cci.lc.wps;
 
-import com.bc.wps.api.WpsRuntimeException;
 import com.bc.wps.api.WpsServerContext;
+import com.bc.wps.api.exceptions.WpsRuntimeException;
 import com.bc.wps.api.schema.CodeType;
 import com.bc.wps.api.schema.DataInputsType;
 import com.bc.wps.api.schema.DocumentOutputDefinitionType;

@@ -1,9 +1,9 @@
 package org.esa.cci.lc.wps;
 
-import com.bc.wps.api.WpsRuntimeException;
 import com.bc.wps.api.WpsServerContext;
 import com.bc.wps.api.WpsServiceInstance;
 import com.bc.wps.api.WpsServiceProvider;
+import com.bc.wps.api.exceptions.WpsRuntimeException;
 import com.bc.wps.utilities.PropertiesWrapper;
 
 import java.io.IOException;

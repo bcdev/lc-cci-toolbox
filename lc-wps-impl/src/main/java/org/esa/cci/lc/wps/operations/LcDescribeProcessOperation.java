@@ -6,6 +6,7 @@ import static com.bc.wps.api.utils.WpsTypeConverter.str2LanguageStringType;
 import com.bc.wps.api.schema.InputDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType;
 import com.bc.wps.api.schema.ProcessDescriptionType.DataInputs;
+import com.bc.wps.api.schema.ValueType;
 import com.bc.wps.api.utils.InputDescriptionTypeBuilder;
 import com.bc.wps.utilities.PropertiesWrapper;
 import org.esa.cci.lc.subset.PredefinedRegion;
@@ -50,9 +51,11 @@ public class LcDescribeProcessOperation {
     private DataInputs getDataInputs() throws IOException {
         DataInputs dataInputs = new DataInputs();
 
-        List<String> allowedRegionNameList = new ArrayList<>();
+        List<Object> allowedRegionNameList = new ArrayList<>();
         for (PredefinedRegion regionName : PredefinedRegion.values()) {
-            allowedRegionNameList.add(regionName.name());
+            ValueType value = new ValueType();
+            value.setValue(regionName.name());
+            allowedRegionNameList.add(value);
         }
 
         InputDescriptionType regionName = InputDescriptionTypeBuilder
@@ -103,7 +106,7 @@ public class LcDescribeProcessOperation {
                     .build();
         dataInputs.getInput().add(west);
 
-        List<String> inputSourceProductList = new ArrayList<>();
+        List<Object> inputSourceProductList = new ArrayList<>();
         Path dir = Paths.get(CATALINA_BASE + PropertiesWrapper.get("wps.application.path"), PropertiesWrapper.get("lc.cci.input.directory"));
         List<File> files = new ArrayList<>();
         DirectoryStream<Path> stream = Files.newDirectoryStream(dir, INPUT_PRODUCT_NAME_PATTERN);
@@ -111,6 +114,8 @@ public class LcDescribeProcessOperation {
             files.add(entry.toFile());
         }
         for (File file : files) {
+            ValueType value = new ValueType();
+            value.setValue(file.getName());
             inputSourceProductList.add(file.getName());
         }
         InputDescriptionType sourceProduct = InputDescriptionTypeBuilder

@@ -2,7 +2,7 @@ package org.esa.cci.lc.wps.operations;
 
 import com.bc.wps.api.WpsRequestContext;
 import com.bc.wps.api.WpsServerContext;
-import com.bc.wps.api.WpsServiceException;
+import com.bc.wps.api.exceptions.WpsServiceException;
 import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
 import com.bc.wps.api.schema.ResponseDocumentType;

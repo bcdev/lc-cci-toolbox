@@ -1,8 +1,8 @@
 package org.esa.cci.lc.wps;
 
 import com.bc.wps.api.WpsRequestContext;
-import com.bc.wps.api.WpsServiceException;
 import com.bc.wps.api.WpsServiceInstance;
+import com.bc.wps.api.exceptions.WpsServiceException;
 import com.bc.wps.api.schema.Capabilities;
 import com.bc.wps.api.schema.Execute;
 import com.bc.wps.api.schema.ExecuteResponse;
