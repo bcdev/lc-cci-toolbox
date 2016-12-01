@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.10</version>
+    <version>3.11</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,8 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.11:
+    - Support for products with temporal resolution of one year (P1Y)
     Changes in 3.10:
     - aggreagte-map tool can now be used with additional user map and conversion table in order to improve PFTs
     - improved validation of user provided look-up tables
