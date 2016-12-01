@@ -66,7 +66,7 @@ public class LcWbTiffReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
-        bandProducts = new ArrayList<Product>();
+        bandProducts = new ArrayList<>();
 
         final File lcWbFile = getFileInput(getInput());
         if (!lcWbFile.exists()) {

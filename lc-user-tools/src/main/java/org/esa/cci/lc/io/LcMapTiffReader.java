@@ -44,8 +44,10 @@ import java.util.regex.Pattern;
  */
 public class LcMapTiffReader extends AbstractProductReader {
     // ESACCI-LC-L4-LCCS-Map-300m-P5Y-2000-v1.1.tif
-    public static final String LC_MAP_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)\\.(tiff?)";
-    public static final String LC_ALTERNATIVE_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P5Y-(....)-v(.*)_AlternativeMap.*\\.(tiff?)";
+    // or
+    // ESACCI-LC-L4-LCCS-Map-300m-P1Y-1994-v2.0.1.tif
+    public static final String LC_MAP_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P(\\d+)Y-(....)-v(.*)\\.(tiff?)";
+    public static final String LC_ALTERNATIVE_FILENAME_PATTERN = "ESACCI-LC-L4-LCCS-Map-300m-P(\\d+)Y-(....)-v(.*)_AlternativeMap.*\\.(tiff?)";
     public static final String[] LC_VARIABLE_NAMES = {
             "lccs_class",
             "processed_flag",
@@ -75,7 +77,7 @@ public class LcMapTiffReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
-        bandProducts = new ArrayList<Product>();
+        bandProducts = new ArrayList<>();
 
         final File lcClassifLccsFile = getFileInput(getInput());
         if (!lcClassifLccsFile.exists()) {
@@ -86,9 +88,10 @@ public class LcMapTiffReader extends AbstractProductReader {
         final String lcClassifLccsFilename = lcClassifLccsFile.getName();
         final String mapType = mapTypeOf(lcClassifLccsFilename);
         final Matcher m = lcClassifLccsFileMatcher(lcClassifLccsFilename, mapType);
-        final String epoch = m.group(1);
-        final String version = m.group(2);
-        final String extension = m.group(3);
+        final String temporalResolution = m.group(1);
+        final String epoch = m.group(2);
+        final String version = m.group(3);
+        final String extension = m.group(4);
 
         final Product lcClassifLccsProduct = readProduct(productDir, lcClassifLccsFilename, plugIn);
 
@@ -103,7 +106,7 @@ public class LcMapTiffReader extends AbstractProductReader {
         metadataRoot.setAttributeString("epoch", epoch);
         metadataRoot.setAttributeString("version", version);
         metadataRoot.setAttributeString("spatialResolution", "300m");
-        metadataRoot.setAttributeString("temporalResolution", "5");
+        metadataRoot.setAttributeString("temporalResolution", temporalResolution);
 
         bandProducts.add(lcClassifLccsProduct);
         Band band = addBand(LC_VARIABLE_NAMES[0], lcClassifLccsProduct, result);
@@ -119,11 +122,11 @@ public class LcMapTiffReader extends AbstractProductReader {
             for (int i = 5; i < 7; ++i) {
                 String lcFlagFilename;
                 if ("AlternativeMap".equals(mapType)) {
-                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_QF" + (i-4) + "." + extension;
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P" + temporalResolution + "Y-" + epoch + "-v" + version + "_AlternativeMap_QF" + (i - 4) + "." + extension;
                 } else if ("AlternativeMapMaxBiomass".equals(mapType)) {
-                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_MaxBiomass_QF" + (i-4) + "." + extension;
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P" + temporalResolution + "Y-" + epoch + "-v" + version + "_AlternativeMap_MaxBiomass_QF" + (i - 4) + "." + extension;
                 } else if ("AlternativeMapMinBiomass".equals(mapType)) {
-                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_AlternativeMap_MinBiomass_QF" + (i-4) + "." + extension;
+                    lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P" + temporalResolution + "Y-" + epoch + "-v" + version + "_AlternativeMap_MinBiomass_QF" + (i - 4) + "." + extension;
                 } else {
                     throw new IllegalArgumentException("unknown map type " + mapType);
                 }
@@ -178,7 +181,7 @@ public class LcMapTiffReader extends AbstractProductReader {
         return m;
     }
 
-    static String mapTypeOf(String filename) {
+    private static String mapTypeOf(String filename) {
         String mapType;
         if (filename.contains("AlternativeMap_MaxBiomass")) {
             mapType = "AlternativeMapMaxBiomass";
@@ -192,20 +195,23 @@ public class LcMapTiffReader extends AbstractProductReader {
         return mapType;
     }
 
-    private static Product readProduct(File productDir, String lcFlagFilename, ProductReaderPlugIn plugIn)
+    private static Product readProduct(File productDir, String lcClassifLccsFilename, ProductReaderPlugIn plugIn)
             throws IOException {
-        File lcFlagFile = new File(productDir, lcFlagFilename);
-        if (!lcFlagFile.canRead()) {
+        File lcClassifLccsFile = new File(productDir, lcClassifLccsFilename);
+        if (!lcClassifLccsFile.canRead()) {
             return null;
         }
-        final ProductReader productReader1 = plugIn.createReaderInstance();
-        return productReader1.readProductNodes(lcFlagFile, null);
+        final ProductReader productReader = plugIn.createReaderInstance();
+        Product product = productReader.readProductNodes(lcClassifLccsFile, null);
+        if (product == null) {
+            throw new IllegalStateException("Could not read product: " + lcClassifLccsFile);
+        }
+        return product;
     }
 
-    private static Band addBand(String variableName, Product lcFlagProduct, Product result) {
-        final Band srcBand = lcFlagProduct.getBandAt(0);
-        final String bandName = variableName;
-        final Band band = result.addBand(bandName, srcBand.getDataType());
+    private static Band addBand(String variableName, Product lcProduct, Product result) {
+        final Band srcBand = lcProduct.getBandAt(0);
+        final Band band = result.addBand(variableName, srcBand.getDataType());
         band.setNoDataValueUsed(false);
         band.setSourceImage(srcBand.getSourceImage());
         return band;
