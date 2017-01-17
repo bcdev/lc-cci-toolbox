@@ -17,9 +17,13 @@
     - improved validation of user provided look-up tables
     - if Java is not installed a "1.6)" file has been created containing "java not installed" message
     - fixed evaluation of JAVA_LOCATION in batch scripts
+    Changes in 3.9:
+    - additional check of the validity of the cross-walking table
+    - conversion and aggregation and sub-setting of the LC seasonality/condition products
+    - conversion and aggregation and sub-setting of the WB product
     Changes in 3.8:
     - variable metadata of WB NetCDF corrected, fill value NaN replaced by -1 for count bands
-    - checks added to ensure that cross walking tables contain the correct sequence and number of LCCS classes.
+    - checks added to ensure that cross walking tables contain the correct sequence and number of LCCS classes
     Changes in 3.7:
     - removed the rules for the map products
     - updated readme.txt to explain the file format of cross walking table better
