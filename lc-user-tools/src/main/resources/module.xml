@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.11</version>
+    <version>3.12</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
