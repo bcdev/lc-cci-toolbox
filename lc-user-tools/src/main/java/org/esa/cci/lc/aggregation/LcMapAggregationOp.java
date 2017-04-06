@@ -73,9 +73,13 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
             label = "Additional User Map PFT Conversion Table")
     private File additionalUserMapPFTConversionTable;
 
-    @Parameter(description = "Whether or not to add the accuracy variable to the output.",
+    @Parameter(description = "Whether or not to add the accuracy variable (for multi-year maps) to the output.",
             label = "Output Accuracy Value", defaultValue = "true")
     private boolean outputAccuracy;
+
+    @Parameter(description = "Whether or not to add the change count variable (for yearly maps) to the output.",
+            label = "Output Change Count Value", defaultValue = "true")
+    private boolean outputChangeCount;
 
     boolean outputTargetProduct;
 
@@ -165,10 +169,14 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
                                                                                 additionalUserMapPFTConversionUrl,
                                                                                 areaCalculator);
         AggregatorConfig[] aggregatorConfigs;
-        if (outputAccuracy) {
+        if (outputAccuracy && sourceProduct.containsBand("algorithmic_confidence_level")) {
             final String accuracyVariable = "Map".equals(mapType) ? "algorithmic_confidence_level" : "label_confidence_level";
             final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence");
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcAccuracyAggregatorConfig};
+        } else if (outputChangeCount && sourceProduct.containsBand("change_count")) {
+            final String majorityVariable = "change_count";
+            final LcMajorityAggregatorConfig lcMajorityAggregatorConfig = new LcMajorityAggregatorConfig(majorityVariable, "change_count");
+            aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcMajorityAggregatorConfig};
         } else {
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig};
         }

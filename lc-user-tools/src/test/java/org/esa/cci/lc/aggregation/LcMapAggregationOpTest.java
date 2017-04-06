@@ -74,6 +74,32 @@ public class LcMapAggregationOpTest {
     }
 
     @Test
+    public void testTargetProductCreation_YearlyMap() throws Exception {
+        // preparation
+        LcMapAggregationOp aggregationOp = createAggrOp();
+        aggregationOp.setGridName(PlanetaryGridName.GEOGRAPHIC_LAT_LON);
+        aggregationOp.setSourceProduct(TestProduct.createYearlyMapSourceProductNetCdf(new Dimension(3600, 1800)));
+        int numMajorityClasses = 2;
+        aggregationOp.setNumMajorityClasses(numMajorityClasses);
+        aggregationOp.setNumRows(4);
+        initOp(aggregationOp);
+
+        // execution
+        Product targetProduct = aggregationOp.getTargetProduct();
+
+        // verification
+        int numObsAndPasses = 2;
+        int numPFTs = 14;
+        int numAccuracyBands = 1;
+        final int expectedNumBands = LCCS.getInstance().getNumClasses()
+                                     + numMajorityClasses
+                                     + numObsAndPasses
+                                     + numPFTs
+                                     + numAccuracyBands;
+        assertThat(targetProduct.getNumBands(), is(expectedNumBands));
+    }
+
+    @Test
     public void testRegionWithGaussianGrid() throws Exception {
         LcMapAggregationOp aggrOp = createAggrOp();
         aggrOp.setSourceProduct(TestProduct.createMapSourceProductNetCdf(new Dimension(3600, 1800)));

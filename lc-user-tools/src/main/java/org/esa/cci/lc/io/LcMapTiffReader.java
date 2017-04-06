@@ -58,12 +58,32 @@ public class LcMapTiffReader extends AbstractProductReader {
             "label_source" ,
             "overall_confidence_level"
     };
+    public static final String[] LC_VARIABLE_NAMES_P1Y = {
+            "lccs_class",
+            "processed_flag",
+            "current_pixel_state",
+            "observation_count",
+            "change_count",
+            "label_confidence_level",
+            "label_source" ,
+            "overall_confidence_level"
+    };
     private static final String[] LC_VARIABLE_DESCRIPTIONS = new String[]{
             "Land cover class defined in LCCS",
             "LC map processed area flag",
             "LC pixel type mask",
             "number of valid observations",
             "LC map confidence level based on algorithm performance",
+            "Alternative label confidence level",
+            "Source of the alternative class",
+            "LC map confidence level based on product validation"
+    };
+    private static final String[] LC_VARIABLE_DESCRIPTIONS_P1Y = new String[]{
+            "Land cover class defined in LCCS",
+            "LC map processed area flag",
+            "LC pixel type mask",
+            "number of valid observations",
+            "number of class changes",
             "Alternative label confidence level",
             "Source of the alternative class",
             "LC map confidence level based on product validation"
@@ -112,10 +132,16 @@ public class LcMapTiffReader extends AbstractProductReader {
         Band band = addBand(LC_VARIABLE_NAMES[0], lcClassifLccsProduct, result);
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
 
-        if ("Map".equals(mapType)) {
+        if ("Map".equals(mapType) && "1".equals(temporalResolution)) {
             for (int i = 1; i < 5; ++i) {
                 String lcFlagFilename;
-                lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P5Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
+                lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P" + temporalResolution + "Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
+                addInputToResult(productDir, lcFlagFilename, result, plugIn, LC_VARIABLE_NAMES_P1Y[i], LC_VARIABLE_DESCRIPTIONS_P1Y[i]);
+            }
+        } else if ("Map".equals(mapType) ) {
+            for (int i = 1; i < 5; ++i) {
+                String lcFlagFilename;
+                lcFlagFilename = "ESACCI-LC-L4-LCCS-Map" + "-300m-P" + temporalResolution + "Y-" + epoch + "-v" + version + "_qualityflag" + i + "." + extension;
                 addInputToResult(productDir, lcFlagFilename, result, plugIn, LC_VARIABLE_NAMES[i], LC_VARIABLE_DESCRIPTIONS[i]);
             }
         } else {

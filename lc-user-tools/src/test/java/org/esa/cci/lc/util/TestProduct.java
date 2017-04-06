@@ -44,6 +44,34 @@ public abstract class TestProduct {
         return product;
     }
 
+    public static Product createYearlyMapSourceProductNetCdf(Dimension size) {
+        final Product product = new Product("P", "T", size.width, size.height);
+        product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"));
+        product.addBand("lccs_class", "X", ProductData.TYPE_UINT8);
+        product.addBand("processed_flag", "Y", ProductData.TYPE_INT8);
+        product.addBand("current_pixel_state", "X * Y", ProductData.TYPE_INT8);
+        product.addBand("observation_count", "10", ProductData.TYPE_INT8);
+        product.addBand("change_count", "2", ProductData.TYPE_FLOAT32);
+        setWgs84GeoCoding(product, size);
+        MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
+        globalAttributes.setAttributeString("id", "ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2");
+        globalAttributes.setAttributeString("type", "ESACCI-LC-L4-LCCS-Map-300m-P5Y");
+        globalAttributes.setAttributeString("time_coverage_duration", "P1Y");
+        globalAttributes.setAttributeString("time_coverage_resolution", "P1Y");
+        globalAttributes.setAttributeString("time_coverage_start", "2000");
+        globalAttributes.setAttributeString("time_coverage_end", "2000");
+        globalAttributes.setAttributeString("product_version", "1.0");
+        globalAttributes.setAttributeString("spatial_resolution", "300m");
+        globalAttributes.setAttributeString("geospatial_lat_min", "-90");
+        globalAttributes.setAttributeString("geospatial_lat_max", "90");
+        globalAttributes.setAttributeString("geospatial_lon_min", "-180");
+        globalAttributes.setAttributeString("geospatial_lon_max", "180");
+        globalAttributes.setAttributeString("source", "MERIS FR L1B");
+        globalAttributes.setAttributeString("history", "LC tool tests");
+        product.getMetadataRoot().addElement(globalAttributes);
+        return product;
+    }
+
     public static Product createMapSourceProductGeoTiff(Dimension size) {
         final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.tif"));

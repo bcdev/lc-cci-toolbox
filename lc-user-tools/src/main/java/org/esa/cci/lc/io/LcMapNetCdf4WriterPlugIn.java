@@ -141,6 +141,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private static final String CURRENT_PIXEL_STATE_BAND_NAME = "current_pixel_state";
             private static final String OBSERVATION_COUNT_BAND_NAME = "observation_count";
             private static final String ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME = "algorithmic_confidence_level";
+            private static final String CHANGE_COUNT_BAND_NAME = "change_count";
             private static final String OVERALL_CONFIDENCE_LEVEL_BAND_NAME = "overall_confidence_level";
             private static final String LABEL_CONFIDENCE_LEVEL_BAND_NAME = "label_confidence_level";
             private static final String LABEL_SOURCE_BAND_NAME = "label_source";
@@ -162,6 +163,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                         addObservationCountVariable(ncFile, band, tileSize);
                     } else if (ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addAlgorithmicConfidenceLevelVariable(ncFile, band, tileSize);
+                    } else if (CHANGE_COUNT_BAND_NAME.equals(band.getName())) {
+                        addChangeCountVariable(ncFile, band, tileSize);
                     } else if (OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
                         addOverallConfidenceLevelVariable(ncFile, band, tileSize);
                     } else if (LABEL_CONFIDENCE_LEVEL_BAND_NAME.equals(band.getName())) {
@@ -194,6 +197,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                        CURRENT_PIXEL_STATE_BAND_NAME.equals(bandName) ||
                        OBSERVATION_COUNT_BAND_NAME.equals(bandName) ||
                        ALGORITHMIC_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
+                       CHANGE_COUNT_BAND_NAME.equals(bandName) ||
                        OVERALL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
                        LABEL_CONFIDENCE_LEVEL_BAND_NAME.equals(bandName) ||
                        LABEL_SOURCE_BAND_NAME.equals(bandName);
@@ -287,6 +291,20 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 100);
                 variable.addAttribute("scale_factor", 0.01f);
+                if (ncDataType == DataType.SHORT) {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
+                } else {
+                    variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) -1);
+                }
+            }
+
+            private void addChangeCountVariable(NFileWriteable ncFile, Band band, Dimension tileSize) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 100);
                 if (ncDataType == DataType.SHORT) {
                     variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (short) -1);
                 } else {
