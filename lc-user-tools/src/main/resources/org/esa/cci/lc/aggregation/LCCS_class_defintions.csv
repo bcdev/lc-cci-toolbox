@@ -24,6 +24,7 @@
 130 | Grassland | grassland
 140 | Lichens and mosses | lichens_and_mosses
 150 | Sparse vegetation (tree, shrub, herbaceous cover) (<15%) | sparse_vegetation
+151 | Sparse tree (<15%) | sparse_tree
 152 | Sparse shrub (<15%) | sparse_shrub
 153 | Sparse herbaceous cover (<15%) | sparse_herbaceous
 160 | Tree cover, flooded, fresh or brakish water | tree_cover_flooded_fresh_or_brakish_water

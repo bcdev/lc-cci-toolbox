@@ -11,7 +11,7 @@
 
     <artifactId>lc-user-tools</artifactId>
     <name>LC CCI User Tools</name>
-    <version>3.12</version>
+    <version>3.13</version>
 
     <dependencies>
         <dependency>
@@ -56,12 +56,21 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/main/assembly/bin.xml</descriptor>
-                    </descriptors>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>user-tool-zip</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
