@@ -56,15 +56,15 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/user-tool-zip.xml</descriptor>
+                    </descriptors>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
                 <executions>
                     <execution>
                         <id>user-tool-zip</id>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
