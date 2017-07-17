@@ -29,7 +29,7 @@ import java.util.HashMap;
 @OperatorMetadata(
         alias = "LCCCI.Remap",
         internal = true,
-        version = "3.13",
+        version = "3.14",
         authors = "Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Remaps the LCCS classes to pft classes on the same grid as the input.",

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.13</version>
+    <version>3.14</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,12 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.14:
+    - readme updated, conversion tool no longer described, NetCDF input format required
+    Changes in 3.13:
+    - 151 added to legend (again)
+    Changes in 3.12:
+    - conversion and aggregation of change_count band implemented for P1Y
     Changes in 3.11:
     - Support for products with temporal resolution of one year (P1Y)
     Changes in 3.10:

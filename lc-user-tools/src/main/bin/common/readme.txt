@@ -6,11 +6,13 @@ Release: ${buildDate}
 
 Summary
 ~~~~~~~
-This set of tools (conversion tool, aggregation tool, subset tool) prepares data for model computation.
+This set of tools (aggregation, remapping, PFT conversion, and subsetting) prepares data for model computation.
 
 
 General Note
 ~~~~~~~~~~~~
+The CCI-LC User Tool requires the NetCDF-formatted LC files as input, NOT the GeoTIFF-formatted ones.
+
 The target files are always written in NetCDF-4 (enhanced model) file format.
 If the NetCDF-4 Classic file format is needed the standard nccopy tool can be used for conversion.
 When the REGULAR_GAUSSIAN_GRID is chosen as target grid and a regional subset which crosses the
@@ -34,26 +36,6 @@ Execution
 All provided scripts are available in windows (*.bat) and unix (*.sh) versions.
 The scripts need to be invoked from the command line.  Navigate to the bin directory of the folder where you
 have unpacked the tools to. Write the command as described as follows.
-
-    Conversion Tool Usage (converts Tiff to NetCDF-4 files)
-    ~~~~~~~~~~~~~~~~~~~~~~~~
-        convert(.sh/.bat) -PtargetDir=<dirPath> <pathToMapTifFile|pathToConditionTifFile>
-
-        In case of a CCI-LC Map file the corresponding flag files must be in the same directory as the Map file.
-        They are automatically detected and added to the output NetCDF-4 file.
-        For an alternative map the corresponding QF1 and QF2 files, as well as the qualityflag3 and qualityflag4 files
-        of the original Map must be in the same directory.
-        If a condition product shall be converted the AggMean tif file must be provided as source. All the associated
-        variables (AggMean, Std, Status and NYearObs) are considered and integrated into the output NetCDF-4 file if
-        they reside in the same folder as the source tif file.
-
-        Parameter Description:
-            -PtargetDir=<dirPath>
-                Specifies the directory where the target will be written. If this parameter is omitted the directory
-                of the source file is used. The target is written as NetCDF-4 file.
-                If already a file with the same name/path exists, it will be overwritten.
-                (see "Output File Naming Convention" )
-
 
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -291,14 +273,6 @@ have unpacked the tools to. Write the command as described as follows.
 
 Output File Naming Convention
 """""""""""""""""""""""""""""
-
-    Conversion Tool Output:
-    ~~~~~~~~~~~~~~~~~~~~~~~
-        Map Product:        ESACCI-LC-L4-LCCS-Map-{sRes}m-P{tRes}Y-{epoch}-v{versNr}.nc
-
-        Condition Product:  ESACCI-LC-L4-{condition}-Cond-{sRes}m-P{tRes}D-{startY}{MonthDay}-v{versNr}.nc
-
-
 
     Split Points:
     ~~~~~~~~~~~~~
