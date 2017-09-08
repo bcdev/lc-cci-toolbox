@@ -9,9 +9,9 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>lc-compare-modis-meris</artifactId>
+    <artifactId>lc-compare-merisv1-merisv2</artifactId>
     <version>1.0</version>
-    <name>LC-CCI Compare Modis/MERIS</name>
+    <name>LC-CCI Compare MERISv1/MERISv2</name>
     <packaging>jar</packaging>
 
     <dependencies>
