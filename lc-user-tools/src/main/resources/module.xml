@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.14</version>
+    <version>3.15</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,8 @@
 
     <changelog>
         <![CDATA[
+    Changes in 3.15:
+    - Changed tiling (chunk-size) to more appropriate one (1800,1800)
     Changes in 3.14:
     - readme updated, conversion tool no longer described, NetCDF input format required
     Changes in 3.13:

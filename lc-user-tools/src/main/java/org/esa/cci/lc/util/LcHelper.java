@@ -21,8 +21,9 @@ import java.util.HashMap;
 public class LcHelper {
 
     // number of tiles per image in netcdf must be smaller then Short.MAX_VALUE
-    // therefore we set 2048 as tile size
-    public static final Dimension TILE_SIZE = new Dimension(2048, 2048);
+    // therefore we set 1800 as tile size, in addition it fite to the scene size and
+    // no unnecessary is kept in memory
+    public static final Dimension TILE_SIZE = new Dimension(1800, 1800);
     public static final String TILE_SIZE_STRING = format(TILE_SIZE);
     public static final String PROP_NAME_TILE_SIZE = "TileSize";
 
