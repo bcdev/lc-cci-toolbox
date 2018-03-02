@@ -46,9 +46,12 @@ ncatted -h -O -a TileSize,global,o,c,'%chunkSize:%chunkSize' %dataDir/out2.nc
 ################ Removing _Unsigned and _FillValue #######################
 ncatted -h -O -a _Unsigned,lccs_class,d,, -a _FillValue,lccs_class,d,, %dataDir/out2.nc
 
-################ Change flag_values attribute #######################
+################ Change flag_values flag_meanings attribute #######################
 ncatted -h -O -a flag_values,lccs_class,o,ub,'0,10,11,12,20,30,40,50,60,61,62,70,71,72,80,81,82,90,100,110,120,121,122,130,140,150,151,152,153,160,170,180,190,200,201,202,210,220' %dataDir/out2.nc
 ncatted -h -O -a flag_meanings,lccs_class,o,c,'no_data cropland_rainfed cropland_rainfed_herbaceous_cover cropland_rainfed_tree_or_shrub_cover cropland_irrigated mosaic_cropland mosaic_natural_vegetation tree_broadleaved_evergreen_closed_to_open tree_broadleaved_deciduous_closed_to_open tree_broadleaved_deciduous_closed tree_broadleaved_deciduous_open tree_needleleaved_evergreen_closed_to_open tree_needleleaved_evergreen_closed tree_needleleaved_evergreen_open tree_needleleaved_deciduous_closed_to_open tree_needleleaved_deciduous_closed tree_needleleaved_deciduous_open tree_mixed mosaic_tree_and_shrub mosaic_herbaceous shrubland shrubland_evergreen shrubland_deciduous grassland lichens_and_mosses sparse_vegetation sparse_tree sparse_shrub sparse_herbaceous tree_cover_flooded_fresh_or_brakish_water tree_cover_flooded_saline_water shrub_or_herbaceous_cover_flooded urban bare_areas bare_areas_consolidated bare_areas_unconsolidated water snow_and_ice' %dataDir/out2.nc
+################ Add flag_colors attribute #######################
+ncatted -h -O -a flag_colors,lccs_class,c,c,'#ffff64,#ffff64,#ffff00,#aaf0f0,#dcf064,#c8c864,#006400,#00a000,#00a000,#aac800,#003c00,#003c00,#005000,#285000,#285000,#286400,#788200,#8ca000,#be9600,#966400,#966400,#966400,#ffb432,#ffdcd2,#ffebaf,#ffc864,#ffd278,#ffebaf,#00785a,#009678,#00dc82,#c31400,#fff5d7,#dcdcdc,#fff5d7,#0046c8,#ffffff' %dataDir/out2.nc
+
 
 ################ Remove _FillValue attribute #######################
 # from processed_flag, current_pixel_state, observation_count and change_count
