@@ -63,7 +63,7 @@ rm -f $tempOut0
 ncrename -h -v temp_lccs_class,lccs_class $tempOut
 #change global:TileSize according chunkSize
 # -a atttribute description att_nm, var_nm, mode, att_type, att_val
-ncatted -h -O -a TileSize,global,o,c,'$chunkSize:$chunkSize' $tempOut
+ncatted -h -O -a TileSize,global,o,c,"$chunkSize:$chunkSize" $tempOut
 
 ################ Removing _Unsigned and _FillValue #######################
 ncatted -h -O -a _Unsigned,lccs_class,d,, -a _FillValue,lccs_class,d,, $tempOut
@@ -82,7 +82,7 @@ ncatted -h -O -a flag_colors,lccs_class,c,c,'#ffff64 #ffff64 #ffff00 #aaf0f0 #dc
 ncatted -h -O -a _FillValue,processed_flag,d,, -a _FillValue,current_pixel_state,d,, -a _FillValue,observation_count,d,, -a _FillValue,change_count,d,, $tempOut
 
 ################ Change global:product_version attribute #######################
-ncatted -h -O -a product_version,global,o,c,'$newVersion' $tempOut
+ncatted -h -O -a product_version,global,o,c,"$newVersion" $tempOut
 
 ################ remove global:history attribute and other attributes added by nco#######################
 ncatted -h -O -a history,global,d,, $tempOut
