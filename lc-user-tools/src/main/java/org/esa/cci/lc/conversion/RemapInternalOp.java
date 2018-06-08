@@ -41,7 +41,7 @@ import java.util.TreeMap;
 @OperatorMetadata(
         alias = "LCCCI.RemapIntern",
         internal = true,
-        version = "3.14",
+        version = "3.15",
         authors = "Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Remaps the LCCS classes to pft classes on the same grid as the input."
