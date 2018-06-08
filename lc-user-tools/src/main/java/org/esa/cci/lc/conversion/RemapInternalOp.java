@@ -139,7 +139,28 @@ public class RemapInternalOp extends Operator {
                                 outBuffer.setElemIntAt(index, userClass);
                             } else {
                                 int pftIndex = pftNameIndexMap.get(targetBand.getName());
-                                int lccsClass = inBuffer.getElemIntAt(index);
+                                int lccsClass = 0;
+                                try {
+                                    lccsClass = inBuffer.getElemIntAt(index);
+                                } catch (ArrayIndexOutOfBoundsException e) {
+                                    System.err.printf("targetTile name: %s", targetTile.getRasterDataNode().getName());
+                                    System.err.printf("targetTile rectangle: %s", targetRectangle);
+                                    System.err.printf("targetTile MinX: %s", targetTile.getMinX());
+                                    System.err.printf("targetTile MaxX: %s", targetTile.getMaxX());
+                                    System.err.printf("targetTile MinY: %s", targetTile.getMinY());
+                                    System.err.printf("targetTile MaxY: %s", targetTile.getMaxY());
+                                    System.err.printf("lccsTile rectangle: %s", lccsTile.getRectangle());
+                                    System.err.printf("proxyTile rectangle: %s", proxyTile.getRectangle());
+                                    System.err.printf("proxyTile scan line stride: %s", proxyTile.getScanlineStride());
+                                    System.err.printf("proxyTile scan line offset: %s", proxyTile.getScanlineOffset());
+                                    System.err.printf("proxyTile MinX: %s", proxyTile.getMinX());
+                                    System.err.printf("proxyTile MaxX: %s", proxyTile.getMaxX());
+                                    System.err.printf("proxyTile MinY: %s", proxyTile.getMinY());
+                                    System.err.printf("proxyTile MaxY: %s", proxyTile.getMaxY());
+                                    System.err.printf("inBuffer num elems: %s", inBuffer.getNumElems());
+                                    System.err.printf("outBuffer num elems: %s", outBuffer.getNumElems());
+                                    e.printStackTrace();
+                                }
                                 float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
                                 final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
                                 outBuffer.setElemIntAt(index, (int) Math.floor(Double.isNaN(value) ? 0 : value));
