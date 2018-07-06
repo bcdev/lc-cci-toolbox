@@ -1,15 +1,15 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.support.SEAGrid;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;

@@ -1,9 +1,9 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.support.ObservationImpl;
-import org.esa.beam.binning.support.VectorImpl;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.Observation;
+import org.esa.snap.binning.support.ObservationImpl;
+import org.esa.snap.binning.support.VectorImpl;
 
 import java.util.HashMap;
 

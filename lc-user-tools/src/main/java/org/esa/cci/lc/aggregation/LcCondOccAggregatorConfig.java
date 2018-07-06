@@ -1,7 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.core.gpf.annotations.Parameter;
 
 /**
  * @author Marco Peters

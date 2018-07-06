@@ -1,22 +1,23 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.BinningContext;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.TemporalBin;
-import org.esa.beam.binning.WritableVector;
-import org.esa.beam.binning.operator.BinWriter;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
-import org.esa.beam.dataio.netcdf.nc.NVariable;
-import org.esa.beam.dataio.netcdf.nc.NWritableFactory;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.BinningContext;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.TemporalBin;
+import org.esa.snap.binning.WritableVector;
+import org.esa.snap.binning.operator.BinWriter;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.logging.BeamLogManager;
 import org.esa.cci.lc.util.LcHelper;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import ucar.ma2.DataType;
+import ucar.nc2.Attribute;
 
 import java.awt.Dimension;
 import java.io.IOException;
@@ -158,7 +159,7 @@ public class LcBinWriter implements BinWriter {
             final String[] featureNames = aggregator.getOutputFeatureNames();
             for (String featureName : featureNames) {
                 final NVariable featureVar = writeable.addVariable(featureName, DataType.FLOAT, tileSize, writeable.getDimensions());
-                featureVar.addAttribute("_FillValue", FILL_VALUE);
+                Attribute attribute = featureVar.addAttribute("_FillValue", FILL_VALUE);
                 featureVars.add(featureVar);
             }
         }

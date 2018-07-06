@@ -3,7 +3,7 @@ package org.esa.cci.lc.io;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;
 import com.bc.ceres.core.runtime.internal.ModuleReader;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.IOException;

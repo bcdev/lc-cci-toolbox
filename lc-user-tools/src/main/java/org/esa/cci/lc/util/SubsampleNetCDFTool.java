@@ -1,10 +1,10 @@
 package org.esa.cci.lc.util;
 
 import com.bc.ceres.core.PrintWriterProgressMonitor;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 
 import java.io.File;

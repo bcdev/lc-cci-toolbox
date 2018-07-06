@@ -1,16 +1,16 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.gpf.operators.standard.WriteOp;
-import org.esa.beam.util.Debug;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.common.WriteOp;
+import org.esa.snap.core.util.Debug;
 import org.esa.cci.lc.io.LcCondMetadata;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapMetadata;
@@ -113,7 +113,7 @@ public class LcConversionOp extends Operator {
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
         // if only 2GB of heap space is available:
         // Exception in thread "SunTileScheduler0Standard2" java.lang.OutOfMemoryError: Java heap space
-        System.setProperty("beam.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
+        System.setProperty("snap.gpf.executionOrder", "SCHEDULE_BAND_ROW_COLUMN");
         writeOp.writeProduct(ProgressMonitor.NULL);
         setTargetProduct(new Product("foo", "dummy", 2, 2));
     }

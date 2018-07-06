@@ -1,13 +1,13 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LCCfNetCdfReaderPlugIn;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.LcSubsetOp;
@@ -77,8 +77,8 @@ public class SubsetAfterAggregationTest {
                                               }
                                           });
         try {
-            GeoPos ulGp = product.getGeoCoding().getGeoPos(new PixelPos(0.5f, 0.5f), null);
-            GeoPos lrGp = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f,
+            GeoPos ulGp = product.getSceneGeoCoding().getGeoPos(new PixelPos(0.5f, 0.5f), null);
+            GeoPos lrGp = product.getSceneGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f,
                                                                         product.getSceneRasterHeight() - 0.5f), null);
             assertEquals(27.471285f, ulGp.getLat(), 1.0e-6f);
             assertEquals(266.625f, ulGp.getLon(), 1.0e-6f);
@@ -152,7 +152,7 @@ public class SubsetAfterAggregationTest {
             subsetOp.setSourceProduct(tempProduct);
             subsetOp.initialize();
             Product subsetProduct = readProduct(targetFile);
-            assertNotNull(subsetProduct.getGeoCoding());
+            assertNotNull(subsetProduct.getSceneGeoCoding());
             return subsetProduct;
         } finally {
             aggrOp.dispose();

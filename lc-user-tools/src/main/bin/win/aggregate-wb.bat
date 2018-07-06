@@ -9,10 +9,10 @@ if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
 
-java -Xmx4G -Dceres.context=beam ^
-    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
-    -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
-    -Dbeam.binning.sliceHeight=64 ^
+java -Xmx4G -Dceres.context=snap ^
+    -Dsnap.logLevel=INFO -Dsnap.consoleLog=true ^
+    -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT ^
+    -Dsnap.binning.sliceHeight=64 ^
     -jar "%TOOL_HOME%\ceres-launcher.jar" ^
     LCCCI.Aggregate.WB -e -c 1024M %*
 

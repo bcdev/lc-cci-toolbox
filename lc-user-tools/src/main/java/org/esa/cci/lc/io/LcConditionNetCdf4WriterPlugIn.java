@@ -1,24 +1,24 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.dataio.netcdf.DefaultNetCdfWriter;
-import org.esa.beam.dataio.netcdf.NullProfilePartWriter;
-import org.esa.beam.dataio.netcdf.ProfileWriteContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartWriter;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
-import org.esa.beam.dataio.netcdf.nc.NVariable;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
-import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductWriter;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
+import org.esa.snap.dataio.netcdf.NullProfilePartWriter;
+import org.esa.snap.dataio.netcdf.ProfileWriteContext;
+import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
+import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.core.dataio.ProductWriter;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
@@ -86,7 +86,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
 
             final String startTime = startDate;
             final String endTime = endYear + startDate.substring(4);
-            final GeoCoding geoCoding = product.getGeoCoding();
+            final GeoCoding geoCoding = product.getSceneGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0.0f, 0.0f), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
             final String latMax = String.valueOf(upperLeft.getLat());
@@ -242,7 +242,7 @@ public class LcConditionNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 final byte[] conditionFlagValues = new byte[]{0, 1, 2, 3, 4, 5};
                 final String conditionFlagMeanings = "invalid land water snow cloud filled_ice";
-                final Array valids = Array.factory(conditionFlagValues);
+                final Array valids = Array.factory(DataType.BYTE ,new int[]{6},conditionFlagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "normalized_difference_vegetation_index status_flag");
                 variable.addAttribute("flag_values", valids);

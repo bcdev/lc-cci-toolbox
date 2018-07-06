@@ -1,7 +1,7 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

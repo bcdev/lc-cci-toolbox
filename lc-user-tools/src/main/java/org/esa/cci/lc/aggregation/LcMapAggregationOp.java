@@ -1,14 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcMapMetadata;
 import org.esa.cci.lc.io.LcMapTiffReader;

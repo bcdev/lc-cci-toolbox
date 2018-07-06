@@ -1,11 +1,11 @@
 package org.esa.cci.lc.conversion;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.util.TestProduct;
@@ -55,7 +55,7 @@ public class RemapInternalOpTest {
     @Test(expected = OperatorException.class)
     public void testSource_MissingGeoCoding() throws Exception {
         final RemapInternalOp remapOp = new RemapInternalOp();
-        testSource.setGeoCoding(null);
+        testSource.setSceneGeoCoding(null);
         remapOp.setSourceProduct(testSource);
 
         remapOp.getTargetProduct();
@@ -66,7 +66,7 @@ public class RemapInternalOpTest {
         final RemapInternalOp remapOp = new RemapInternalOp();
         final int width = testSource.getSceneRasterWidth();
         final int height = testSource.getSceneRasterHeight();
-        testSource.setGeoCoding(new NotGeoPosProvidingGeoCoding(width, height));
+        testSource.setSceneGeoCoding(new NotGeoPosProvidingGeoCoding(width, height));
         remapOp.setSourceProduct(testSource);
 
         remapOp.getTargetProduct();
@@ -89,7 +89,7 @@ public class RemapInternalOpTest {
         remapOp.setSourceProduct(testSource);
         final int width = testUserMap.getSceneRasterWidth();
         final int height = testUserMap.getSceneRasterHeight();
-        testUserMap.setGeoCoding(new NotPixelPosProvidingGeoCoding(width, height));
+        testUserMap.setSceneGeoCoding(new NotPixelPosProvidingGeoCoding(width, height));
         remapOp.setSourceProduct("additionalUserMap", testUserMap);
 
         remapOp.getTargetProduct();
@@ -101,7 +101,7 @@ public class RemapInternalOpTest {
         remapOp.setSourceProduct(testSource);
 
         final Product targetProduct = remapOp.getTargetProduct();
-        assertNotNull(targetProduct.getGeoCoding());
+        assertNotNull(targetProduct.getSceneGeoCoding());
         final Band[] sourceBands = testSource.getBands();
         checkSourceBandsAreCopied(targetProduct, sourceBands);
         final Lccs2PftLut lut = new Lccs2PftLutBuilder().create();
@@ -118,7 +118,7 @@ public class RemapInternalOpTest {
 
         final Product targetProduct = remapOp.getTargetProduct();
 
-        assertNotNull(targetProduct.getGeoCoding());
+        assertNotNull(targetProduct.getSceneGeoCoding());
         final Band[] sourceBands = testSource.getBands();
         checkSourceBandsAreCopied(targetProduct, sourceBands);
         final MetadataElement globAttribs = targetProduct.getMetadataRoot().getElement("Global_Attributes");

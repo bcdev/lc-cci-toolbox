@@ -1,23 +1,23 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
@@ -216,15 +216,16 @@ public class RemapInternalOp extends Operator {
     }
 
     private void validateSource() {
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        if (geoCoding == null || !geoCoding.canGetGeoPos()) {
-            throw new OperatorException("The source is not properly geo-referenced. " +
-                                                "It must be able to provide the geo-location for a pixel position.");
-        }
         if (!sourceProduct.containsBand(LCCS_CLASS_BAND_NAME)) {
             throw new OperatorException(String.format("Missing band '%s' in source product.", LCCS_CLASS_BAND_NAME));
         }
+        final GeoCoding geoCoding = sourceProduct.getBand(LCCS_CLASS_BAND_NAME).getGeoCoding();
+        if (geoCoding == null || !geoCoding.canGetGeoPos()) {
+            throw new OperatorException("The source is not properly geo-referenced. " +
+                    "It must be able to provide the geo-location for a pixel position.");
+        }
     }
+
 
     private void validateParameter() {
         if (userPFTConversionTable != null) {
@@ -255,7 +256,8 @@ public class RemapInternalOp extends Operator {
     }
 
     private void validateAddionalUserMap() {
-        final GeoCoding geoCoding = additionalUserMap.getGeoCoding();
+
+        final GeoCoding geoCoding = additionalUserMap.getSceneGeoCoding();
         if (geoCoding == null || !geoCoding.canGetPixelPos()) {
             throw new OperatorException("The additional user map is not properly geo-referenced. " +
                                                 "It must be able to provide the pixel position for a geo-location.");

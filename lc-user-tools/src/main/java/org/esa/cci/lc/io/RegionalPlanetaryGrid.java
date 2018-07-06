@@ -1,6 +1,6 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.snap.binning.PlanetaryGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 /**

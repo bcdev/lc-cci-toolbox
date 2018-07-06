@@ -1,11 +1,11 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.AggregatorDescriptor;
-import org.esa.beam.binning.VariableContext;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.AggregatorDescriptor;
+import org.esa.snap.binning.VariableContext;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Product;
 
 import java.io.File;
 import java.io.IOException;

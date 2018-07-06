@@ -1,10 +1,10 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.SpatialBin;
-import org.esa.beam.binning.TemporalBin;
-import org.esa.beam.binning.support.ObservationImpl;
-import org.esa.beam.binning.support.VariableContextImpl;
-import org.esa.beam.binning.support.VectorImpl;
+import org.esa.snap.binning.SpatialBin;
+import org.esa.snap.binning.TemporalBin;
+import org.esa.snap.binning.support.ObservationImpl;
+import org.esa.snap.binning.support.VariableContextImpl;
+import org.esa.snap.binning.support.VectorImpl;
 import org.junit.Before;
 import org.junit.Test;
 

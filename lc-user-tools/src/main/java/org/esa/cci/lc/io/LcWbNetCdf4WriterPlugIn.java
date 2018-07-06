@@ -1,24 +1,24 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.dataio.netcdf.DefaultNetCdfWriter;
-import org.esa.beam.dataio.netcdf.NullProfilePartWriter;
-import org.esa.beam.dataio.netcdf.ProfileWriteContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartWriter;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
-import org.esa.beam.dataio.netcdf.nc.NVariable;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
-import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductWriter;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
+import org.esa.snap.dataio.netcdf.NullProfilePartWriter;
+import org.esa.snap.dataio.netcdf.ProfileWriteContext;
+import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
+import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.core.dataio.ProductWriter;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -70,7 +70,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String epoch = lcWbMetadata.getEpoch();
             final String version = lcWbMetadata.getVersion();
 
-            final GeoCoding geoCoding = product.getGeoCoding();
+
+            final GeoCoding geoCoding = product.getSceneGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
             final String latMax = String.valueOf(upperLeft.getLat());
@@ -170,10 +171,9 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
-                //final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
                 byte[] wbClassFlagValues = new byte[] { 1, 2 };
-                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length);
+                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
                 for (int i = 0; i < wbClassFlagValues.length; ++i) {
                     valids.set(i, wbClassFlagValues[i]);
                 }

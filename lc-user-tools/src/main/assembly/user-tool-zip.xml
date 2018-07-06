@@ -17,12 +17,10 @@
             <useProjectArtifact>true</useProjectArtifact>
             <unpack>false</unpack>
             <excludes>
-                <exclude>org.esa.beam:beam-ui</exclude>
-                <exclude>org.esa.beam:beam-visat-rcp</exclude>
-                <exclude>org.esa.beam:beam-visat</exclude>
-                <exclude>org.esa.beam:beam-csv-dataio</exclude>
-                <exclude>org.esa.beam:beam-processing</exclude>
-                <exclude>org.esa.beam:beam-statistics-op</exclude>
+                <exclude>org.esa.snap:snap-ui</exclude>
+                <exclude>org.esa.snap:snap-csv-dataio</exclude>
+                <exclude>org.esa.snap:snap-processing</exclude>
+                <exclude>org.esa.snap:snap-statistics-op</exclude>
                 <exclude>org.jython:jython</exclude>
                 <exclude>com.jidesoft:jide-*</exclude>
                 <exclude>jfree:jfreechart</exclude>

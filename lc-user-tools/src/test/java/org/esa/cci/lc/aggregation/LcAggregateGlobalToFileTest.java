@@ -1,14 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.cci.lc.io.LCCfNetCdfReaderPlugIn;
 import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
@@ -100,13 +100,14 @@ public class LcAggregateGlobalToFileTest {
     }
 
     private void checkProductWithStandardReader(File file, PlanetaryGridName grid) throws IOException {
+
         CfNetCdfReaderPlugIn plugIn = new CfNetCdfReaderPlugIn();
         DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
         assertEquals(DecodeQualification.SUITABLE, decodeQualification);
         Product product = plugIn.createReaderInstance().readProductNodes(file, null);
         try {
             assertNotNull(product);
-            GeoCoding geoCoding = product.getGeoCoding();
+            GeoCoding geoCoding = product.getSceneGeoCoding();
             GeoPos ulgp = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
             GeoPos urgp = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f, 0.5f), null);
             if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(grid)) {
@@ -130,7 +131,7 @@ public class LcAggregateGlobalToFileTest {
         Product product = plugIn.createReaderInstance().readProductNodes(file, null);
         try {
             assertNotNull(product);
-            GeoCoding geoCoding = product.getGeoCoding();
+            GeoCoding geoCoding = product.getSceneGeoCoding();
             GeoPos ulgp = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
             GeoPos urgp = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 0.5f, 0.5f), null);
             if (PlanetaryGridName.REGULAR_GAUSSIAN_GRID.equals(grid)) {
