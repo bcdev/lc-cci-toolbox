@@ -74,6 +74,17 @@
             </includes>
             <filtered>true</filtered>
         </fileSet>
+        <fileSet>
+            <directory>src/main/resources/lib/x86</directory>
+            <outputDirectory>lib</outputDirectory>
+            <lineEnding>keep</lineEnding>
+            <includes>
+                <include>*.dll</include>
+                <include>*.so</include>
+                <include>*.exe</include>
+            </includes>
+            <filtered>false</filtered>
+        </fileSet>
     </fileSets>
 
 </assembly>

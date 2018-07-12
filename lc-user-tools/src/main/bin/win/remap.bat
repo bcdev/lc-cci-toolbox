@@ -8,6 +8,7 @@ for /f %%j in ("java.exe") do (
 if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
 set TOOL_HOME="%CD%"
+set PATH=%PATH%;%CD%\..\lib
 
 java -Xmx8G -Dceres.context=snap ^
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT ^

@@ -13,6 +13,7 @@
     <name>LC CCI User Tools</name>
     <version>3.15-SNAPSHOT</version>
 
+
     <repositories>
         <repository>
             <id>central</id>
@@ -56,9 +57,6 @@
         <maven.build.timestamp.format>yyyy/MM/dd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
         <snap.version>[6.0.0,7.0]</snap.version>
-
-
-
     </properties>
 
     <dependencies>
