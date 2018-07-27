@@ -1,5 +1,6 @@
 package org.esa.cci.lc.io;
 
+import org.esa.cci.lc.util.N4VariableWriter;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
