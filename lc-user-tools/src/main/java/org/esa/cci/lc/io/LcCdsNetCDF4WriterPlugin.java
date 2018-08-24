@@ -305,6 +305,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         } else if (element.containsAttribute(name) && value == null) {
             value = element.getAttributeString(name);
             writeable.addGlobalAttribute(name, value);
+        } else if (!element.containsAttribute(name) && value != null) {
+            writeable.addGlobalAttribute(name, value);
         } else {
             SystemUtils.LOG.warning("Global attribute " + name + " does not exist in the original product. Nothing is written");
 
