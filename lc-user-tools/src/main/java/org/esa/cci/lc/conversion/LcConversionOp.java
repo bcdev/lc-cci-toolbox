@@ -1,6 +1,7 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
@@ -19,6 +20,7 @@ import org.esa.cci.lc.io.LcWbMetadata;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.util.LcHelper;
 
+
 import java.io.File;
 
 /**
@@ -30,7 +32,7 @@ import java.io.File;
 @OperatorMetadata(
         alias = "LCCCI.Convert",
         internal = true,
-        version = "3.15",
+        version = "4.0",
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names",
@@ -48,6 +50,8 @@ public class LcConversionOp extends Operator {
     private File targetDir;
     @Parameter(description = "Version of the target file. Replacing the one given by the source product")
     private String targetVersion;
+    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds.",defaultValue = "lccci")
+    private String format;
 
     @Override
     public void initialize() throws OperatorException {
@@ -58,7 +62,7 @@ public class LcConversionOp extends Operator {
         String typeString;
         String id;
         String outputFormat;
-        if (sourceFile.getName().startsWith("ESACCI-LC-L4-LCCS-Map")) {
+        if ("lccci".equals(format) && sourceFile.getName().startsWith("ESACCI-LC-L4-LCCS-Map")) {
             outputFormat = LC_MAP_FORMAT;
             final LcMapMetadata metadata = new LcMapMetadata(sourceProduct);
             typeString = String.format("ESACCI-LC-L4-LCCS-%s-%s-P%sY",
@@ -69,7 +73,7 @@ public class LcConversionOp extends Operator {
                                typeString,
                                metadata.getEpoch(),
                                targetVersion != null ? targetVersion : metadata.getVersion());
-        } else if (sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map")) {
+        } else if ("lccci".equals(format) && sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map")) {
             outputFormat = LC_WB_FORMAT;
             final LcWbMetadata metadata = new LcWbMetadata(sourceProduct);
             typeString = String.format("ESACCI-LC-L4-WB-Map-%s-P%sY",
@@ -79,36 +83,63 @@ public class LcConversionOp extends Operator {
                                typeString,
                                metadata.getEpoch(),
                                targetVersion != null ? targetVersion : metadata.getVersion());
-        } else {
+        }
+        else if  ("lccci".equals(format)) {
             outputFormat = LC_CONDITION_FORMAT;
             LcCondMetadata metadata = new LcCondMetadata(sourceProduct);
             String temporalCoverageYears = String.valueOf(Integer.parseInt(metadata.getEndYear()) - Integer.parseInt(metadata.getStartYear()) + 1);
             typeString = String.format("ESACCI-LC-L4-%s-Cond-%s-P%sY%sD",
-                                       metadata.getCondition(),
-                                       metadata.getSpatialResolution(),
-                                       temporalCoverageYears,
-                                       metadata.getTemporalResolution());
+                    metadata.getCondition(),
+                    metadata.getSpatialResolution(),
+                    temporalCoverageYears,
+                    metadata.getTemporalResolution());
             id = String.format("%s-%s-v%s",
-                               typeString,
-                               metadata.getStartDate(),
-                               targetVersion != null ? targetVersion : metadata.getVersion());
+                    typeString,
+                    metadata.getStartDate(),
+                    targetVersion != null ? targetVersion : metadata.getVersion());
         }
 
+        else if ("lccds".equals(format) || "bacds".equals(format))  {
+            outputFormat = "NetCDF4-LC-CDS";
+            id = sourceFile.getName();
+
+            if ("lccds".equals(format)) {
+                typeString = sourceProduct.getMetadataRoot().getElement("global_attributes").getAttributeString("type");
+            }
+            else {
+                typeString="burned_area";
+                id=id+"cds";
+            }
+            String productVersion=sourceProduct.getMetadataRoot().getElement("global_attributes").getAttributeString("product_version");
+            if (targetVersion==null) {
+                targetVersion=productVersion+"cds";
+            }
+            id=id.replace(productVersion+"b.nc",targetVersion);
+            id=id.replaceFirst(".nc","");
+        }
+        else {
+            throw  new OperatorException("Unknown format "+format);
+        }
         // setting the id in order to hand over to the writer
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
-        metadataRoot.setAttributeString("type", typeString);
-        metadataRoot.setAttributeString("id", id);
+        metadataRoot.getElement("global_attributes").setAttributeString("type", typeString);
+        metadataRoot.getElement("global_attributes").setAttributeString("id", id);
         if (targetVersion != null) {
-            metadataRoot.setAttributeString("version", targetVersion);
+            metadataRoot.getElement("global_attributes").setAttributeString("product_version", targetVersion);
         }
 
         if (targetDir == null) {
             targetDir = sourceFile.getParentFile();
         }
+        File targetFile;
 
-        File targetFile = new File(targetDir, id + ".nc");
+        targetFile = new File(targetDir, id + ".nc");
+
         sourceProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
+
+        writeOp.setWriteEntireTileRows(false);
+
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
         // if only 2GB of heap space is available:

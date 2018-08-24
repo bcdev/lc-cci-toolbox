@@ -1,4 +1,4 @@
 org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn
 org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn
 org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn
-org.esa.cci.lc.io.LcFireNetCDF4WriterPlugin
+org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.15</version>
+    <version>4.0</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,8 @@
 
     <changelog>
         <![CDATA[
+    Changes in 4.0:
+    - plugin and writer for cds format for lc are created
     Changes in 3.15:
     - Changed tiling (chunk-size) to more appropriate one (2025,2025)
     Changes in 3.14:
