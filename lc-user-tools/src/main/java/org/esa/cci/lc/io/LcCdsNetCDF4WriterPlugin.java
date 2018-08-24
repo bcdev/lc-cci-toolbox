@@ -313,6 +313,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
     private void writeLCGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
         final Dimension tileSize = new Dimension(1350, 675);
+        String history = element.getAttributeString("history");
 
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "title", "Land Cover Map of ESA CCI brokered by CDS");
@@ -338,7 +339,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be/");
         addGlobalAttribute(writeable, element, "creator_email", null);
         addGlobalAttribute(writeable, element, "source", null);
-        addGlobalAttribute(writeable, element, "history", "amorgos-4,0, lc-sdr-1.0, lc-sr-1.0, lc-classification-1.0, lc-user-tools-3.13, lc-user-tools-4.0");
+        addGlobalAttribute(writeable, element, "history", history + ",lc-user-tools-" + LcWriterUtils.getModuleVersion());
         addGlobalAttribute(writeable, element, "time_coverage_start", null);
         addGlobalAttribute(writeable, element, "time_coverage_end", null);
         addGlobalAttribute(writeable, element, "time_coverage_duration", null);
