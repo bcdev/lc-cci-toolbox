@@ -126,7 +126,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
             final int totalWidthHalf = sourceBand.getRasterWidth() / 2;
             final int totalWidth = sourceBand.getRasterWidth();
 
-            if (sourceOffsetX > totalWidthHalf) {
+            if (sourceOffsetX >= totalWidthHalf) {
                 final int[] shape = new int[]{1, 1, sourceHeight, sourceWidth};
                 final int[] origin = new int[]{0, vegetationClass - 1, sourceOffsetY, sourceOffsetX - totalWidthHalf};
                 Array array = Array.factory(variable.getDataType(), shape, elems);
@@ -134,7 +134,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
                     getWriteable().getWriter().write(variable, origin, array);
                 } catch (InvalidRangeException e) {
                 }
-            } else if (sourceOffsetX < totalWidthHalf && (sourceOffsetX + sourceWidth + totalWidthHalf) < (totalWidth)) {
+            } else if (sourceOffsetX <= totalWidthHalf && (sourceOffsetX + sourceWidth + totalWidthHalf) <= (totalWidth)) {
                 sourceOffsetX = sourceOffsetX + totalWidthHalf;
                 final int[] shape = new int[]{1, 1, sourceHeight, sourceWidth};
                 final int[] origin = new int[]{0, vegetationClass - 1, sourceOffsetY, sourceOffsetX};
