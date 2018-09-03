@@ -27,7 +27,7 @@ public class LcWriterUtils {
         LcWriterUtils.COMPACT_ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    private static String getModuleVersion() throws IOException {
+    public static String getModuleVersion() throws IOException {
         String lcUserToolsVersion;
         ModuleReader moduleReader = new ModuleReader(Logger.getAnonymousLogger());
         URL moduleLocation = LcWriterUtils.class.getProtectionDomain().getCodeSource().getLocation();
