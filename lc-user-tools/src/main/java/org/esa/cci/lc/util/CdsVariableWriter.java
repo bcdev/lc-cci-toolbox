@@ -113,6 +113,7 @@ public class CdsVariableWriter extends ProfilePartIO {
         } catch (InvalidRangeException e) {
         }
         data = Array.factory(DataType.DOUBLE,new int[]{numLatPixels, 1}, lat);
+        data = data.flip(0);
         try {
             writeable.getWriter().write("lat", data);
         }
@@ -137,7 +138,7 @@ public class CdsVariableWriter extends ProfilePartIO {
         }
         catch (InvalidRangeException e) {
         }
-        data = Array.factory(DataType.DOUBLE,new int[]{numLatPixels, 1}, lon);
+        data = Array.factory(DataType.DOUBLE,new int[]{numLonPixels, 1}, lon);
         try {
             writeable.getWriter().write("lon", data);
         }

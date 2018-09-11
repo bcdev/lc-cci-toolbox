@@ -1,6 +1,7 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
@@ -22,6 +23,7 @@ import org.esa.cci.lc.util.LcHelper;
 
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This operator converts the LC CCI GeoTIFF files of a map product or a condition product
@@ -50,14 +52,14 @@ public class LcConversionOp extends Operator {
     private File targetDir;
     @Parameter(description = "Version of the target file. Replacing the one given by the source product")
     private String targetVersion;
-    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds.",defaultValue = "lccci")
+    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds,ppcds.",defaultValue = "lccci")
     private String format;
 
     @Override
     public void initialize() throws OperatorException {
         Debug.setEnabled(true);
 
-        File sourceFile = sourceProduct.getFileLocation();
+        final File sourceFile = sourceProduct.getFileLocation();
 
         String typeString;
         String id;
@@ -116,6 +118,16 @@ public class LcConversionOp extends Operator {
             }
             id=id.replace(productVersion+"b.nc",targetVersion);
             id=id.replaceFirst(".nc","");
+        }
+        else if ("ppcds".equals(format)) {
+            typeString="pp";
+            id=sourceFile.getName().replace("-LC.tif","cds");
+            outputFormat = "NetCDF4-LC-CDS";
+            try
+            {
+                 sourceProduct = ProductIO.readProduct(sourceFile, "LC_CDS_TIFF");
+            }
+            catch (IOException e){}
         }
         else {
             throw  new OperatorException("Unknown format "+format);

@@ -1,7 +1,7 @@
 package org.esa.cci.lc.io;
 
-import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.CdsVariableWriter;
+import org.esa.cci.lc.util.LcHelper;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -26,10 +26,10 @@ import ucar.nc2.Variable;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 
 public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
@@ -117,7 +117,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
             // add global attributes
             if ( path.endsWith(".tif") ){
-                addGlobalAttribute(writeable,element,"type","pixel_product");
+                //addGlobalAttribute(writeable,element,"type","pixel_product");
                 writePPGlobalAttribute( writeable, element);
             }
             else if (element.getAttributeString("type").equals("ESACCI-LC-L4-LCCS-Map-300m-P1Y")) {
@@ -161,11 +161,12 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
                 }
                 else {
-                addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSize);
-                addCustomVariable(ncFile,"JD","time lat lon",DataType.SHORT,tileSize);
-                addCustomVariable(ncFile,"CL","time lat lon",DataType.BYTE,tileSize);
-                addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null);
-                addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null);
+                    final Dimension tileSizePixel = new Dimension(2025, 2025);
+                    addCustomVariable(ncFile,"JD","time lat lon",DataType.SHORT,tileSizePixel);
+                    addCustomVariable(ncFile,"CL","time lat lon",DataType.BYTE,tileSizePixel);
+                    addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSizePixel);
+                    addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null);
+                    addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null);
 
                 }
 
@@ -197,7 +198,37 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("calendar", "standard");
             nVariable.addAttribute("units", "days since 1970-01-01 00:00:00");
             nVariable.addAttribute("bounds", "time_bounds");
-
+        }
+        else if (variableName.equals("lat")){
+            nVariable.addAttribute("standard_name", "latitude");
+            nVariable.addAttribute("units", "degrees_north");
+            nVariable.addAttribute("axis", "Y");
+            nVariable.addAttribute("long_name", "latitude");
+            nVariable.addAttribute("bounds", "lat_bounds");
+        }
+        else if (variableName.equals("lon")){
+            nVariable.addAttribute("standard_name", "longitude");
+            nVariable.addAttribute("units", "degrees_east");
+            nVariable.addAttribute("axis", "X");
+            nVariable.addAttribute("long_name", "longitude");
+            nVariable.addAttribute("bounds", "lon_bounds");
+        }
+        else if (variableName.equals("JD")){
+            nVariable.addAttribute("long_name", "Date of the first detection");
+            nVariable.addAttribute("units", "Day of the year");
+            nVariable.addAttribute("comment", "Possible values: 0  when the pixel is not burnedl 1 to 366 day of the first detection when the pixel is burned; -1 when the pixel is" +
+                    "not observed in the month; -2 when pixel is not burnable: continuous water, bare land, urban, permanent ice-snow");
+        }
+        else if (variableName.equals("CL")){
+            nVariable.addAttribute("long_name", "Confidence Level");
+            nVariable.addAttribute("units", "percent");
+            nVariable.addAttribute("comment", "Probability of detecting a pixel as burned. Possible values: 0 when the pixel is not observed in the month, or it is not burnable;" +
+                    " 1 to 100 Probability values. The closer to 100, the higher the confidence that the pixel is actually burned.");
+        }
+        else if (variableName.equals("LC")){
+            nVariable.addAttribute("long_name", "Land cover of burned pixels");
+            nVariable.addAttribute("units", "Land cover code");
+            nVariable.addAttribute("comment", "Possible values: 0 when the pixel is not burned in the month; 10 to 180 land cover code when the pixel is burned.");
         }
     }
 
@@ -403,7 +434,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "title", null);
         addGlobalAttribute(writeable, element, "institution", null);
         addGlobalAttribute(writeable, element, "source", null);
-        addGlobalAttribute(writeable, element, "history", null);
+        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         addGlobalAttribute(writeable, element, "references", null);
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "Conventions", null);
@@ -442,8 +473,56 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
     }
 
     private void writePPGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
-        addGlobalAttribute(writeable, element, "geospatial_lon_resolution", "0");
-        addGlobalAttribute(writeable, element, "geospatial_lat_resolution", "360");
+        String timeYear = element.getProduct().getFileLocation().getName().substring(0,4);
+        String timeMonth = element.getProduct().getFileLocation().getName().substring(4,6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(timeYear),Integer.parseInt(timeMonth)-1,1);
+        String lastDay  = Integer.toString(calendar.getActualMaximum( Calendar.DAY_OF_MONTH));
+        String startObservation = timeYear+timeMonth+"01T000000Z";
+        String endObservation = timeYear+timeMonth+lastDay+"T235959Z";
+        addGlobalAttribute(writeable, element, "title", "Fire_cci Pixel MODIS Burned Area product");
+        addGlobalAttribute(writeable, element, "institution", "University of Alcala");
+        addGlobalAttribute(writeable, element, "source", "MODIS MOD09GQ Collection 6, MODIS MOD09GA Collection 6, MODIS MCD14ML Collection 6, ESA CCI Land Cover dataset v1.6.1");
+        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "references", "See www.esa-fire-cci.org");
+        addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
+        addGlobalAttribute(writeable, element, "conventions","CF-1.6");
+        addGlobalAttribute(writeable, element, "product_version","v5.0cds");
+        addGlobalAttribute(writeable, element, "summary","The grid product is the result of summing up burned area pixels and their attributes, as extracted from their original sinusoidal " +
+                "projection, within each cell of 0.25 degrees in a regular grid covering the whole Earth in biweekly composites. The attributes stored are sum of burned area, standard error, " +
+                "fraction of burnable area, fraction of observed area, number of patches and the burned area for 18 land cover classes of Land Cover CCI." );
+
+        addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
+        addGlobalAttribute(writeable, element, "id", null);
+        addGlobalAttribute(writeable, element, "naming_authority", "org.esa-fire-cci");
+        addGlobalAttribute(writeable, element, "keywords_vocabulary", "none");
+        addGlobalAttribute(writeable, element, "cdm_data_type", "Grid");
+        addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the ESA Fire_cci programme");
+        addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "creation_name", "University of Alcala");
+        addGlobalAttribute(writeable, element, "creator_url", "www.esa-fire-cci.org");
+        addGlobalAttribute(writeable, element, "creator_email", "emilio.chuvieco@uah.es");
+        addGlobalAttribute(writeable, element, "contact", "http://copernicus-support.ecmwf.int");
+        addGlobalAttribute(writeable, element, "project", "Climate Change Initiative - European Space Agency");
+        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        //addGlobalAttribute(writeable, element, "geospatial_vertical_min", "0");
+        //addGlobalAttribute(writeable, element, "geospatial_vertical_max", "0");
+        addGlobalAttribute(writeable, element, "time_coverage_start", startObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_duration", "P1M");
+        addGlobalAttribute(writeable, element, "time_coverage_resolution", "P1M");
+        addGlobalAttribute(writeable, element, "standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Metadata Convention");
+        addGlobalAttribute(writeable, element, "license", "ESA CCI Data Policy: free and open access");
+        addGlobalAttribute(writeable, element, "platform", "Terra");
+        addGlobalAttribute(writeable, element, "sensor", "MODIS");
+        addGlobalAttribute(writeable, element, "spatial_resolution", "250m");
+        addGlobalAttribute(writeable, element, "geospatial_lon_units", "degrees_east");
+        addGlobalAttribute(writeable, element, "geospatial_lat_units", "degrees_north");
+        addGlobalAttribute(writeable, element, "geospatial_lon_resolution", "0.0022457331");
+        addGlobalAttribute(writeable, element, "geospatial_lat_resolution", "0.0022457331");
     }
 
 }
