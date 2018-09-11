@@ -488,9 +488,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
         addGlobalAttribute(writeable, element, "product_version","v5.0cds");
-        addGlobalAttribute(writeable, element, "summary","The grid product is the result of summing up burned area pixels and their attributes, as extracted from their original sinusoidal " +
-                "projection, within each cell of 0.25 degrees in a regular grid covering the whole Earth in biweekly composites. The attributes stored are sum of burned area, standard error, " +
-                "fraction of burnable area, fraction of observed area, number of patches and the burned area for 18 land cover classes of Land Cover CCI." );
+        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 'Date of the first detection', 'Confidence Level', and 'Land cover of burned pixels'" );
 
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
