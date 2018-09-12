@@ -488,7 +488,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
         addGlobalAttribute(writeable, element, "product_version","v5.0cds");
-        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 'Date of the first detection', 'Confidence Level', and 'Land cover of burned pixels'" );
+        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
 
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
