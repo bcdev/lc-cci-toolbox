@@ -26,6 +26,7 @@ import ucar.nc2.Variable;
 
 import java.awt.*;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -207,7 +208,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         else if (variableName.equals("JD")){
             nVariable.addAttribute("long_name", "Date of the first detection");
             nVariable.addAttribute("units", "Day of the year");
-            nVariable.addAttribute("comment", "Possible values: 0  when the pixel is not burnedl 1 to 366 day of the first detection when the pixel is burned; -1 when the pixel is" +
+            nVariable.addAttribute("comment", "Possible values: 0  when the pixel is not burned; 1 to 366 day of the first detection when the pixel is burned; -1 when the pixel is " +
                     "not observed in the month; -2 when pixel is not burnable: continuous water, bare land, urban, permanent ice-snow");
         }
         else if (variableName.equals("CL")){
@@ -413,10 +414,13 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
 
     private void writeBAGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         addGlobalAttribute(writeable, element, "title", null);
         addGlobalAttribute(writeable, element, "institution", null);
         addGlobalAttribute(writeable, element, "source", null);
-        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+dateFormat.format(new Date()));
         addGlobalAttribute(writeable, element, "references", null);
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "Conventions", null);
@@ -462,10 +466,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         String lastDay  = Integer.toString(calendar.getActualMaximum( Calendar.DAY_OF_MONTH));
         String startObservation = timeYear+timeMonth+"01T000000Z";
         String endObservation = timeYear+timeMonth+lastDay+"T235959Z";
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+
         addGlobalAttribute(writeable, element, "title", "Fire_cci Pixel MODIS Burned Area product");
         addGlobalAttribute(writeable, element, "institution", "University of Alcala");
         addGlobalAttribute(writeable, element, "source", "MODIS MOD09GQ Collection 6, MODIS MOD09GA Collection 6, MODIS MCD14ML Collection 6, ESA CCI Land Cover dataset v1.6.1");
-        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "history", "Created on 2017-12-19 06:42:41; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+dateFormat.format(new Date()));
         addGlobalAttribute(writeable, element, "references", "See www.esa-fire-cci.org");
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
