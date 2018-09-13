@@ -12,10 +12,8 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,9 +108,17 @@ public class LcCdsTiffReader extends AbstractProductReader {
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_resolution","0.0022457331");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_resolution","0.0022457331");
 
+        /// time part
+        String timeYear = lcConditionProduct.getFileLocation().getName().substring(0,4);
+        String timeMonth = lcConditionProduct.getFileLocation().getName().substring(4,6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(timeYear),Integer.parseInt(timeMonth)-1,1);
+        String lastDay  = Integer.toString(calendar.getActualMaximum( Calendar.DAY_OF_MONTH));
+        String startObservation = timeYear+timeMonth+"01T000000Z";
+        String endObservation = timeYear+timeMonth+lastDay+"T235959Z";
+        result.getMetadataRoot().getElement("global_attributes").setAttributeString("time_coverage_start",startObservation);
+        result.getMetadataRoot().getElement("global_attributes").setAttributeString("time_coverage_end",endObservation);
         ///
-
-
 
         bandProducts.add(lcConditionProduct);
         //Band band = addBand(condition.toLowerCase() + "_" + mainVariable, lcConditionProduct, result);

@@ -86,6 +86,7 @@ public class CdsVariableWriter extends ProfilePartIO {
             Double lonMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_min");
             Double lonMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_max");
             lcLatLonCustomBoundsWriter(ctx,p,lonMin,lonMax,latMin,latMax);
+            timeWriter(ctx, p);
         }
     }
 
