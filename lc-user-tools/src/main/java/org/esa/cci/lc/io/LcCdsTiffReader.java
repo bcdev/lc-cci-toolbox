@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 public class LcCdsTiffReader extends AbstractProductReader {
 
 
-    //public static final String LC_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-(.*)-Cond-Agg(Mean|Occ)-(.*m)-P(.*)Y(.*)D-(........)-v(.*)\\.(tiff?)";
     public static final String LC_CONDITION_FILENAME_PATTERN = "(........)-ESACCI-L3S_FIRE-BA-MODIS-AREA_(.)-fv5.0-LC.tif";
     //20010101-ESACCI-L3S_FIRE-BA-MODIS-AREA_1-fv5.0-LC.tif
     private List<Product> bandProducts;
@@ -40,10 +39,7 @@ public class LcCdsTiffReader extends AbstractProductReader {
         final String jdConditionFilename = lcConditionFilename.replace("LC","JD");
         final String clConditionFilename = lcConditionFilename.replace("LC","CL");
         final File productDir = lcConditionFile.getParentFile();
-        final Matcher m = lcConditionFileMatcher(lcConditionFilename);
-        //final String condition = m.group(1);
-        //final String mainVariable = m.group(2).toLowerCase();
-        //String mainVariable = "LC";
+
          Product lcConditionProduct = readProduct(productDir, lcConditionFilename, plugIn);
          Product jdConditionProduct = readProduct(productDir, jdConditionFilename, plugIn);
          Product clConditionProduct = readProduct(productDir, clConditionFilename, plugIn);
@@ -63,20 +59,16 @@ public class LcCdsTiffReader extends AbstractProductReader {
 
         result.setFileLocation(lcConditionFile);
 
-
-        //result.setSceneGeoCoding(lcConditionProduct.getSceneGeoCoding());
         final GeoCoding geoCoding = lcConditionProduct.getSceneGeoCoding();
         final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
         final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(lcConditionProduct.getSceneRasterWidth(), lcConditionProduct.getSceneRasterHeight()), null);
         final String latMax = String.valueOf(upperLeft.getLat());
         final String latMin = String.valueOf(lowerRight.getLat());
-        final String lonMin = String.valueOf((upperLeft.getLon()+360d)%360);  ///change longitude here
-        final String lonMax = String.valueOf((lowerRight.getLon()+360d)%360);
-
+        String lonMin = String.valueOf((upperLeft.getLon()+360d)%360);  ///change longitude here
+        String lonMax = String.valueOf((lowerRight.getLon()+360d)%360);
 
         ////
         result.getMetadataRoot().addElement(new MetadataElement("global_attributes"));
-
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("title","Fire_cci Pixel MODIS Burned Area product");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("institution","University of Alcala");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("source","MODIS MOD09GQ Collection 6, MODIS MOD09GA Collection 6, MODIS MCD14ML Collection 6, ESA CCI Land Cover dataset v1.6.1");
@@ -90,6 +82,7 @@ public class LcCdsTiffReader extends AbstractProductReader {
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("naming_authority", "org.esa-fire-cci");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("keywords_vocabulary", "none");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("cdm_data_type", "Grid");
+        result.getMetadataRoot().getElement("global_attributes").setAttributeString("type", "pixel_product");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("comment", "These data were produced as part of the ESA Fire_cci programme");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("creator_name", "University of Alcala");
@@ -97,7 +90,6 @@ public class LcCdsTiffReader extends AbstractProductReader {
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("creator_email", "emilio.chuvieco@uah.es");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("contact", "http://copernicus-support.ecmwf.int");
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("project", "Climate Change Initiative - European Space Agency");
-
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lat_min",Double.parseDouble(latMin));
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lat_max",Double.parseDouble(latMax));
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lon_min",Double.parseDouble(lonMin));
@@ -121,7 +113,6 @@ public class LcCdsTiffReader extends AbstractProductReader {
         ///
 
 
-        //result.setPreferredTileSize(new Dimension(2025, 2025));
 
         bandProducts.add(lcConditionProduct);
         //Band band = addBand(condition.toLowerCase() + "_" + mainVariable, lcConditionProduct, result);
@@ -132,8 +123,6 @@ public class LcCdsTiffReader extends AbstractProductReader {
         bandLC.setDescription("LC");
         bandJD.setDescription("JD");
         bandCL.setDescription("CL");
-
-        //result.setPreferredTileSize(new Dimension(2025, 2025));
 
         return result;
 

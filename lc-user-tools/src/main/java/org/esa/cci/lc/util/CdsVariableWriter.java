@@ -121,15 +121,16 @@ public class CdsVariableWriter extends ProfilePartIO {
         }
         //lon part
         int numLonPixels = p.getSceneRasterWidth();//129600;
+        if (minLon>maxLon){maxLon=maxLon+360;}
         divider = numLonPixels / (maxLon -minLon);
         step = 1 / divider;
         double[] lonArray = new double[2 * numLonPixels];
         double[] lon = new double[ numLonPixels];
         j = 0;
         for (int i = 0; i < numLonPixels; i += 1) {
-            lonArray[j] = minLon + (i * step);
-            lonArray[j + 1] = minLon + (i + 1) * step;
-            lon[i]=minLon + (i * step);
+            lonArray[j] = (minLon + (i * step))%360;
+            lonArray[j + 1] = (minLon + (i + 1) * step)%360;
+            lon[i]=(minLon + (i * step))%360;
             j += 2;
         }
         data = Array.factory(DataType.DOUBLE, new int[]{numLonPixels, 2}, lonArray);

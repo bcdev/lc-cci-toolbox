@@ -26,8 +26,6 @@ import ucar.nc2.Variable;
 
 import java.awt.*;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -83,7 +81,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
             final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
-            final Dimension tileSize = new Dimension(2025, 2025);
             NetcdfFileWriter onlyReader;
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
@@ -116,8 +113,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             }
 
             // add global attributes
-            if ( path.endsWith(".tif") ){
-                //addGlobalAttribute(writeable,element,"type","pixel_product");
+            if ( element.getAttributeString("type").equals("pixel_product") ){
                 writePPGlobalAttribute( writeable, element);
             }
             else if (element.getAttributeString("type").equals("ESACCI-LC-L4-LCCS-Map-300m-P1Y")) {
@@ -142,7 +138,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 final Dimension tileSize = new Dimension(2025, 2025);
                 if (! path.endsWith(".tif") ) {
                     NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
-
                     for (Band band : p.getBands()) {
                         if (!band.getName().contains("vegetation_class")) {
                             addBandVariable(ncFile, band, onlyReader, tileSize);
@@ -150,7 +145,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                             addBandClassVariable(ncFile, band, onlyReader, tileSize);
                         }
                     }
-
                     List<Variable> list = onlyReader.getNetcdfFile().getVariables();
                     for (Variable variable : list) {
                         if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class"))) {
@@ -158,7 +152,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                         }
                     }
                     onlyReader.close();
-
                 }
                 else {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
@@ -167,10 +160,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                     addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSizePixel);
                     addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null);
                     addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null);
-
                 }
 
-                //adding lat_bounds and lon_bounds and time_bounds and time. So far needed only for LC
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lat_bounds") == null)) {
                     addCustomVariable(ncFile, "lat_bounds", "lat bounds", DataType.DOUBLE,null);
                 }
@@ -258,21 +249,13 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         List<Attribute> attributeList = variable.getAttributes();
         for (Attribute attribute : attributeList) {
             if (attribute.getFullName().equals("valid_min") && variable.getFullName().equals("lon")) {
-                //nVariable.addAttribute("valid_min", (Double) 0.0014);
-                nVariable.addAttribute("valid_min",  0.);
+                nVariable.addAttribute("valid_min",  0d);
             } else if (attribute.getFullName().equals("valid_max") && variable.getFullName().equals("lon")) {
-                //nVariable.addAttribute("valid_max", (Double) 359.9986);
-                nVariable.addAttribute("valid_max",  360.);
+                nVariable.addAttribute("valid_max",  360d);
             } else if (attribute.getFullName().equals("valid_max") && variable.getFullName().equals("lat")) {
-                //float temp = 89.99861f;
-                //double doubleTemp = temp;
-                double doubleTemp = 90;
-                nVariable.addAttribute("valid_max", doubleTemp);
+                nVariable.addAttribute("valid_max", 90d);
             } else if (attribute.getFullName().equals("valid_min") && variable.getFullName().equals("lat")) {
-                //float temp = -89.99861f;
-                //double doubleTemp = temp;
-                double doubleTemp = -90;
-                nVariable.addAttribute("valid_min", (Double) doubleTemp);
+                nVariable.addAttribute("valid_min",  -90d);
             } else if (attribute.getFullName().equals("bounds")) {
                 nVariable.addAttribute(attribute.getFullName(), attribute.getStringValue().replace("bnds", "bounds"));
             } else if (attribute.getFullName().equals("units")) {
@@ -303,7 +286,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         final String variableName = ReaderUtils.getVariableName(band);
         String dimString = "time lat lon";
 
-
         Variable oldVariable = onlyReader.findVariable(variableName);
         if (oldVariable.getFullName().equals("lccs_class") || oldVariable.getFullName().equals("observation_count") ||
                 oldVariable.getFullName().equals("change_count")) {
@@ -312,11 +294,12 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             if (oldVariable.getFullName().equals("lccs_class")) {
                 addedVariable.addAttribute("standard_name", "land_cover_lccs");
                 addedVariable.addAttribute("flag_colors", "#ffff64 #ffff64 #ffff00 #aaf0f0 #dcf064 #c8c864 #006400 #00a000 #00a000 #aac800 #003c00 #003c00 #005000 #285000 #285000 #286400 #788200 #8ca000 #be9600 #966400 #966400 #966400 #ffb432 #ffdcd2 #ffebaf #ffc864 #ffd278 #ffebaf #00785a #009678 #00dc82 #c31400 #fff5d7 #dcdcdc #fff5d7 #0046c8 #ffffff");
-
-            } else if (oldVariable.getFullName().equals("standard_error")) {
+            }
+            else if (oldVariable.getFullName().equals("standard_error")) {
                 addedVariable.addAttribute("standard_name", "burned_area standard_error");
             }
-        } else {
+        }
+        else {
             addedVariable = ncFile.addVariable(variableName, oldVariable.getDataType(), oldVariable.getDataType().isUnsigned(), tileSize, dimString);
         }
         addedVariable.addAttribute("long_name", band.getDescription());
@@ -330,7 +313,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         for (Attribute attribute : attributeList) {
             if (attribute.getFullName().equals("units")) {
                 addedVariable.addAttribute(attribute.getFullName(), attribute.getStringValue());
-            } else if (attribute.getLength() == 1 && !attribute.getFullName().equals("flag_meanings") && !attribute.getFullName().equals("_Unsigned")) {
+            }
+            else if (attribute.getLength() == 1 && !attribute.getFullName().equals("flag_meanings") && !attribute.getFullName().equals("_Unsigned")) {
                 if (!(attribute.getNumericValue() == null)) {
                     addedVariable.addAttribute(attribute.getFullName(), attribute.getNumericValue());
                 } else {
@@ -376,10 +360,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 writeable.addGlobalAttribute(name, value);
             } else {
                 SystemUtils.LOG.warning("Global attribute " + name + " does not exist in the original product. Nothing is written");
-
             }
         }
-        else{
+        else {
             writeable.addGlobalAttribute(name, value);
         }
     }
@@ -430,7 +413,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
 
     private void writeBAGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
-        final Dimension tileSize = new Dimension(2025  , 2025);
         addGlobalAttribute(writeable, element, "title", null);
         addGlobalAttribute(writeable, element, "institution", null);
         addGlobalAttribute(writeable, element, "source", null);
@@ -489,7 +471,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
         addGlobalAttribute(writeable, element, "product_version","v5.0cds");
         addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
-
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "naming_authority", "org.esa-fire-cci");
@@ -506,8 +487,6 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
         addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
         addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
-        //addGlobalAttribute(writeable, element, "geospatial_vertical_min", "0");
-        //addGlobalAttribute(writeable, element, "geospatial_vertical_max", "0");
         addGlobalAttribute(writeable, element, "time_coverage_start", startObservation);
         addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
         addGlobalAttribute(writeable, element, "time_coverage_duration", "P1M");

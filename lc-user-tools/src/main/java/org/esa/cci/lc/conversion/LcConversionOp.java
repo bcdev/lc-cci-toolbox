@@ -24,6 +24,8 @@ import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This operator converts the LC CCI GeoTIFF files of a map product or a condition product
@@ -45,6 +47,8 @@ public class LcConversionOp extends Operator {
     private static final String LC_MAP_FORMAT = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_WB_FORMAT = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_CONDITION_FORMAT = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
+    private static final String LC_CDS_FILENAME_FORMAT = "ESACCI-LC-L4-LCCS-Map-300m-P1Y-(....)-v2.0.7b.nc";
+    private static final String BA_CDS_FILENAME_FORMAT = "(........)-ESACCI-L4_FIRE-BA-MODIS-fv5.0.nc";
 
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
     private Product sourceProduct;
@@ -100,15 +104,26 @@ public class LcConversionOp extends Operator {
                     metadata.getStartDate(),
                     targetVersion != null ? targetVersion : metadata.getVersion());
         }
-
         else if ("lccds".equals(format) || "bacds".equals(format))  {
             outputFormat = "NetCDF4-LC-CDS";
             id = sourceFile.getName();
 
             if ("lccds".equals(format)) {
+                Pattern p = Pattern.compile(LC_CDS_FILENAME_FORMAT);
+                final Matcher m = p.matcher(sourceFile.getName());
+                if (!m.matches()) {
+                    throw new IllegalArgumentException("input file name " + sourceFile.getName() + " does not match pattern " + LC_CDS_FILENAME_FORMAT);
+                }
+
+
                 typeString = sourceProduct.getMetadataRoot().getElement("global_attributes").getAttributeString("type");
             }
             else {
+                Pattern p = Pattern.compile(BA_CDS_FILENAME_FORMAT);
+                final Matcher m = p.matcher(sourceFile.getName());
+                if (!m.matches()) {
+                    throw new IllegalArgumentException("input file name " + sourceFile.getName() + " does not match pattern " + BA_CDS_FILENAME_FORMAT);
+                }
                 typeString="burned_area";
                 id=id+"cds";
             }
@@ -120,12 +135,12 @@ public class LcConversionOp extends Operator {
             id=id.replaceFirst(".nc","");
         }
         else if ("ppcds".equals(format)) {
-            typeString="pp";
+            typeString="pixel_product";
             id=sourceFile.getName().replace("-LC.tif","cds");
             outputFormat = "NetCDF4-LC-CDS";
             try
             {
-                 sourceProduct = ProductIO.readProduct(sourceFile, "LC_CDS_TIFF");
+                 sourceProduct = ProductIO.readProduct(sourceFile);
             }
             catch (IOException e){}
         }
@@ -143,15 +158,11 @@ public class LcConversionOp extends Operator {
         if (targetDir == null) {
             targetDir = sourceFile.getParentFile();
         }
-        File targetFile;
 
-        targetFile = new File(targetDir, id + ".nc");
-
+        File targetFile = new File(targetDir, id + ".nc");
         sourceProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
         WriteOp writeOp = new WriteOp(sourceProduct, targetFile, outputFormat);
-
         writeOp.setWriteEntireTileRows(false);
-
         writeOp.setClearCacheAfterRowWrite(true);
         // If execution order is not set to SCHEDULE_BAND_ROW_COLUMN a Java heap space error occurs multiple times
         // if only 2GB of heap space is available:

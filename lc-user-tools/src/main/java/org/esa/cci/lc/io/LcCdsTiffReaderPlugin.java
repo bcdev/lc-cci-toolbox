@@ -17,8 +17,6 @@ public class LcCdsTiffReaderPlugin implements ProductReaderPlugIn {
     private static final SnapFileFilter FILE_FILTER = new LcCdsTiffReaderPlugin.TiffFileFilter();
 
 
-
-
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         String filename;
