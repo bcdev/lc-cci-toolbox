@@ -104,7 +104,7 @@ public class CdsVariableWriter extends ProfilePartIO {
             latArray[j] = minLat + (i * step);
             latArray[j + 1] = minLat + (i + 1) * step;
             j += 2;
-            lat[i]=minLat + (i * step);
+            lat[i]=minLat + ((i+0.5) * step);
         }
         data = Array.factory(DataType.DOUBLE, new int[]{numLatPixels, 2}, latArray);
         try {
@@ -131,7 +131,7 @@ public class CdsVariableWriter extends ProfilePartIO {
         for (int i = 0; i < numLonPixels; i += 1) {
             lonArray[j] = (minLon + (i * step))%360;
             lonArray[j + 1] = (minLon + (i + 1) * step)%360;
-            lon[i]=(minLon + (i * step))%360;
+            lon[i]=(minLon + ((i+0.5) * step))%360;
             j += 2;
         }
         data = Array.factory(DataType.DOUBLE, new int[]{numLonPixels, 2}, lonArray);
