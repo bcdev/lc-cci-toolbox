@@ -135,9 +135,18 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 /// opening netcdf file in order to initialize variables
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
                 String path = p.getFileLocation().getAbsolutePath();
+                MetadataElement element = p.getMetadataRoot().getElement("global_attributes");
+
                 final Dimension tileSize = new Dimension(2025, 2025);
                 if (! path.endsWith(".tif") ) {
                     NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
+                    List<Variable> list = onlyReader.getNetcdfFile().getVariables();
+                    for (Variable variable : list) {
+                        if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class"))) {
+                            addNotBandVariable(ncFile, variable);
+                        }
+                    }
+
                     for (Band band : p.getBands()) {
                         if (!band.getName().contains("vegetation_class")) {
                             addBandVariable(ncFile, band, onlyReader, tileSize);
@@ -145,41 +154,36 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                             addBandClassVariable(ncFile, band, onlyReader, tileSize);
                         }
                     }
-                    List<Variable> list = onlyReader.getNetcdfFile().getVariables();
-                    for (Variable variable : list) {
-                        if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class"))) {
-                            addNotBandVariable(ncFile, variable);
-                        }
-                    }
+
                     onlyReader.close();
                 }
                 else {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
-                    addCustomVariable(ncFile,"JD","time lat lon",DataType.SHORT,tileSizePixel);
-                    addCustomVariable(ncFile,"CL","time lat lon",DataType.BYTE,tileSizePixel);
-                    addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSizePixel);
-                    addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null);
-                    addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null);
+                    addCustomVariable(ncFile,"JD","time lat lon",DataType.SHORT,tileSizePixel, element);
+                    addCustomVariable(ncFile,"CL","time lat lon",DataType.BYTE,tileSizePixel,element);
+                    addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSizePixel,element);
+                    addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null,element);
+                    addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null,element);
                 }
 
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lat_bounds") == null)) {
-                    addCustomVariable(ncFile, "lat_bounds", "lat bounds", DataType.DOUBLE,null);
+                    addCustomVariable(ncFile, "lat_bounds", "lat bounds", DataType.DOUBLE,null,element);
                 }
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lon_bounds") == null)) {
-                    addCustomVariable(ncFile, "lon_bounds", "lon bounds", DataType.DOUBLE,null);
+                    addCustomVariable(ncFile, "lon_bounds", "lon bounds", DataType.DOUBLE,null,element);
                 }
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("time_bounds") == null)) {
-                    addCustomVariable(ncFile, "time_bounds", "time bounds", DataType.DOUBLE,null);
+                    addCustomVariable(ncFile, "time_bounds", "time bounds", DataType.DOUBLE,null,element);
                 }
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("time") == null)) {
-                    addCustomVariable(ncFile, "time", "time", DataType.DOUBLE,null);
+                    addCustomVariable(ncFile, "time", "time", DataType.DOUBLE,null,element);
                 }
             }
         };
     }
 
 
-    private void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize) throws IOException {
+    private void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -196,6 +200,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("axis", "Y");
             nVariable.addAttribute("long_name", "latitude");
             nVariable.addAttribute("bounds", "lat_bounds");
+            nVariable.addAttribute("valid_min", element.getAttributeDouble("geospatial_lat_min"));
+            nVariable.addAttribute("valid_max", element.getAttributeDouble("geospatial_lat_max"));
         }
         else if (variableName.equals("lon")){
             nVariable.addAttribute("standard_name", "longitude");
@@ -203,23 +209,25 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("axis", "X");
             nVariable.addAttribute("long_name", "longitude");
             nVariable.addAttribute("bounds", "lon_bounds");
+            nVariable.addAttribute("valid_min", element.getAttributeDouble("geospatial_lon_min"));
+            nVariable.addAttribute("valid_max", element.getAttributeDouble("geospatial_lon_max"));
         }
         else if (variableName.equals("JD")){
             nVariable.addAttribute("long_name", "Date of the first detection");
             nVariable.addAttribute("units", "Day of the year");
             nVariable.addAttribute("comment", "Possible values: 0  when the pixel is not burned; 1 to 366 day of the first detection when the pixel is burned; -1 when the pixel is " +
-                    "not observed in the month; -2 when pixel is not burnable: continuous water, bare land, urban, permanent ice-snow");
+                    "not observed in the month; -2 when pixel is not burnable: water bodies, bare areas, urban areas and permanent snow and ice.");
         }
         else if (variableName.equals("CL")){
             nVariable.addAttribute("long_name", "Confidence Level");
             nVariable.addAttribute("units", "percent");
             nVariable.addAttribute("comment", "Probability of detecting a pixel as burned. Possible values: 0 when the pixel is not observed in the month, or it is not burnable;" +
-                    " 1 to 100 Probability values. The closer to 100, the higher the confidence that the pixel is actually burned.");
+                    " 1 to 100 probability values when the pixel was observed. The closer to 100, the higher the confidence that the pixel is actually burned.");
         }
         else if (variableName.equals("LC")){
             nVariable.addAttribute("long_name", "Land cover of burned pixels");
             nVariable.addAttribute("units", "Land cover code");
-            nVariable.addAttribute("comment", "Possible values: 0 when the pixel is not burned in the month; 10 to 180 land cover code when the pixel is burned.");
+            nVariable.addAttribute("comment", "Land cover of the burned pixel, extracted from the CCI LandCover v1.6.1 (LC). N is the number of the land cover category in the reference map. It is only valid when JD > 0. Pixel value is 0 to N under the following codes: 10 = Cropland, rainfed; 20 = Cropland, irrigated or post-flooding; 30 = Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%); 40 = Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%); 50 = Tree cover, broadleaved, evergreen, closed to open (>15%); 60 = Tree cover, broadleaved, deciduous, closed to open (>15%); 70 = Tree cover, needleleaved, evergreen, closed to open (>15%); 80 = Tree cover, needleleaved, deciduous, closed to open (>15%); 90 = Tree cover, mixed leaf type (broadleaved and needleleaved); 100 = Mosaic tree and shrub (>50%) / herbaceous cover (<50%); 110 = Mosaic herbaceous cover (>50%) / tree and shrub (<50%); 120 = Shrubland; 130 = Grassland; 140 = Lichens and mosses; 150 = Sparse vegetation (tree, shrub, herbaceous cover) (<15%); 160 = Tree cover, flooded, fresh or brackish water; 170 = Tree cover, flooded, saline water; 180 = Shrub or herbaceous cover, flooded, fresh/saline/brackish water.");
         }
     }
 
@@ -477,14 +485,17 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
         addGlobalAttribute(writeable, element, "product_version","v5.0cds");
-        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
+        //addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
+        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product." +
+                "It uses the following naming convention: ${Indicative Date}-ESACCI-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.tif. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is MODIS. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}cds] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20050301-ESACCI-L3S_FIRE-BA-MODIS-AREA_5-fv5.0cds.nc");
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "naming_authority", "org.esa-fire-cci");
         addGlobalAttribute(writeable, element, "keywords_vocabulary", "none");
         addGlobalAttribute(writeable, element, "cdm_data_type", "Grid");
         addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the ESA Fire_cci programme");
-        addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        //addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         addGlobalAttribute(writeable, element, "creator_name", "University of Alcala");
         addGlobalAttribute(writeable, element, "creator_url", "www.esa-fire-cci.org");
         addGlobalAttribute(writeable, element, "creator_email", "emilio.chuvieco@uah.es");
