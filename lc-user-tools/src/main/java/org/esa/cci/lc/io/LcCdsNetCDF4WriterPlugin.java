@@ -494,8 +494,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "keywords_vocabulary", "none");
         addGlobalAttribute(writeable, element, "cdm_data_type", "Grid");
         addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the ESA Fire_cci programme");
-        //addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
-        addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        //addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         addGlobalAttribute(writeable, element, "creator_name", "University of Alcala");
         addGlobalAttribute(writeable, element, "creator_url", "www.esa-fire-cci.org");
         addGlobalAttribute(writeable, element, "creator_email", "emilio.chuvieco@uah.es");
