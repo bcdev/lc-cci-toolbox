@@ -140,18 +140,21 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 final Dimension tileSize = new Dimension(2025, 2025);
                 if (! path.endsWith(".tif") ) {
                     NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
-                    List<Variable> list = onlyReader.getNetcdfFile().getVariables();
-                    for (Variable variable : list) {
-                        if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class"))) {
-                            addNotBandVariable(ncFile, variable);
-                        }
-                    }
+
 
                     for (Band band : p.getBands()) {
                         if (!band.getName().contains("vegetation_class")) {
                             addBandVariable(ncFile, band, onlyReader, tileSize);
                         } else {
                             addBandClassVariable(ncFile, band, onlyReader, tileSize);
+                        }
+                    }
+
+
+                    List<Variable> list = onlyReader.getNetcdfFile().getVariables();
+                    for (Variable variable : list) {
+                        if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class"))) {
+                            addNotBandVariable(ncFile, variable);
                         }
                     }
 
@@ -436,7 +439,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "keywords", null);
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "naming_authority", null);
-        addGlobalAttribute(writeable, element, "doi", null);
+        //addGlobalAttribute(writeable, element, "doi", null);
         addGlobalAttribute(writeable, element, "keywords_vocabulary", null);
         addGlobalAttribute(writeable, element, "cdm_data_type", null);
         addGlobalAttribute(writeable, element, "comment", null);
@@ -487,7 +490,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "product_version","v5.0cds");
         //addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
         addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product." +
-                "It uses the following naming convention: ${Indicative Date}-ESACCI-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.tif. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is MODIS. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}cds] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20050301-ESACCI-L3S_FIRE-BA-MODIS-AREA_5-fv5.0cds.nc");
+                "It uses the following naming convention: ${Indicative Date}-ESACCI-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.nc. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is MODIS. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}cds] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20050301-ESACCI-L3S_FIRE-BA-MODIS-AREA_5-fv5.0cds.nc");
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "naming_authority", "org.esa-fire-cci");
@@ -513,7 +516,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "license", "ESA CCI Data Policy: free and open access");
         addGlobalAttribute(writeable, element, "platform", "Terra");
         addGlobalAttribute(writeable, element, "sensor", "MODIS");
-        addGlobalAttribute(writeable, element, "spatial_resolution", "250m");
+        addGlobalAttribute(writeable, element, "spatial_resolution", "0.0022457331");
         addGlobalAttribute(writeable, element, "geospatial_lon_units", "degrees_east");
         addGlobalAttribute(writeable, element, "geospatial_lat_units", "degrees_north");
         addGlobalAttribute(writeable, element, "geospatial_lon_resolution", "0.0022457331");
