@@ -8,6 +8,7 @@ import org.esa.snap.binning.support.PlateCarreeGrid;
 import org.esa.snap.binning.support.RegularGaussianGrid;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.binning.support.VectorImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
