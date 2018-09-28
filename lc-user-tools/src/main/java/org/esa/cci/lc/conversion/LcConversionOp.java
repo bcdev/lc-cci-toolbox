@@ -140,7 +140,7 @@ public class LcConversionOp extends Operator {
             outputFormat = "NetCDF4-LC-CDS";
             try
             {
-                 sourceProduct = ProductIO.readProduct(sourceFile);
+                 sourceProduct = ProductIO.readProduct(sourceFile,"LC_CDS_TIFF");
             }
             catch (IOException e){}
         }
@@ -149,6 +149,12 @@ public class LcConversionOp extends Operator {
         }
         // setting the id in order to hand over to the writer
         MetadataElement metadataRoot = sourceProduct.getMetadataRoot();
+        if (metadataRoot==null){
+            throw new OperatorException(sourceProduct.getName()+" lacks metadataRoot, reader is "+sourceProduct.getProductReader());
+        }
+        if (metadataRoot.getElement("global_attributes")==null){
+            throw new OperatorException(sourceProduct.getName()+" lacks global_attributes, reader is "+sourceProduct.getProductReader());
+        }
         metadataRoot.getElement("global_attributes").setAttributeString("type", typeString);
         metadataRoot.getElement("global_attributes").setAttributeString("id", id);
         if (targetVersion != null) {

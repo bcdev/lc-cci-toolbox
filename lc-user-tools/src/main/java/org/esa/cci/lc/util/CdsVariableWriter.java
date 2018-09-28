@@ -202,10 +202,16 @@ public class CdsVariableWriter extends ProfilePartIO {
         final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
         //time and timebounds for lccs
         String YearString = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_start").substring(0, 4);
+        String firstMonth = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_start").substring(4, 6);
+        String lastMonth = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_end").substring(4, 6);
+        String firstDay = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_start").substring(6, 8);
+        String lastDay = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_end").substring(6, 8);
         try {
             SimpleDateFormat tempFormat = new SimpleDateFormat("dd MM yyyy");
-            Date startDay = tempFormat.parse("01 01 " + YearString);
-            Date finalDay = tempFormat.parse("31 12 " + YearString);
+            Date startDay = tempFormat.parse(firstDay+" "+firstMonth+" "+ YearString);
+            //Date startDay = tempFormat.parse("01 01 " + YearString);
+            Date finalDay = tempFormat.parse(lastDay+" "+lastMonth+" "+YearString);
+            //Date finalDay = tempFormat.parse("31 12 " + YearString);
             Date startCalendar = tempFormat.parse("01 01 1970");
 
             long startYear = (startDay.getTime() - startCalendar.getTime());
