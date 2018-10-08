@@ -107,6 +107,7 @@ public class LcConversionOp extends Operator {
         else if ("lccds".equals(format) || "bacds".equals(format))  {
             outputFormat = "NetCDF4-LC-CDS";
             id = sourceFile.getName();
+            sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
 
             if ("lccds".equals(format)) {
                 Pattern p = Pattern.compile(LC_CDS_FILENAME_FORMAT);
@@ -138,6 +139,8 @@ public class LcConversionOp extends Operator {
             typeString="pixel_product";
             id=sourceFile.getName().replace("-LC.tif","cds");
             outputFormat = "NetCDF4-LC-CDS";
+            sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+
             try
             {
                  sourceProduct = ProductIO.readProduct(sourceFile,"LC_CDS_TIFF");

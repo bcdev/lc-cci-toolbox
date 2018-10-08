@@ -42,6 +42,10 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
             label = "Number of Majority Classes")
     private int numMajorityClasses;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
+
     boolean outputTargetProduct;
     private String outputFormat;
     private String outputFile;
@@ -78,6 +82,8 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+
+
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
@@ -127,6 +133,9 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);
         binningOp.setOutputType(outputType == null ? "Product" : outputType);
         binningOp.setOutputFormat(outputFormat);
+        if (format.equals("lccds")) {
+            binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        }
     }
 
     void setOutputFormat(String outputFormat) {

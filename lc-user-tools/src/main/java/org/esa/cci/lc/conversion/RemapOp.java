@@ -57,6 +57,9 @@ public class RemapOp extends Operator {
             label = "Additional User Map PFT Conversion Table")
     private File additionalUserMapPFTConversionTable;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
     @Override
     public void initialize() throws OperatorException {
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -79,7 +82,16 @@ public class RemapOp extends Operator {
     private void writeTarget() {
         final String targetFileName = FileUtils.getFilenameWithoutExtension(sourceProduct.getFileLocation()) + "_updated.nc";
         final String targetDir = sourceProduct.getFileLocation().getParent();
-        final String formatName = "NetCDF4-LC-Map";
+        //final String formatName = "NetCDF4-LC-Map";
+
+
+        String formatName = "NetCDF4-LC-Map";
+        if (format.equals("lccds")){
+             formatName = "NetCDF4-LC-CDS";
+            targetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+        }
+
+
         File targetFile = new File(targetDir, targetFileName);
         targetProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
         WriteOp writeOp = new WriteOp(targetProduct, targetFile, formatName);

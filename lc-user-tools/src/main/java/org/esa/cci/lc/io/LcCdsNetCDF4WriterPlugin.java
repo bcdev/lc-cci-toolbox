@@ -85,14 +85,21 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             NetcdfFileWriter onlyReader;
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
-            String path = product.getFileLocation().getAbsolutePath();
+            //String path = product.getFileLocation().getAbsolutePath();
+            String path = element.getAttributeString("parent_path");
 
             if (! path.endsWith(".tif") ) {
                 onlyReader = NetcdfFileWriter.openExisting(path);
                 //add dimensions
                 List<ucar.nc2.Dimension> dimensionList = onlyReader.getNetcdfFile().getDimensions();
                 for (ucar.nc2.Dimension d : dimensionList) {
-                    if (!d.getFullName().equals("nv")) {
+                    if (d.getFullName().equals("lon")){
+                        writeable.addDimension(d.getFullName(), product.getSceneRasterWidth());
+                    }
+                    else if (d.getFullName().equals("lat")){
+                        writeable.addDimension(d.getFullName(), product.getSceneRasterHeight());
+                    }
+                    else if (!d.getFullName().equals("nv")) {
                         writeable.addDimension(d.getFullName(), d.getLength());
                     }
                 }
@@ -134,8 +141,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
                 /// opening netcdf file in order to initialize variables
                 final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-                String path = p.getFileLocation().getAbsolutePath();
+                //String path = p.getFileLocation().getAbsolutePath();
                 MetadataElement element = p.getMetadataRoot().getElement("global_attributes");
+                String path = element.getAttributeString("parent_path");
 
                 final Dimension tileSize = new Dimension(2025, 2025);
                 if (! path.endsWith(".tif") ) {
@@ -143,10 +151,15 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
 
                     for (Band band : p.getBands()) {
-                        if (!band.getName().contains("vegetation_class")) {
-                            addBandVariable(ncFile, band, onlyReader, tileSize);
-                        } else {
-                            addBandClassVariable(ncFile, band, onlyReader, tileSize);
+                        if (onlyReader.findVariable(band.getName())!=null) {
+                            if (!band.getName().contains("vegetation_class")) {
+                                addBandVariable(ncFile, band, onlyReader, tileSize);
+                            } else {
+                                addBandClassVariable(ncFile, band, onlyReader, tileSize);
+                            }
+                        }
+                        else {
+                            addCustomVariable(ncFile,band.getName(),"time lat lon",DataTypeUtils.getNetcdf4DataType(band.getDataType()),tileSize,element);
                         }
                     }
 
@@ -298,6 +311,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         String dimString = "time lat lon";
 
         Variable oldVariable = onlyReader.findVariable(variableName);
+
         if (oldVariable.getFullName().equals("lccs_class") || oldVariable.getFullName().equals("observation_count") ||
                 oldVariable.getFullName().equals("change_count")) {
             DataType dataType = oldVariable.getDataType().withSignedness(DataType.Signedness.UNSIGNED);
@@ -413,8 +427,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "time_coverage_resolution", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
-        addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
-        addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+        if(element.containsAttribute("subsetted")) {
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        }
+        else{
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+        }
         addGlobalAttribute(writeable, element, "spatial_resolution", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_units", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_resolution", null);

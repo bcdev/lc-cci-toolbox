@@ -3,6 +3,7 @@ package org.esa.cci.lc.aggregation;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
@@ -81,6 +82,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
             label = "Output Change Count Value", defaultValue = "true")
     private boolean outputChangeCount;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
     boolean outputTargetProduct;
 
     @Override
@@ -117,8 +121,14 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
 
+
+
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
+
+        if (format.equals("lccds")) {
+        binningOp.setOutputFormat("NetCDF4-LC-CDS");
+       }
     }
 
     private String createTypeAndID(HashMap<String, String> lcProperties, String mapType) {

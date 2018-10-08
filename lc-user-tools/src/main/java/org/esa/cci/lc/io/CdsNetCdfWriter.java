@@ -18,6 +18,7 @@ package org.esa.cci.lc.io;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.AbstractNetCdfWriterPlugIn;
 import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
@@ -54,7 +55,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
     public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,
                                     int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
         final String variableName = ReaderUtils.getVariableName(sourceBand);
-        if (!sourceBand.getProduct().getFileLocation().getAbsolutePath().endsWith(".tif")) {
+        if (sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
             if (shallWriteVariable(variableName)) {
                 writeBandWithShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             } else if (variableName.contains("burned_area_in_vegetation_class")) {

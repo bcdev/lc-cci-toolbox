@@ -1,6 +1,7 @@
 package org.esa.cci.lc.util;
 
 
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
@@ -31,53 +32,67 @@ public class CdsVariableWriter extends ProfilePartIO {
     public void encode(ProfileWriteContext ctx, Product p) throws IOException {
         Array data ;
         final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
-        String path = p.getFileLocation().getAbsolutePath();
+        //String path = p.getFileLocation().getAbsolutePath();
+        MetadataElement element = p.getMetadataRoot().getElement("global_attributes");
+        String path = element.getAttributeString("parent_path");
+
         if (! path.endsWith(".tif") ) {
+            if (element.containsAttribute("subsetted")) {
+                Double latMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_min");
+                Double latMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_max");
+                Double lonMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_min");
+                Double lonMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_max");
+                lcLatLonCustomBoundsWriter(ctx,p,lonMin,lonMax,latMin,latMax);
+                timeWriter(ctx, p);
+            }
 
-            NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
-            List<Variable> list = onlyReader.getNetcdfFile().getVariables();
-            String[] listBands = p.getBandNames();
-            List bandArray = Arrays.asList(listBands);
-            for (Variable variable : list) {
-                String variableName = variable.getFullName();
-                if (!bandArray.contains(variableName) && !variableName.contains("burned_area_in_vegetation_class")) {
-                    data = variable.read();
-                    if (variableName.equals("lat_bnds")) {
-                        variableName = "lat_bounds";
-                    } else if (variableName.equals("lon_bnds")) {
-                        variableName = "lon_bounds";
-                        IndexIterator iterator = data.getIndexIterator();
-                        for (int i = 0; iterator.hasNext(); i++) {
-                            data.setDouble(i, data.getDouble(i) + 180);
-                            iterator.next();
-                        }
-                    } else if (variableName.equals("time_bnds")) {
-                        variableName = "time_bounds";
-                        double begTime = variable.read().getDouble(0);
-                        double endTime = variable.read().getDouble(1);
-                        data = Array.factory(DataType.DOUBLE, new int[]{1, 2}, new double[]{begTime, endTime});
-                    } else if (variable.getFullName().equals("lon")) {
-                        IndexIterator iterator = data.getIndexIterator();
-                        for (int i = 0; iterator.hasNext(); i++) {
-                            data.setDouble(i, data.getDouble(i) + 180);
-                            iterator.next();
-                        }
-                    }
+            else {
 
-                    try {
-                        Object temp = data.get1DJavaArray(ctx.getNetcdfFileWriteable().findVariable(variableName).getDataType());
-                        data = Array.makeFromJavaArray(temp);
-                        data = data.reshape(variable.getShape());
-                        writeable.getWriter().write(writeable.getWriter().findVariable(variableName), data);
-                    } catch (InvalidRangeException e) {
+                NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
+                List<Variable> list = onlyReader.getNetcdfFile().getVariables();
+                String[] listBands = p.getBandNames();
+                List bandArray = Arrays.asList(listBands);
+                for (Variable variable : list) {
+                    String variableName = variable.getFullName();
+                    if (!bandArray.contains(variableName) && !variableName.contains("burned_area_in_vegetation_class")) {
+                        data = variable.read();
+                        if (variableName.equals("lat_bnds")) {
+                            variableName = "lat_bounds";
+                        } else if (variableName.equals("lon_bnds")) {
+                            variableName = "lon_bounds";
+                            IndexIterator iterator = data.getIndexIterator();
+                            for (int i = 0; iterator.hasNext(); i++) {
+                                data.setDouble(i, data.getDouble(i) + 180);
+                                iterator.next();
+                            }
+                        } else if (variableName.equals("time_bnds")) {
+                            variableName = "time_bounds";
+                            double begTime = variable.read().getDouble(0);
+                            double endTime = variable.read().getDouble(1);
+                            data = Array.factory(DataType.DOUBLE, new int[]{1, 2}, new double[]{begTime, endTime});
+                        } else if (variable.getFullName().equals("lon")) {
+                            IndexIterator iterator = data.getIndexIterator();
+                            for (int i = 0; iterator.hasNext(); i++) {
+                                data.setDouble(i, data.getDouble(i) + 180);
+                                iterator.next();
+                            }
+                        }
+
+                        try {
+                            Object temp = data.get1DJavaArray(ctx.getNetcdfFileWriteable().findVariable(variableName).getDataType());
+                            data = Array.makeFromJavaArray(temp);
+                            data = data.reshape(variable.getShape());
+                            writeable.getWriter().write(writeable.getWriter().findVariable(variableName), data);
+                        } catch (InvalidRangeException e) {
+                        }
                     }
                 }
-            }
-            onlyReader.close();
+                onlyReader.close();
 
-            if (p.getMetadataRoot().getElement("global_attributes").getAttributeString("type").equals("ESACCI-LC-L4-LCCS-Map-300m-P1Y")) {
-                lcLatLonBoundsWriter(ctx, p);
-                timeWriter(ctx, p);
+                if (p.getMetadataRoot().getElement("global_attributes").getAttributeString("type").equals("ESACCI-LC-L4-LCCS-Map-300m-P1Y")) {
+                    lcLatLonBoundsWriter(ctx, p);
+                    timeWriter(ctx, p);
+                }
             }
         }
         else {
@@ -198,7 +213,9 @@ public class CdsVariableWriter extends ProfilePartIO {
 
     private void timeWriter (ProfileWriteContext ctx, Product p) throws IOException {
         Array data;
-        String path = p.getFileLocation().getAbsolutePath();
+        //String path = p.getFileLocation().getAbsolutePath();
+        MetadataElement element = p.getMetadataRoot().getElement("global_attributes");
+        String path = element.getAttributeString("parent_path");
         final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
         //time and timebounds for lccs
         String YearString = p.getMetadataRoot().getElement("global_attributes").getAttributeString("time_coverage_start").substring(0, 4);

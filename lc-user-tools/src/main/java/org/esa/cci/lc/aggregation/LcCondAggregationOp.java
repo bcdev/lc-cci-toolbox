@@ -10,6 +10,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcCondMetadata;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -34,6 +35,9 @@ import java.util.Locale;
         description = "Allows to aggregate LC condition products.",
         autoWriteDisabled = true)
 public class LcCondAggregationOp extends AbstractLcAggregationOp {
+
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
 
     boolean outputTargetProduct;
 
@@ -141,6 +145,9 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFileName).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
         binningOp.setOutputFormat(getOutputFormat());
+        if (format.equals("lccds")) {
+            binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        }
     }
 
     private boolean isSourceBA(String sourceFileName) {
