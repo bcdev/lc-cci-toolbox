@@ -1,5 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.cci.lc.io.LcCdsBinWriter;
+import org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.operator.BinningOp;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -78,6 +80,11 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+
+        }
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
@@ -145,9 +152,6 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFileName).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
         binningOp.setOutputFormat(getOutputFormat());
-        if (format.equals("lccds")) {
-            binningOp.setOutputFormat("NetCDF4-LC-CDS");
-        }
     }
 
     private boolean isSourceBA(String sourceFileName) {

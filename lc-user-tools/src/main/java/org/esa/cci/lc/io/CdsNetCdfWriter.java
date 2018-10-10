@@ -41,6 +41,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
 
 
 
+
     public CdsNetCdfWriter(AbstractNetCdfWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
         variableMap = new HashMap<>();
@@ -55,18 +56,21 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
     public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,
                                     int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
         final String variableName = ReaderUtils.getVariableName(sourceBand);
-        if (sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
-            if (shallWriteVariable(variableName)) {
+
+
+        if (!sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
+            if (shallWriteVariable(variableName)  ) {
                 writeBandWithShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             } else if (variableName.contains("burned_area_in_vegetation_class")) {
                 writeBurnedAreaWithShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             }
         }
-        else {
+        else if (sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
             if (shallWriteVariable(variableName)) {
                 writeBandNoShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             }
         }
+
     }
 
     private void writeBandNoShift(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,

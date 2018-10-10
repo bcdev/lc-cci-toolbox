@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.cci.lc.io.*;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.operator.BinningOp;
@@ -10,9 +11,6 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.cci.lc.io.LcBinWriter;
-import org.esa.cci.lc.io.LcMapMetadata;
-import org.esa.cci.lc.io.LcMapTiffReader;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -120,6 +118,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+        }
 
 
 

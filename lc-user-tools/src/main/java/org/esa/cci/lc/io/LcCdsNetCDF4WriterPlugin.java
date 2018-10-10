@@ -151,12 +151,15 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
 
                     for (Band band : p.getBands()) {
-                        if (onlyReader.findVariable(band.getName())!=null) {
+                        if (onlyReader.findVariable(band.getName())!=null ) {
                             if (!band.getName().contains("vegetation_class")) {
                                 addBandVariable(ncFile, band, onlyReader, tileSize);
                             } else {
                                 addBandClassVariable(ncFile, band, onlyReader, tileSize);
                             }
+                        }
+                        else if (band.getName().contains("vegetation_class")) {
+                            addBandClassVariable(ncFile, band, onlyReader, tileSize);
                         }
                         else {
                             addCustomVariable(ncFile,band.getName(),"time lat lon",DataTypeUtils.getNetcdf4DataType(band.getDataType()),tileSize,element);
@@ -199,7 +202,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
     }
 
 
-    private void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
+   public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -373,7 +376,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
     }
 
 
-    private void addGlobalAttribute(NFileWriteable writeable, MetadataElement element, String name, String value) throws IOException {
+    public static void addGlobalAttribute(NFileWriteable writeable, MetadataElement element, String name, String value) throws IOException {
         if (element!=null) {
             if (element.containsAttribute(name) && value != null) {
                 writeable.addGlobalAttribute(name, value);

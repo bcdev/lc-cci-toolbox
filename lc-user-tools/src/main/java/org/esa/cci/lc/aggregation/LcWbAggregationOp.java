@@ -1,5 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.cci.lc.io.LcCdsBinWriter;
+import org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.operator.BinningOp;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -83,7 +85,10 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
 
-
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+        }
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
@@ -133,9 +138,6 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);
         binningOp.setOutputType(outputType == null ? "Product" : outputType);
         binningOp.setOutputFormat(outputFormat);
-        if (format.equals("lccds")) {
-            binningOp.setOutputFormat("NetCDF4-LC-CDS");
-        }
     }
 
     void setOutputFormat(String outputFormat) {

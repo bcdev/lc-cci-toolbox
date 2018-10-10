@@ -139,13 +139,14 @@ public class LcConversionOp extends Operator {
             typeString="pixel_product";
             id=sourceFile.getName().replace("-LC.tif","cds");
             outputFormat = "NetCDF4-LC-CDS";
-            sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
 
             try
             {
                  sourceProduct = ProductIO.readProduct(sourceFile,"LC_CDS_TIFF");
             }
             catch (IOException e){}
+            sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+
         }
         else {
             throw  new OperatorException("Unknown format "+format);
