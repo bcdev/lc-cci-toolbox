@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>4.2-SNAPSHOT</version>
+    <version>4.2</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,7 +10,12 @@
 
     <changelog>
         <![CDATA[
-    Changes in 4.0:
+    Changes in 4.2:
+    - plugin and writer for cds format are optimized. Operators made compatible with cds format
+    - new option to convert to cds2 for landcover products added
+    Changes in 4.1:
+    - writer for cds burned area grid and pixel products are added
+     Changes in 4.0:
     - plugin and writer for cds format for lc are created
     Changes in 3.15:
     - Changed tiling (chunk-size) to more appropriate one (2025,2025)

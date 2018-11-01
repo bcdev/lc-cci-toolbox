@@ -129,6 +129,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             else if (element.getAttributeString("type").equals("burned_area")) {
                 writeBAGlobalAttribute( writeable,  element);
             }
+            else if (element.getAttributeString("type").equals("lccds2")) {
+                writeLC2GlobalAttribute( writeable,  element);
+            }
 
         }
     }
@@ -444,6 +447,60 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "geospatial_lon_units", null);
         addGlobalAttribute(writeable, element, "geospatial_lon_resolution", null);
     }
+
+
+    private void writeLC2GlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+        final Dimension tileSize = new Dimension(2025, 2025);
+        String history = element.getAttributeString("history");
+
+        addGlobalAttribute(writeable, element, "id", null);
+        addGlobalAttribute(writeable, element, "title", "Land Cover Map of "+element.getAttributeString("time_coverage_start").substring(0,4));
+        addGlobalAttribute(writeable, element, "summary", "This dataset characterizes the land cover of a particular year (see time_coverage). The land cover was derived from the analysis of satellite data time series of the full period.");
+        addGlobalAttribute(writeable, element, "type", "C3S-LC-L4-LCCS-Map-300m-P1Y");
+        addGlobalAttribute(writeable, element, "project", "EC C3S Land cover");
+        addGlobalAttribute(writeable, element, "references", "https://cds.climate.copernicus.eu/");
+        addGlobalAttribute(writeable, element, "institution", "UCLouvain");
+        addGlobalAttribute(writeable, element, "contact", "copernicus-support@ecmwf.int");
+        addGlobalAttribute(writeable, element, "comment", "");
+        addGlobalAttribute(writeable, element, "Conventions", "CF-1.6");
+        addGlobalAttribute(writeable, element, "standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Standard Names version 21");
+        addGlobalAttribute(writeable, element, "keywords", "land cover classification,satellite,observation");
+        addGlobalAttribute(writeable, element, "keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords");
+        addGlobalAttribute(writeable, element, "license", "EC C3S Land cover Data Policy");
+        addGlobalAttribute(writeable, element, "naming_authority", "");
+        addGlobalAttribute(writeable, element, "cdm_data_type", "grid");
+        addGlobalAttribute(writeable, element, "TileSize", LcHelper.format(tileSize));
+        addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
+        addGlobalAttribute(writeable, element, "product_version", "2.0_cds");
+        addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "creator_name", "UCLouvain");
+        addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be/");
+        addGlobalAttribute(writeable, element, "creator_email", "landcover-cci@uclouvain.be");
+        addGlobalAttribute(writeable, element, "source", "PROBA-V");
+        addGlobalAttribute(writeable, element, "history", history + ",lc-user-tools-" + LcWriterUtils.getModuleVersion());
+        addGlobalAttribute(writeable, element, "time_coverage_start", null);
+        addGlobalAttribute(writeable, element, "time_coverage_end", null);
+        addGlobalAttribute(writeable, element, "time_coverage_duration", null);
+        addGlobalAttribute(writeable, element, "time_coverage_resolution", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
+        if(element.containsAttribute("subsetted")) {
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        }
+        else{
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+        }
+        addGlobalAttribute(writeable, element, "spatial_resolution", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_units", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_resolution", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_units", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_resolution", null);
+    }
+
+
+
 
 
     private void writeBAGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {

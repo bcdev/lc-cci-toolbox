@@ -56,7 +56,7 @@ public class LcConversionOp extends Operator {
     private File targetDir;
     @Parameter(description = "Version of the target file. Replacing the one given by the source product")
     private String targetVersion;
-    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds,ppcds.",defaultValue = "lccci")
+    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds,ppcds,lccds2.",defaultValue = "lccci")
     private String format;
 
     @Override
@@ -104,7 +104,7 @@ public class LcConversionOp extends Operator {
                     metadata.getStartDate(),
                     targetVersion != null ? targetVersion : metadata.getVersion());
         }
-        else if ("lccds".equals(format) || "bacds".equals(format))  {
+        else if ("lccds".equals(format) || "bacds".equals(format) || "lccds2".equals(format))  {
             outputFormat = "NetCDF4-LC-CDS";
             id = sourceFile.getName();
             sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
@@ -115,9 +115,17 @@ public class LcConversionOp extends Operator {
                 if (!m.matches()) {
                     throw new IllegalArgumentException("input file name " + sourceFile.getName() + " does not match pattern " + LC_CDS_FILENAME_FORMAT);
                 }
-
-
                 typeString = sourceProduct.getMetadataRoot().getElement("global_attributes").getAttributeString("type");
+            }
+            else if ("lccds2".equals(format)) {
+                Pattern p = Pattern.compile(LC_CDS_FILENAME_FORMAT);
+                final Matcher m = p.matcher(sourceFile.getName());
+                if (!m.matches()) {
+                    throw new IllegalArgumentException("input file name " + sourceFile.getName() + " does not match pattern " + LC_CDS_FILENAME_FORMAT);
+                }
+                typeString = "lccds2";
+                id=sourceFile.getName().replace("ESACCI","C3S");
+                id=id.replace(".7b.nc","-cds");
             }
             else {
                 Pattern p = Pattern.compile(BA_CDS_FILENAME_FORMAT);

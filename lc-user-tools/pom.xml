@@ -11,7 +11,7 @@
 
     <artifactId>lc-user-tools</artifactId>
     <name>LC CCI User Tools</name>
-    <version>4.2-SNAPSHOT</version>
+    <version>4.2</version>
 
     <repositories>
         <repository>
