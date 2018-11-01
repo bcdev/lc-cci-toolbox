@@ -481,7 +481,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be/");
         addGlobalAttribute(writeable, element, "creator_email", "landcover-cci@uclouvain.be");
         addGlobalAttribute(writeable, element, "source", "PROBA-V");
-        addGlobalAttribute(writeable, element, "history", history + ",lc-user-tools-" + LcWriterUtils.getModuleVersion());
+        addGlobalAttribute(writeable, element, "history", "lc-sr-1.0, lc-classification-1.0,lc-user-tools-3.14"+ ",lc-user-tools-" + LcWriterUtils.getModuleVersion());
         addGlobalAttribute(writeable, element, "time_coverage_start", null);
         addGlobalAttribute(writeable, element, "time_coverage_end", null);
         addGlobalAttribute(writeable, element, "time_coverage_duration", null);
