@@ -279,9 +279,11 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         List<Attribute> attributeList = variable.getAttributes();
         for (Attribute attribute : attributeList) {
             if (attribute.getFullName().equals("valid_min") && variable.getFullName().equals("lon")) {
-                nVariable.addAttribute("valid_min",  0d);
+                //nVariable.addAttribute("valid_min",  0d);
+                nVariable.addAttribute("valid_min",  -180d);
             } else if (attribute.getFullName().equals("valid_max") && variable.getFullName().equals("lon")) {
-                nVariable.addAttribute("valid_max",  360d);
+                //nVariable.addAttribute("valid_max",  360d);
+                nVariable.addAttribute("valid_max",  180d);
             } else if (attribute.getFullName().equals("valid_max") && variable.getFullName().equals("lat")) {
                 nVariable.addAttribute("valid_max", 90d);
             } else if (attribute.getFullName().equals("valid_min") && variable.getFullName().equals("lat")) {
@@ -438,8 +440,10 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
         }
         else{
-            addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
-            addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+            //addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", "-180");
+            //addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", "180");
         }
         addGlobalAttribute(writeable, element, "spatial_resolution", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_units", null);
@@ -531,8 +535,10 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "project", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
-        addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
-        addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+        //addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
+        addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+        //addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+        addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
         addGlobalAttribute(writeable, element, "time_coverage_start", null);
         addGlobalAttribute(writeable, element, "time_coverage_end", null);
         addGlobalAttribute(writeable, element, "time_coverage_duration", null);

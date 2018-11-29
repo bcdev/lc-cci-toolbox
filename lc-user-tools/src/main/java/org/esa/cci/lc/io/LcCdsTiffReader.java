@@ -62,8 +62,10 @@ public class LcCdsTiffReader extends AbstractProductReader {
         final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(lcConditionProduct.getSceneRasterWidth(), lcConditionProduct.getSceneRasterHeight()), null);
         final String latMax = String.valueOf(upperLeft.getLat());
         final String latMin = String.valueOf(lowerRight.getLat());
-        String lonMin = String.valueOf((upperLeft.getLon()+360d)%360);  ///change longitude here
-        String lonMax = String.valueOf((lowerRight.getLon()+360d)%360);
+        //String lonMin = String.valueOf((upperLeft.getLon()+360d)%360);  ///change longitude here
+        String lonMin = String.valueOf((upperLeft.getLon()));  ///change longitude here
+        //String lonMax = String.valueOf((lowerRight.getLon()+360d)%360);
+        String lonMax = String.valueOf((lowerRight.getLon()));
 
         ////
         result.getMetadataRoot().addElement(new MetadataElement("global_attributes"));

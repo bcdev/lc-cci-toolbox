@@ -39,8 +39,10 @@ public class CdsVariableWriter extends ProfilePartIO {
              lonMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_max");
         }
         else {
-            lonMin = 0D ;
-            lonMax = 360D;
+            //lonMin = 0D ;
+            //lonMax = 360D;
+            lonMin = -180D;
+            lonMax = 180D;
         }
         lcLatLonCustomBoundsWriter(writeable, p.getSceneRasterHeight(), p.getSceneRasterWidth(), lonMin, lonMax, latMin, latMax);
 
@@ -86,9 +88,9 @@ public class CdsVariableWriter extends ProfilePartIO {
         double[] lon = new double[ numLonPixels];
         j = 0;
         for (int i = 0; i < numLonPixels; i += 1) {
-            lonArray[j] = (minLon + (i * step))%360;
-            lonArray[j + 1] = (minLon + (i + 1) * step)%360;
-            lon[i]=(minLon + ((i+0.5) * step))%360;
+            lonArray[j] = (minLon + (i * step));//%360;
+            lonArray[j + 1] = (minLon + (i + 1) * step);//%360;
+            lon[i]=(minLon + ((i+0.5) * step));//%360;
             if ((minLon + (i * step))==360){
                 lonArray[j]=360;
             }

@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 @OperatorMetadata(
         alias = "LCCCI.Convert",
         internal = true,
-        version = "4.1-SNAPSHOT",
+        version = "4.3-SNAPSHOT",
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names",

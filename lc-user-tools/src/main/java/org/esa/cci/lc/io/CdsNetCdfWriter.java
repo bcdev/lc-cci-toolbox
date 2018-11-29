@@ -60,9 +60,9 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
 
         if (!sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
             if (shallWriteVariable(variableName)  ) {
-                writeBandWithShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
+                writeBandNoShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             } else if (variableName.contains("burned_area_in_vegetation_class")) {
-                writeBurnedAreaWithShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
+                writeBurnedAreaNoShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             }
         }
         else if (sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
@@ -189,6 +189,26 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
                     getWriteable().getWriter().write(variable, originX2, piece2);
                 } catch (InvalidRangeException e) {
                 }
+            }
+        }
+    }
+
+    private void writeBurnedAreaNoShift(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,
+                                          int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm,String variableName) throws IOException {
+        int vegetationClass = Integer.parseInt(variableName.replace("burned_area_in_vegetation_class_vegetation_class",""));
+        ProductData scaledBuffer = sourceBuffer;
+
+        synchronized (getWriteable()) {
+            Object elems = scaledBuffer.getElems();
+            Variable variable = getWriteable().getWriter().findVariable("burned_area_in_vegetation_class");
+
+
+            final int[] shape = new int[]{1, 1, sourceHeight, sourceWidth};
+            final int[] origin = new int[]{0, vegetationClass - 1, sourceOffsetY, sourceOffsetX};
+            Array array = Array.factory(variable.getDataType(), shape, elems);
+            try {
+                getWriteable().getWriter().write(variable, origin, array);
+            } catch (InvalidRangeException e) {
             }
         }
     }
