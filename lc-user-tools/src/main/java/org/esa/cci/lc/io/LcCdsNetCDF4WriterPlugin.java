@@ -475,7 +475,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "cdm_data_type", "grid");
         addGlobalAttribute(writeable, element, "TileSize", LcHelper.format(tileSize));
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
-        addGlobalAttribute(writeable, element, "product_version", "2.0_cds");
+        addGlobalAttribute(writeable, element, "product_version", "2.1.1");
         addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         addGlobalAttribute(writeable, element, "creator_name", "UCLouvain");
         addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be/");
