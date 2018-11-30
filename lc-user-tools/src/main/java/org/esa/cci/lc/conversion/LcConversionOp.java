@@ -125,7 +125,7 @@ public class LcConversionOp extends Operator {
                 }
                 typeString = "lccds2";
                 id=sourceFile.getName().replace("ESACCI","C3S");
-                id=id.replace(".7b.nc","-cds");
+                id=id.replace("2.0.7b.nc","2.1.1");
             }
             else {
                 Pattern p = Pattern.compile(BA_CDS_FILENAME_FORMAT);

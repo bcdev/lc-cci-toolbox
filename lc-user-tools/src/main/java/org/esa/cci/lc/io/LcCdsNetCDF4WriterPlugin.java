@@ -493,8 +493,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
         }
         else{
-            addGlobalAttribute(writeable, element, "geospatial_lon_min", "0");
-            addGlobalAttribute(writeable, element, "geospatial_lon_max", "360");
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", "null");
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", "null");
         }
         addGlobalAttribute(writeable, element, "spatial_resolution", null);
         addGlobalAttribute(writeable, element, "geospatial_lat_units", null);
