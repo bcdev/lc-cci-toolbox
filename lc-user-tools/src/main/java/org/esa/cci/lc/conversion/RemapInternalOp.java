@@ -160,6 +160,7 @@ public class RemapInternalOp extends Operator {
                                     System.err.printf("inBuffer num elems: %s", inBuffer.getNumElems());
                                     System.err.printf("outBuffer num elems: %s", outBuffer.getNumElems());
                                     e.printStackTrace();
+                                    throw e;
                                 }
                                 float[] conversionFactors = pftLut.getConversionFactors(lccsClass, userClass);
                                 final double value = conversionFactors[pftIndex] * SCALING_FACTOR;
