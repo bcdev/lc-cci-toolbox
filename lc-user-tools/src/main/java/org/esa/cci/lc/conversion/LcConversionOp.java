@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 @OperatorMetadata(
         alias = "LCCCI.Convert",
         internal = true,
-        version = "4.3",
+        version = "4.4",
         authors = "Martin Böttcher, Marco Peters",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Converts LC CCI GeoTiff Map products to NetCDF4 with CF and LC metadata and file names",
@@ -48,7 +48,7 @@ public class LcConversionOp extends Operator {
     private static final String LC_WB_FORMAT = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_CONDITION_FORMAT = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_CDS_FILENAME_FORMAT = "ESACCI-LC-L4-LCCS-Map-300m-P1Y-(....)-v2.0.7b.nc";
-    private static final String BA_CDS_FILENAME_FORMAT = "(........)-ESACCI-L4_FIRE-BA-MODIS-fv5.0.nc";
+    private static final String BA_CDS_FILENAME_FORMAT = "(........)-ESACCI-L4_FIRE-BA-MODIS-fv5.(.).nc";
 
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
     private Product sourceProduct;

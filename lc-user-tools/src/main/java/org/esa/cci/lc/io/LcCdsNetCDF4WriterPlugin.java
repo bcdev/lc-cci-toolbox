@@ -573,7 +573,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "references", "See www.esa-fire-cci.org");
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.6");
-        addGlobalAttribute(writeable, element, "product_version","v5.0cds");
+        String oldVersion = element.getProduct().getFileLocation().getName().substring(42,46);
+        //addGlobalAttribute(writeable, element, "product_version","v5.0cds");
+        addGlobalAttribute(writeable, element, "product_version",oldVersion+"cds");
         //addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. These layers are 1) Date of the first detection; 2) Confidence Level; 3) Land cover of burned pixels");
         addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product." +
                 "It uses the following naming convention: ${Indicative Date}-ESACCI-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.nc. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is MODIS. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}cds] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20050301-ESACCI-L3S_FIRE-BA-MODIS-AREA_5-fv5.0cds.nc");

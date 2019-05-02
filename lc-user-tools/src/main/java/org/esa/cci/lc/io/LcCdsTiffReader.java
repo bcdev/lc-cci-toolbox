@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class LcCdsTiffReader extends AbstractProductReader {
 
 
-    public static final String LC_CONDITION_FILENAME_PATTERN = "(........)-ESACCI-L3S_FIRE-BA-MODIS-AREA_(.)-fv5.0-LC.tif";
+    public static final String LC_CONDITION_FILENAME_PATTERN = "(........)-ESACCI-L3S_FIRE-BA-MODIS-AREA_(.)-fv5.(.)-LC.tif";
     //20010101-ESACCI-L3S_FIRE-BA-MODIS-AREA_1-fv5.0-LC.tif
     private List<Product> bandProducts;
 
