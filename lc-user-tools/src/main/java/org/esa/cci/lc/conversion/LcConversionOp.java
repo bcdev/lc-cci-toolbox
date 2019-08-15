@@ -79,12 +79,20 @@ public class LcConversionOp extends Operator {
                                typeString,
                                metadata.getEpoch(),
                                targetVersion != null ? targetVersion : metadata.getVersion());
-        } else if ("lccci".equals(format) && sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map")) {
+        } else if ("lccci".equals(format) && ( sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map") || sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Ocean-Map"))) {
             outputFormat = LC_WB_FORMAT;
             final LcWbMetadata metadata = new LcWbMetadata(sourceProduct);
-            typeString = String.format("ESACCI-LC-L4-WB-Map-%s-P%sY",
-                                       metadata.getSpatialResolution(),
-                                       metadata.getTemporalResolution());
+            if (!sourceFile.getName().contains("Ocean")) {
+                typeString = String.format("ESACCI-LC-L4-WB-Map-%s-P%sY",
+                        metadata.getSpatialResolution(),
+                        metadata.getTemporalResolution());
+            }
+            else {
+                typeString = String.format("ESACCI-LC-L4-WB-Ocean-Map-%s-P%sY",
+                        metadata.getSpatialResolution(),
+                        metadata.getTemporalResolution());
+            }
+
             id = String.format("%s-%s-v%s",
                                typeString,
                                metadata.getEpoch(),

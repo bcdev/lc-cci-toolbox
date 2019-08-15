@@ -10,6 +10,9 @@
 
     <changelog>
         <![CDATA[
+    Changes in 4.5:
+    - convert is adapted for WB 150m resolution
+
     Changes in 4.4:
     - cds plugin is adjusted for v5.x of Burned Area pixel and grid products
     Changes in 4.2:

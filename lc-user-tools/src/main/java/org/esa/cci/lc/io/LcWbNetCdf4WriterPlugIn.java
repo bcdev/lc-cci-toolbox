@@ -172,7 +172,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                byte[] wbClassFlagValues = new byte[] { 1, 2 };
+                byte[] wbClassFlagValues = new byte[] {0, 1, 2 };
                 final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
                 for (int i = 0; i < wbClassFlagValues.length; ++i) {
                     valids.set(i, wbClassFlagValues[i]);
@@ -181,7 +181,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "land_cover_lccs");
                 variable.addAttribute("flag_values", valids);
                 variable.addAttribute("flag_meanings", "terrestrial water");
-                variable.addAttribute("valid_min", 1);
+                variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 2);
                 variable.addAttribute("_Unsigned", "true");
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
