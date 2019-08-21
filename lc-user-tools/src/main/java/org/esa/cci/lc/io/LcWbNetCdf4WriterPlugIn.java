@@ -128,7 +128,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private static final String WB_CLASS_BAND_NAME = "wb_class";
             private static final String WS_OBSERVATION_COUNT_BAND_NAME = "ws_observation_count";
             private static final String GM_OBSERVATION_COUNT_BAND_NAME = "gm_observation_count";
-
+            private static final String WB_INLAND_OCEAN_LAND = "land_cover_lccs";
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
@@ -141,7 +141,10 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName()) ||
                                GM_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
                         addObservationCountVariable(ncFile, band, tileSize);
-                    }else {
+                    } else if (WB_INLAND_OCEAN_LAND.equals(band.getName())) {
+                        addWbInlandWBVariable(ncFile,band,tileSize, ancillaryVariableString);
+                    }
+                    else {
                         // this branch is passed if an aggregated product is subsetted
                         addGeneralVariable(ncFile, band, tileSize);
                     }
@@ -172,7 +175,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final String variableName = ReaderUtils.getVariableName(band);
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                byte[] wbClassFlagValues = new byte[] {0, 1, 2 };
+                byte[] wbClassFlagValues = new byte[] {0, 1};
                 final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
                 for (int i = 0; i < wbClassFlagValues.length; ++i) {
                     valids.set(i, wbClassFlagValues[i]);
@@ -182,7 +185,7 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("flag_values", valids);
                 variable.addAttribute("flag_meanings", "terrestrial water");
                 variable.addAttribute("valid_min", 0);
-                variable.addAttribute("valid_max", 2);
+                variable.addAttribute("valid_max", 1);
                 variable.addAttribute("_Unsigned", "true");
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
                 if (ancillaryVariables.length() > 0) {
@@ -220,6 +223,28 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
             }
 
+            private void addWbInlandWBVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                //nccopy does not support reading ubyte variables, therefore preliminarily commented out
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                byte[] wbClassFlagValues = new byte[] {0, 1, 2};
+                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
+                for (int i = 0; i < wbClassFlagValues.length; ++i) {
+                    valids.set(i, wbClassFlagValues[i]);
+                }
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", WB_INLAND_OCEAN_LAND);
+                variable.addAttribute("flag_values", valids);
+                variable.addAttribute("flag_meanings", "ocean_water terrestrial inland_water");
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 2);
+                variable.addAttribute("_Unsigned", "true");
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 3);
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
+            }
         };
     }
 

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>4.4</version>
+    <version>4.5</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -11,8 +11,7 @@
     <changelog>
         <![CDATA[
     Changes in 4.5:
-    - convert is adapted for WB 150m resolution
-
+    - convert is adapted for WB 150m resolution and ocean\inland water distinguishing.
     Changes in 4.4:
     - cds plugin is adjusted for v5.x of Burned Area pixel and grid products
     Changes in 4.2:

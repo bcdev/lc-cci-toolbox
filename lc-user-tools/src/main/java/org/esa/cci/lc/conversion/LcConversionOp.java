@@ -49,6 +49,7 @@ public class LcConversionOp extends Operator {
     private static final String LC_CONDITION_FORMAT = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
     private static final String LC_CDS_FILENAME_FORMAT = "ESACCI-LC-L4-LCCS-Map-300m-P1Y-(....)-v2.0.7b.nc";
     private static final String BA_CDS_FILENAME_FORMAT = "(........)-ESACCI-L4_FIRE-BA-MODIS-fv5.(.).nc";
+    private static final String WB_INLAND_OCEAN_LAND = "land_cover_lccs";
 
     @SourceProduct(description = "LC CCI map conversion input.", optional = false)
     private Product sourceProduct;
@@ -79,7 +80,7 @@ public class LcConversionOp extends Operator {
                                typeString,
                                metadata.getEpoch(),
                                targetVersion != null ? targetVersion : metadata.getVersion());
-        } else if ("lccci".equals(format) && ( sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Map") || sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Ocean-Map"))) {
+        } else if ("lccci".equals(format) && ( sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Ocean-Land-Map") || sourceFile.getName().startsWith("ESACCI-LC-L4-WB-Ocean-Map"))) {
             outputFormat = LC_WB_FORMAT;
             final LcWbMetadata metadata = new LcWbMetadata(sourceProduct);
             if (!sourceFile.getName().contains("Ocean")) {
@@ -91,6 +92,9 @@ public class LcConversionOp extends Operator {
                 typeString = String.format("ESACCI-LC-L4-WB-Ocean-Map-%s-P%sY",
                         metadata.getSpatialResolution(),
                         metadata.getTemporalResolution());
+                if (sourceProduct.getBand("band_1")!=null) {
+                    sourceProduct.getBand("band_1").setName(WB_INLAND_OCEAN_LAND);
+                }
             }
 
             id = String.format("%s-%s-v%s",

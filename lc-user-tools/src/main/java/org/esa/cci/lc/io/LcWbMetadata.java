@@ -58,21 +58,20 @@ public class LcWbMetadata {
         }
 
         if (sourceProduct.getName().contains("150m")){
-            MetadataElement globalAttributes = metadata150mResolution();
+            MetadataElement globalAttributes = metadata150mResolution(sourceProduct);
             sourceProduct.getMetadataRoot().addElement(globalAttributes);
         }
     }
 
-    private MetadataElement metadata150mResolution(){
-        this.type               = "ESACCI-LC-L4-WB-Map-150m-P6Y";
-        this.id                 = "ESACCI-LC-L4-WB-Ocean-Map-150m-P13Y-2000-v4.0";
-        this.epoch              = "2000";
+    private MetadataElement metadata150mResolution(Product sourceProduct){
+        this.type               = sourceProduct.getProductType();
+        this.id                 = sourceProduct.getName();
+        this.epoch              = sourceProduct.getName().substring(41,45);
         this.spatialResolution  = "150m";
         this.temporalResolution = "1";
         this.version            = "4.0";
 
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
-        //MetadataAttribute typeAttribute = new MetadataAttribute("type",2);
         globalAttributes.setAttributeString("type",this.type);
         globalAttributes.setAttributeString("id",this.id);
         globalAttributes.setAttributeString("epoch",this.epoch);
@@ -88,7 +87,6 @@ public class LcWbMetadata {
         final Matcher m = p.matcher(id);
         if (!m.matches()) {
             return lcMapAlternativeMatcher(id);
-            //throw new IllegalArgumentException("Global attribute (id=" + id + ") does not match pattern " + LC_WB_ID_PATTERN);
         }
         return m;
     }
