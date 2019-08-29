@@ -128,7 +128,6 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private static final String WB_CLASS_BAND_NAME = "wb_class";
             private static final String WS_OBSERVATION_COUNT_BAND_NAME = "ws_observation_count";
             private static final String GM_OBSERVATION_COUNT_BAND_NAME = "gm_observation_count";
-            private static final String WB_INLAND_OCEAN_LAND = "land_cover_lccs";
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
@@ -136,12 +135,12 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
                     final Dimension tileSize = p.getPreferredTileSize();
-                    if (WB_CLASS_BAND_NAME.equals(band.getName())) {
+                    if (WB_CLASS_BAND_NAME.equals(band.getName()) && !p.getMetadataRoot().getElements()[0].getAttributeString("type").contains("150")) {
                         addWbClassVariable(ncFile, band, tileSize, ancillaryVariableString);
                     } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName()) ||
                                GM_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
                         addObservationCountVariable(ncFile, band, tileSize);
-                    } else if (WB_INLAND_OCEAN_LAND.equals(band.getName())) {
+                    } else if (WB_CLASS_BAND_NAME.equals(band.getName()) && p.getMetadataRoot().getElements()[0].getAttributeString("type").contains("150") ) {
                         addWbInlandWBVariable(ncFile,band,tileSize, ancillaryVariableString);
                     }
                     else {
@@ -234,13 +233,13 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                     valids.set(i, wbClassFlagValues[i]);
                 }
                 variable.addAttribute("long_name", band.getDescription());
-                variable.addAttribute("standard_name", WB_INLAND_OCEAN_LAND);
+                variable.addAttribute("standard_name", WB_CLASS_BAND_NAME);
                 variable.addAttribute("flag_values", valids);
                 variable.addAttribute("flag_meanings", "ocean_water terrestrial inland_water");
                 variable.addAttribute("valid_min", 0);
                 variable.addAttribute("valid_max", 2);
                 variable.addAttribute("_Unsigned", "true");
-                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 3);
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 127);
                 if (ancillaryVariables.length() > 0) {
                     variable.addAttribute("ancillary_variables", ancillaryVariables);
                 }

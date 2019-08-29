@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 public class LcWbTiffReader extends AbstractProductReader {
     // ESACCI-LC-L4-WB-Map-150m-P13Y-2000-v4.0.tif
     public static final String LC_WB_FILENAME_PATTERN =
-            "ESACCI-LC-L4-WB-Map-(.*m)-P(.*)Y-(....)-v(.*)\\.(tiff?)";
+            "ESACCI-LC-L4-WB-(?:Ocean-Land-)?Map-(.*m)-P(.*)Y-(....)-v(.*).(tiff?)";
     public static final String[] FLAG_NAMES = new String[]{"NObsImsWS", "NObsImsGM"};
     public static final String[] LC_VARIABLE_NAMES = new String[] {
             "wb_class",
@@ -97,6 +97,17 @@ public class LcWbTiffReader extends AbstractProductReader {
         metadataRoot.setAttributeString("spatialResolution", spatialResolution);
         metadataRoot.setAttributeString("temporalResolution", temporalResolution);
 
+        // Creating global attributes element and passing all the attribute to it as well
+        MetadataElement globalAttributes = new MetadataElement("global_attributes");
+        metadataRoot.addElement(globalAttributes);
+        globalAttributes = metadataRoot.getElement("global_attributes");
+        globalAttributes.setAttributeString ("epoch",epoch);
+        globalAttributes.setAttributeString ("version",version);
+        globalAttributes.setAttributeString ("spatialResolution",spatialResolution);
+        globalAttributes.setAttributeString ("temporalResolution",temporalResolution);
+        globalAttributes.setAttributeString ("id",lcWbFilename.substring(0,lcWbFilename.lastIndexOf('.')));
+        globalAttributes.setAttributeString ("type",lcWbFilename.substring(0,lcWbFilename.lastIndexOf('.')));
+        //
         bandProducts.add(lcWbProduct);
         Band band = addBand(0, lcWbProduct, result);
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);
