@@ -29,7 +29,7 @@ import java.util.Locale;
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.WB",
         internal = true,
-        version = "3.15",
+        version = "4.5",
         authors = "Marco Peters, Martin Boettcher",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Allows to aggregate LC WB products.",
@@ -127,12 +127,13 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         final double sourceMapResolutionX = 180.0 / sceneHeight;
         final double sourceMapResolutionY = 360.0 / sceneWidth;
+        final int numWbClasses = sourceProduct.getBand("wb_class").getIndexCoding().getIndexNames().length;
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
-        LcWbAggregatorConfig lcWbAggregatorConfig = new LcWbAggregatorConfig(outputWbClasses, numMajorityClasses, areaCalculator);
+        LcWbAggregatorConfig lcWbAggregatorConfig = new LcWbAggregatorConfig(outputWbClasses, numMajorityClasses, numWbClasses, areaCalculator);
         binningOp.setAggregatorConfigs(lcWbAggregatorConfig);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);

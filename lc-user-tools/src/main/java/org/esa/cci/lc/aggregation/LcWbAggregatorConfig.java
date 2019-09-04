@@ -20,16 +20,19 @@ class LcWbAggregatorConfig extends AggregatorConfig {
     @Parameter(converter = AreaCalculatorConverter.class)
     private AreaCalculator areaCalculator;
 
+    @Parameter
+    private int numWbClasses;
 
     LcWbAggregatorConfig() {
         super(LcWbAggregatorDescriptor.NAME);
     }
 
-    LcWbAggregatorConfig(boolean outputWbClasses, int numMajorityClasses, AreaCalculator areaCalculator) {
+    LcWbAggregatorConfig(boolean outputWbClasses, int numMajorityClasses, int numWbClasses, AreaCalculator areaCalculator) {
         super(LcWbAggregatorDescriptor.NAME);
         this.outputWbClasses = outputWbClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.areaCalculator = areaCalculator;
+        this.numWbClasses = numWbClasses;
     }
 
     public String getSourceVarName() {

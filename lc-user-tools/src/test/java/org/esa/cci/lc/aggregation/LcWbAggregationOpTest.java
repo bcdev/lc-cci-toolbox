@@ -1,12 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
@@ -194,6 +189,11 @@ public class LcWbAggregationOpTest {
         final Product product = new Product("P", "T", width, height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-WB-Map-300m-P5Y-2010-v2.nc"));
         final Band classesBand = product.addBand("wb_class", ProductData.TYPE_UINT8);
+        product.getIndexCodingGroup().add(new IndexCoding("wb_class"));
+        IndexCoding indexCoding = product.getIndexCodingGroup().get("wb_class");
+        product.getIndexCodingGroup().get("wb_class").addIndex("land",1,"land");
+        product.getIndexCodingGroup().get("wb_class").addIndex("water",2,"water");
+        classesBand.setSampleCoding(indexCoding);
         classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                              new Float[]{2f}, null));
         final Band wsObservationBand = product.addBand("ws_observation_count", ProductData.TYPE_INT16);

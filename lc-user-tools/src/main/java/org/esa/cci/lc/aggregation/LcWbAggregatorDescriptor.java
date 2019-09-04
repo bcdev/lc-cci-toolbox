@@ -5,6 +5,7 @@ import org.esa.snap.binning.Aggregator;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.AggregatorDescriptor;
 import org.esa.snap.binning.VariableContext;
+import org.esa.snap.core.gpf.OperatorException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,8 +35,19 @@ public class LcWbAggregatorDescriptor implements AggregatorDescriptor {
         int numMajorityClasses = propertySet.getValue("numMajorityClasses");
         boolean outputWbClasses = propertySet.getValue("outputWbClasses");
         AreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
+        int numWbClasses = propertySet.getValue("numWbClasses");
 
-        String[] spatialFeatureNames = createSpatialFeatureNames();
+        String[] spatialFeatureNames;
+        if (numWbClasses == 2) {
+             spatialFeatureNames = createSpatialFeatureNames();
+        }
+        else if (numWbClasses == 3) {
+            spatialFeatureNames = createSpatialFeatureNamesInlandWater();
+        }
+        else {
+            throw new OperatorException("Incorrect number of WB Classes");
+        }
+
         String[] outputFeatureNames = createOutputFeatureNames(outputWbClasses, numMajorityClasses, spatialFeatureNames);
         return new LcWbAggregator(numMajorityClasses, outputWbClasses, areaCalculator, spatialFeatureNames, outputFeatureNames);
     }
@@ -56,6 +68,10 @@ public class LcWbAggregatorDescriptor implements AggregatorDescriptor {
 
     private static String[] createSpatialFeatureNames() {
         return new String[]{"class_area_invalid", "class_area_terrestrial", "class_area_water"};
+    }
+
+    private static String[] createSpatialFeatureNamesInlandWater() {
+        return new String[]{"class_area_invalid", "class_area_water", "class_area_terrestrial", "class_area_inland_water"};
     }
 
     private static String[] createOutputFeatureNames(boolean outputWbClasses, int numMajorityClasses,
