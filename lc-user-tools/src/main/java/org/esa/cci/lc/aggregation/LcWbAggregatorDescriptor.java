@@ -71,7 +71,7 @@ public class LcWbAggregatorDescriptor implements AggregatorDescriptor {
     }
 
     private static String[] createSpatialFeatureNamesInlandWater() {
-        return new String[]{"class_area_invalid", "class_area_water", "class_area_terrestrial", "class_area_inland_water"};
+        return new String[]{"class_area_ocean_water", "class_area_terrestrial", "class_area_inland_water", "class_area_invalid"};
     }
 
     private static String[] createOutputFeatureNames(boolean outputWbClasses, int numMajorityClasses,
