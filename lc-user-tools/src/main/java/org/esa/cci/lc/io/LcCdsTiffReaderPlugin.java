@@ -27,7 +27,7 @@ public class LcCdsTiffReaderPlugin implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
-        if (filename.matches(LcCdsTiffReader.LC_CONDITION_FILENAME_PATTERN) || filename.matches(LcMapTiffReader.LC_ALTERNATIVE_FILENAME_PATTERN)) {
+        if (filename.matches(LcCdsTiffReader.LC_CONDITION_FILENAME_PATTERN) ||  filename.matches(LcCdsTiffReader.LC_ALTERNATIVE_CONDITION_FILENAME_PATTERN)) {
             return DecodeQualification.INTENDED;
         } else {
             return DecodeQualification.UNABLE;

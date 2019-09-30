@@ -21,7 +21,9 @@ public class LcCdsTiffReader extends AbstractProductReader {
 
 
     public static final String LC_CONDITION_FILENAME_PATTERN = "(........)-ESACCI-L3S_FIRE-BA-MODIS-AREA_(.)-fv5.(.)-LC.tif";
+    public static final String LC_ALTERNATIVE_CONDITION_FILENAME_PATTERN = "(........)-ESACCI-L3S_FIRE-BA-OLCI-AREA_(.)-fv1.(.)-LC.tif";
     //20010101-ESACCI-L3S_FIRE-BA-MODIS-AREA_1-fv5.0-LC.tif
+    //20180101-ESACCI-L3S_FIRE-BA-OLCI-AREA_1-fv1.0-LC.tif
     private List<Product> bandProducts;
 
     public LcCdsTiffReader(LcCdsTiffReaderPlugin readerPlugin) {
@@ -34,8 +36,8 @@ public class LcCdsTiffReader extends AbstractProductReader {
         final File lcConditionFile = getFileInput(getInput());
         bandProducts = new ArrayList<>();
         final String lcConditionFilename = lcConditionFile.getName();
-        final String jdConditionFilename = lcConditionFilename.replace("LC","JD");
-        final String clConditionFilename = lcConditionFilename.replace("LC","CL");
+        final String jdConditionFilename = lcConditionFilename.replace("LC.tif","JD.tif");
+        final String clConditionFilename = lcConditionFilename.replace("LC.tif","CL.tif");
         final File productDir = lcConditionFile.getParentFile();
 
         Product lcConditionProduct = readProduct(productDir, lcConditionFilename, plugIn);

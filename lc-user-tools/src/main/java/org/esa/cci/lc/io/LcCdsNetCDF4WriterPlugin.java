@@ -132,6 +132,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             else if (element.getAttributeString("type").equals("lccds2")) {
                 writeLC2GlobalAttribute( writeable,  element);
             }
+            else if (element.getAttributeString("type").equals("pixel_product2") ) {
+                writePP2GlobalAttribute(writeable, element);
+            }
 
         }
     }
@@ -609,6 +612,60 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "geospatial_lat_units", "degrees_north");
         addGlobalAttribute(writeable, element, "geospatial_lon_resolution", "0.0022457331");
         addGlobalAttribute(writeable, element, "geospatial_lat_resolution", "0.0022457331");
+    }
+
+    private void writePP2GlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+        String timeYear = element.getProduct().getFileLocation().getName().substring(0,4);
+        String timeMonth = element.getProduct().getFileLocation().getName().substring(4,6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(timeYear),Integer.parseInt(timeMonth)-1,1);
+        String lastDay  = Integer.toString(calendar.getActualMaximum( Calendar.DAY_OF_MONTH));
+        String startObservation = timeYear+timeMonth+"01T000000Z";
+        String endObservation = timeYear+timeMonth+lastDay+"T235959Z";
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        addGlobalAttribute(writeable, element, "title", "ECMWF C3S Pixel OLCI Burned Area product");
+        addGlobalAttribute(writeable, element, "institution", "University of Alcala");
+        addGlobalAttribute(writeable, element, "source", "Sentinel-3 A+B OLCI FR, MODIS MCD14ML Collection 6, C3S Land Cover dataset v.2.1.1");
+        addGlobalAttribute(writeable, element, "history", "Created on 2019-09-30 08:30:00; modified with lc-user-tools-"+ LcWriterUtils.getModuleVersion()+" on "+dateFormat.format(new Date()));
+        addGlobalAttribute(writeable, element, "references", "https://climate.copernicus.eu/");
+        addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
+        addGlobalAttribute(writeable, element, "conventions","CF-1.7");
+        addGlobalAttribute(writeable, element, "product_version","v6.0");
+        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product." +
+                "It uses the following naming convention: ${Indicative Date}-C3S-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.nc. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is OLCI. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20180101-C3S-L3S_FIRE-BA-OLCI-AREA_1-fv1.0.nc");
+        addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, C3S, GCOS");
+        addGlobalAttribute(writeable, element, "id", null);
+        addGlobalAttribute(writeable, element, "naming_authority", "org.esa-cci");
+        addGlobalAttribute(writeable, element, "keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science keywords");
+        addGlobalAttribute(writeable, element, "cdm_data_type", "Pixel");
+        addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the Copernicus Climate Change Service");
+        addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        //addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "creator_name", "University of Alcala");
+        addGlobalAttribute(writeable, element, "creator_url", "http://www.uah.es");
+        addGlobalAttribute(writeable, element, "creator_email", "emilio.chuvieco@uah.es");
+        addGlobalAttribute(writeable, element, "contact", "http://copernicus-support.ecmwf.int");
+        addGlobalAttribute(writeable, element, "project", "EC C3S Fire Burned Area");
+        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        addGlobalAttribute(writeable, element, "time_coverage_start", startObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_duration", "P1M");
+        addGlobalAttribute(writeable, element, "time_coverage_resolution", "P1M");
+        addGlobalAttribute(writeable, element, "standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Metadata Convention");
+        addGlobalAttribute(writeable, element, "license", "EC C3S FIRE BURNED AREA Data Policy");
+        addGlobalAttribute(writeable, element, "platform", "Sentinel-3");
+        addGlobalAttribute(writeable, element, "sensor", "OLCI");
+        addGlobalAttribute(writeable, element, "spatial_resolution", "0.00277778");
+        addGlobalAttribute(writeable, element, "geospatial_lon_units", "degrees_east");
+        addGlobalAttribute(writeable, element, "geospatial_lat_units", "degrees_north");
+        addGlobalAttribute(writeable, element, "geospatial_lon_resolution", "0.00277778");
+        addGlobalAttribute(writeable, element, "geospatial_lat_resolution", "0.00277778");
+
     }
 
 }

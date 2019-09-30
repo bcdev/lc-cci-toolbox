@@ -76,6 +76,8 @@ public class LcConversionOp extends Operator {
             setIdForBurnedArea(sourceFileName);
         } else if ("ppcds".equals(format)) {
             setIdForBAPixelProduct(sourceFileName);
+        } else if ("ppcds2".equals(format)) {
+          setIdForBAPixelProduct2(sourceFileName);
         } else {
             throw  new OperatorException("Unknown format "+format);
         }
@@ -167,6 +169,14 @@ public class LcConversionOp extends Operator {
     private void setIdForBAPixelProduct(String sourceFileName) {
         typeString="pixel_product";
         id=sourceFileName.replace("-LC.tif","cds");
+        outputFormat = "NetCDF4-LC-CDS";
+        sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+    }
+
+    private void setIdForBAPixelProduct2(String sourceFileName) {
+        typeString="pixel_product2";
+        id=sourceFileName.replace("v1.0-LC.tif","v6.0");
+        id=id.replace("ESACCI","C3S");
         outputFormat = "NetCDF4-LC-CDS";
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
     }
