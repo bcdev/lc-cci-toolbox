@@ -225,8 +225,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("axis", "Y");
             nVariable.addAttribute("long_name", "latitude");
             nVariable.addAttribute("bounds", "lat_bounds");
-            nVariable.addAttribute("valid_min", element.getAttributeDouble("geospatial_lat_min"));
-            nVariable.addAttribute("valid_max", element.getAttributeDouble("geospatial_lat_max"));
+            nVariable.addAttribute("valid_min", (int) element.getAttributeDouble("geospatial_lat_min"));
+            nVariable.addAttribute("valid_max", (int) element.getAttributeDouble("geospatial_lat_max"));
         }
         else if (variableName.equals("lon")){
             nVariable.addAttribute("standard_name", "longitude");
@@ -234,8 +234,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("axis", "X");
             nVariable.addAttribute("long_name", "longitude");
             nVariable.addAttribute("bounds", "lon_bounds");
-            nVariable.addAttribute("valid_min", element.getAttributeDouble("geospatial_lon_min"));
-            nVariable.addAttribute("valid_max", element.getAttributeDouble("geospatial_lon_max"));
+            nVariable.addAttribute("valid_min", (int) element.getAttributeDouble("geospatial_lon_min"));
+            nVariable.addAttribute("valid_max", (int) element.getAttributeDouble("geospatial_lon_max"));
         }
         else if (variableName.equals("JD")){
             nVariable.addAttribute("long_name", "Date of the first detection");
@@ -252,7 +252,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         else if (variableName.equals("LC")){
             nVariable.addAttribute("long_name", "Land cover of burned pixels");
             nVariable.addAttribute("units", "Land cover code");
-            nVariable.addAttribute("comment", "Land cover of the burned pixel, extracted from the CCI LandCover v1.6.1 (LC). N is the number of the land cover category in the reference map. It is only valid when JD > 0. Pixel value is 0 to N under the following codes: 10 = Cropland, rainfed; 20 = Cropland, irrigated or post-flooding; 30 = Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%); 40 = Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%); 50 = Tree cover, broadleaved, evergreen, closed to open (>15%); 60 = Tree cover, broadleaved, deciduous, closed to open (>15%); 70 = Tree cover, needleleaved, evergreen, closed to open (>15%); 80 = Tree cover, needleleaved, deciduous, closed to open (>15%); 90 = Tree cover, mixed leaf type (broadleaved and needleleaved); 100 = Mosaic tree and shrub (>50%) / herbaceous cover (<50%); 110 = Mosaic herbaceous cover (>50%) / tree and shrub (<50%); 120 = Shrubland; 130 = Grassland; 140 = Lichens and mosses; 150 = Sparse vegetation (tree, shrub, herbaceous cover) (<15%); 160 = Tree cover, flooded, fresh or brackish water; 170 = Tree cover, flooded, saline water; 180 = Shrub or herbaceous cover, flooded, fresh/saline/brackish water.");
+            nVariable.addAttribute("comment", "Land cover of the burned pixel, extracted from the C3S LandCover v2.1.1 (LC). N is the number of the land cover category in the reference map. It is only valid when JD > 0. Pixel value is 0 to N under the following codes: 10 = Cropland, rainfed; 20 = Cropland, irrigated or post-flooding; 30 = Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%); 40 = Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%); 50 = Tree cover, broadleaved, evergreen, closed to open (>15%); 60 = Tree cover, broadleaved, deciduous, closed to open (>15%); 70 = Tree cover, needleleaved, evergreen, closed to open (>15%); 80 = Tree cover, needleleaved, deciduous, closed to open (>15%); 90 = Tree cover, mixed leaf type (broadleaved and needleleaved); 100 = Mosaic tree and shrub (>50%) / herbaceous cover (<50%); 110 = Mosaic herbaceous cover (>50%) / tree and shrub (<50%); 120 = Shrubland; 130 = Grassland; 140 = Lichens and mosses; 150 = Sparse vegetation (tree, shrub, herbaceous cover) (<15%); 160 = Tree cover, flooded, fresh or brackish water; 170 = Tree cover, flooded, saline water; 180 = Shrub or herbaceous cover, flooded, fresh/saline/brackish water.");
         }
     }
 
@@ -633,14 +633,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "conventions","CF-1.7");
         addGlobalAttribute(writeable, element, "product_version","v6.0");
-        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product." +
-                "It uses the following naming convention: ${Indicative Date}-C3S-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.nc. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is OLCI. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}] (That is 1 or more digits followed by optional . and another 1 or more digits, and the cds code to identify this product. An example is: 20180101-C3S-L3S_FIRE-BA-OLCI-AREA_1-fv1.0.nc");
+        addGlobalAttribute(writeable, element, "summary","The pixel product is a raster dataset consisting of three layers that together describe the attributes of the BA product. " +
+                "It uses the following naming convention: ${Indicative Date}-C3S-L3S_FIRE-BA-${Indicative sensor}[-${Additional Segregator}]-fv${xx.x}.nc. ${Indicative Date} is the identifying date for this data set. Format is YYYYMMDD, where YYYY is the four digit year, MM is the two digit month from 01 to 12 and DD is the two digit day of the month from 01 to 31. For monthly products the date is set to 01. ${Indicative sensor} is OLCI. ${Additional Segregator} is the AREA_${TILE_CODE} being the tile code described in the Product User Guide. ${File Version} is the File version number in the form n{1,}[.n{1,}] (That is 1 or more digits followed by optional . and another 1 or more digits). An example is: 20180101-C3S-L3S_FIRE-BA-OLCI-AREA_1-fv1.0.nc");
         addGlobalAttribute(writeable, element, "keywords", "Burned Area, Fire Disturbance, Climate Change, ESA, C3S, GCOS");
         addGlobalAttribute(writeable, element, "id", null);
         addGlobalAttribute(writeable, element, "naming_authority", "org.esa-cci");
         addGlobalAttribute(writeable, element, "keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science keywords");
         addGlobalAttribute(writeable, element, "cdm_data_type", "Pixel");
-        addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the Copernicus Climate Change Service");
+        addGlobalAttribute(writeable, element, "comment", "These data were produced as part of the Copernicus Climate Change Service programme.");
         addGlobalAttribute(writeable, element, "creation_date", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         //addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
         addGlobalAttribute(writeable, element, "creator_name", "University of Alcala");
@@ -648,10 +648,10 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "creator_email", "emilio.chuvieco@uah.es");
         addGlobalAttribute(writeable, element, "contact", "http://copernicus-support.ecmwf.int");
         addGlobalAttribute(writeable, element, "project", "EC C3S Fire Burned Area");
-        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
-        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
-        addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
-        addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        writeable.addGlobalAttribute("geospatial_lat_min", (int) element.getAttributeDouble("geospatial_lat_min"));
+        writeable.addGlobalAttribute("geospatial_lat_max", (int) element.getAttributeDouble("geospatial_lat_max"));
+        writeable.addGlobalAttribute("geospatial_lon_min", (int) element.getAttributeDouble("geospatial_lon_min"));
+        writeable.addGlobalAttribute("geospatial_lon_max", (int) element.getAttributeDouble("geospatial_lon_max"));
         addGlobalAttribute(writeable, element, "time_coverage_start", startObservation);
         addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
         addGlobalAttribute(writeable, element, "time_coverage_duration", "P1M");
