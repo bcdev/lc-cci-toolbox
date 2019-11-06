@@ -13,6 +13,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
+//import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -91,6 +92,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         validateInputSettings();
 
         Product source = getSourceProduct();
+        //source = computeTileCacheProduct(source,2500);
         final String planetaryGridClassName = getPlanetaryGridClassName();
         final String mapType = source.getFileLocation() != null ? LcMapMetadata.mapTypeOf(source.getFileLocation().getName()) : "unknown";
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
@@ -280,6 +282,15 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         }
 
     }
+
+    /*private Product computeTileCacheProduct(Product inputProduct,int cacheSize) {
+        TileCacheOp tileCacheOp = new TileCacheOp();
+        tileCacheOp.setSourceProduct("source", inputProduct);
+        tileCacheOp.setParameterDefaultValues();
+        tileCacheOp.setParameter("cacheSize", cacheSize);
+        inputProduct = tileCacheOp.getTargetProduct();
+        return inputProduct;
+    }*/
 
     /**
      * The Service Provider Interface (SPI) for the operator.

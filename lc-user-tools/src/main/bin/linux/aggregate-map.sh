@@ -14,6 +14,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 exec java -Xmx4G -Dceres.context=snap \
     -Dsnap.logLevel=INFO -Dsnap.consoleLog=true \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
-    -Dsnap.binning.sliceHeight=64 \
+    -Dsnap.binning.sliceHeight=2025 \
+    -Dsnap.binning.sliceWidth=2025 \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
     LCCCI.Aggregate.Map -e -c 1024M $@
