@@ -175,7 +175,7 @@ public class LcConversionOp extends Operator {
 
     private void setIdForBAPixelProduct2(String sourceFileName) {
         typeString="pixel_product2";
-        id=sourceFileName.replace("v1.0-LC.tif","v6.0");
+        id=sourceFileName.replace("v1.0-LC.tif","v1.0");
         id=id.replace("ESACCI","C3S");
         outputFormat = "NetCDF4-LC-CDS";
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
