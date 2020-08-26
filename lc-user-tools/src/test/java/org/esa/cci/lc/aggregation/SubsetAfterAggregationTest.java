@@ -14,6 +14,7 @@ import org.esa.cci.lc.subset.LcSubsetOp;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.esa.cci.lc.util.TestProduct;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -42,6 +43,7 @@ public class SubsetAfterAggregationTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+        NetCdfActivator.activate();
         aggregationSpi = new LcMapAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.loadOperatorSpis();

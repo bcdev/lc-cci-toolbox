@@ -73,7 +73,7 @@
     <properties>
         <maven.build.timestamp.format>yyyy/MM/dd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
-        <snap.version>[6.0.0,7.0.0)</snap.version>
+        <snap.version>8.0.0-SNAPSHOT</snap.version>
     </properties>
 
     <dependencies>

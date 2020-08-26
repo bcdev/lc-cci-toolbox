@@ -8,6 +8,7 @@ import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
@@ -33,6 +34,7 @@ public class LcWbAggregationOpTest {
 
     @BeforeClass
     public static void beforeClass() {
+        NetCdfActivator.activate();
         aggregationSpi = new LcWbAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.loadOperatorSpis();

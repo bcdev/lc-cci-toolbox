@@ -1,5 +1,6 @@
 package org.esa.cci.lc.aggregation;
 
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
@@ -47,6 +48,7 @@ public class LcAggregateRegionToFileTest {
     @BeforeClass
     public static void beforeClass() throws IOException {
         Locale.setDefault(Locale.ENGLISH);
+        NetCdfActivator.activate();
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
         lcMapNetCdf4WriterPlugIn = new LcMapNetCdf4WriterPlugIn();
         ProductIOPlugInManager.getInstance().addWriterPlugIn(lcMapNetCdf4WriterPlugIn);
