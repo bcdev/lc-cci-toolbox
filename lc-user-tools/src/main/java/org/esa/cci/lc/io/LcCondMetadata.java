@@ -13,6 +13,8 @@ public class LcCondMetadata {
 
     // ESACCI-LC-L4-Snow-Cond-500m-P13Y7D-(aggregated)(-)(N640)(-)20001224-v2.0
     private static final String LC_CONDITION_ID_PATTERN = "ESACCI-LC-L4-(.*)-Cond-(.*m)-P(.*)Y(.*)D-[aggregated]?-?.*?-?(....)(....)-v(.*)";
+    //private static final String LC_ALTERNATIVE_CONDITION_ID_PATTERN = "C3S-LC-L4-LCCS-Map-(.*m)-P(.*)Y-(....)-v(.*)";
+    private static final String LC_ALTERNATIVE_CONDITION_ID_PATTERN = "C3S-LC-L4-(.*)-Map-(.*m)-P(.*)Y-(.*)-v(.*)";
 
     private String type;
     private String id;
@@ -42,8 +44,22 @@ public class LcCondMetadata {
             startDate = metadataRoot.getAttributeString("startDate");
             version = metadataRoot.getAttributeString("version");
 
-        } else {
-            // NetCdf
+        } else if (product.getName().contains("C3S-LC-L4")) {
+         //C3S LC
+            MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
+            type = globalAttributes.getAttributeString("type");
+            id = globalAttributes.getAttributeString("id");
+            Matcher idMatcher = lcConditionTypeMatcher(id);
+            condition = " ";
+            spatialResolution = globalAttributes.getAttributeString("spatial_resolution");
+            temporalResolution = globalAttributes.getAttributeString("time_coverage_resolution");
+            startYear = idMatcher.group(3);
+            endYear = idMatcher.group(3);
+            startDate = startYear+"0101";
+            version = idMatcher.group(4);
+        }
+        else {
+            // Old NetCdf
             MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
             type = globalAttributes.getAttributeString("type");
             id = globalAttributes.getAttributeString("id");
@@ -60,7 +76,9 @@ public class LcCondMetadata {
     }
 
     static Matcher lcConditionTypeMatcher(String id) {
-        Pattern p = Pattern.compile(LC_CONDITION_ID_PATTERN);
+        final String regexp =
+                id.contains("ESACCI") ? LC_CONDITION_ID_PATTERN : LC_ALTERNATIVE_CONDITION_ID_PATTERN;
+        Pattern p = Pattern.compile(regexp);
         Matcher m = p.matcher(id);
         if (m.matches()) {
             return m;

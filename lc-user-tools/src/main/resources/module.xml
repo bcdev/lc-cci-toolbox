@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>4.5</version>
+    <version>4.6</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,9 @@
 
     <changelog>
         <![CDATA[
+    Changes in 4.6:
+    - rebased SNAP dependency on SNAP-8.0.0
+    - fixed issues with LC filenames
     Changes in 4.5:
     - convert is adapted for WB 150m resolution and ocean\inland water distinguishing.
     Changes in 4.4:
