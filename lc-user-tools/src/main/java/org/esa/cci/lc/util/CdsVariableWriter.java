@@ -118,7 +118,6 @@ public class CdsVariableWriter extends ProfilePartIO {
 
     public static void timeWriter (NFileWriteable writeable, MetadataElement element) throws IOException {
         Array data;
-        String path = element.getAttributeString("parent_path");
         //time and timebounds for lccs
         String YearString = element.getAttributeString("time_coverage_start").substring(0, 4);
         String firstMonth = element.getAttributeString("time_coverage_start").substring(4, 6);
