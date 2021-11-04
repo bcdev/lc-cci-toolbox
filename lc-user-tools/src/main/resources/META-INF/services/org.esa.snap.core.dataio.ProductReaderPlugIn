@@ -3,3 +3,4 @@ org.esa.cci.lc.io.LcWbTiffReaderPlugin
 org.esa.cci.lc.io.LcConditionTiffReaderPlugin
 org.esa.cci.lc.io.LCCfNetCdfReaderPlugIn
 org.esa.cci.lc.io.LcCdsTiffReaderPlugin
+org.esa.cci.lc.io.LcPftTiffReaderPlugin

@@ -50,7 +50,7 @@ public class LcConversionOp extends Operator {
     private File targetDir;
     @Parameter(description = "Version of the target file. Replacing the one given by the source product")
     private String targetVersion;
-    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds,ppcds,lccds2.",defaultValue = "lccci")
+    @Parameter(description = "Format of the output file: lccci,lccds,bacds,clcds,ppcds,lccds2,lcpft.",defaultValue = "lccci")
     private String format;
 
     private String typeString;
@@ -77,7 +77,9 @@ public class LcConversionOp extends Operator {
         } else if ("ppcds".equals(format)) {
             setIdForBAPixelProduct(sourceFileName);
         } else if ("ppcds2".equals(format)) {
-          setIdForBAPixelProduct2(sourceFileName);
+            setIdForBAPixelProduct2(sourceFileName);
+        } else if ("lcpft".equals(format)) {
+            setIdForPftProduct(sourceFileName);
         } else {
             throw  new OperatorException("Unknown format "+format);
         }
@@ -179,6 +181,13 @@ public class LcConversionOp extends Operator {
         id=id.replace("ESACCI","C3S");
         outputFormat = "NetCDF4-LC-CDS";
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+    }
+
+    private void setIdForPftProduct(String  sourceFileName) {
+        typeString="pft_product";
+        id=sourceFileName.replace("WATER","LC");
+        outputFormat = "NetCDF4-LC-CDS";
+        sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
     }
 
     private void setIdForBurnedArea(String sourceFileName) {

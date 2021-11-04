@@ -184,11 +184,21 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 }
                 else {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
-                    addCustomVariable(ncFile,"JD","time lat lon",DataType.SHORT,tileSizePixel, element);
-                    addCustomVariable(ncFile,"CL","time lat lon",DataType.BYTE,tileSizePixel,element);
-                    addCustomVariable(ncFile,"LC","time lat lon",DataType.UBYTE,tileSizePixel,element);
-                    addCustomVariable(ncFile,"lon","lon",DataType.DOUBLE,null,element);
-                    addCustomVariable(ncFile,"lat","lat",DataType.DOUBLE,null,element);
+                    Band[] bands = element.getProduct().getBands();
+                    if (!bands[0].getName().equals("JC")) {
+                        for ( Band band : bands) {
+                            addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.BYTE,tileSizePixel, element);
+                        }
+                        addCustomVariable(ncFile, "lon", "lon", DataType.DOUBLE, null, element);
+                        addCustomVariable(ncFile, "lat", "lat", DataType.DOUBLE, null, element);
+                    }
+                    else {
+                        addCustomVariable(ncFile, "JD", "time lat lon", DataType.SHORT, tileSizePixel, element);
+                        addCustomVariable(ncFile, "CL", "time lat lon", DataType.BYTE, tileSizePixel, element);
+                        addCustomVariable(ncFile, "LC", "time lat lon", DataType.UBYTE, tileSizePixel, element);
+                        addCustomVariable(ncFile, "lon", "lon", DataType.DOUBLE, null, element);
+                        addCustomVariable(ncFile, "lat", "lat", DataType.DOUBLE, null, element);
+                    }
                 }
 
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lat_bounds") == null)) {
