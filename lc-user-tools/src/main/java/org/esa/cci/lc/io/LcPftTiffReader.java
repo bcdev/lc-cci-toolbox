@@ -50,7 +50,7 @@ public class LcPftTiffReader extends AbstractProductReader {
 
         result.getMetadataRoot().addElement(new MetadataElement("global_attributes"));
         result.getMetadataRoot().getElement("global_attributes").setAttributeString("product_version", "v5.0");
-        result.getMetadataRoot().getElement("global_attributes").setAttributeString("type", "pixel_product");
+        result.getMetadataRoot().getElement("global_attributes").setAttributeString("type", "PFT_product");
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lat_min",Double.parseDouble(latMin));
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lat_max",Double.parseDouble(latMax));
         result.getMetadataRoot().getElement("global_attributes").setAttributeDouble("geospatial_lon_min",Double.parseDouble(lonMin));

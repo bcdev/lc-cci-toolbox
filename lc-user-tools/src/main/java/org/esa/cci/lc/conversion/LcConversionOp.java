@@ -184,8 +184,10 @@ public class LcConversionOp extends Operator {
     }
 
     private void setIdForPftProduct(String  sourceFileName) {
-        typeString="pft_product";
-        id=sourceFileName.replace("WATER","LC");
+        typeString="PFT_product";
+        String year = sourceFileName.substring(15,19);
+        //id=sourceFileName.replace("WATER","LC");
+        id = "ESACCI-LC-L4-PFT-Map-300m-P1Y-"+year+"-v2.0.8";
         outputFormat = "NetCDF4-LC-CDS";
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
     }

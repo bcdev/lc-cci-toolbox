@@ -135,6 +135,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             else if (element.getAttributeString("type").equals("pixel_product2") ) {
                 writePP2GlobalAttribute(writeable, element);
             }
+            else if (element.getAttributeString("type").equals("PFT_product") ) {
+                writePFTGlobalAttribute(writeable, element);
+            }
 
         }
     }
@@ -185,7 +188,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 else {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
                     Band[] bands = element.getProduct().getBands();
-                    if (!bands[0].getName().equals("JC")) {
+                    if (!bands[0].getName().equals("JD")) {
                         for ( Band band : bands) {
                             addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.BYTE,tileSizePixel, element);
                         }
@@ -678,4 +681,57 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
     }
 
+    private void writePFTGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+        final Dimension tileSize = new Dimension(2025, 2025);
+        String timeYear = element.getAttributeString("id").substring(30,34);
+        //timeYear = "2010";
+        String startObservation = timeYear+"0101";
+        String endObservation = timeYear+"1231";
+
+        addGlobalAttribute(writeable, element, "title", "ESA CCI Land Cover Project: Maps of Plant Functional Type Fractional Cover");
+        addGlobalAttribute(writeable, element, "summary", "This dataset contains the global plant functional type fractional" +
+                "cover maps for the ESA CCI Land Cover project");
+        addGlobalAttribute(writeable, element,"type","ESACCI-LC-L4-PFT-Map-300m-P1Y");
+        addGlobalAttribute(writeable,element,"id",null);
+        addGlobalAttribute(writeable,element,"project","Climate Change Initiative - European Space Agency");
+        addGlobalAttribute(writeable,element,"references","http://www.esa-landcover-cci.org");
+        addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain");
+        addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
+        addGlobalAttribute(writeable,element,"Conventions","CF-1.6");
+        addGlobalAttribute(writeable,element,"standard_name_vocabulary","CF-1.6");
+        addGlobalAttribute(writeable,element,"keywords","land cover classification, satellite, observation");
+        addGlobalAttribute(writeable,element,"keywords_vocabulary","NASA Global Change Master Directory (GCMD) Science Keywords");
+        addGlobalAttribute(writeable,element,"license","CC BY 4.0");
+        addGlobalAttribute(writeable,element,"naming_authority","org.esa-cci");
+        addGlobalAttribute(writeable,element,"cdm_data_type","grid");
+        addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
+        addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
+        addGlobalAttribute(writeable, element, "creator_name", "Universite catholique de Louvain");
+        addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be");
+        addGlobalAttribute(writeable, element, "creator_email", "contact@esa-landcover-cci.org");
+        addGlobalAttribute(writeable, element, "source", "ESA CCI land cover maps, auxiliary derived satellite data products");
+        addGlobalAttribute(writeable, element, "history", "lc-classification-1.0,pft-classification-1.0,lc-user-tools-"+ LcWriterUtils.getModuleVersion());
+        addGlobalAttribute(writeable, element, "time_coverage_start", startObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
+        addGlobalAttribute(writeable, element, "time_coverage_duration", "P1Y");
+        addGlobalAttribute(writeable, element, "time_coverage_resolution", "P1Y");
+        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
+        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
+        if (element.containsAttribute("subsetted")) {
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
+        }
+        else {
+            addGlobalAttribute(writeable, element, "geospatial_lon_min", "-180");
+            addGlobalAttribute(writeable, element, "geospatial_lon_max", "180");
+        }
+        addGlobalAttribute(writeable, element,"spatial_resolution","300m");
+        addGlobalAttribute(writeable, element,"geospatial_lat_units","degrees_north");
+        addGlobalAttribute(writeable, element,"geospatial_lat_resolution","002777777777778");
+        addGlobalAttribute(writeable, element,"geospatial_lon_units","degrees_east");
+        addGlobalAttribute(writeable, element,"geospatial_lon_resolution","002777777777778");
+        addGlobalAttribute(writeable, element, "TileSize", LcHelper.format(tileSize));
+        addGlobalAttribute(writeable, element, "product_version", "2.0.8");
+
+    }
 }
