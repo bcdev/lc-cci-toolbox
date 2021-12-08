@@ -135,7 +135,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             else if (element.getAttributeString("type").equals("pixel_product2") ) {
                 writePP2GlobalAttribute(writeable, element);
             }
-            else if (element.getAttributeString("type").equals("PFT_product") ) {
+            else if (element.getAttributeString("type").equals("PFT_product") || element.getAttributeString("type").equals("ESACCI-LC-L4-PFT-Map-300m-P1Y") ) {
                 writePFTGlobalAttribute(writeable, element);
             }
 
@@ -223,6 +223,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
    public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
+        String[] listPFTVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE","INLAND_WATER",
+               "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE"};
+
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
             nVariable.addAttribute("standard_name", "time");
@@ -266,6 +269,9 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("long_name", "Land cover of burned pixels");
             nVariable.addAttribute("units", "Land cover code");
             nVariable.addAttribute("comment", "Land cover of the burned pixel, extracted from the C3S LandCover v2.1.1 . N is the number of the land cover category in the reference map. It is only valid when JD > 0. Pixel value is 0 to N under the following codes: 10 = Cropland, rainfed; 20 = Cropland, irrigated or post-flooding; 30 = Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%); 40 = Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%); 50 = Tree cover, broadleaved, evergreen, closed to open (>15%); 60 = Tree cover, broadleaved, deciduous, closed to open (>15%); 70 = Tree cover, needleleaved, evergreen, closed to open (>15%); 80 = Tree cover, needleleaved, deciduous, closed to open (>15%); 90 = Tree cover, mixed leaf type (broadleaved and needleleaved); 100 = Mosaic tree and shrub (>50%) / herbaceous cover (<50%); 110 = Mosaic herbaceous cover (>50%) / tree and shrub (<50%); 120 = Shrubland; 130 = Grassland; 140 = Lichens and mosses; 150 = Sparse vegetation (tree, shrub, herbaceous cover) (<15%); 160 = Tree cover, flooded, fresh or brackish water; 170 = Tree cover, flooded, saline water; 180 = Shrub or herbaceous cover, flooded, fresh/saline/brackish water.");
+        }
+        else if (Arrays.asList(listPFTVariables).contains(variableName)) {
+            setPFTVariableAttributes(nVariable);
         }
     }
 
@@ -396,6 +402,69 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         }
     }
 
+    private static void setPFTVariableAttributes(NVariable nVariable) throws IOException{
+        String variableName = nVariable.getName();
+        if (variableName.equals("BARE")){
+            nVariable.addAttribute("long_name","Bare");
+            nVariable.addAttribute("description", "Percentage cover of bare soil in the 300 m pixel.");
+        }
+        if (variableName.equals("BUILT")){
+            nVariable.addAttribute("long_name","Built");
+            nVariable.addAttribute("description","Percentage cover of built (artificial impervious area, e.g., buildings) in the 300 m pixel.");
+        }
+        if (variableName.equals("SNOWICE")){
+            nVariable.addAttribute("long_name","Permanent snow and ice");
+            nVariable.addAttribute("description","Percentage cover permanent snow and ice in the 300 m pixel.");
+        }
+        if (variableName.equals("WATER")){
+            nVariable.addAttribute("long_name","Water");
+            nVariable.addAttribute("description","Percentage cover of surface water (ocean and permanent inland water bodies) in the 300 m pixel.");
+        }
+        if (variableName.equals("INLAND_WATER")){
+            nVariable.addAttribute("long_name","Inland Water");
+            nVariable.addAttribute("description","Percentage cover of permanent inland water bodies in the 300 m pixel. Excludes ocean (i.e., ocean pixels are set to 0% cover in this file).");
+        }
+        if (variableName.equals("GRASS_MAN")){
+            nVariable.addAttribute("long_name","Managed grasses");
+            nVariable.addAttribute("description","Percentage cover of managed grasses (i.e., herbaceous crops) in the 300 m pixel.");
+        }
+        if (variableName.equals("GRASS_NAT")){
+            nVariable.addAttribute("long_name","Natural grasses");
+            nVariable.addAttribute("description","Percentage cover of natural grasses in the 300 m pixel.");
+        }
+        if (variableName.equals("TREES_BD")){
+            nVariable.addAttribute("long_name","Broadleaved deciduous trees");
+            nVariable.addAttribute("description","Percentage cover of broadleaved deciduous trees in the 300 m pixel.");
+        }
+        if (variableName.equals("TREES_BE")){
+            nVariable.addAttribute("long_name","Broadleaved evergreen trees");
+            nVariable.addAttribute("description","Percentage cover of broadleaved evergreen trees in the 300 m pixel.");
+        }
+        if (variableName.equals("TREES_ND")){
+            nVariable.addAttribute("long_name","Needleleaved deciduous trees");
+            nVariable.addAttribute("description","Percentage cover of needleleaved deciduous trees in the 300 m pixel.");
+        }
+        if (variableName.equals("TREES_NE")){
+            nVariable.addAttribute("long_name","Needleleaved evergreen trees");
+            nVariable.addAttribute("description","Percentage cover of needleleaved evergreen trees in the 300 m pixel.");
+        }
+        if (variableName.equals("SHRUBS_BD")){
+            nVariable.addAttribute("long_name","Broadleaved deciduous shrubs");
+            nVariable.addAttribute("description","Percentage cover of broadleaved deciduous shrubs in the 300 m pixel.");
+        }
+        if (variableName.equals("SHRUBS_BE")){
+            nVariable.addAttribute("long_name","Broadleaved evergreen shrubs");
+            nVariable.addAttribute("description","Percentage cover of broadleaved evergreen shrubs in the 300 m pixel.");
+        }
+        if (variableName.equals("SHRUBS_ND")){
+            nVariable.addAttribute("long_name","Needleleaved deciduous shrubs");
+            nVariable.addAttribute("description","Percentage cover of needleleaved deciduous shrubs in the 300 m pixel.");
+        }
+        if (variableName.equals("SHRUBS_NE")){
+            nVariable.addAttribute("long_name","Needleleaved evergreen shrubs");
+            nVariable.addAttribute("description","Percentage cover of needleleaved evergreen shrubs in the 300 m pixel.");
+        }
+    }
 
     public static void addGlobalAttribute(NFileWriteable writeable, MetadataElement element, String name, String value) throws IOException {
         if (element!=null) {

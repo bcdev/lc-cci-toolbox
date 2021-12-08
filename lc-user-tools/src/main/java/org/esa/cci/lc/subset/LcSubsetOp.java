@@ -93,7 +93,7 @@ public class LcSubsetOp extends Operator {
         } else {
             formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
         }
-        if (format.equals("lccds")){
+        if (format.equals("lccds") || format.equals("lcpft")){
             formatName= LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
             subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
             subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_min", south.toString());

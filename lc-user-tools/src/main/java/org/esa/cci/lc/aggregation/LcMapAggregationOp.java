@@ -129,7 +129,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
 
-        if (format.equals("lccds")) {
+        if (format.equals("lccds") || format.equals("lcpft")) {
         binningOp.setOutputFormat("NetCDF4-LC-CDS");
        }
     }
