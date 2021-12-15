@@ -27,7 +27,7 @@ public class LcPftTiffReaderPlugin implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
-        if (filename.matches(LcPftTiffReader.LC_CONDITION_FILENAME_PATTERN) ||  filename.matches(LcPftTiffReader.LC_ALTERNATIVE_CONDITION_FILENAME_PATTERN)) {
+        if (filename.matches(LcPftTiffReader.LC_PFT_CONDITION_FILENAME_PATTERN) ||  filename.matches(LcPftTiffReader.LC_PFT_ALTERNATIVE_CONDITION_FILENAME_PATTERN)) {
             return DecodeQualification.INTENDED;
         } else {
             return DecodeQualification.UNABLE;

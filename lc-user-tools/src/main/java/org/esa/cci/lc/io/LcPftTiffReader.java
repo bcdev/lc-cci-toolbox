@@ -16,10 +16,10 @@ import java.util.List;
 public class LcPftTiffReader extends AbstractProductReader {
 
     private List<Product> bandProducts;
-    public static final String LC_CONDITION_FILENAME_PATTERN = "PFT_WATER_300m_...._GLOBAL_v2.tif";
-    public static final String LC_ALTERNATIVE_CONDITION_FILENAME_PATTERN = "PFT_WATER_300m_2010_GLOBAL_v2.tif";
-    private String[] listVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE","INLAND_WATER",
-            "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE"};
+    public static final String LC_PFT_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-INLAND-WATER-PFT-Map-300m-P1Y-....-v0.1.tif";
+    public static final String LC_PFT_ALTERNATIVE_CONDITION_FILENAME_PATTERN = "PFT_WATER_300m_...._GLOBAL_v2.tif";
+    private String[] listVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","INLAND-WATER",
+            "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE"};
 
     public LcPftTiffReader(LcPftTiffReaderPlugin readerPlugin) {
         super(readerPlugin);

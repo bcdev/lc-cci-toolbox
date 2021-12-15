@@ -223,8 +223,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
    public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
-        String[] listPFTVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE","INLAND_WATER",
-               "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE"};
+        String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","INLAND-WATER",
+                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER"};
 
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -420,47 +420,47 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("long_name","Water");
             nVariable.addAttribute("description","Percentage cover of surface water (ocean and permanent inland water bodies) in the 300 m pixel.");
         }
-        if (variableName.equals("INLAND_WATER")){
+        if (variableName.equals("INLAND-WATER")){
             nVariable.addAttribute("long_name","Inland Water");
             nVariable.addAttribute("description","Percentage cover of permanent inland water bodies in the 300 m pixel. Excludes ocean (i.e., ocean pixels are set to 0% cover in this file).");
         }
-        if (variableName.equals("GRASS_MAN")){
+        if (variableName.equals("GRASS-MAN")){
             nVariable.addAttribute("long_name","Managed grasses");
             nVariable.addAttribute("description","Percentage cover of managed grasses (i.e., herbaceous crops) in the 300 m pixel.");
         }
-        if (variableName.equals("GRASS_NAT")){
+        if (variableName.equals("GRASS-NAT")){
             nVariable.addAttribute("long_name","Natural grasses");
             nVariable.addAttribute("description","Percentage cover of natural grasses in the 300 m pixel.");
         }
-        if (variableName.equals("TREES_BD")){
+        if (variableName.equals("TREES-BD")){
             nVariable.addAttribute("long_name","Broadleaved deciduous trees");
             nVariable.addAttribute("description","Percentage cover of broadleaved deciduous trees in the 300 m pixel.");
         }
-        if (variableName.equals("TREES_BE")){
+        if (variableName.equals("TREES-BE")){
             nVariable.addAttribute("long_name","Broadleaved evergreen trees");
             nVariable.addAttribute("description","Percentage cover of broadleaved evergreen trees in the 300 m pixel.");
         }
-        if (variableName.equals("TREES_ND")){
+        if (variableName.equals("TREES-ND")){
             nVariable.addAttribute("long_name","Needleleaved deciduous trees");
             nVariable.addAttribute("description","Percentage cover of needleleaved deciduous trees in the 300 m pixel.");
         }
-        if (variableName.equals("TREES_NE")){
+        if (variableName.equals("TREES-NE")){
             nVariable.addAttribute("long_name","Needleleaved evergreen trees");
             nVariable.addAttribute("description","Percentage cover of needleleaved evergreen trees in the 300 m pixel.");
         }
-        if (variableName.equals("SHRUBS_BD")){
+        if (variableName.equals("SHRUBS-BD")){
             nVariable.addAttribute("long_name","Broadleaved deciduous shrubs");
             nVariable.addAttribute("description","Percentage cover of broadleaved deciduous shrubs in the 300 m pixel.");
         }
-        if (variableName.equals("SHRUBS_BE")){
+        if (variableName.equals("SHRUBS-BE")){
             nVariable.addAttribute("long_name","Broadleaved evergreen shrubs");
             nVariable.addAttribute("description","Percentage cover of broadleaved evergreen shrubs in the 300 m pixel.");
         }
-        if (variableName.equals("SHRUBS_ND")){
+        if (variableName.equals("SHRUBS-ND")){
             nVariable.addAttribute("long_name","Needleleaved deciduous shrubs");
             nVariable.addAttribute("description","Percentage cover of needleleaved deciduous shrubs in the 300 m pixel.");
         }
-        if (variableName.equals("SHRUBS_NE")){
+        if (variableName.equals("SHRUBS-NE")){
             nVariable.addAttribute("long_name","Needleleaved evergreen shrubs");
             nVariable.addAttribute("description","Percentage cover of needleleaved evergreen shrubs in the 300 m pixel.");
         }
