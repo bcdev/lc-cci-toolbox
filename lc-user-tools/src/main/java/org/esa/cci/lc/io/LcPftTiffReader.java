@@ -16,9 +16,9 @@ import java.util.List;
 public class LcPftTiffReader extends AbstractProductReader {
 
     private List<Product> bandProducts;
-    public static final String LC_PFT_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-INLAND-WATER-PFT-Map-300m-P1Y-....-v0.1.tif";
+    public static final String LC_PFT_CONDITION_FILENAME_PATTERN = "ESACCI-LC-L4-WATER_INLAND-PFT-Map-300m-P1Y-....-v0.1.tif";
     public static final String LC_PFT_ALTERNATIVE_CONDITION_FILENAME_PATTERN = "PFT_WATER_300m_...._GLOBAL_v2.tif";
-    private String[] listVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","INLAND-WATER",
+    private String[] listVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
             "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE"};
 
     public LcPftTiffReader(LcPftTiffReaderPlugin readerPlugin) {
@@ -84,7 +84,7 @@ public class LcPftTiffReader extends AbstractProductReader {
         }
 
         Band landBand = new VirtualBand("LAND",ProductData.TYPE_INT8,result.getSceneRasterWidth(),result.getSceneRasterHeight(),"100-WATER");
-        Band oceanWaterBand = new VirtualBand("OCEAN-WATER",ProductData.TYPE_INT8,result.getSceneRasterWidth(),result.getSceneRasterHeight(),"WATER - 'INLAND-WATER'");
+        Band oceanWaterBand = new VirtualBand("WATER_OCEAN",ProductData.TYPE_INT8,result.getSceneRasterWidth(),result.getSceneRasterHeight(),"WATER - 'WATER_INLAND'");
         result.addBand(landBand);
         result.addBand(oceanWaterBand);
         return result;

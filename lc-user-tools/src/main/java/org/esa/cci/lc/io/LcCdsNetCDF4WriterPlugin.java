@@ -223,8 +223,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
    public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
-        String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","INLAND-WATER",
-                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","OCEAN-WATER"};
+        String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
+                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
 
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -420,7 +420,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             nVariable.addAttribute("long_name","Water");
             nVariable.addAttribute("description","Percentage cover of surface water (ocean and permanent inland water bodies) in the 300 m pixel.");
         }
-        if (variableName.equals("INLAND-WATER")){
+        if (variableName.equals("WATER_INLAND")){
             nVariable.addAttribute("long_name","Inland Water");
             nVariable.addAttribute("description","Percentage cover of permanent inland water bodies in the 300 m pixel. Excludes ocean (i.e., ocean pixels are set to 0% cover in this file).");
         }
@@ -466,11 +466,11 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         }
         if (variableName.equals("LAND")){
             nVariable.addAttribute("long_name","Land");
-            nVariable.addAttribute("description","TBD");
+            nVariable.addAttribute("description","Percentage cover of land(no ocean and permanent inland water bodies) in the 300 m pixel.");
         }
-        if (variableName.equals("OCEAN-WATER")){
+        if (variableName.equals("WATER_OCEAN")){
             nVariable.addAttribute("long_name","Oceanic water");
-            nVariable.addAttribute("description","TBD");
+            nVariable.addAttribute("description","Percentage cover of ocean in the 300 m pixel. Excludes inland water (i.e., inland water pixels are set to 0% cover in this file).");
         }
     }
 
@@ -766,24 +766,25 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         String endObservation = timeYear+"1231";
 
         addGlobalAttribute(writeable, element, "title", "ESA CCI Land Cover Project: Maps of Plant Functional Type Fractional Cover");
-        addGlobalAttribute(writeable, element, "summary", "This dataset contains the global plant functional type fractional" +
-                "cover maps for the ESA CCI Land Cover project");
+        addGlobalAttribute(writeable, element, "summary", "This dataset contains the global plant functional type fractional " +
+                "cover maps of the ESA Medium Resolution CCI Land Cover project");
         addGlobalAttribute(writeable, element,"type","ESACCI-LC-L4-PFT-Map-300m-P1Y");
         addGlobalAttribute(writeable,element,"id",null);
-        addGlobalAttribute(writeable,element,"project","Climate Change Initiative - European Space Agency");
-        addGlobalAttribute(writeable,element,"references","http://www.esa-landcover-cci.org");
-        addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain");
+        addGlobalAttribute(writeable,element,"project","Medium Resolution Land Cover - Climate Change Initiative - European Space Agency");
+        addGlobalAttribute(writeable,element,"references","https://maps.elie.ucl.ac.be/CCI/viewer/download.php, https://climate.esa.int/fr/projects/land-cover/about/");
+        addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable,element,"Conventions","CF-1.6");
         addGlobalAttribute(writeable,element,"standard_name_vocabulary","CF-1.6");
         addGlobalAttribute(writeable,element,"keywords","land cover classification, satellite, observation");
         addGlobalAttribute(writeable,element,"keywords_vocabulary","NASA Global Change Master Directory (GCMD) Science Keywords");
-        addGlobalAttribute(writeable,element,"license","CC BY 4.0");
+        addGlobalAttribute(writeable,element,"license","CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/ ");
         addGlobalAttribute(writeable,element,"naming_authority","org.esa-cci");
+        addGlobalAttribute(writeable,element,"doi","10.5285/26a0f46c95ee4c29b5c650b129aab788");
         addGlobalAttribute(writeable,element,"cdm_data_type","grid");
         addGlobalAttribute(writeable, element, "tracking_id", UUID.randomUUID().toString());
         addGlobalAttribute(writeable, element, "date_created", LcWriterUtils.COMPACT_ISO_FORMAT.format(new Date()));
-        addGlobalAttribute(writeable, element, "creator_name", "Universite catholique de Louvain");
+        addGlobalAttribute(writeable, element, "creator_name", "Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable, element, "creator_url", "http://www.uclouvain.be");
         addGlobalAttribute(writeable, element, "creator_email", "contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable, element, "source", "ESA CCI land cover maps, auxiliary derived satellite data products");
