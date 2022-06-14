@@ -83,6 +83,10 @@ public class LcPftTiffReader extends AbstractProductReader {
             bandBare.setDescription(bandName);
         }
 
+        Band landBand = new VirtualBand("LAND",ProductData.TYPE_INT8,result.getSceneRasterWidth(),result.getSceneRasterHeight(),"100-WATER");
+        Band oceanWaterBand = new VirtualBand("OCEAN-WATER",ProductData.TYPE_INT8,result.getSceneRasterWidth(),result.getSceneRasterHeight(),"WATER - 'INLAND-WATER'");
+        result.addBand(landBand);
+        result.addBand(oceanWaterBand);
         return result;
     }
 

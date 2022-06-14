@@ -224,7 +224,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
    public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
         String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","INLAND-WATER",
-                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER"};
+                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","OCEAN-WATER"};
 
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -463,6 +463,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         if (variableName.equals("SHRUBS-NE")){
             nVariable.addAttribute("long_name","Needleleaved evergreen shrubs");
             nVariable.addAttribute("description","Percentage cover of needleleaved evergreen shrubs in the 300 m pixel.");
+        }
+        if (variableName.equals("LAND")){
+            nVariable.addAttribute("long_name","Land");
+            nVariable.addAttribute("description","TBD");
+        }
+        if (variableName.equals("OCEAN-WATER")){
+            nVariable.addAttribute("long_name","Oceanic water");
+            nVariable.addAttribute("description","TBD");
         }
     }
 
