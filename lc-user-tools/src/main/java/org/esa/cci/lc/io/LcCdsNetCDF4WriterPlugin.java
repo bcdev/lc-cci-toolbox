@@ -771,7 +771,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element,"type","ESACCI-LC-L4-PFT-Map-300m-P1Y");
         addGlobalAttribute(writeable,element,"id",null);
         addGlobalAttribute(writeable,element,"project","Medium Resolution Land Cover - Climate Change Initiative - European Space Agency");
-        addGlobalAttribute(writeable,element,"references","https://maps.elie.ucl.ac.be/CCI/viewer/download.php, https://climate.esa.int/fr/projects/land-cover/about/");
+        addGlobalAttribute(writeable,element,"references","https://maps.elie.ucl.ac.be/CCI/viewer/download.php, https://climate.esa.int/fr/projects/land-cover/about/, https://catalogue.ceda.ac.uk/uuid/26a0f46c95ee4c29b5c650b129aab788");
         addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable,element,"Conventions","CF-1.6");
