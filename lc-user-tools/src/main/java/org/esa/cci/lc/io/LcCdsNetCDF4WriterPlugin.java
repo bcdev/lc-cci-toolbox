@@ -772,6 +772,18 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable,element,"id",null);
         addGlobalAttribute(writeable,element,"project","Medium Resolution Land Cover - Climate Change Initiative - European Space Agency");
         addGlobalAttribute(writeable,element,"references","https://maps.elie.ucl.ac.be/CCI/viewer/download.php, https://climate.esa.int/fr/projects/land-cover/about/, https://catalogue.ceda.ac.uk/uuid/26a0f46c95ee4c29b5c650b129aab788");
+        addGlobalAttribute(writeable,element,"citation","Harper et al., submitted. A 29-year time series of annual 300-metre resolution plant functional type maps for climate models ." +
+                " Kandice L. Harper, Céline Lamarche, Andrew Hartley, Philippe Peylin, Catherine Ottlé, Vladislav Bastrikov," +
+                " Rodrigo San Martín, Sylvia I. Bohnenstengel, Grit Kirches, Martin Boettcher, Roman Shevchuk, Carsten Brockmann, Pierre Defourny. Dataset doi: doi = \"10.5285/26a0f46c95ee4c29b5c650b129aab788.");
+        addGlobalAttribute(writeable,element,"input_data","CCI medium-resolution land cover time series. (Defourny et al., submitted)." +
+                " Surface water product Pekel et al. (2016)." +
+                " Tree canopy cover product Hansen et al. (2013). " +
+                " Tree canopy height product Potapov et al. (2021). " +
+                " Built-up product  (Pesaresi et al., 2013 - GHSL). " +
+                " Köppen-Geiger climate zone product Beck et al. (2018). " +
+                " Landform product (Sayre et al. (2014)). " +
+                " IMAGE world regions product. Available at https://models.pbl.nl/image/index.php/Region_classification_map" +
+                " CCI medium-resolution water body product v4.0. (Lamarche et al., 2017).");
         addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable,element,"Conventions","CF-1.6");
