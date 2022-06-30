@@ -11,7 +11,7 @@ fi
 export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 
-exec java -Xmx2G -Dceres.context=snap \
+exec java -Xmx8G -Dceres.context=snap \
     -Dsnap.logLevel=INFO -Dsnap.consoleLog=true \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
