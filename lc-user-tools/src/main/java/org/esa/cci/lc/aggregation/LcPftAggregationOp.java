@@ -48,8 +48,9 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
             source = createSubset(source, regionEnvelope);
         }
 
-        initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
         binningOp.setSourceProduct(source);
+        initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
+
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
@@ -79,6 +80,9 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
         binningOp.setOutputFormat(getOutputFormat());
+
+        Product dummyTarget = binningOp.getTargetProduct();
+        setTargetProduct(dummyTarget);
     }
 
 
