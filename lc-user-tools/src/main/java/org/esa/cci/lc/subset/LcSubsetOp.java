@@ -90,7 +90,11 @@ public class LcSubsetOp extends Operator {
             formatName = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
         } else if (id.startsWith("ESACCI-LC-L4-WB-Map-")) {
             formatName = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
-        } else {
+        } else if (id.startsWith("ESACCI-LC-L4-PFT")) {
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+            formatName = LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
+        }
+        else {
             formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
         }
         if (format.equals("lccds") || format.equals("lcpft")){
