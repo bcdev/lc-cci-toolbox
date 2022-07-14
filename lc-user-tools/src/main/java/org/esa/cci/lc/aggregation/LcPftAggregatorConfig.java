@@ -5,27 +5,16 @@ import com.bc.ceres.binding.Converter;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.core.gpf.annotations.Parameter;
 
-import java.net.URL;
 
 public class LcPftAggregatorConfig extends AggregatorConfig {
 
-    @Parameter
-    private boolean outputLCCSClasses;
+    private static final String CLASS_BAND_NAME = "pft_class";
+
     @Parameter
     private int numMajorityClasses;
     @Parameter
-    private boolean outputPFTClasses;
-    @Parameter
-    private URL userPFTConversionTable;
-    @Parameter
-    private URL additionalUserMap;
-    @Parameter
-    private boolean outputUserMapClasses;
-    @Parameter
-    private URL additionalUserMapPFTConversionTable;
-
-    @Parameter(converter = LcPftAggregatorConfig.AreaCalculatorConverter.class)
-
+    private boolean outputPftClasses;
+    @Parameter(converter = AreaCalculatorConverter.class)
     private AreaCalculator areaCalculator;
 
 
@@ -33,49 +22,15 @@ public class LcPftAggregatorConfig extends AggregatorConfig {
         super(LcPftAggregatorDescriptor.NAME);
     }
 
-    LcPftAggregatorConfig(AreaCalculator areaCalculator) {
+    LcPftAggregatorConfig( int numMajorityClasses, AreaCalculator areaCalculator) {
         super(LcPftAggregatorDescriptor.NAME);
+        //this.outputPftClasses = outputPftClasses;
+        this.numMajorityClasses = numMajorityClasses;
         this.areaCalculator = areaCalculator;
     }
 
-    private static final String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
-            "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
-
-    public String[] getSourceVarName() {
-        return listPFTVariables;
-    }
-
-
-    public URL getAdditionalUserMap() {
-        return additionalUserMap;
-    }
-
-    public URL getAdditionalUserMapPFTConversionTable() {
-        return additionalUserMapPFTConversionTable;
-    }
-
-    public AreaCalculator getAreaCalculator() {
-        return areaCalculator;
-    }
-
-    public int getNumMajorityClasses() {
-        return numMajorityClasses;
-    }
-
-    public boolean isOutputLCCSClasses() {
-        return outputLCCSClasses;
-    }
-
-    public boolean isOutputPFTClasses() {
-        return outputPFTClasses;
-    }
-
-    public boolean isOutputUserMapClasses() {
-        return outputUserMapClasses;
-    }
-
-    public URL getUserPFTConversionTable() {
-        return userPFTConversionTable;
+    public String getSourceVarName() {
+        return CLASS_BAND_NAME;
     }
 
     public static class AreaCalculatorConverter implements Converter<AreaCalculator> {

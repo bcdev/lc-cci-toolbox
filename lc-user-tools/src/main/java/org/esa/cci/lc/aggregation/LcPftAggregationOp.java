@@ -9,6 +9,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -24,6 +25,9 @@ import java.util.HashMap;
         autoWriteDisabled = true)
 public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
+    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5",
+            label = "Number of Majority Classes")
+    private int numMajorityClasses;
 
     boolean outputTargetProduct;
 
@@ -70,7 +74,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
 
-        LcPftAggregatorConfig lcPftAggregatorConfig = new LcPftAggregatorConfig(areaCalculator);
+        LcPftAggregatorConfig lcPftAggregatorConfig = new LcPftAggregatorConfig(numMajorityClasses, areaCalculator);
         AggregatorConfig[] aggregatorConfigs;
         aggregatorConfigs = new AggregatorConfig[]{lcPftAggregatorConfig};
 

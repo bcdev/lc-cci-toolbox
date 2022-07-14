@@ -122,11 +122,12 @@
         </dependency>
 
 
-        <dependency>
+       <!-- <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf-ui</artifactId>
             <version>${snap.version}</version>
         </dependency>
+    -->
 
         <dependency>
             <groupId>org.mockito</groupId>

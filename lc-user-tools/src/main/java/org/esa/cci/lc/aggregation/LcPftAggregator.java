@@ -13,24 +13,14 @@ import java.util.TreeMap;
 
 public class LcPftAggregator extends AbstractAggregator {
 
-    private static final LCCS LCCS_CLASSES = LCCS.getInstance();
     private AreaCalculator areaCalculator;
-    private boolean outputLCCSClasses;
     private int numMajorityClasses;
-    private final Product additionalUserMap;
-    private final boolean outputUserMapClasses;
-    private Lccs2PftLut pftLut;
 
 
-    public LcPftAggregator(boolean outputLCCSClasses, int numMajorityClasses,
-                           Product additionalUserMap, boolean outputUserMapClasses,
-                           AreaCalculator calculator, Lccs2PftLut pftLut, String[] spatialFeatureNames, String[] outputFeatureNames) {
-        super(LcMapAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames);
-        this.outputLCCSClasses = outputLCCSClasses;
+    public LcPftAggregator( int numMajorityClasses,
+                           AreaCalculator calculator,  String[] spatialFeatureNames, String[] outputFeatureNames) {
+        super(LcPftAggregatorDescriptor.NAME, spatialFeatureNames, spatialFeatureNames, outputFeatureNames);
         this.numMajorityClasses = numMajorityClasses;
-        this.additionalUserMap = additionalUserMap;
-        this.outputUserMapClasses = outputUserMapClasses;
-        this.pftLut = pftLut;
         this.areaCalculator = calculator;
     }
 
@@ -40,24 +30,20 @@ public class LcPftAggregator extends AbstractAggregator {
         initVector(vector, Float.NaN);
     }
 
+
+    //todo : remake this using different pft bands instead of LCCS classes
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observation, WritableVector spatialVector) {
         final double obsLatitude = observation.getLatitude();
         final double obsLongitude = observation.getLongitude();
         final float areaFraction = (float) areaCalculator.calculate(obsLongitude, obsLatitude, ctx.getIndex());
 
-        final int index = LCCS_CLASSES.getClassIndex((short) observation.get(0));
+        final int index = (int)observation.get(0);
         final float oldValue = spatialVector.get(index);
         if (Float.isNaN(oldValue)) {
             spatialVector.set(index, areaFraction);
         } else {
             spatialVector.set(index, oldValue + areaFraction);
-        }
-
-        final int userMapIndex = spatialVector.size() - 1;
-        if (Float.isNaN(spatialVector.get(userMapIndex)) && (outputUserMapClasses || additionalUserMap != null)) {
-            final float userMapValue = getUserMapValue(obsLatitude, obsLongitude);
-            spatialVector.set(userMapIndex, userMapValue);
         }
     }
 
@@ -65,15 +51,14 @@ public class LcPftAggregator extends AbstractAggregator {
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
         // normalizing the data because of aggregating with float data and the float inaccuracy
         float sum = 0;
-
-        for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
+        for (int i = 0; i < spatialVector.size(); i++) {
             float v = spatialVector.get(i);
             if (!Float.isNaN(v)) {
                 sum += v;
             }
         }
         if (sum != 1.0f) {
-            for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
+            for (int i = 0; i < spatialVector.size(); i++) {
                 spatialVector.set(i, spatialVector.get(i) / sum);
             }
         }
@@ -105,57 +90,19 @@ public class LcPftAggregator extends AbstractAggregator {
         initVector(outputVector, Float.NaN);
         SortedMap<Float, Integer> sortedMap = new TreeMap<>(Collections.reverseOrder());
         int outputVectorIndex = 0;
-        for (short i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
+        for (short i = 0; i < temporalVector.size(); i++) {
             float classArea = temporalVector.get(i);
-            if (numMajorityClasses > 0 && !Float.isNaN(classArea)) {
-                sortedMap.put(classArea, LCCS_CLASSES.getClassValue(i));
-            }
-            if (outputLCCSClasses) {
-                outputVector.set(outputVectorIndex++, classArea);
-            }
-        }
-        Integer userMapValue = Integer.MIN_VALUE;
-        if (additionalUserMap != null) {
-            final float tempUserMapValue = temporalVector.get(LCCS_CLASSES.getNumClasses());
-            if (!Float.isNaN(tempUserMapValue)) {
-                userMapValue = (int) Math.floor(tempUserMapValue);
-            }
-            if (outputUserMapClasses) {
-                outputVector.set(outputVectorIndex++, userMapValue);
+            if (!Float.isNaN(classArea)) {
+                sortedMap.put(classArea, (int) i);
             }
         }
 
-        if (numMajorityClasses > 0) {
-            Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
-            for (int i = 0; i < numMajorityClasses; i++) {
-                if (i >= classesSortedByOccurrence.length) {
-                    outputVector.set(outputVectorIndex++, Float.NaN);
-                } else {
-                    outputVector.set(outputVectorIndex++, classesSortedByOccurrence[i]);
-                }
-            }
-        }
-
-        if (pftLut != null) {
-            for (int i = 0; i < LCCS_CLASSES.getNumClasses(); i++) {
-                float classArea = temporalVector.get(i);
-                if (!Float.isNaN(classArea)) {
-                    final int lccsClass = LCCS_CLASSES.getClassValue(i);
-                    float[] classPftFactors;
-                    classPftFactors = pftLut.getConversionFactors(lccsClass, userMapValue);
-                    for (int j = 0; j < classPftFactors.length; j++) {
-                        float factor = classPftFactors[j];
-                        if (!Float.isNaN(factor)) {
-                            int currentOutputIndex = outputVectorIndex + j;
-                            float oldValue = outputVector.get(currentOutputIndex);
-                            if (Float.isNaN(oldValue)) {
-                                outputVector.set(currentOutputIndex, classArea * factor);
-                            } else {
-                                outputVector.set(currentOutputIndex, oldValue + (classArea * factor));
-                            }
-                        }
-                    }
-                }
+        Integer[] classesSortedByOccurrence = sortedMap.values().toArray(new Integer[sortedMap.size()]);
+        for (int i = 0; i < numMajorityClasses; i++) {
+            if (i >= classesSortedByOccurrence.length) {
+                outputVector.set(outputVectorIndex++, Float.NaN);
+            } else {
+                outputVector.set(outputVectorIndex++, classesSortedByOccurrence[i]);
             }
         }
     }
@@ -166,15 +113,5 @@ public class LcPftAggregator extends AbstractAggregator {
         }
     }
 
-    public float getUserMapValue(double obsLatitude, double obsLongitude) {
-        final Band firstBand = additionalUserMap.getBandAt(0);
-        final PixelPos pixelPos = firstBand.getGeoCoding().getPixelPos(new GeoPos((float) obsLatitude, (float) obsLongitude), null);
-        final int pixX = (int) Math.floor(pixelPos.getX());
-        final int pixY = (int) Math.floor(pixelPos.getY());
-        if (firstBand.getGeophysicalImage().getBounds().contains(pixX, pixY)) {
-            return firstBand.getGeophysicalImage().getData(new Rectangle(pixX, pixY, 1, 1)).getSample(pixX, pixY, 0);
-        }
-        return Float.NaN;
-    }
 
 }
