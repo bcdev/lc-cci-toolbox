@@ -4,7 +4,10 @@ package org.esa.cci.lc.aggregation;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.aggregators.AggregatorAverage;
+import org.esa.snap.binning.aggregators.AggregatorSum;
 import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.binning.operator.VariableConfig;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -31,6 +34,8 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
     boolean outputTargetProduct;
 
+    private static final String[] listPFTVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE",
+            "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE","WATER"};
 
     @Override
     public void initialize() throws OperatorException {
@@ -62,6 +67,14 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     }
 
 
+    private VariableConfig[] createVarConfigs(){
+        VariableConfig[] variableConfigs = new VariableConfig[listPFTVariables.length];
+        for (int i=0 ; i<listPFTVariables.length; i++) {
+            variableConfigs[0] = new VariableConfig(listPFTVariables[i], listPFTVariables[i], "true");
+        }
+        return variableConfigs;
+    }
+
     private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {
         Product sourceProduct = getSourceProduct();
         //final String mapType = sourceProduct.getFileLocation() != null ? LcMapMetadata.mapTypeOf(sourceProduct.getFileLocation().getName()) : "unknown";
@@ -74,12 +87,14 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
 
-        LcPftAggregatorConfig lcPftAggregatorConfig = new LcPftAggregatorConfig(numMajorityClasses, areaCalculator);
-        AggregatorConfig[] aggregatorConfigs;
-        aggregatorConfigs = new AggregatorConfig[]{lcPftAggregatorConfig};
+        binningOp.setVariableConfigs(createVarConfigs());
+
+        LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false );
 
 
-        binningOp.setAggregatorConfigs(aggregatorConfigs);
+        binningOp.setAggregatorConfigs(config);
+
+        //binningOp.setAggregatorConfigs(aggregatorConfigs);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
