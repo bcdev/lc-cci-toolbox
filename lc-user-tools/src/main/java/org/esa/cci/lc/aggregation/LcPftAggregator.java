@@ -22,7 +22,9 @@ import org.esa.snap.core.util.StringUtils;
 
 import java.util.Arrays;
 
-
+/**
+ * An aggregator that computes an average.
+ */
 class LcPftAggregator extends AbstractAggregator {
 
     private final int varIndex;
@@ -32,11 +34,11 @@ class LcPftAggregator extends AbstractAggregator {
     private String icName;
 
     public LcPftAggregator(VariableContext varCtx, String varName, double weightCoeff) {
-        this(varCtx, varName, varName, weightCoeff, false, false);
+        this(varCtx, varName, varName, weightCoeff, false, false, null);
     }
 
     public LcPftAggregator(VariableContext varCtx, String varName, String targetName, double weightCoeff, boolean outputCounts,
-                             boolean outputSums) {
+                             boolean outputSums, AreaCalculator areaCalculator) {
         super(LcPftAggregatorDescriptor.NAME,
                 createFeatureNames(varName, "sum", "sum_sq", outputCounts ? "counts" : null),
                 createFeatureNames(varName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null),
@@ -119,7 +121,11 @@ class LcPftAggregator extends AbstractAggregator {
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs,
                                   WritableVector temporalVector) {
-        float w = weightFn.eval(numSpatialObs);
+        // simply copy the data; no temporal aggregation needed
+        for (int i = 0; i < spatialVector.size(); i++) {
+            temporalVector.set(i, spatialVector.get(i));
+        }
+        /*float w = weightFn.eval(numSpatialObs);
         float sum = spatialVector.get(0);
         float sumSqr = spatialVector.get(1);
         if (!Float.isNaN(sum)) {
@@ -130,7 +136,7 @@ class LcPftAggregator extends AbstractAggregator {
                 float counts = spatialVector.get(2);
                 temporalVector.set(3, temporalVector.get(3) + counts);
             }
-        }
+        }*/
     }
 
     @Override

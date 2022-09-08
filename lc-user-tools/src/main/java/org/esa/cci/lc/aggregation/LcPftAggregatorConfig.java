@@ -23,22 +23,25 @@ class LcPftAggregatorConfig extends AggregatorConfig {
         @Parameter(defaultValue = "false",
                 description = "If true, the result will include the sum of all values.")
         Boolean outputSums;
+        @Parameter(converter = LcMapAggregatorConfig.AreaCalculatorConverter.class)
+        AreaCalculator areaCalculator;
 
         public LcPftAggregatorConfig() {
-            this(null, null, null, null, null);
+            this(null, null, null, null, null, null);
         }
 
         public LcPftAggregatorConfig(String varName) {
-            this(varName, null, null, null, null);
+            this(varName, null, null, null, null, null);
         }
 
-        public LcPftAggregatorConfig(String varName, String targetName, Double weightCoeff, Boolean outputCounts, Boolean outputSums) {
-            //AggregatorConfig.NAME;
+        public LcPftAggregatorConfig(String varName, String targetName, Double weightCoeff, Boolean outputCounts, Boolean outputSums, AreaCalculator areaCalculator) {
+            super(LcPftAggregatorDescriptor.NAME);
             this.varName = varName;
             this.targetName = targetName;
             this.weightCoeff = weightCoeff;
             this.outputCounts = outputCounts;
             this.outputSums = outputSums;
+            this.areaCalculator = areaCalculator;
         }
 }
 

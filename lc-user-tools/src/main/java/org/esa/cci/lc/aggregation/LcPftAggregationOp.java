@@ -87,24 +87,35 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
 
-        binningOp.setVariableConfigs(createVarConfigs());
-
-        LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false );
 
 
-        binningOp.setAggregatorConfigs(config);
+        LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false, areaCalculator );
+        LcPftAggregatorConfig config2 = new LcPftAggregatorConfig("BARE", "BARE", 1d, false, false, areaCalculator );
+
+        LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
+
+
+
+        binningOp.setAggregatorConfigs(configs);
 
         //binningOp.setAggregatorConfigs(aggregatorConfigs);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
-        binningOp.setOutputFormat(getOutputFormat());
+        binningOp.setOutputFormat("NetCDF4-CF");
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
     }
 
-
+    private LcPftAggregatorConfig[] createConfigs(AreaCalculator areaCalculator){
+        LcPftAggregatorConfig[] configs = new LcPftAggregatorConfig[4];
+        for (int i=0 ; i<4; i++) {
+            LcPftAggregatorConfig config = new LcPftAggregatorConfig(listPFTVariables[i], listPFTVariables[i], 1d, false, false, areaCalculator);
+            configs[i] = config;
+        }
+        return configs;
+    }
 
     private String createTypeAndID(){
 

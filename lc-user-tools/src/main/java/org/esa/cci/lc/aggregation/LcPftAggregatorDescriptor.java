@@ -1,12 +1,8 @@
 package org.esa.cci.lc.aggregation;
 
-import com.bc.ceres.binding.PropertySet;
 import org.esa.snap.binning.*;
 import org.esa.snap.core.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class LcPftAggregatorDescriptor implements AggregatorDescriptor {
 
@@ -25,7 +21,8 @@ public class LcPftAggregatorDescriptor implements AggregatorDescriptor {
             double weightCoeff = config.weightCoeff != null ? config.weightCoeff : 0.0;
             boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
             boolean outputSums = config.outputSums != null ? config.outputSums : false;
-            return new LcPftAggregator(varCtx, config.varName, targetName, weightCoeff, outputCounts, outputSums);
+            AreaCalculator areaCalculator = config.areaCalculator;
+            return new LcPftAggregator(varCtx, config.varName, targetName, weightCoeff, outputCounts, outputSums, areaCalculator);
         }
 
         @Override
