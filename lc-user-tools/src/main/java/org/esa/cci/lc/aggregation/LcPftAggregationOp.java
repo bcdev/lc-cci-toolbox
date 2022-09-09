@@ -109,8 +109,8 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     }
 
     private LcPftAggregatorConfig[] createConfigs(AreaCalculator areaCalculator){
-        LcPftAggregatorConfig[] configs = new LcPftAggregatorConfig[4];
-        for (int i=0 ; i<4; i++) {
+        LcPftAggregatorConfig[] configs = new LcPftAggregatorConfig[listPFTVariables.length];
+        for (int i=0 ; i<listPFTVariables.length; i++) {
             LcPftAggregatorConfig config = new LcPftAggregatorConfig(listPFTVariables[i], listPFTVariables[i], 1d, false, false, areaCalculator);
             configs[i] = config;
         }
