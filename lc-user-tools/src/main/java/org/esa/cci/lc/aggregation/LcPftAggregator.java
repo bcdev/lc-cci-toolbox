@@ -32,19 +32,21 @@ class LcPftAggregator extends AbstractAggregator {
     private final boolean outputCounts;
     private final boolean outputSums;
     private String icName;
-
     public LcPftAggregator(VariableContext varCtx, String varName, double weightCoeff) {
         this(varCtx, varName, varName, weightCoeff, false, false, null);
     }
 
     public LcPftAggregator(VariableContext varCtx, String varName, String targetName, double weightCoeff, boolean outputCounts,
                              boolean outputSums, AreaCalculator areaCalculator) {
+
         super(LcPftAggregatorDescriptor.NAME,
                 createFeatureNames(varName, "sum", "sum_sq", outputCounts ? "counts" : null),
                 createFeatureNames(varName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null),
-                outputSums ?
-                        createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
-                        createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null)
+                //outputSums ?
+                //        createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
+                        //createFeatureNames(targetName, "mean-1", "sigma-1", outputCounts ? "counts" : null)
+                        new String[]{targetName,targetName+"_sigma"}
+
         );
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
@@ -121,10 +123,6 @@ class LcPftAggregator extends AbstractAggregator {
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs,
                                   WritableVector temporalVector) {
-        // simply copy the data; no temporal aggregation needed
-        /*for (int i = 0; i < spatialVector.size(); i++) {
-            temporalVector.set(i, spatialVector.get(i));
-        }*/
         float w = weightFn.eval(numSpatialObs);
         float sum = spatialVector.get(0);
         float sumSqr = spatialVector.get(1);
@@ -183,6 +181,7 @@ class LcPftAggregator extends AbstractAggregator {
                 outputVector.set(index, 0.0f);
             }
         }
+
     }
 
     private void initNumInvalids(BinContext ctx) {

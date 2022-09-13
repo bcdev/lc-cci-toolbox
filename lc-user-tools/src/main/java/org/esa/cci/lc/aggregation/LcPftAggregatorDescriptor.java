@@ -42,9 +42,7 @@ public class LcPftAggregatorDescriptor implements AggregatorDescriptor {
             String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
             boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
             boolean outputSums = config.outputSums != null ? config.outputSums : false;
-            return outputSums ?
-                    AbstractAggregator.createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
-                    AbstractAggregator.createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null);
+            return AbstractAggregator.createFeatureNames(targetName, "mean-2", "sigma-2", outputCounts ? "counts" : null);
         }
 }
 

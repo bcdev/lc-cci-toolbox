@@ -64,6 +64,9 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
 
+
+
+        //binningOp.setOutputFormat("NetCDF4-LC-CDS");
     }
 
 
@@ -92,8 +95,8 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false, areaCalculator );
         LcPftAggregatorConfig config2 = new LcPftAggregatorConfig("BARE", "BARE", 1d, false, false, areaCalculator );
 
-        LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
-
+        //LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
+        LcPftAggregatorConfig[] configs = {config};
 
 
         binningOp.setAggregatorConfigs(configs);
@@ -105,7 +108,9 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputFormat("NetCDF4-CF");
 
         Product dummyTarget = binningOp.getTargetProduct();
+        dummyTarget.removeBand(dummyTarget.getBand("num_obs"));
         setTargetProduct(dummyTarget);
+
     }
 
     private LcPftAggregatorConfig[] createConfigs(AreaCalculator areaCalculator){
