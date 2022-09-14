@@ -86,8 +86,17 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
             //String path = product.getFileLocation().getAbsolutePath();
-            String path = element.getAttributeString("parent_path");
-
+            String path;
+            if (element == null) {
+                path = product.getName();
+                MetadataElement globalAttributes = new MetadataElement("global_attributes");
+                product.getMetadataRoot().addElement(globalAttributes);
+                element = product.getMetadataRoot().getElement("global_attributes");
+                element.setAttributeString("type","PFT_product" );
+            }
+            else {
+                path = element.getAttributeString("parent_path");
+            }
             if (! path.endsWith(".tif") ) {
                 onlyReader = NetcdfFileWriter.openExisting(path);
                 //add dimensions
@@ -136,7 +145,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 writePP2GlobalAttribute(writeable, element);
             }
             else if (element.getAttributeString("type").equals("PFT_product") || element.getAttributeString("type").equals("ESACCI-LC-L4-PFT-Map-300m-P1Y") ) {
-                writePFTGlobalAttribute(writeable, element);
+                //writePFTGlobalAttribute(writeable, element);
             }
 
         }
@@ -775,15 +784,13 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable,element,"citation","Harper et al., submitted. A 29-year time series of annual 300-metre resolution plant functional type maps for climate models ." +
                 " Kandice L. Harper, Céline Lamarche, Andrew Hartley, Philippe Peylin, Catherine Ottlé, Vladislav Bastrikov," +
                 " Rodrigo San Martín, Sylvia I. Bohnenstengel, Grit Kirches, Martin Boettcher, Roman Shevchuk, Carsten Brockmann, Pierre Defourny. Dataset doi: doi = \"10.5285/26a0f46c95ee4c29b5c650b129aab788.");
-        addGlobalAttribute(writeable,element,"input_data","CCI medium-resolution land cover time series. (Defourny et al., submitted)." +
-                " Surface water product Pekel et al. (2016)." +
-                " Tree canopy cover product Hansen et al. (2013). " +
-                " Tree canopy height product Potapov et al. (2021). " +
-                " Built-up product  (Pesaresi et al., 2013 - GHSL). " +
-                " Köppen-Geiger climate zone product Beck et al. (2018). " +
-                " Landform product (Sayre et al. (2014)). " +
-                " IMAGE world regions product. Available at https://models.pbl.nl/image/index.php/Region_classification_map" +
-                " CCI medium-resolution water body product v4.0. (Lamarche et al., 2017).");
+        addGlobalAttribute(writeable,element,"input_data","CCI medium-resolution land cover time series (Defourny et al., submitted)." +
+                " Surface water product (Pekel et al., 2016). " +
+                "Tree canopy cover product (Hansen et al., 2013). " +
+                " Tree canopy height product (Potapov et al., 2021).  Built-up product Global Human Settlement Layer (Pesaresi et al., 2013)." +
+                "  Köppen-Geiger climate zone product (Beck et al. 2018).  Landform product (Sayre et al., 2014). " +
+                " IMAGE world regions product (Stehfest et al., 2014). CCI medium-resolution water body product v4.1. (Lamarche et al., 2017)." +
+                " Detailed references can be found in the paper indicated in NC_GLOBAL");
         addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable,element,"Conventions","CF-1.6");

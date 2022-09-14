@@ -2,12 +2,18 @@ package org.esa.cci.lc.aggregation;
 
 
 import org.esa.cci.lc.io.LcBinWriter;
+import org.esa.cci.lc.io.LcCdsBinWriter;
+import org.esa.cci.lc.util.PlanetaryGridName;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorSum;
 import org.esa.snap.binning.operator.BinningOp;
 import org.esa.snap.binning.operator.VariableConfig;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.support.SEAGrid;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -33,6 +39,8 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     private int numMajorityClasses;
 
     boolean outputTargetProduct;
+    private  HashMap<String, String> lcProperties = new HashMap<>();
+    private static final int METER_PER_DEGREE_At_EQUATOR = 111300;
 
     private static final String[] listPFTVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE",
             "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE","WATER"};
@@ -41,9 +49,14 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     public void initialize() throws OperatorException {
         super.initialize();
         Product source = getSourceProduct();
-        final String planetaryGridClassName = getPlanetaryGridClassName();
+        final String planetaryGridClassName = PlateCarreeGrid.class.getName();
 
-        final HashMap<String, String> lcProperties = getLcProperties();
+        //final HashMap<String, String> lcProperties = getLcProperties();
+        getSourceProduct().getMetadataRoot().getElement("Global_Attributes").setAttributeString("parent_path",getSourceProduct().getFileLocation().getAbsolutePath());;
+        final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
+        addMetadataToLcProperties(globalAttributes);
+        addGridNameToLcProperties(planetaryGridClassName);
+
         String id = createTypeAndID();
         BinningOp binningOp;
         try {
@@ -62,11 +75,10 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
-        binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+        //binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+        //result.getMetadataRoot().getElement("global_attributes").setAttributeString("type", "PFT_product");
+        binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
 
-
-
-        //binningOp.setOutputFormat("NetCDF4-LC-CDS");
     }
 
 
@@ -105,12 +117,12 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
-        binningOp.setOutputFormat("NetCDF4-CF");
-
+        binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        //binningOp.setOutputFormat("NetCDF4-CF");
+        sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
         Product dummyTarget = binningOp.getTargetProduct();
         dummyTarget.removeBand(dummyTarget.getBand("num_obs"));
         setTargetProduct(dummyTarget);
-
     }
 
     private LcPftAggregatorConfig[] createConfigs(AreaCalculator areaCalculator){
@@ -123,8 +135,42 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     }
 
     private String createTypeAndID(){
+        String id = getSourceProduct().getName().replace("ESACCI-LC-L4-PFT-Map-300m","ESACCI-LC-L4-PFT-Map-300m-aggregated");
+        return id;
+    }
 
-        return "ID";
+    @Override
+    protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
+        String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
+        String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
+        //lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
+        //lcProperties.put("spatialResolutionNominal", globalAttributes.getAttributeString("spatial_resolution"));
+        //lcProperties.put("temporalResolution", timeCoverageResolution.substring(1, timeCoverageResolution.length() - 1));
+        //lcProperties.put("startTime", globalAttributes.getAttributeString("time_coverage_start"));
+        //lcProperties.put("endTime", globalAttributes.getAttributeString("time_coverage_end"));
+        //lcProperties.put("version", globalAttributes.getAttributeString("product_version"));
+        //lcProperties.put("source", globalAttributes.getAttributeString("source"));
+        lcProperties.put("history", globalAttributes.getAttributeString("history"));
+        float resolutionDegree = getTargetSpatialResolution();
+        lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
+        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
+        ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (regionEnvelope != null) {
+            lcProperties.put("latMin", String.valueOf(regionEnvelope.getMinimum(1)));
+            lcProperties.put("latMax", String.valueOf(regionEnvelope.getMaximum(1)));
+            lcProperties.put("lonMin", String.valueOf(regionEnvelope.getMinimum(0)));
+            lcProperties.put("lonMax", String.valueOf(regionEnvelope.getMaximum(0)));
+        } else {
+            lcProperties.put("latMin", globalAttributes.getAttributeString("geospatial_lat_min"));
+            lcProperties.put("latMax", globalAttributes.getAttributeString("geospatial_lat_max"));
+            lcProperties.put("lonMin", globalAttributes.getAttributeString("geospatial_lon_min"));
+            lcProperties.put("lonMax", globalAttributes.getAttributeString("geospatial_lon_max"));
+        }
+        lcProperties.put("parent_path",getSourceProduct().getProduct().getFileLocation().getAbsolutePath());
+    }
+
+    private float getTargetSpatialResolution() {
+        return 180.0f / getNumRows();
     }
 
 
