@@ -51,7 +51,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         Product source = getSourceProduct();
         final String planetaryGridClassName = PlateCarreeGrid.class.getName();
 
-        //final HashMap<String, String> lcProperties = getLcProperties();
+        final HashMap<String, String> lcProperties = getLcProperties();
         getSourceProduct().getMetadataRoot().getElement("Global_Attributes").setAttributeString("parent_path",getSourceProduct().getFileLocation().getAbsolutePath());;
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
@@ -75,8 +75,6 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
-        //binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
-        //result.getMetadataRoot().getElement("global_attributes").setAttributeString("type", "PFT_product");
         binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
 
     }
@@ -92,7 +90,6 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
     private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {
         Product sourceProduct = getSourceProduct();
-        //final String mapType = sourceProduct.getFileLocation() != null ? LcMapMetadata.mapTypeOf(sourceProduct.getFileLocation().getName()) : "unknown";
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         final double sourceMapResolutionX = 180.0 / sceneHeight;
@@ -121,7 +118,6 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         //binningOp.setOutputFormat("NetCDF4-CF");
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
         Product dummyTarget = binningOp.getTargetProduct();
-        dummyTarget.removeBand(dummyTarget.getBand("num_obs"));
         setTargetProduct(dummyTarget);
     }
 

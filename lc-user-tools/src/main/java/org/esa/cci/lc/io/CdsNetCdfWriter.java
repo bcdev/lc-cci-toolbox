@@ -20,6 +20,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.AbstractNetCdfWriterPlugIn;
 import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
@@ -59,6 +60,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
 
 
         if (!sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
+            SystemUtils.LOG.warning(variableName+" writing...");
             if (shallWriteVariable(variableName)  ) {
                 writeBandNoShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             } else if (variableName.contains("burned_area_in_vegetation_class")) {

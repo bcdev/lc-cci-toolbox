@@ -12,6 +12,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,8 +33,14 @@ public class CdsVariableWriter extends ProfilePartIO {
         MetadataElement element = p.getMetadataRoot().getElement("global_attributes");
         String path = element.getAttributeString("parent_path");
 
-        Double latMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_min");
-        Double latMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_max");
+        Double latMin = -90d;
+        Double latMax = 90d;
+        if (  p.getMetadataRoot().getElement("global_attributes").containsAttribute ("geospatial_lat_min") ) {
+             latMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_min");
+        }
+        if (p.getMetadataRoot().getElement("global_attributes").containsAttribute ("geospatial_lat_max")) {
+            latMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lat_max");
+        }
         if (element.containsAttribute("subsetted") || path.endsWith(".tif")) {
              lonMin = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_min");
              lonMax = p.getMetadataRoot().getElement("global_attributes").getAttributeDouble("geospatial_lon_max");

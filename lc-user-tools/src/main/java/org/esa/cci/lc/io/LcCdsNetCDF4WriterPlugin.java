@@ -87,12 +87,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             NetcdfFileWriter writer = writeable.getWriter();
             //String path = product.getFileLocation().getAbsolutePath();
             String path;
-            if (element == null) {
-                path = product.getName();
+            //case of aggregated PFT
+            if (element == null && product.getName().contains("aggregated") && product.getName().contains("PFT") ) {
+                path = product.getName().replace("ESACCI-LC-L4-PFT-Map-300m-aggregated","ESACCI-LC-L4-PFT-Map-300m");
                 MetadataElement globalAttributes = new MetadataElement("global_attributes");
                 product.getMetadataRoot().addElement(globalAttributes);
                 element = product.getMetadataRoot().getElement("global_attributes");
-                element.setAttributeString("type","PFT_product" );
+                setAggregatedPFTAttributes(writeable, element, path);
+                //product.removeBand(product.getBand("num_obs"));
             }
             else {
                 path = element.getAttributeString("parent_path");
@@ -198,8 +200,15 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
                     Band[] bands = element.getProduct().getBands();
                     if (!bands[0].getName().equals("JD")) {
-                        for ( Band band : bands) {
-                            addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.BYTE,tileSizePixel, element);
+                        if ( element.getName().contains("aggregated") ) {
+                            for ( Band band : bands) {
+                                addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.DOUBLE,tileSizePixel, element);
+                            }
+                        }
+                        else {
+                            for (Band band : bands) {
+                                addCustomVariable(ncFile, band.getName(), "time lat lon", DataType.BYTE, tileSizePixel, element);
+                            }
                         }
                         addCustomVariable(ncFile, "lon", "lon", DataType.DOUBLE, null, element);
                         addCustomVariable(ncFile, "lat", "lat", DataType.DOUBLE, null, element);
@@ -488,11 +497,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             if (element.containsAttribute(name) && value != null) {
                 writeable.addGlobalAttribute(name, value);
                 SystemUtils.LOG.warning("You are going to rewrite global attribute " + name + " original value with the " + value + " value");
+                element.setAttributeString(name,value);
             } else if (element.containsAttribute(name) && value == null) {
                 value = element.getAttributeString(name);
                 writeable.addGlobalAttribute(name, value);
+                element.setAttributeString(name,value);
             } else if (!element.containsAttribute(name) && value != null) {
                 writeable.addGlobalAttribute(name, value);
+                element.setAttributeString(name,value);
             } else {
                 SystemUtils.LOG.warning("Global attribute " + name + " does not exist in the original product. Nothing is written");
             }
@@ -767,7 +779,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
     }
 
-    private void writePFTGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+     private void writePFTGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
         final Dimension tileSize = new Dimension(2025, 2025);
         String timeYear = element.getAttributeString("id").substring(30,34);
         //timeYear = "2010";
@@ -830,5 +842,12 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "TileSize", LcHelper.format(tileSize));
         addGlobalAttribute(writeable, element, "product_version", "2.0.8");
 
+    }
+
+    private void setAggregatedPFTAttributes(NFileWriteable writeable, MetadataElement element, String path) throws IOException{
+        addGlobalAttribute(writeable,element,"type","PFT_product" );
+        addGlobalAttribute(writeable,element,"parent_path",path );
+        addGlobalAttribute(writeable,element,"id",path );
+        writePFTGlobalAttribute(writeable,element);
     }
 }
