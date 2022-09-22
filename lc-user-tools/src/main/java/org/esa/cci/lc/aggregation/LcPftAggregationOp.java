@@ -34,16 +34,15 @@ import java.util.HashMap;
         autoWriteDisabled = true)
 public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
-    @Parameter(description = "The number of majority classes generated and added to the output.", defaultValue = "5",
-            label = "Number of Majority Classes")
-    private int numMajorityClasses;
+    @Parameter(defaultValue = "2160")
+    private int numRows;
 
     boolean outputTargetProduct;
     private  HashMap<String, String> lcProperties = new HashMap<>();
     private static final int METER_PER_DEGREE_At_EQUATOR = 111300;
 
-    private static final String[] listPFTVariables = {"BARE","BUILT","GRASS_MAN","GRASS_NAT","SHRUBS_BD","SHRUBS_BE","SHRUBS_ND","SHRUBS_NE",
-            "SNOWICE","TREES_BD","TREES_BE","TREES_ND","TREES_NE","WATER"};
+    private static final String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
+            "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
 
     @Override
     public void initialize() throws OperatorException {
@@ -54,7 +53,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         final HashMap<String, String> lcProperties = getLcProperties();
         getSourceProduct().getMetadataRoot().getElement("Global_Attributes").setAttributeString("parent_path",getSourceProduct().getFileLocation().getAbsolutePath());;
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
-        addMetadataToLcProperties(globalAttributes);
+        //addMetadataToLcProperties(globalAttributes);
         addGridNameToLcProperties(planetaryGridClassName);
 
         String id = createTypeAndID();
@@ -101,11 +100,12 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
 
 
-        LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false, areaCalculator );
-        LcPftAggregatorConfig config2 = new LcPftAggregatorConfig("BARE", "BARE", 1d, false, false, areaCalculator );
+        //LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false, areaCalculator );
+        //LcPftAggregatorConfig config2 = new LcPftAggregatorConfig("BARE", "BARE", 1d, false, false, areaCalculator );
+        //LcPftAggregatorConfig[] configs = {config};
 
-        //LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
-        LcPftAggregatorConfig[] configs = {config};
+        LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
+
 
 
         binningOp.setAggregatorConfigs(configs);
@@ -114,7 +114,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
-        binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        binningOp.setOutputFormat("NetCDF4-LC-PFT-Aggregate");
         //binningOp.setOutputFormat("NetCDF4-CF");
         sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
         Product dummyTarget = binningOp.getTargetProduct();
@@ -137,8 +137,8 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
     @Override
     protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
-        String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
-        String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
+        //String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
+        //String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
         //lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
         //lcProperties.put("spatialResolutionNominal", globalAttributes.getAttributeString("spatial_resolution"));
         //lcProperties.put("temporalResolution", timeCoverageResolution.substring(1, timeCoverageResolution.length() - 1));
