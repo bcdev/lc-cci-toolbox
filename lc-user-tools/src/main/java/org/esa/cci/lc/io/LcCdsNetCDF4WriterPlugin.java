@@ -86,8 +86,19 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
             //String path = product.getFileLocation().getAbsolutePath();
-            String path = element.getAttributeString("parent_path");
-
+            String path;
+            //case of aggregated PFT
+            if (element == null && product.getName().contains("aggregated") && product.getName().contains("PFT") ) {
+                path = product.getName().replace("ESACCI-LC-L4-PFT-Map-300m-aggregated","ESACCI-LC-L4-PFT-Map-300m");
+                MetadataElement globalAttributes = new MetadataElement("global_attributes");
+                product.getMetadataRoot().addElement(globalAttributes);
+                element = product.getMetadataRoot().getElement("global_attributes");
+                setAggregatedPFTAttributes(writeable, element, path);
+                //product.removeBand(product.getBand("num_obs"));
+            }
+            else {
+                path = element.getAttributeString("parent_path");
+            }
             if (! path.endsWith(".tif") ) {
                 onlyReader = NetcdfFileWriter.openExisting(path);
                 //add dimensions
@@ -136,7 +147,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 writePP2GlobalAttribute(writeable, element);
             }
             else if (element.getAttributeString("type").equals("PFT_product") || element.getAttributeString("type").equals("ESACCI-LC-L4-PFT-Map-300m-P1Y") ) {
-                writePFTGlobalAttribute(writeable, element);
+                //writePFTGlobalAttribute(writeable, element);
             }
 
         }
@@ -189,8 +200,15 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                     final Dimension tileSizePixel = new Dimension(2025, 2025);
                     Band[] bands = element.getProduct().getBands();
                     if (!bands[0].getName().equals("JD")) {
-                        for ( Band band : bands) {
-                            addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.BYTE,tileSizePixel, element);
+                        if ( element.getName().contains("aggregated") ) {
+                            for ( Band band : bands) {
+                                addCustomVariable(ncFile,band.getName(),"time lat lon", DataType.DOUBLE,tileSizePixel, element);
+                            }
+                        }
+                        else {
+                            for (Band band : bands) {
+                                addCustomVariable(ncFile, band.getName(), "time lat lon", DataType.BYTE, tileSizePixel, element);
+                            }
                         }
                         addCustomVariable(ncFile, "lon", "lon", DataType.DOUBLE, null, element);
                         addCustomVariable(ncFile, "lat", "lat", DataType.DOUBLE, null, element);
@@ -223,8 +241,8 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
    public static void addCustomVariable(NFileWriteable ncFile, String variableName, String dimString, DataType dataType,Dimension tileSize, MetadataElement element) throws IOException {
         //needed to initialize variables which didnt exist before.
-        String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
-                "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
+        String[] listPFTVariables = {"WATER","BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE",
+               "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","LAND","WATER_OCEAN"};
 
         NVariable nVariable = ncFile.addVariable(variableName, dataType, dataType.isUnsigned(), tileSize, dimString);
         if (variableName.equals("time")) {
@@ -479,11 +497,14 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             if (element.containsAttribute(name) && value != null) {
                 writeable.addGlobalAttribute(name, value);
                 SystemUtils.LOG.warning("You are going to rewrite global attribute " + name + " original value with the " + value + " value");
+                element.setAttributeString(name,value);
             } else if (element.containsAttribute(name) && value == null) {
                 value = element.getAttributeString(name);
                 writeable.addGlobalAttribute(name, value);
+                element.setAttributeString(name,value);
             } else if (!element.containsAttribute(name) && value != null) {
                 writeable.addGlobalAttribute(name, value);
+                element.setAttributeString(name,value);
             } else {
                 SystemUtils.LOG.warning("Global attribute " + name + " does not exist in the original product. Nothing is written");
             }
@@ -758,7 +779,7 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
     }
 
-    private void writePFTGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
+     private void writePFTGlobalAttribute(NFileWriteable writeable, MetadataElement element) throws IOException {
         final Dimension tileSize = new Dimension(2025, 2025);
         String timeYear = element.getAttributeString("id").substring(30,34);
         //timeYear = "2010";
@@ -775,15 +796,13 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable,element,"citation","Harper et al., submitted. A 29-year time series of annual 300-metre resolution plant functional type maps for climate models ." +
                 " Kandice L. Harper, Céline Lamarche, Andrew Hartley, Philippe Peylin, Catherine Ottlé, Vladislav Bastrikov," +
                 " Rodrigo San Martín, Sylvia I. Bohnenstengel, Grit Kirches, Martin Boettcher, Roman Shevchuk, Carsten Brockmann, Pierre Defourny. Dataset doi: doi = \"10.5285/26a0f46c95ee4c29b5c650b129aab788.");
-        addGlobalAttribute(writeable,element,"input_data","CCI medium-resolution land cover time series. (Defourny et al., submitted)." +
-                " Surface water product Pekel et al. (2016)." +
-                " Tree canopy cover product Hansen et al. (2013). " +
-                " Tree canopy height product Potapov et al. (2021). " +
-                " Built-up product  (Pesaresi et al., 2013 - GHSL). " +
-                " Köppen-Geiger climate zone product Beck et al. (2018). " +
-                " Landform product (Sayre et al. (2014)). " +
-                " IMAGE world regions product. Available at https://models.pbl.nl/image/index.php/Region_classification_map" +
-                " CCI medium-resolution water body product v4.0. (Lamarche et al., 2017).");
+        addGlobalAttribute(writeable,element,"input_data","CCI medium-resolution land cover time series (Defourny et al., submitted)." +
+                " Surface water product (Pekel et al., 2016). " +
+                "Tree canopy cover product (Hansen et al., 2013). " +
+                " Tree canopy height product (Potapov et al., 2021).  Built-up product Global Human Settlement Layer (Pesaresi et al., 2013)." +
+                "  Köppen-Geiger climate zone product (Beck et al. 2018).  Landform product (Sayre et al., 2014). " +
+                " IMAGE world regions product (Stehfest et al., 2014). CCI medium-resolution water body product v4.1. (Lamarche et al., 2017)." +
+                " Detailed references can be found in the paper indicated in NC_GLOBAL");
         addGlobalAttribute(writeable,element,"institution","Universite catholique de Louvain, UCLouvain-Geomatics (Belgium)");
         addGlobalAttribute(writeable,element,"contact","contact@esa-landcover-cci.org");
         addGlobalAttribute(writeable,element,"Conventions","CF-1.6");
@@ -823,5 +842,12 @@ public class LcCdsNetCDF4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "TileSize", LcHelper.format(tileSize));
         addGlobalAttribute(writeable, element, "product_version", "2.0.8");
 
+    }
+
+    private void setAggregatedPFTAttributes(NFileWriteable writeable, MetadataElement element, String path) throws IOException{
+        addGlobalAttribute(writeable,element,"type","PFT_product" );
+        addGlobalAttribute(writeable,element,"parent_path",path );
+        addGlobalAttribute(writeable,element,"id",path );
+        writePFTGlobalAttribute(writeable,element);
     }
 }

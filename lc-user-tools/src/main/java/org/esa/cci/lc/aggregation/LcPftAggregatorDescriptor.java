@@ -1,75 +1,49 @@
 package org.esa.cci.lc.aggregation;
 
-import com.bc.ceres.binding.PropertySet;
-import org.esa.snap.binning.Aggregator;
-import org.esa.snap.binning.AggregatorConfig;
-import org.esa.snap.binning.AggregatorDescriptor;
-import org.esa.snap.binning.VariableContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.esa.snap.binning.*;
+import org.esa.snap.core.util.StringUtils;
+
 
 public class LcPftAggregatorDescriptor implements AggregatorDescriptor {
 
-    private static final LCCS LCCS_CLASSES = LCCS.getInstance();
 
-    public static final String NAME = "LC_PFT_AGGR";
-    private static final String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
-            "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
+        public static final String NAME = "PFT_AGG";
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public AggregatorConfig createConfig() {
-        return new LcPftAggregatorConfig();
-    }
-
-    @Override
-    public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-
-        PropertySet propertySet = aggregatorConfig.asPropertySet();
-        int numMajorityClasses = propertySet.getValue("numMajorityClasses");
-        AreaCalculator areaCalculator = propertySet.getValue("areaCalculator");
-
-        String[] spatialFeatureNames;
-        spatialFeatureNames = createSpatialFeatureNames();
-
-
-        String[] outputFeatureNames = createOutputFeatureNames();
-        return new LcPftAggregator(numMajorityClasses, areaCalculator, spatialFeatureNames, outputFeatureNames);
-    }
-
-    @Override
-    public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
-        if (!(aggregatorConfig instanceof LcPftAggregatorConfig)) {
-            throw new IllegalStateException("!(aggregatorConfig instanceof LcMapAggregatorConfig)");
+        @Override
+        public String getName() {
+            return NAME;
         }
-        return listPFTVariables;
-    }
 
-    @Override
-    public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
-        return createSpatialFeatureNames();
-    }
-
-    private static String[] createSpatialFeatureNames() {
-        String[] spatialFeatureNames = new String[listPFTVariables.length];
-
-        for (int i = 0; i < listPFTVariables.length; i++) {
-            spatialFeatureNames[i] = "class_area_" + listPFTVariables[i];
+        @Override
+        public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
+            LcPftAggregatorConfig config = (LcPftAggregatorConfig) aggregatorConfig;
+            String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
+            double weightCoeff = config.weightCoeff != null ? config.weightCoeff : 0.0;
+            boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
+            boolean outputSums = config.outputSums != null ? config.outputSums : false;
+            AreaCalculator areaCalculator = config.areaCalculator;
+            return new LcPftAggregator(varCtx, config.varName, targetName, weightCoeff, outputCounts, outputSums, areaCalculator);
         }
-        return spatialFeatureNames;
-    }
 
-    private static String[] createOutputFeatureNames() {
-        List<String> outputFeatureNames = new ArrayList<>();
+        @Override
+        public AggregatorConfig createConfig() {
+            return new LcPftAggregatorConfig();
+        }
 
-        outputFeatureNames.addAll(Arrays.asList(listPFTVariables));
+        @Override
+        public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
+            LcPftAggregatorConfig config = (LcPftAggregatorConfig) aggregatorConfig;
+            return new String[]{config.varName};
+        }
 
-        return outputFeatureNames.toArray(new String[outputFeatureNames.size()]);
-    }
-
+        @Override
+        public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
+            LcPftAggregatorConfig config = (LcPftAggregatorConfig) aggregatorConfig;
+            String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
+            boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
+            boolean outputSums = config.outputSums != null ? config.outputSums : false;
+            return AbstractAggregator.createFeatureNames(targetName, "mean-2", "sigma-2", outputCounts ? "counts" : null);
+        }
 }
+
+
