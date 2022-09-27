@@ -85,16 +85,14 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             NetcdfFileWriter onlyReader;
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
-            //String path = product.getFileLocation().getAbsolutePath();
             String path;
             //case of aggregated PFT
             if (element == null && product.getName().contains("aggregated") && product.getName().contains("PFT") ) {
-                path = product.getName().replace("ESACCI-LC-L4-PFT-Map-300m-aggregated","ESACCI-LC-L4-PFT-Map-300m");
+                path = product.getName().replace("ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated","ESACCI-LC-L4-PFT-Map-300m-P1Y");
                 MetadataElement globalAttributes = new MetadataElement("global_attributes");
                 product.getMetadataRoot().addElement(globalAttributes);
                 element = product.getMetadataRoot().getElement("global_attributes");
                 setAggregatedPFTAttributes(writeable, element, path);
-                //product.removeBand(product.getBand("num_obs"));
             }
             else {
                 path = element.getAttributeString("parent_path");
