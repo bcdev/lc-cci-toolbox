@@ -131,7 +131,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     }
 
     private String createTypeAndID(){
-        String id = getSourceProduct().getName().replace("ESACCI-LC-L4-PFT-Map-300m","ESACCI-LC-L4-PFT-Map-300m-aggregated");
+        String id = getSourceProduct().getName().replace("ESACCI-LC-L4-PFT-Map-300m-P1Y","ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated");
         return id;
     }
 
