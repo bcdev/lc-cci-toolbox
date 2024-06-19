@@ -309,3 +309,26 @@ Output File Naming Convention
             Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-ASIA-20010101-v2.nc
             Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-USER_REGION-20010101-v2.nc
 
+
+
+      300m-PFT Product Aggregation
+      ~~~~~~~~~~~~~~~~~~~
+        aggregate-pft(.sh/.bat) -PnumRows=<integer>
+                         -PtargetDir=<dirPath> <sourceFilePath>
+
+        Parameter Description:
+        -PnumRows=<integer>
+                        Specifies the number of rows for the specified grid.
+                        Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
+                        ~9.8km/pixel in the target product.
+
+
+        Example might look like:
+
+            aggregate-pft.sh ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc -PnumRows=100
+
+        Examples Aggregation Result:
+           Input  : ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
+
+           Output : ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated-2007-v2.0.8.nc
+           ~~~~~~~~~~~~~~~~~~~~
