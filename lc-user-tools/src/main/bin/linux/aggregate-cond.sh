@@ -16,6 +16,6 @@ exec java -Xmx8G -Dceres.context=snap \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
     -Dsnap.dataio.reader.tileHeight=2025 \
     -Dsnap.dataio.reader.tileWidth=2025 \
-    -Dsnap.binning.sliceHeight=64 \
+    -Dsnap.binning.sliceHeight=1024 \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
     LCCCI.Aggregate.Cond -e -c 1024M $@

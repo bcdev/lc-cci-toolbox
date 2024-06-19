@@ -60,7 +60,7 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
 
 
         if (!sourceBand.getProduct().getMetadataRoot().getElement("global_attributes").getAttributeString("parent_path").endsWith(".tif")) {
-            SystemUtils.LOG.warning(variableName+" writing...");
+            //SystemUtils.LOG.warning(variableName+" writing...");
             if (shallWriteVariable(variableName)  ) {
                 writeBandNoShift(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm, variableName);
             } else if (variableName.contains("burned_area_in_vegetation_class")) {
