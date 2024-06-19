@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>4.6</version>
+    <version>5.0</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,11 @@
 
     <changelog>
         <![CDATA[
+    Changes in 5.0:
+    - fixed tilesize of input products (modification in shell scripts)
+    - fixed C3S writer plugin
+    - added handling of PFT products for subset and aggregation
+    - additional classes for PFT aggregator
     Changes in 4.6:
     - rebased SNAP dependency on SNAP-8.0.0
     - fixed issues with LC filenames

@@ -20,7 +20,7 @@ import java.io.File;
 
 @OperatorMetadata(
         alias = "LCCCI.Subset",
-        version = "3.10",
+        version = "5.0",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
         description = "Allows to subset LC map and condition products.",
