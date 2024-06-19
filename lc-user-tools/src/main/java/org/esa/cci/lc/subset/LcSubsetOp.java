@@ -93,6 +93,9 @@ public class LcSubsetOp extends Operator {
         } else if (id.startsWith("ESACCI-LC-L4-PFT")) {
             subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
             formatName = LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
+        } else if (id.startsWith("C3S-LC-L4-LCCS-Map")) {
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+            formatName = LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
         }
         else {
             formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;

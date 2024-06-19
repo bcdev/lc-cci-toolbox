@@ -6,8 +6,6 @@ import org.esa.cci.lc.io.LcCdsBinWriter;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.PlanetaryGrid;
-import org.esa.snap.binning.aggregators.AggregatorAverage;
-import org.esa.snap.binning.aggregators.AggregatorSum;
 import org.esa.snap.binning.operator.BinningOp;
 import org.esa.snap.binning.operator.VariableConfig;
 import org.esa.snap.binning.support.PlateCarreeGrid;

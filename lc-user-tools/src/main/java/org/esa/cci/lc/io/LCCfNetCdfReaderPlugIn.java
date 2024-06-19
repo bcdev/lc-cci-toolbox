@@ -64,7 +64,8 @@ public class LCCfNetCdfReaderPlugIn extends CfNetCdfReaderPlugIn {
         List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
         for (Attribute globalAttribute : globalAttributes) {
             if (globalAttribute.getShortName().equals(ATTRIBUTE_NAME_TYPE)) {
-                if (globalAttribute.getStringValue().startsWith("ESACCI-LC-L4")) {
+                if (globalAttribute.getStringValue().startsWith("ESACCI-LC-L4")
+                        || globalAttribute.getStringValue().startsWith("C3S-LC-L4"))  {
                     return true;
                 }
             }

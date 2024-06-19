@@ -14,5 +14,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 exec java -Xmx8G -Dceres.context=snap \
     -Dsnap.logLevel=INFO -Dsnap.consoleLog=true \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
+    -Dsnap.dataio.reader.tileHeight=2025 \
+    -Dsnap.dataio.reader.tileWidth=2025 \
     -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
     LCCCI.Convert -e $@
