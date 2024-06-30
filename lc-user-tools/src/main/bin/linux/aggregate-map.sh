@@ -19,7 +19,7 @@ exec java \
     -Dsnap.home="$TOOL_HOME" \
     -Dsnap.logLevel=INFO \
     -Dsnap.consoleLog=true \
-    -Dsnap.binning.sliceHeight=1024 \
+    -Dsnap.binning.sliceHeight=256 \
     -Dsnap.dataio.reader.tileHeight=2025 \
     -Dsnap.dataio.reader.tileWidth=2025 \
     -Dsnap.gpf.tileComputationObserver=org.esa.snap.core.gpf.monitor.TileComputationEventLogger \
