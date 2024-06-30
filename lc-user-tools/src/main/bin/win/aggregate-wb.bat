@@ -7,16 +7,23 @@ for /f %%j in ("java.exe") do (
 )
 if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
-set TOOL_HOME="%CD%"
-set PATH=%PATH%;%CD%\..\lib
+SET mypath=%~dp0
+SET TOOL_HOME=%mypath:~0,-5%
+echo "using user tool %TOOL_HOME%"
+set PATH=%PATH%;%TOOL_HOME%\lib
 
-java -Xmx8G -Dceres.context=snap ^
-    -Dsnap.logLevel=INFO -Dsnap.consoleLog=true ^
+java ^
+    -cp "%TOOL_HOME%\modules\*" ^
+    -Xmx8G ^
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT ^
+    -Dsnap.home="$TOOL_HOME" ^
+    -Dsnap.logLevel=INFO ^
+    -Dsnap.consoleLog=true ^
     -Dsnap.binning.sliceHeight=1024 ^
     -Dsnap.dataio.reader.tileHeight=2025 ^
     -Dsnap.dataio.reader.tileWidth=2025 ^
-    -jar "%TOOL_HOME%\ceres-launcher.jar" ^
+    -Dsnap.gpf.tileComputationObserver=org.esa.snap.core.gpf.monitor.TileComputationEventLogger ^
+    org.esa.snap.runtime.Launcher ^
     LCCCI.Aggregate.WB -e -c 1024M %*
 
 exit /B %ERRORLEVEL%

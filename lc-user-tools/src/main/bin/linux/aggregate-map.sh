@@ -9,13 +9,18 @@ if [ -z "$1" ]; then
 fi
 
 export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
+echo "using user tool $TOOL_HOME"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 
-exec java -Xmx8G -Dceres.context=snap \
-    -Dsnap.logLevel=INFO -Dsnap.consoleLog=true \
+exec java \
+    -cp "$TOOL_HOME/modules/*"
+    -Xmx12G \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
+    -Dsnap.home="$TOOL_HOME" \
+    -Dsnap.logLevel=INFO \
+    -Dsnap.consoleLog=true \
     -Dsnap.binning.sliceHeight=1024 \
     -Dsnap.dataio.reader.tileHeight=2025 \
     -Dsnap.dataio.reader.tileWidth=2025 \
-    -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
+    -Dsnap.gpf.tileComputationObserver=org.esa.snap.core.gpf.monitor.TileComputationEventLogger \
     LCCCI.Aggregate.Map -e -c 1024M $@
