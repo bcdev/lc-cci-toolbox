@@ -60,6 +60,11 @@ public class LcHelper {
         if (regionIdentifier != null) {
             subset.getMetadataRoot().setAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER, regionIdentifier);
         }
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_min", String.valueOf(south));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_max", String.valueOf(north));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_min", String.valueOf(west));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_max", String.valueOf(east));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("subsetted", "true");
         return subset;
     }
 
