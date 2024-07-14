@@ -23,7 +23,8 @@ public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
         return new LcAccuracyAggregator(varCtx,
                                         getSourceVarNames(aggregatorConfig),
-                                        getTargetVarNames(aggregatorConfig));
+                                        getTargetVarNames(aggregatorConfig),
+                                        ((LcAccuracyAggregatorConfig)aggregatorConfig).getRowRatio());
     }
 
     @Override

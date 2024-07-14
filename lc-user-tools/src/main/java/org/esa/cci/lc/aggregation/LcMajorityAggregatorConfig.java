@@ -11,14 +11,17 @@ class LcMajorityAggregatorConfig extends AggregatorConfig {
     @Parameter
     private String targetVarName;
 
+    private int rowRatio;
+
     LcMajorityAggregatorConfig() {
         super(LcMajorityAggregatorDescriptor.NAME);
     }
 
-    LcMajorityAggregatorConfig(final String sourceVarName, final String targetVarName) {
+    LcMajorityAggregatorConfig(final String sourceVarName, final String targetVarName, int rowRatio) {
         super(LcMajorityAggregatorDescriptor.NAME);
         this.sourceVarName = sourceVarName;
         this.targetVarName = targetVarName;
+        this.rowRatio = rowRatio;
     }
 
     public String getSourceVarName() {
@@ -27,5 +30,9 @@ class LcMajorityAggregatorConfig extends AggregatorConfig {
 
     public String getTargetVarName() {
         return targetVarName;
+    }
+
+    public int getRowRatio() {
+        return rowRatio;
     }
 }

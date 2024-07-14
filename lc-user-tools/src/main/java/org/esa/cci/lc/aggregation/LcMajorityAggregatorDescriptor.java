@@ -23,7 +23,8 @@ public class LcMajorityAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
         return new LcMajorityAggregator(varCtx,
                                         getSourceVarNames(aggregatorConfig),
-                                        getTargetVarNames(aggregatorConfig));
+                                        getTargetVarNames(aggregatorConfig),
+                                        ((LcMajorityAggregatorConfig)aggregatorConfig).getRowRatio());
     }
 
     @Override

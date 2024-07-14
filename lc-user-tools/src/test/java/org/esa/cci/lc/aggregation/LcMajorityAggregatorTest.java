@@ -26,7 +26,7 @@ public class LcMajorityAggregatorTest {
         final VariableContextImpl varCtx = new VariableContextImpl();
         varCtx.defineVariable("name");
 
-        aggregator = new LcAccuracyAggregator(varCtx, new String[]{"name"}, new String[]{"change_count"});
+        aggregator = new LcAccuracyAggregator(varCtx, new String[]{"name"}, new String[]{"change_count"}, 8);
         spatialBin = new SpatialBin();
         elements = new float[1];
         latitude = 0;

@@ -19,19 +19,21 @@ class LcAccuracyAggregator extends AbstractAggregator {
 
     private final int varIndex;
     private final String contextNameSpace;
+    private final int rowRatio;
 
-    LcAccuracyAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames) {
+    LcAccuracyAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames, int rowRatio) {
         super(LcAccuracyAggregatorDescriptor.NAME,
               targetVarNames,
               targetVarNames,
               targetVarNames);
         varIndex = varCtx.getVariableIndex(sourceVarNames[0]);
         contextNameSpace = targetVarNames[0] + hashCode();
+        this.rowRatio = rowRatio;
     }
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
-        ctx.put(contextNameSpace, new GrowableVector(128));
+        ctx.put(contextNameSpace, new GrowableVector(rowRatio*rowRatio));
     }
 
     @Override

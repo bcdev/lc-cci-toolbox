@@ -11,14 +11,17 @@ class LcAccuracyAggregatorConfig extends AggregatorConfig {
     @Parameter
     private String targetVarName;
 
+    private int rowRatio;
+
     LcAccuracyAggregatorConfig() {
         super(LcAccuracyAggregatorDescriptor.NAME);
     }
 
-    LcAccuracyAggregatorConfig(final String sourceVarName, final String targetVarName) {
+    LcAccuracyAggregatorConfig(final String sourceVarName, final String targetVarName, int rowRatio) {
         super(LcAccuracyAggregatorDescriptor.NAME);
         this.sourceVarName = sourceVarName;
         this.targetVarName = targetVarName;
+        this.rowRatio = rowRatio;
     }
 
     public String getSourceVarName() {
@@ -27,5 +30,9 @@ class LcAccuracyAggregatorConfig extends AggregatorConfig {
 
     public String getTargetVarName() {
         return targetVarName;
+    }
+
+    public int getRowRatio() {
+        return rowRatio;
     }
 }
