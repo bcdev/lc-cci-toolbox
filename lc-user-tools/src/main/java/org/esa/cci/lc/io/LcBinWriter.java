@@ -66,6 +66,7 @@ public class LcBinWriter implements BinWriter {
             Dimension tileSize = LcHelper.convertToDimension(lcProperties.get(LcHelper.PROP_NAME_TILE_SIZE));
             writeable.addDimension("lat", sceneHeight);
             writeable.addDimension("lon", sceneWidth);
+            logger.info("output with extent " + sceneHeight + ":" + sceneWidth + " and chunksize " + tileSize);
             addGlobalAttributes(writeable);
             CoordinateEncoder coordinateEncoder = createCoordinateEncoder();
             coordinateEncoder.addCoordVars(writeable);
@@ -174,7 +175,7 @@ public class LcBinWriter implements BinWriter {
         initDataLines(variables, sceneWidth, dataLines);
 
         int lineY = 0;
-        int hundredthHeight = Math.max(sceneHeight / 100, sceneHeight);
+        int hundredthHeight = Math.max(sceneHeight / 100, 100);
         int binX;
         int binY;
         while (iterator.hasNext()) {
