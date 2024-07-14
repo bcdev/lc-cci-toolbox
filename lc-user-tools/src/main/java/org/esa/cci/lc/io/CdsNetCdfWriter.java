@@ -31,6 +31,7 @@ import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -83,6 +84,25 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
             Variable variable = getWriteable().getWriter().findVariable(variableName);
             final int[] shape = new int[]{1, sourceHeight, sourceWidth};
             final int[] origin = new int[]{0, sourceOffsetY, sourceOffsetX};
+            if (variable.getDataType().isFloatingPoint() && (elems instanceof int[])) {
+                float[] floatElems = new float[((int[])elems).length];
+                for (int i=0; i<((int[])elems).length; ++i) {
+                    floatElems[i] = (float) ((int[])elems)[i];
+                }
+                elems = floatElems;
+            } else if (variable.getDataType().isFloatingPoint() && (elems instanceof short[])) {
+                float[] floatElems = new float[((short[])elems).length];
+                for (int i=0; i<((short[])elems).length; ++i) {
+                    floatElems[i] = (float) ((short[])elems)[i];
+                }
+                elems = floatElems;
+            } else if (variable.getDataType().isFloatingPoint() && (elems instanceof byte[])) {
+                float[] floatElems = new float[((byte[])elems).length];
+                for (int i=0; i<((byte[])elems).length; ++i) {
+                    floatElems[i] = (float) ((byte[])elems)[i];
+                }
+                elems = floatElems;
+            }
             Array array = Array.factory(variable.getDataType(), shape, elems);
             try {
                 getWriteable().getWriter().write(variable, origin, array);
@@ -92,7 +112,9 @@ public class CdsNetCdfWriter extends DefaultNetCdfWriter   {
         }
     }
 
-
+    private static float floatOf(int i) {
+        return (float) i;
+    }
 
     private void writeBandWithShift(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,
                                     int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm,String variableName) throws IOException
