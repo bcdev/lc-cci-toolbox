@@ -22,20 +22,20 @@ the predefined regions WESTERN_EUROPE_AND_MEDITERRANEAN and AFRICA.
 
 Installation
 ~~~~~~~~~~~~
-As a prerequisite the CCI-LC User Tools require an installed Java SE 64Bit JRE version 7 or higher
+As a prerequisite the CCI-LC User Tools require an installed Java SE 64Bit JRE version 8
 on the system. It can be obtained from the web page at
-http://www.oracle.com/technetwork/java/javase/downloads/index.html.
+https://www.azul.com/downloads/#downloads-table-zulu . Please, select a Java 8 JDK.
 
-1) Unzip the zip-file in a directory of your choice.
-2) Inside the unzipped directory you can find a folder which is named 'bin'.
-   Inside you can find the windows and unix start scripts for the CCI-LC tools.
+1) Unzip the lc user tool zip file in a directory of your choice.
+2) Inside the unzipped directory you can find a folder named 'bin'.
+   There, you can find the windows and unix start scripts for the CCI-LC tools.
 
 
 Execution
 ~~~~~~~~~
 All provided scripts are available in windows (*.bat) and unix (*.sh) versions.
-The scripts need to be invoked from the command line.  Navigate to the bin directory of the folder where you
-have unpacked the tools to. Write the command as described as follows.
+The scripts need to be invoked from the command line.
+Write the command as described as follows.
 
     Aggregation Tool Usage
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -244,7 +244,6 @@ have unpacked the tools to. Write the command as described as follows.
             <sourceFilePath>
                 The source file to create a regional subset from.
 
-
         This tool splits up the information found in the band "lccs_class" into the PFTs given via look-up
         table files.
         The basis for the look-up table is the csv file provided as userPFTConversionTable.
@@ -270,6 +269,25 @@ have unpacked the tools to. Write the command as described as follows.
         If one LCCS class, user class combination is missing the algorithm falls back to the userPFTConversionTable,
         if given or to the defaults of th CCI-LC conversion table
 
+    300m-PFT Product Aggregation
+    ~~~~~~~~~~~~~~~~~~~
+        aggregate-pft(.sh/.bat) -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
+
+            -PnumRows=<integer>
+                        Specifies the number of rows for the specified grid.
+                        Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
+                        ~9.8km/pixel in the target product.
+            -PtargetDir=<path>
+                        Specifies the output directory
+
+        Example call:
+
+            aggregate-pft.sh -PnumRows=2160 ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
+
+        Examples Aggregation Result:
+           Input  : ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
+           Output : ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated-2007-v2.0.8.nc
+
 
 Output File Naming Convention
 """""""""""""""""""""""""""""
@@ -284,7 +302,7 @@ Output File Naming Convention
                                                                           ^
                                                                           |--- Split Position
 
-    Examples Map Result:
+    Example Map Result:
     ~~~~~~~~~~~~~~~~~~~~
         Aggregation:
             Input  :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-2006-v2.nc
@@ -298,9 +316,7 @@ Output File Naming Convention
             Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-ASIA-2006-v2.nc
             Output :  ESACCI-LC-L4-LCCS-Map-300m-P5Y-aggregated-0.083333Deg-USER_REGION-2006-v2.nc
 
-
-
-    Examples Condition Result:
+    Example Condition Result:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
         Subset:
             Input  :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-20010101-v2.nc
@@ -308,27 +324,3 @@ Output File Naming Convention
             Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-EUROPE-20010101-v2.nc
             Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-ASIA-20010101-v2.nc
             Output :  ESACCI-LC-L4-NDVI-Cond-300m-P9Y7D-USER_REGION-20010101-v2.nc
-
-
-
-      300m-PFT Product Aggregation
-      ~~~~~~~~~~~~~~~~~~~
-        aggregate-pft(.sh/.bat) -PnumRows=<integer>
-                         -PtargetDir=<dirPath> <sourceFilePath>
-
-        Parameter Description:
-        -PnumRows=<integer>
-                        Specifies the number of rows for the specified grid.
-                        Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
-                        ~9.8km/pixel in the target product.
-
-
-        Example might look like:
-
-            aggregate-pft.sh ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc -PnumRows=100
-
-        Examples Aggregation Result:
-           Input  : ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
-
-           Output : ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated-2007-v2.0.8.nc
-           ~~~~~~~~~~~~~~~~~~~~

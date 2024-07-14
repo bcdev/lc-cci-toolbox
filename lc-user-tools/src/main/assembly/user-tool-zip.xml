@@ -17,21 +17,8 @@
             <useProjectArtifact>true</useProjectArtifact>
             <unpack>false</unpack>
             <excludes>
-                <exclude>org.esa.snap:snap-ui</exclude>
-                <exclude>org.esa.snap:snap-csv-dataio</exclude>
-                <exclude>org.esa.snap:snap-processing</exclude>
-                <exclude>org.esa.snap:snap-statistics-op</exclude>
-                <exclude>org.jython:jython</exclude>
                 <exclude>com.jidesoft:jide-*</exclude>
-                <exclude>jfree:jfreechart</exclude>
             </excludes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>bin</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>com.bc.ceres:ceres-launcher</include>
-            </includes>
         </dependencySet>
     </dependencySets>
 

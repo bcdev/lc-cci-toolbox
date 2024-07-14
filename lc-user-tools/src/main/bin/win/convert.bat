@@ -17,11 +17,11 @@ java ^
     -Xmx8G ^
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT ^
     -Dsnap.home="$TOOL_HOME" ^
+    -Djava.io.tmpdir=. ^
     -Dsnap.logLevel=INFO ^
     -Dsnap.consoleLog=true ^
     -Dsnap.dataio.reader.tileHeight=2025 ^
     -Dsnap.dataio.reader.tileWidth=2025 ^
-    -Dsnap.gpf.tileComputationObserver=org.esa.snap.core.gpf.monitor.TileComputationEventLogger ^
     org.esa.snap.runtime.Launcher ^
     LCCCI.Convert -e %*
 

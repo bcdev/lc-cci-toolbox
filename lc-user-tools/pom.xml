@@ -81,11 +81,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.bc.ceres</groupId>
-            <artifactId>ceres-launcher</artifactId>
-            <version>0.14.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
             <version>${snap.version}</version>
@@ -114,6 +109,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <version>1.10.17</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -154,6 +150,19 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <debug>true</debug>
+                    <encoding>UTF-8</encoding>
+                    <excludes>
+                        <exclude>.gitignore</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

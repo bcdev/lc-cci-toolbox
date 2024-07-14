@@ -1,9 +1,8 @@
 #!/bin/bash
-set -x
-# convert.sh /data/lc-map-example/lc_classif_lccs_2010_v2.tif
+# aggregation.sh /data/lc-map-example/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc
 
 if [ -z "$1" ]; then
-    echo "Land Cover CCI Conversion Tool (Tiff to NetCDF-4)"
+    echo "Land Cover CCI Aggregation Tool"
     echo ""
     echo "For further information see the readme.txt"
     exit 1
@@ -13,15 +12,17 @@ export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
 echo "using user tool $TOOL_HOME"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 
+#    -Dsnap.gpf.tileComputationObserver=org.esa.snap.core.gpf.monitor.TileComputationEventLogger \
 exec java \
     -cp "$TOOL_HOME/modules/*" \
-    -Xmx8G \
+    -Xmx12G \
     -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
     -Dsnap.home="$TOOL_HOME" \
     -Djava.io.tmpdir=. \
     -Dsnap.logLevel=INFO \
     -Dsnap.consoleLog=true \
+    -Dsnap.binning.sliceHeight=512 \
     -Dsnap.dataio.reader.tileHeight=2025 \
     -Dsnap.dataio.reader.tileWidth=2025 \
     org.esa.snap.runtime.Launcher \
-    LCCCI.Remap -e -c 1024M $@
+    LCCCI.Aggregate.Map -e -c 2048M -PoutputTileSize=405:2025 $@
