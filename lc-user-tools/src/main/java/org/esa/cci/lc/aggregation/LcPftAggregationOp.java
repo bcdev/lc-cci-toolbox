@@ -1,16 +1,11 @@
 package org.esa.cci.lc.aggregation;
 
 
-import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcCdsBinWriter;
-import org.esa.cci.lc.util.PlanetaryGridName;
-import org.esa.snap.binning.AggregatorConfig;
+import org.esa.cci.lc.util.LcHelper;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.operator.BinningOp;
-import org.esa.snap.binning.operator.VariableConfig;
 import org.esa.snap.binning.support.PlateCarreeGrid;
-import org.esa.snap.binning.support.RegularGaussianGrid;
-import org.esa.snap.binning.support.SEAGrid;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
@@ -32,29 +27,41 @@ import java.util.HashMap;
         autoWriteDisabled = true)
 public class LcPftAggregationOp extends AbstractLcAggregationOp {
 
-    @Parameter(defaultValue = "2160")
-    private int numRows;
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
 
     boolean outputTargetProduct;
-    private  HashMap<String, String> lcProperties = new HashMap<>();
-    private static final int METER_PER_DEGREE_At_EQUATOR = 111300;
+    private static final int METER_PER_DEGREE_AT_EQUATOR = 111300;
 
     private static final String[] listPFTVariables = {"BARE","BUILT","GRASS-MAN","GRASS-NAT","SHRUBS-BD","SHRUBS-BE","SHRUBS-ND","SHRUBS-NE","WATER_INLAND",
             "SNOWICE","TREES-BD","TREES-BE","TREES-ND","TREES-NE","WATER","LAND","WATER_OCEAN"};
 
+    /**
+     * Creates a chain of SubsetOp and BinnningOp, parameterises binning, forwards global attributes of input or subset
+     * @throws OperatorException
+     */
     @Override
     public void initialize() throws OperatorException {
         super.initialize();
-        Product source = getSourceProduct();
         final String planetaryGridClassName = PlateCarreeGrid.class.getName();
 
+        Product source = getSourceProduct();
+        MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
+        final String parent_path = source.getFileLocation().getAbsolutePath();
+        final String id = createTypeAndID();
+
         final HashMap<String, String> lcProperties = getLcProperties();
-        getSourceProduct().getMetadataRoot().getElement("Global_Attributes").setAttributeString("parent_path",getSourceProduct().getFileLocation().getAbsolutePath());;
-        final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
         //addMetadataToLcProperties(globalAttributes);
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addGridNameToLcProperties(planetaryGridClassName);
 
-        String id = createTypeAndID();
+        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
+        if (regionEnvelope != null) {
+            source = createSubset(source, regionEnvelope);
+            globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
+        }
+        globalAttributes.setAttributeString("parent_path", parent_path);
+
         BinningOp binningOp;
         try {
             binningOp = new BinningOp();
@@ -62,61 +69,25 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         } catch (Exception e) {
             throw new OperatorException("Could not create binning operator.", e);
         }
-        final ReferencedEnvelope regionEnvelope = getRegionEnvelope();
-        if (regionEnvelope != null) {
-            source = createSubset(source, regionEnvelope);
-        }
-
         binningOp.setSourceProduct(source);
-        initBinningOp(planetaryGridClassName, binningOp, id + ".nc");
-
-        binningOp.setOutputTargetProduct(outputTargetProduct);
-        binningOp.setParameter("outputBinnedData", true);
-        binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
-
-    }
-
-
-    private VariableConfig[] createVarConfigs(){
-        VariableConfig[] variableConfigs = new VariableConfig[listPFTVariables.length];
-        for (int i=0 ; i<listPFTVariables.length; i++) {
-            variableConfigs[0] = new VariableConfig(listPFTVariables[i], listPFTVariables[i], "true");
-        }
-        return variableConfigs;
-    }
-
-    private void initBinningOp(String planetaryGridClassName, BinningOp binningOp, String outputFilename) {
-        Product sourceProduct = getSourceProduct();
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
-        final double sourceMapResolutionX = 180.0 / sceneHeight;
-        final double sourceMapResolutionY = 360.0 / sceneWidth;
+        final double sourceMapResolutionX = 180.0 / source.getSceneRasterHeight();
+        final double sourceMapResolutionY = 360.0 / source.getSceneRasterWidth();
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
+        LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
+        binningOp.setAggregatorConfigs(configs);
+        binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
-
-
-
-        //LcPftAggregatorConfig config = new LcPftAggregatorConfig("WATER", "WATER", 1d, false, false, areaCalculator );
-        //LcPftAggregatorConfig config2 = new LcPftAggregatorConfig("BARE", "BARE", 1d, false, false, areaCalculator );
-        //LcPftAggregatorConfig[] configs = {config};
-
-        LcPftAggregatorConfig[] configs = createConfigs(areaCalculator);
-
-
-
-        binningOp.setAggregatorConfigs(configs);
-
-        //binningOp.setAggregatorConfigs(aggregatorConfigs);
-        binningOp.setPlanetaryGridClass(planetaryGridClassName);
-        binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), outputFilename).getPath() : getOutputFile());
+        binningOp.setOutputFile(getOutputFile() == null ? new File(getTargetDir(), id + ".nc").getPath() : getOutputFile());
         binningOp.setOutputType(getOutputType() == null ? "Product" : getOutputType());
         binningOp.setOutputFormat("NetCDF4-LC-PFT-Aggregate");
-        //binningOp.setOutputFormat("NetCDF4-CF");
-        sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
+        //sourceProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path",sourceProduct.getFileLocation().getAbsolutePath());
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
+        binningOp.setOutputTargetProduct(outputTargetProduct);
+        binningOp.setParameter("outputBinnedData", true);
+        binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope, globalAttributes));
     }
 
     private LcPftAggregatorConfig[] createConfigs(AreaCalculator areaCalculator){
@@ -129,12 +100,13 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
     }
 
     private String createTypeAndID(){
-        String id = getSourceProduct().getName().replace("ESACCI-LC-L4-PFT-Map-300m-P1Y","ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated");
-        return id;
+        return getSourceProduct().getName().replace("ESACCI-LC-L4-PFT-Map-300m-P1Y",
+                                                    "ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated");
     }
 
     @Override
     protected void addMetadataToLcProperties(MetadataElement globalAttributes) {
+        final HashMap<String, String> lcProperties = getLcProperties();
         //String timeCoverageDuration = globalAttributes.getAttributeString("time_coverage_duration");
         //String timeCoverageResolution = globalAttributes.getAttributeString("time_coverage_resolution");
         //lcProperties.put("temporalCoverageYears", timeCoverageDuration.substring(1, timeCoverageDuration.length() - 1));
@@ -147,7 +119,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         lcProperties.put("history", globalAttributes.getAttributeString("history"));
         float resolutionDegree = getTargetSpatialResolution();
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
-        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
+        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_AT_EQUATOR * resolutionDegree)));
         ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
             lcProperties.put("latMin", String.valueOf(regionEnvelope.getMinimum(1)));
@@ -167,10 +139,7 @@ public class LcPftAggregationOp extends AbstractLcAggregationOp {
         return 180.0f / getNumRows();
     }
 
-    int getNumRows() {
-        return numRows;
-    }
-    /**
+     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.
      */
