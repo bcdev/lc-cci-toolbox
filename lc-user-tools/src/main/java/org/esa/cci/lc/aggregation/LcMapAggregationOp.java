@@ -83,6 +83,9 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
     @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
     private String format;
 
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
+
     boolean outputTargetProduct;
 
     @Override
@@ -96,6 +99,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
         final HashMap<String, String> lcProperties = getLcProperties();
         LcHelper.addPFTTableInfoToLcProperties(lcProperties, outputPFTClasses, userPFTConversionTable, additionalUserMapPFTConversionTable);
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGridClassName);
         addMetadataToLcProperties(globalAttributes);
@@ -121,17 +125,18 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
 
         if (format.equals("lccds")) {
             setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
-            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+            binningOp.setBinWriter(new LcCdsBinWriter(
+                    lcProperties,
+                    regionEnvelope,
+                    getSourceProduct().getMetadataRoot().getElement("global_attributes")));
         }
-
-
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
 
         if (format.equals("lccds") || format.equals("lcpft")) {
-        binningOp.setOutputFormat("NetCDF4-LC-CDS");
-       }
+            binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        }
     }
 
     private String createTypeAndID(HashMap<String, String> lcProperties, String mapType) {
@@ -171,8 +176,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
-        binningOp.setNumRows(getNumRows());
+        final int numRows = getNumRows();
+        binningOp.setNumRows(numRows);
         binningOp.setSuperSampling(1);
+        final int rowRatio = (sceneHeight + numRows - 1) / numRows;
+        getLogger().info("upper bounds of pixel area ratio between input and output is " + rowRatio*rowRatio);
         URL userPFTConversionTableUrl = convertFileToUrl(userPFTConversionTable);
         URL additionalUserMapUrl = convertFileToUrl(additionalUserMap);
         URL additionalUserMapPFTConversionUrl = convertFileToUrl(additionalUserMapPFTConversionTable);
@@ -184,11 +192,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         AggregatorConfig[] aggregatorConfigs;
         if (outputAccuracy && sourceProduct.containsBand("algorithmic_confidence_level")) {
             final String accuracyVariable = "Map".equals(mapType) ? "algorithmic_confidence_level" : "label_confidence_level";
-            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence");
+            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence", rowRatio);
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcAccuracyAggregatorConfig};
         } else if (outputChangeCount && sourceProduct.containsBand("change_count")) {
             final String majorityVariable = "change_count";
-            final LcMajorityAggregatorConfig lcMajorityAggregatorConfig = new LcMajorityAggregatorConfig(majorityVariable, "change_count");
+            final LcMajorityAggregatorConfig lcMajorityAggregatorConfig = new LcMajorityAggregatorConfig(majorityVariable, "change_count", rowRatio);
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcMajorityAggregatorConfig};
         } else {
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig};

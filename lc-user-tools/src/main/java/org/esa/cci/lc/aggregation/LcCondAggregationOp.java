@@ -2,6 +2,7 @@ package org.esa.cci.lc.aggregation;
 
 import org.esa.cci.lc.io.LcCdsBinWriter;
 import org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin;
+import org.esa.cci.lc.util.LcHelper;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.operator.BinningOp;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -41,6 +42,9 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
     @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
     private String format;
 
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
+
     boolean outputTargetProduct;
 
     @Override
@@ -51,6 +55,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
 
         HashMap<String, String> lcProperties = getLcProperties();
         addAggregationTypeToLcProperties("Condition");
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addGridNameToLcProperties(planetaryGridClassName);
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
