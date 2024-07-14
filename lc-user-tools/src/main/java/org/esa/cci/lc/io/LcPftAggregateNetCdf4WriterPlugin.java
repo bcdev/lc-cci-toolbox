@@ -4,7 +4,10 @@ import org.esa.cci.lc.util.CdsVariableWriter;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.NullProfilePartWriter;
@@ -82,7 +85,7 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         @Override
         public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
             final NFileWriteable writeable = ctx.getNetcdfFileWriteable();
-            NetcdfFileWriter onlyReader;
+            //NetcdfFileWriter onlyReader;
             MetadataElement element = product.getMetadataRoot().getElement("global_attributes");
             NetcdfFileWriter writer = writeable.getWriter();
             String path;
@@ -92,12 +95,25 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 MetadataElement globalAttributes = new MetadataElement("global_attributes");
                 product.getMetadataRoot().addElement(globalAttributes);
                 element = product.getMetadataRoot().getElement("global_attributes");
+
+                final GeoCoding geoCoding = product.getSceneGeoCoding();
+                final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
+                final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
+                element.setAttributeString("geospatial_lat_min", String.valueOf(lowerRight.getLat()));
+                element.setAttributeString("geospatial_lat_max", String.valueOf(upperLeft.getLat()));
+                element.setAttributeString("geospatial_lon_min", String.valueOf(upperLeft.getLon()));
+                element.setAttributeString("geospatial_lon_max", String.valueOf(lowerRight.getLon()));
+                element.setAttributeString("subsetted", "true");
                 setAggregatedPFTAttributes(writeable, element, path);
             }
-            else {
-                path = element.getAttributeString("parent_path");
-            }
+//            else {
+//                path = element.getAttributeString("parent_path");
+//            }
 
+            /* MB 20240705 this fails
+               path seems to be the input filename but not the path to the input if it is in a different path.
+               lat and lon are added below anyway.
+               nv, which input has this dimension?
             onlyReader = NetcdfFileWriter.openExisting(path);
                 //add dimensions
             List<ucar.nc2.Dimension> dimensionList = onlyReader.getNetcdfFile().getDimensions();
@@ -113,7 +129,7 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                     }
                 }
             onlyReader.close();
-
+            */
 
             if (!writer.hasDimension(null, "time")) {
                 writeable.addDimension("time", 1);
@@ -128,11 +144,12 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 writeable.addDimension("lat", product.getSceneRasterHeight());
             }
 
+            /*
             // add global attributes
              if (element.getAttributeString("type").equals("PFT_product") || element.getAttributeString("type").equals("ESACCI-LC-L4-PFT-Map-300m-P1Y") ) {
                 writePFTGlobalAttribute(writeable, element);
             }
-
+            */
         }
     }
 
@@ -150,28 +167,33 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
 
                 final Dimension tileSize = new Dimension(2025, 2025);
 
+                /*
                 NetcdfFileWriter onlyReader = NetcdfFileWriter.openExisting(path);
-
-
                 for (Band band : p.getBands()) {
-                        if (onlyReader.findVariable(band.getName())!=null ) {
-                            if (!band.getName().contains("sigma") || !band.getName().contains("num")) {
-                                    addBandVariable(ncFile, band, onlyReader, tileSize);
-                                }
-
+                    // MB 20240705 second line should presumably have been &&, but is excluded by first line anyway
+                    if (onlyReader.findVariable(band.getName())!=null ) {
+                        if (!band.getName().contains("sigma") || !band.getName().contains("num")) {
+                            addBandVariable(ncFile, band, onlyReader, tileSize);
                         }
                     }
-
-
-                    List<Variable> list = onlyReader.getNetcdfFile().getVariables();
-                    for (Variable variable : list) {
-                        if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class")) &&(! variable.getFullName().contains("sigma")) ) {
-                            addNotBandVariable(ncFile, variable);
-                        }
+                }
+                List<Variable> list = onlyReader.getNetcdfFile().getVariables();
+                for (Variable variable : list) {
+                    if (!Arrays.asList(p.getBandNames()).contains(variable.getFullName()) && (!variable.getFullName().contains("burned_area_in_vegetation_class")) &&(! variable.getFullName().contains("sigma")) ) {
+                        addNotBandVariable(ncFile, variable);
                     }
+                }
                 onlyReader.close();
+                */
 
-
+                // we assume that all aggregated bands shall be written, without filtering by input bands
+                // (But the condition to only include input bands restricts sigma and num.)
+                for (Band band : p.getBands()) {
+                    // TODO why do we compute sigma if we do not write it?
+                    if (! band.getName().contains("sigma") && ! band.getName().contains("num")) {
+                        addCustomVariable(ncFile, band.getName(), "time lat lon", DataType.FLOAT, tileSize, element);
+                    }
+                }
 
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lat_bounds") == null)) {
                     addCustomVariable(ncFile, "lat_bounds", "lat bounds", DataType.DOUBLE,null,element);
@@ -184,6 +206,14 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
                 }
                 if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("time") == null)) {
                     addCustomVariable(ncFile, "time", "time", DataType.DOUBLE,null,element);
+                }
+
+                // we may have to add custom variables lat and lon because we do not copy them from the input
+                if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lat") == null)) {
+                    addCustomVariable(ncFile, "lat", "lat", DataType.DOUBLE, null, element);
+                }
+                if ((ctx.getNetcdfFileWriteable().getWriter().findVariable("lon") == null)) {
+                    addCustomVariable(ncFile, "lon", "lon", DataType.DOUBLE, null, element);
                 }
             }
         };
@@ -323,9 +353,6 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
             }
         }
     }
-
-
-
 
     private static void setPFTVariableAttributes(NVariable nVariable) throws IOException{
         String variableName = nVariable.getName();
@@ -468,13 +495,15 @@ public class LcPftAggregateNetCdf4WriterPlugin extends BeamNetCdf4WriterPlugIn {
         addGlobalAttribute(writeable, element, "time_coverage_end", endObservation);
         addGlobalAttribute(writeable, element, "time_coverage_duration", "P1Y");
         addGlobalAttribute(writeable, element, "time_coverage_resolution", "P1Y");
-        addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
-        addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
         if (element.containsAttribute("subsetted")) {
+            addGlobalAttribute(writeable, element, "geospatial_lat_min", null);
+            addGlobalAttribute(writeable, element, "geospatial_lat_max", null);
             addGlobalAttribute(writeable, element, "geospatial_lon_min", null);
             addGlobalAttribute(writeable, element, "geospatial_lon_max", null);
         }
         else {
+            addGlobalAttribute(writeable, element, "geospatial_lat_min", "-90");
+            addGlobalAttribute(writeable, element, "geospatial_lat_max", "90");
             addGlobalAttribute(writeable, element, "geospatial_lon_min", "-180");
             addGlobalAttribute(writeable, element, "geospatial_lon_max", "180");
         }
