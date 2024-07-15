@@ -190,6 +190,36 @@ Write the command as described as follows.
             ...
             220||...||||100|
 
+        Memory issues
+        ~~~~~~~~~~~~~
+            Aggregating large maps without subsetting in higher resolution can lead to memory issues.
+            If you either get an "out of memory" error or an "GC overhead exceeded" error you may try
+
+                aggregate-map12g(.sh/.bat)
+
+            instead. It allocates 12 GB heap instead of 8 GB, assuming that the machine you run the
+            tool on has at least 16 GB RAM.
+
+
+    300m-PFT Product Aggregation
+    ~~~~~~~~~~~~~~~~~~~
+        aggregate-pft(.sh/.bat) -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
+
+            -PnumRows=<integer>
+                        Specifies the number of rows for the specified grid.
+                        Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
+                        ~9.8km/pixel in the target product.
+            -PtargetDir=<path>
+                        Specifies the output directory
+
+        Example call:
+
+            aggregate-pft.sh -PnumRows=2160 ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
+
+        Examples Aggregation Result:
+           Input  : ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
+           Output : ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated-2007-v2.0.8.nc
+
 
     Subset Tool Usage
     ~~~~~~~~~~~~~~~~~~
@@ -218,7 +248,7 @@ Write the command as described as follows.
         <sourceFilePath>
             The source file to create a regional subset from.
 
-        In order to create a regional subset of a map, condition or aggregated product the subset
+        In order to create a regional subset of a map, PFT, condition, and WB product the subset
         tool can be used. As parameter either one of the predefined regions can be selected or the
         outer bounds of the desired region can be specified. The target file is written into
         the directory of the source file.
@@ -268,26 +298,6 @@ Write the command as described as follows.
         The first column is again the LCCS class, the second the class in the additional user map.
         If one LCCS class, user class combination is missing the algorithm falls back to the userPFTConversionTable,
         if given or to the defaults of th CCI-LC conversion table
-
-    300m-PFT Product Aggregation
-    ~~~~~~~~~~~~~~~~~~~
-        aggregate-pft(.sh/.bat) -PnumRows=<integer> -PtargetDir=<dirPath> <sourceFilePath>
-
-            -PnumRows=<integer>
-                        Specifies the number of rows for the specified grid.
-                        Default ist 2160 rows. A grid with the default number of rows leads to a resolution of
-                        ~9.8km/pixel in the target product.
-            -PtargetDir=<path>
-                        Specifies the output directory
-
-        Example call:
-
-            aggregate-pft.sh -PnumRows=2160 ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
-
-        Examples Aggregation Result:
-           Input  : ESACCI-LC-L4-PFT-Map-300m-P1Y-2007-v2.0.8.nc
-           Output : ESACCI-LC-L4-PFT-Map-300m-P1Y-aggregated-2007-v2.0.8.nc
-
 
 Output File Naming Convention
 """""""""""""""""""""""""""""
