@@ -1,12 +1,12 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AbstractAggregator;
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.VariableContext;
-import org.esa.beam.binning.Vector;
-import org.esa.beam.binning.WritableVector;
-import org.esa.beam.binning.support.GrowableVector;
+import org.esa.snap.binning.AbstractAggregator;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.Observation;
+import org.esa.snap.binning.VariableContext;
+import org.esa.snap.binning.Vector;
+import org.esa.snap.binning.WritableVector;
+import org.esa.snap.binning.support.GrowableVector;
 
 import java.awt.geom.FlatteningPathIterator;
 import java.util.Arrays;
@@ -18,19 +18,21 @@ class LcMajorityAggregator extends AbstractAggregator {
 
     private final int varIndex;
     private final String contextNameSpace;
+    private final int rowRatio;
 
-    LcMajorityAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames) {
+    LcMajorityAggregator(VariableContext varCtx, String[] sourceVarNames, String[] targetVarNames, int rowRatio) {
         super(LcMajorityAggregatorDescriptor.NAME,
               targetVarNames,
               targetVarNames,
               targetVarNames);
         varIndex = varCtx.getVariableIndex(sourceVarNames[0]);
         contextNameSpace = targetVarNames[0] + hashCode();
+        this.rowRatio = rowRatio;
     }
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
-        ctx.put(contextNameSpace, new GrowableVector(128));
+        ctx.put(contextNameSpace, new GrowableVector(rowRatio*rowRatio));
     }
 
     @Override

@@ -1,17 +1,16 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.cci.lc.io.LcBinWriter;
-import org.esa.cci.lc.io.LcMapMetadata;
-import org.esa.cci.lc.io.LcMapTiffReader;
+import org.esa.cci.lc.io.*;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -81,6 +80,12 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
             label = "Output Change Count Value", defaultValue = "true")
     private boolean outputChangeCount;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
+
     boolean outputTargetProduct;
 
     @Override
@@ -94,6 +99,7 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         final MetadataElement globalAttributes = source.getMetadataRoot().getElement("Global_Attributes");
         final HashMap<String, String> lcProperties = getLcProperties();
         LcHelper.addPFTTableInfoToLcProperties(lcProperties, outputPFTClasses, userPFTConversionTable, additionalUserMapPFTConversionTable);
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addAggregationTypeToLcProperties("Map");
         addGridNameToLcProperties(planetaryGridClassName);
         addMetadataToLcProperties(globalAttributes);
@@ -117,8 +123,20 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
 
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(
+                    lcProperties,
+                    regionEnvelope,
+                    getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+        }
+
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
+
+        if (format.equals("lccds") || format.equals("lcpft")) {
+            binningOp.setOutputFormat("NetCDF4-LC-CDS");
+        }
     }
 
     private String createTypeAndID(HashMap<String, String> lcProperties, String mapType) {
@@ -158,8 +176,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
-        binningOp.setNumRows(getNumRows());
+        final int numRows = getNumRows();
+        binningOp.setNumRows(numRows);
         binningOp.setSuperSampling(1);
+        final int rowRatio = (sceneHeight + numRows - 1) / numRows;
+        getLogger().info("upper bounds of pixel area ratio between input and output is " + rowRatio*rowRatio);
         URL userPFTConversionTableUrl = convertFileToUrl(userPFTConversionTable);
         URL additionalUserMapUrl = convertFileToUrl(additionalUserMap);
         URL additionalUserMapPFTConversionUrl = convertFileToUrl(additionalUserMapPFTConversionTable);
@@ -171,11 +192,11 @@ public class LcMapAggregationOp extends AbstractLcAggregationOp {
         AggregatorConfig[] aggregatorConfigs;
         if (outputAccuracy && sourceProduct.containsBand("algorithmic_confidence_level")) {
             final String accuracyVariable = "Map".equals(mapType) ? "algorithmic_confidence_level" : "label_confidence_level";
-            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence");
+            final LcAccuracyAggregatorConfig lcAccuracyAggregatorConfig = new LcAccuracyAggregatorConfig(accuracyVariable, "confidence", rowRatio);
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcAccuracyAggregatorConfig};
         } else if (outputChangeCount && sourceProduct.containsBand("change_count")) {
             final String majorityVariable = "change_count";
-            final LcMajorityAggregatorConfig lcMajorityAggregatorConfig = new LcMajorityAggregatorConfig(majorityVariable, "change_count");
+            final LcMajorityAggregatorConfig lcMajorityAggregatorConfig = new LcMajorityAggregatorConfig(majorityVariable, "change_count", rowRatio);
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig, lcMajorityAggregatorConfig};
         } else {
             aggregatorConfigs = new AggregatorConfig[]{lcMapAggregatorConfig};

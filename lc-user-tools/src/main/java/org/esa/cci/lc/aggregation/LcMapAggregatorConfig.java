@@ -2,8 +2,8 @@ package org.esa.cci.lc.aggregation;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.core.gpf.annotations.Parameter;
 
 import java.net.URL;
 

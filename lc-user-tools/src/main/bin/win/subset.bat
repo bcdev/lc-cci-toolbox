@@ -7,16 +7,25 @@ for /f %%j in ("java.exe") do (
 )
 if "%JAVA_LOCATION%".==. GOTO JAVA_NO_INSTALLED
 
-set TOOL_HOME="%CD%"
+SET mypath=%~dp0
+SET TOOL_HOME=%mypath:~0,-5%
+echo "using user tool %TOOL_HOME%"
+set PATH=%PATH%;%TOOL_HOME%\lib
 
-java -Xmx2G -Dceres.context=beam ^
-    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true ^
-    -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT ^
-    -jar "%TOOL_HOME%\ceres-launcher.jar" ^
+java ^
+    -cp "%TOOL_HOME%\modules\*" ^
+    -Xmx8G ^
+    -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT ^
+    -Dsnap.home="$TOOL_HOME" ^
+    -Djava.io.tmpdir=. ^
+    -Dsnap.logLevel=INFO ^
+    -Dsnap.consoleLog=true ^
+    -Dsnap.dataio.reader.tileHeight=2025 ^
+    -Dsnap.dataio.reader.tileWidth=2025 ^
+    org.esa.snap.runtime.Launcher ^
     LCCCI.Subset -e %*
 
 exit /B %ERRORLEVEL%
-
 
 :HELP
 echo Land Cover CCI NetCDF 4 Subsetting Tool
@@ -25,6 +34,6 @@ echo For further information see the readme.txt
 exit /B 1
 
 :JAVA_NO_INSTALLED
-echo Java is not installed. Please install Java JRE 64Bit (version ^>= 1.7) first. ^
+echo Java is not installed. Please install Java JRE 64Bit (version 1.8) first. ^
 (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 exit /B 2

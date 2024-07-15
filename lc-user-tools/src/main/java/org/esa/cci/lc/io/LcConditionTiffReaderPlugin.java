@@ -16,11 +16,11 @@
 
 package org.esa.cci.lc.io;
 
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.util.Locale;
@@ -37,7 +37,7 @@ public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_TIFF};
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".tif", ".tiff", ".TIF", ".TIFF"};
     private static final String READER_DESCRIPTION = "Land Cover CCI condition tiff with mean and std in same dir";
-    private static final BeamFileFilter FILE_FILTER = new TiffFileFilter();
+    private static final SnapFileFilter FILE_FILTER = new TiffFileFilter();
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
@@ -83,7 +83,7 @@ public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         return FILE_FILTER;
     }
 
@@ -96,7 +96,7 @@ public class LcConditionTiffReaderPlugin implements ProductReaderPlugIn {
         return false;
     }
 
-    private static class TiffFileFilter extends BeamFileFilter {
+    private static class TiffFileFilter extends SnapFileFilter {
 
         public TiffFileFilter() {
             super();

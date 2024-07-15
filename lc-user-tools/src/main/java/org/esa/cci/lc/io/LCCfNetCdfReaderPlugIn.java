@@ -16,22 +16,22 @@
 
 package org.esa.cci.lc.io;
 
-import org.esa.beam.dataio.netcdf.ProfileReadContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartReader;
-import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfHdfEosGeoInfoExtractor;
-import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
-import org.esa.beam.dataio.netcdf.metadata.profiles.hdfeos.HdfEosGeocodingPart;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.DimKey;
-import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoCodingFactory;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.snap.dataio.netcdf.ProfileReadContext;
+import org.esa.snap.dataio.netcdf.metadata.ProfilePartReader;
+import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfHdfEosGeoInfoExtractor;
+import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
+import org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosGeocodingPart;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DimKey;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.logging.BeamLogManager;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -64,7 +64,8 @@ public class LCCfNetCdfReaderPlugIn extends CfNetCdfReaderPlugIn {
         List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
         for (Attribute globalAttribute : globalAttributes) {
             if (globalAttribute.getShortName().equals(ATTRIBUTE_NAME_TYPE)) {
-                if (globalAttribute.getStringValue().startsWith("ESACCI-LC-L4")) {
+                if (globalAttribute.getStringValue().startsWith("ESACCI-LC-L4")
+                        || globalAttribute.getStringValue().startsWith("C3S-LC-L4"))  {
                     return true;
                 }
             }
@@ -93,7 +94,7 @@ public class LCCfNetCdfReaderPlugIn extends CfNetCdfReaderPlugIn {
                 hdfDecode(ctx, p);
             }
             if (geoCoding != null) {
-                p.setGeoCoding(geoCoding);
+                p.setSceneGeoCoding(geoCoding);
             }
         }
 

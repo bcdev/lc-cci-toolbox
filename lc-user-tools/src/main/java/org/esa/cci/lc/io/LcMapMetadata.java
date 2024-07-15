@@ -1,7 +1,7 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +14,7 @@ public class LcMapMetadata {
     private static final String LC_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
     private static final String LC_ALTERNATIVE_MAP_ID_PATTERN = "ESACCI-LC-L4-LCCS-Map-(.*m)-P(.*)Y-(....)-v(.*)_AlternativeMap.*";
     private static final String LC_ALTERNATIVE_MAP_ID_PATTERN2 = "ESACCI-LC-L4-LCCS-AlternativeMap.*-(.*m)-P(.*)Y-.*(....)-v(.*)";
+    private static final String LC_ALTERNATIVE_MAP_ID_PATTERN3 = "C3S-LC-L4-LCCS-Map-(.*m)-P(.*)Y-(....)-v(.*)";
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 
@@ -69,7 +70,8 @@ public class LcMapMetadata {
     static Matcher lcMapIdMatcher(String id) {
         final String regexp =
                 id.contains("_AlternativeMap") ? LC_ALTERNATIVE_MAP_ID_PATTERN :
-                id.contains("AlternativeMap") ? LC_ALTERNATIVE_MAP_ID_PATTERN2 : LC_MAP_ID_PATTERN;
+                id.contains("AlternativeMap") ? LC_ALTERNATIVE_MAP_ID_PATTERN2 :
+                id.contains("C3S") ? LC_ALTERNATIVE_MAP_ID_PATTERN3 : LC_MAP_ID_PATTERN;
         Pattern p = Pattern.compile(regexp);
         final Matcher m = p.matcher(id);
         if (!m.matches()) {

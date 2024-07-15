@@ -1,20 +1,20 @@
 package org.esa.cci.lc.conversion;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.gpf.operators.standard.WriteOp;
-import org.esa.beam.util.io.FileUtils;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.common.WriteOp;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.cci.lc.util.LcHelper;
 
 import java.io.File;
@@ -57,6 +57,9 @@ public class RemapOp extends Operator {
             label = "Additional User Map PFT Conversion Table")
     private File additionalUserMapPFTConversionTable;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
     @Override
     public void initialize() throws OperatorException {
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -79,13 +82,22 @@ public class RemapOp extends Operator {
     private void writeTarget() {
         final String targetFileName = FileUtils.getFilenameWithoutExtension(sourceProduct.getFileLocation()) + "_updated.nc";
         final String targetDir = sourceProduct.getFileLocation().getParent();
-        final String formatName = "NetCDF4-LC-Map";
+        //final String formatName = "NetCDF4-LC-Map";
+
+
+        String formatName = "NetCDF4-LC-Map";
+        if (format.equals("lccds")){
+             formatName = "NetCDF4-LC-CDS";
+            targetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+        }
+
+
         File targetFile = new File(targetDir, targetFileName);
         targetProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
         WriteOp writeOp = new WriteOp(targetProduct, targetFile, formatName);
         writeOp.setClearCacheAfterRowWrite(true);
         writeOp.setWriteEntireTileRows(false);
-        System.setProperty("beam.gpf.executionOrder", "SCHEDULE_ROW_COLUMN_BAND");
+        System.setProperty("snap.gpf.executionOrder", "SCHEDULE_ROW_COLUMN_BAND");
         writeOp.writeProduct(ProgressMonitor.NULL);
     }
 

@@ -1,11 +1,11 @@
 package org.esa.cci.lc.util;
 
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.cci.lc.aggregation.Lccs2PftLut;
 import org.esa.cci.lc.aggregation.Lccs2PftLutBuilder;
 import org.esa.cci.lc.aggregation.Lccs2PftLutException;
@@ -50,7 +50,7 @@ public class LcHelper {
     }
 
     public static Product createProductSubset(Product product, double north, double east, double south, double west, String regionIdentifier) {
-        Rectangle pixelRect = getPixelBounds(north, east, south, west, product.getGeoCoding());
+        Rectangle pixelRect = getPixelBounds(north, east, south, west, product.getSceneGeoCoding());
         Rectangle productRect = new Rectangle(0, 0, product.getSceneRasterWidth(), product.getSceneRasterHeight());
         pixelRect = pixelRect.intersection(productRect);
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -60,6 +60,11 @@ public class LcHelper {
         if (regionIdentifier != null) {
             subset.getMetadataRoot().setAttributeString(LcWriterUtils.ATTRIBUTE_NAME_REGION_IDENTIFIER, regionIdentifier);
         }
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_min", String.valueOf(south));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_max", String.valueOf(north));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_min", String.valueOf(west));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_max", String.valueOf(east));
+        subset.getMetadataRoot().getElement("global_attributes").setAttributeString("subsetted", "true");
         return subset;
     }
 
@@ -143,4 +148,6 @@ public class LcHelper {
     public static String format(Dimension tileSize) {
         return String.format("%d:%d", tileSize.width, tileSize.height);
     }
+
+
 }

@@ -1,9 +1,9 @@
 package org.esa.cci.lc.util;
 
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -18,12 +18,12 @@ public abstract class TestProduct {
     public static Product createMapSourceProductNetCdf(Dimension size) {
         final Product product = new Product("P", "T", size.width, size.height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2.nc"));
-        product.addBand("lccs_class", "X", ProductData.TYPE_UINT8);
-        product.addBand("processed_flag", "Y", ProductData.TYPE_INT8);
-        product.addBand("current_pixel_state", "X * Y", ProductData.TYPE_INT8);
-        product.addBand("observation_count", "10", ProductData.TYPE_INT8);
-        product.addBand("algorithmic_confidence_level", "10", ProductData.TYPE_FLOAT32);
-        product.addBand("overall_confidence_level", "10", ProductData.TYPE_INT8);
+        product.addBand("lccs_class", "X", ProductData.TYPE_UINT8).setDescription("lccs");
+        product.addBand("processed_flag", "Y", ProductData.TYPE_INT8).setDescription("processed");
+        product.addBand("current_pixel_state", "X * Y", ProductData.TYPE_INT8).setDescription("state");
+        product.addBand("observation_count", "10", ProductData.TYPE_INT8).setDescription("obs_count");
+        product.addBand("algorithmic_confidence_level", "10", ProductData.TYPE_FLOAT32).setDescription("confidence");
+        product.addBand("overall_confidence_level", "10", ProductData.TYPE_INT8).setDescription("overall");
         setWgs84GeoCoding(product, size);
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.setAttributeString("id", "ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2");
@@ -130,7 +130,7 @@ public abstract class TestProduct {
         try {
             final double pixelSizeX = 360.0 / size.getWidth();
             final double pixelSizeY = 180.0 / size.getHeight();
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height,
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, size.width, size.height,
                                                   -180.0 + pixelSizeX / 2, 90.0 - pixelSizeY / 2,
                                                   pixelSizeX, pixelSizeY));
         } catch (FactoryException | TransformException e) {

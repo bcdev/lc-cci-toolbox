@@ -1,9 +1,9 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.AggregatorDescriptor;
-import org.esa.beam.binning.VariableContext;
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.AggregatorDescriptor;
+import org.esa.snap.binning.VariableContext;
 
 public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
 
@@ -23,7 +23,8 @@ public class LcAccuracyAggregatorDescriptor implements AggregatorDescriptor {
     public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
         return new LcAccuracyAggregator(varCtx,
                                         getSourceVarNames(aggregatorConfig),
-                                        getTargetVarNames(aggregatorConfig));
+                                        getTargetVarNames(aggregatorConfig),
+                                        ((LcAccuracyAggregatorConfig)aggregatorConfig).getRowRatio());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.util.io.CsvReader;
-import org.esa.beam.util.math.MathUtils;
+import org.esa.snap.core.util.io.CsvReader;
+import org.esa.snap.core.util.math.MathUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

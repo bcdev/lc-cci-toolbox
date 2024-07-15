@@ -1,7 +1,7 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
 
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;

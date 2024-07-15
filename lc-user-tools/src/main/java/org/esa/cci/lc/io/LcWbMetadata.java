@@ -1,7 +1,7 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class LcWbMetadata {
 
-    private static final String LC_WB_ID_PATTERN = "ESACCI-LC-L4-WB-Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
+    private static final String LC_WB_ID_PATTERN = "ESACCI-LC-L4-WB-(?:Ocean-Land-)?Map-(.*m)-P(.*)Y-[aggregated]?-?.*?-?(....)-v(.*)";
 
     public static final String GLOBAL_ATTRIBUTES_ELEMENT_NAME = "Global_Attributes";
 

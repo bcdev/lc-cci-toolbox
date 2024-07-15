@@ -1,15 +1,15 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.support.SEAGrid;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
@@ -24,7 +24,7 @@ import java.util.HashMap;
  */
 public abstract class AbstractLcAggregationOp extends Operator {
 
-    private static final int METER_PER_DEGREE_At_EQUATOR = 111300;
+    private static final int METER_PER_DEGREE_AT_EQUATOR = 111300;
 
     @SourceProduct(description = "LC CCI map or conditions product.", optional = false)
     private Product sourceProduct;
@@ -243,7 +243,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
         lcProperties.put("history", globalAttributes.getAttributeString("history"));
         float resolutionDegree = getTargetSpatialResolution();
         lcProperties.put("spatialResolutionDegrees", String.format("%.6f", resolutionDegree));
-        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_At_EQUATOR * resolutionDegree)));
+        lcProperties.put("spatialResolution", String.valueOf((int) (METER_PER_DEGREE_AT_EQUATOR * resolutionDegree)));
         ReferencedEnvelope regionEnvelope = getRegionEnvelope();
         if (regionEnvelope != null) {
             lcProperties.put("latMin", String.valueOf(regionEnvelope.getMinimum(1)));
@@ -308,6 +308,7 @@ public abstract class AbstractLcAggregationOp extends Operator {
     protected Product createSubset(Product source, ReferencedEnvelope regionEnvelope) {
         ReferencedEnvelope envelopeCopy = new ReferencedEnvelope(regionEnvelope);
         // work on the copy to prevent altering the original envelope
+        // MB TODO Why don't we simply snap the envelope to the target grid? This would expand by less than one target pixel.
         envelopeCopy.expandBy(getTargetSpatialResolution() * 5);
         double north = envelopeCopy.getMaximum(1);
         double east = envelopeCopy.getMaximum(0);

@@ -1,10 +1,10 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AbstractAggregator;
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.Vector;
-import org.esa.beam.binning.WritableVector;
+import org.esa.snap.binning.AbstractAggregator;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.Observation;
+import org.esa.snap.binning.Vector;
+import org.esa.snap.binning.WritableVector;
 
 import java.util.Collections;
 import java.util.SortedMap;

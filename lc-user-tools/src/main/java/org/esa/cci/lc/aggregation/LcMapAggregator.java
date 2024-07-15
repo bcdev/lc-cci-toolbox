@@ -1,14 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AbstractAggregator;
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.Vector;
-import org.esa.beam.binning.WritableVector;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.binning.AbstractAggregator;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.Observation;
+import org.esa.snap.binning.Vector;
+import org.esa.snap.binning.WritableVector;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 
 import java.awt.Rectangle;
 import java.util.Collections;

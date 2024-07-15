@@ -1,8 +1,8 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.SEAGrid;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.support.SEAGrid;
 import org.junit.Test;
 
 import java.awt.*;

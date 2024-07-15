@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>lc-user-tools</symbolicName>
-    <version>3.15</version>
+    <version>5.0</version>
     <name>LC CCI User Tools</name>
 
     <description>A set of tools providing functionality to convert, aggregate and subset
@@ -10,6 +10,25 @@
 
     <changelog>
         <![CDATA[
+    Changes in 5.0:
+    - fixed tilesize of input products (modification in shell scripts)
+    - fixed C3S writer plugin
+    - added handling of PFT products for subset and aggregation
+    - additional classes for PFT aggregator
+    Changes in 4.6:
+    - rebased SNAP dependency on SNAP-8.0.0
+    - fixed issues with LC filenames
+    Changes in 4.5:
+    - convert is adapted for WB 150m resolution and ocean\inland water distinguishing.
+    Changes in 4.4:
+    - cds plugin is adjusted for v5.x of Burned Area pixel and grid products
+    Changes in 4.2:
+    - plugin and writer for cds format are optimized. Operators made compatible with cds format
+    - new option to convert to cds2 for landcover products added
+    Changes in 4.1:
+    - writer for cds burned area grid and pixel products are added
+     Changes in 4.0:
+    - plugin and writer for cds format for lc are created
     Changes in 3.15:
     - Changed tiling (chunk-size) to more appropriate one (2025,2025)
     Changes in 3.14:
@@ -77,33 +96,19 @@
     <url>http://www.esa-landcover-cci.org/</url>
 
 
+
     <dependency>
-        <module>beam-visat-rcp</module>
-        <optional>true</optional>
+        <module>snap-gpf</module>
     </dependency>
     <dependency>
-        <module>beam-gpf</module>
+        <module>snap-binning</module>
     </dependency>
     <dependency>
-        <module>beam-binning</module>
-    </dependency>
-    <dependency>
-        <module>beam-netcdf</module>
+        <module>snap-netcdf</module>
     </dependency>
 
     <categories>VISAT,Processing,Landcover,CCI</categories>
 
-    <!--<extension point="beam-ui:actions">-->
-    <!--<action>-->
-    <!--<parent>tool</parent>-->
-    <!--<id>lc_cci_aggregation</id>-->
-    <!--<class>org.esa.cci.lc.aggregation.ui.LCAggregationAction</class>-->
-    <!--<helpId>lc_cci_aggregation</helpId>-->
-    <!--<text>LC CCI Aggregation Tool...</text>-->
-    <!--<description>Re-project, aggregate and subset LC map and conditions products.</description>-->
-    <!--<mnemonic>A</mnemonic>-->
-    <!--</action>-->
-    <!--</extension>-->
 
     <!--<extension point="beam-ui:helpSets">-->
     <!--<helpSet>-->

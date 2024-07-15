@@ -1,13 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.SpatialBin;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
-import org.esa.beam.binning.support.VariableContextImpl;
-import org.esa.beam.binning.support.VectorImpl;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.Observation;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.SpatialBin;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.support.VariableContextImpl;
+import org.esa.snap.binning.support.VectorImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -269,9 +270,10 @@ public class LcMapAggregatorTest {
         int class82 = 82;
         int class82Index = 16;
         int colStartIndex = plateCarreeGrid.getColIndex(10.4 - 1.5);
-        int rowStartIndex = plateCarreeGrid.getRowIndex(60.2 + 1.5);
+        int rowStartIndex = plateCarreeGrid.getRowIndex( 60.2 + 1.5);
         int colStopIndex = plateCarreeGrid.getColIndex(10.4 + 1.5);
-        int rowStopIndex = plateCarreeGrid.getRowIndex(60.2 - 1.5);
+        int rowStopIndex = plateCarreeGrid.getRowIndex( 60.2 - 1.5);
+
         for (int y = rowStartIndex; y < rowStopIndex; y++) {
             for (int x = colStartIndex; x < colStopIndex; x++) {
                 long binIndex = plateCarreeGrid.getFirstBinIndex(y) + x;

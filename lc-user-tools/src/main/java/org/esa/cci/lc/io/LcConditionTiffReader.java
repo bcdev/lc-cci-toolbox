@@ -17,14 +17,15 @@
 package org.esa.cci.lc.io;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.beam.framework.dataio.AbstractProductReader;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.util.ProductUtils;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -97,6 +98,20 @@ public class LcConditionTiffReader extends AbstractProductReader {
         result.getMetadataRoot().setAttributeString("endYear", endYear);
         result.getMetadataRoot().setAttributeString("startDate", startDate);
         result.getMetadataRoot().setAttributeString("version", version);
+
+        //adding all attributes to the global attributes
+        MetadataElement globalAttributes = new MetadataElement("global_attributes");
+        MetadataElement metadataRoot = result.getMetadataRoot();
+        metadataRoot.addElement(globalAttributes);
+        globalAttributes = metadataRoot.getElement("global_attributes");
+        globalAttributes.setAttributeString ("condition",condition);
+        globalAttributes.setAttributeString ("spatialResolution",spatialResolution);
+        globalAttributes.setAttributeString ("temporalResolution",temporalResolution);
+        globalAttributes.setAttributeString ("startYear",startYear);
+        globalAttributes.setAttributeString ("endYear",endYear);
+        globalAttributes.setAttributeString ("startDate",startDate);
+        globalAttributes.setAttributeString ("version",version);
+
 
         bandProducts.add(lcConditionProduct);
         Band band = addBand(condition.toLowerCase() + "_" + mainVariable, lcConditionProduct, result);

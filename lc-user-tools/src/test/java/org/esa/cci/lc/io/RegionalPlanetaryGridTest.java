@@ -1,8 +1,8 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.support.PlateCarreeGrid;
-import org.esa.beam.binning.support.RegularGaussianGrid;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.support.PlateCarreeGrid;
+import org.esa.snap.binning.support.RegularGaussianGrid;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;

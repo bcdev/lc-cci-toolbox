@@ -1,19 +1,16 @@
 package org.esa.cci.lc.subset;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.cci.lc.io.LcConditionNetCdf4WriterPlugIn;
-import org.esa.cci.lc.io.LcMapMetadata;
-import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
-import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
+import org.esa.cci.lc.io.*;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.cci.lc.util.LcHelper;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -23,7 +20,7 @@ import java.io.File;
 
 @OperatorMetadata(
         alias = "LCCCI.Subset",
-        version = "3.10",
+        version = "5.0",
         authors = "Marco Peters",
         copyright = "(c) 2013 by Brockmann Consult",
         description = "Allows to subset LC map and condition products.",
@@ -45,6 +42,8 @@ public class LcSubsetOp extends Operator {
     private Float east;
     @Parameter(description = "The southern latitude.", interval = "[-90,90]", unit = "°")
     private Float south;
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
 
     @Parameter(description = "A predefined set of north, east, south and west bounds.",
             valueSet = {
@@ -85,13 +84,31 @@ public class LcSubsetOp extends Operator {
         subsetProduct.setPreferredTileSize(LcHelper.TILE_SIZE);
 
         updateIdMetadataAttribute(id);
-        final String formatName;
+        String formatName;
+
         if (id.startsWith("ESACCI-LC-L4-LCCS-Map-") || id.startsWith("ESACCI-LC-L4-LCCS-AlternativeMap")) {
             formatName = LcMapNetCdf4WriterPlugIn.FORMAT_NAME;
         } else if (id.startsWith("ESACCI-LC-L4-WB-Map-")) {
             formatName = LcWbNetCdf4WriterPlugIn.FORMAT_NAME;
-        } else {
+        } else if (id.startsWith("ESACCI-LC-L4-PFT")) {
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+            formatName = LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
+        } else if (id.startsWith("C3S-LC-L4-LCCS-Map")) {
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+            formatName = LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
+        }
+        else {
             formatName = LcConditionNetCdf4WriterPlugIn.FORMAT_NAME;
+        }
+        if (format.equals("lccds") || format.equals("lcpft")){
+            formatName= LcCdsNetCDF4WriterPlugin.FORMAT_NAME;
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("parent_path", sourceProduct.getFileLocation().getAbsolutePath());
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_min", south.toString());
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lat_max", north.toString());
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_min", west.toString());
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("geospatial_lon_max", east.toString());
+            subsetProduct.getMetadataRoot().getElement("global_attributes").setAttributeString("subsetted", "true");
+
         }
 
         if (targetFile == null) {

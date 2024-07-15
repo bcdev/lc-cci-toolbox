@@ -1,18 +1,14 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcWbNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hamcrest.core.IsNull;
@@ -24,7 +20,8 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.matchers.JUnitMatchers.containsString;
+//import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -37,6 +34,7 @@ public class LcWbAggregationOpTest {
 
     @BeforeClass
     public static void beforeClass() {
+        NetCdfActivator.activate();
         aggregationSpi = new LcWbAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.loadOperatorSpis();
@@ -193,6 +191,11 @@ public class LcWbAggregationOpTest {
         final Product product = new Product("P", "T", width, height);
         product.setFileLocation(new File("/blah/ESACCI-LC-L4-WB-Map-300m-P5Y-2010-v2.nc"));
         final Band classesBand = product.addBand("wb_class", ProductData.TYPE_UINT8);
+        product.getIndexCodingGroup().add(new IndexCoding("wb_class"));
+        IndexCoding indexCoding = product.getIndexCodingGroup().get("wb_class");
+        product.getIndexCodingGroup().get("wb_class").addIndex("land",1,"land");
+        product.getIndexCodingGroup().get("wb_class").addIndex("water",2,"water");
+        classesBand.setSampleCoding(indexCoding);
         classesBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                              new Float[]{2f}, null));
         final Band wsObservationBand = product.addBand("ws_observation_count", ProductData.TYPE_INT16);
@@ -201,7 +204,7 @@ public class LcWbAggregationOpTest {
         final Band gmObservationBand = product.addBand("gm_observation_count", ProductData.TYPE_INT16);
         gmObservationBand.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                  new Float[]{10f}, null));
-        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+        product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-WB-Map-300m-P5Y-2010-v2"), true));
         globalAttributes.addAttribute(new MetadataAttribute("time_coverage_duration", ProductData.createInstance("P5Y"), true));

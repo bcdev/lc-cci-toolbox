@@ -2,8 +2,8 @@ package org.esa.cci.lc.aggregation;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.core.gpf.annotations.Parameter;
 
 /**
  * @author Marco Peters
@@ -20,16 +20,19 @@ class LcWbAggregatorConfig extends AggregatorConfig {
     @Parameter(converter = AreaCalculatorConverter.class)
     private AreaCalculator areaCalculator;
 
+    @Parameter
+    private int numWbClasses;
 
     LcWbAggregatorConfig() {
         super(LcWbAggregatorDescriptor.NAME);
     }
 
-    LcWbAggregatorConfig(boolean outputWbClasses, int numMajorityClasses, AreaCalculator areaCalculator) {
+    LcWbAggregatorConfig(boolean outputWbClasses, int numMajorityClasses, int numWbClasses, AreaCalculator areaCalculator) {
         super(LcWbAggregatorDescriptor.NAME);
         this.outputWbClasses = outputWbClasses;
         this.numMajorityClasses = numMajorityClasses;
         this.areaCalculator = areaCalculator;
+        this.numWbClasses = numWbClasses;
     }
 
     public String getSourceVarName() {

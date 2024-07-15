@@ -1,24 +1,24 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.dataio.netcdf.DefaultNetCdfWriter;
-import org.esa.beam.dataio.netcdf.NullProfilePartWriter;
-import org.esa.beam.dataio.netcdf.ProfileWriteContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartWriter;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
-import org.esa.beam.dataio.netcdf.nc.NVariable;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
-import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductWriter;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
+import org.esa.snap.dataio.netcdf.NullProfilePartWriter;
+import org.esa.snap.dataio.netcdf.ProfileWriteContext;
+import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
+import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.core.dataio.ProductWriter;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.DataType;
 
@@ -70,7 +70,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String epoch = lcWbMetadata.getEpoch();
             final String version = lcWbMetadata.getVersion();
 
-            final GeoCoding geoCoding = product.getGeoCoding();
+
+            final GeoCoding geoCoding = product.getSceneGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
             final String latMax = String.valueOf(upperLeft.getLat());
@@ -127,7 +128,6 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             private static final String WB_CLASS_BAND_NAME = "wb_class";
             private static final String WS_OBSERVATION_COUNT_BAND_NAME = "ws_observation_count";
             private static final String GM_OBSERVATION_COUNT_BAND_NAME = "gm_observation_count";
-
             @Override
             public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
 
@@ -135,12 +135,15 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 String ancillaryVariableString = getAncillaryVariableString(p);
                 for (Band band : p.getBands()) {
                     final Dimension tileSize = p.getPreferredTileSize();
-                    if (WB_CLASS_BAND_NAME.equals(band.getName())) {
+                    if (WB_CLASS_BAND_NAME.equals(band.getName()) && !p.getMetadataRoot().getElements()[0].getAttributeString("type").contains("150")) {
                         addWbClassVariable(ncFile, band, tileSize, ancillaryVariableString);
                     } else if (WS_OBSERVATION_COUNT_BAND_NAME.equals(band.getName()) ||
                                GM_OBSERVATION_COUNT_BAND_NAME.equals(band.getName())) {
                         addObservationCountVariable(ncFile, band, tileSize);
-                    }else {
+                    } else if (WB_CLASS_BAND_NAME.equals(band.getName()) && p.getMetadataRoot().getElements()[0].getAttributeString("type").contains("150") ) {
+                        addWbInlandWBVariable(ncFile,band,tileSize, ancillaryVariableString);
+                    }
+                    else {
                         // this branch is passed if an aggregated product is subsetted
                         addGeneralVariable(ncFile, band, tileSize);
                     }
@@ -170,10 +173,9 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
-                //final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
-                byte[] wbClassFlagValues = new byte[] { 1, 2 };
-                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length);
+                byte[] wbClassFlagValues = new byte[] {0, 1};
+                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
                 for (int i = 0; i < wbClassFlagValues.length; ++i) {
                     valids.set(i, wbClassFlagValues[i]);
                 }
@@ -181,8 +183,8 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute("standard_name", "land_cover_lccs");
                 variable.addAttribute("flag_values", valids);
                 variable.addAttribute("flag_meanings", "terrestrial water");
-                variable.addAttribute("valid_min", 1);
-                variable.addAttribute("valid_max", 2);
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 1);
                 variable.addAttribute("_Unsigned", "true");
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 0);
                 if (ancillaryVariables.length() > 0) {
@@ -220,6 +222,28 @@ public class LcWbNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, Float.NaN);
             }
 
+            private void addWbInlandWBVariable(NFileWriteable ncFile, Band band, Dimension tileSize, String ancillaryVariables) throws IOException {
+                final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
+                final String variableName = ReaderUtils.getVariableName(band);
+                //nccopy does not support reading ubyte variables, therefore preliminarily commented out
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                byte[] wbClassFlagValues = new byte[] {0, 1, 2};
+                final ArrayByte.D1 valids = new ArrayByte.D1(wbClassFlagValues.length,variable.getDataType().isUnsigned());
+                for (int i = 0; i < wbClassFlagValues.length; ++i) {
+                    valids.set(i, wbClassFlagValues[i]);
+                }
+                variable.addAttribute("long_name", band.getDescription());
+                variable.addAttribute("standard_name", WB_CLASS_BAND_NAME);
+                variable.addAttribute("flag_values", valids);
+                variable.addAttribute("flag_meanings", "ocean_water terrestrial inland_water");
+                variable.addAttribute("valid_min", 0);
+                variable.addAttribute("valid_max", 2);
+                variable.addAttribute("_Unsigned", "true");
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, (byte) 127);
+                if (ancillaryVariables.length() > 0) {
+                    variable.addAttribute("ancillary_variables", ancillaryVariables);
+                }
+            }
         };
     }
 

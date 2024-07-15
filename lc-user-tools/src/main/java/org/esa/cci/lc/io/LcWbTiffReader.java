@@ -17,15 +17,15 @@
 package org.esa.cci.lc.io;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.beam.framework.dataio.AbstractProductReader;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.util.ProductUtils;
+import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 public class LcWbTiffReader extends AbstractProductReader {
     // ESACCI-LC-L4-WB-Map-150m-P13Y-2000-v4.0.tif
     public static final String LC_WB_FILENAME_PATTERN =
-            "ESACCI-LC-L4-WB-Map-(.*m)-P(.*)Y-(....)-v(.*)\\.(tiff?)";
+            "ESACCI-LC-L4-WB-(?:Ocean-Land-)?Map-(.*m)-P(.*)Y-(....)-v(.*).(tiff?)";
     public static final String[] FLAG_NAMES = new String[]{"NObsImsWS", "NObsImsGM"};
     public static final String[] LC_VARIABLE_NAMES = new String[] {
             "wb_class",
@@ -97,6 +97,17 @@ public class LcWbTiffReader extends AbstractProductReader {
         metadataRoot.setAttributeString("spatialResolution", spatialResolution);
         metadataRoot.setAttributeString("temporalResolution", temporalResolution);
 
+        // Creating global attributes element and passing all the attribute to it as well
+        MetadataElement globalAttributes = new MetadataElement("global_attributes");
+        metadataRoot.addElement(globalAttributes);
+        globalAttributes = metadataRoot.getElement("global_attributes");
+        globalAttributes.setAttributeString ("epoch",epoch);
+        globalAttributes.setAttributeString ("version",version);
+        globalAttributes.setAttributeString ("spatialResolution",spatialResolution);
+        globalAttributes.setAttributeString ("temporalResolution",temporalResolution);
+        globalAttributes.setAttributeString ("id",lcWbFilename.substring(0,lcWbFilename.lastIndexOf('.')));
+        globalAttributes.setAttributeString ("type",lcWbFilename.substring(0,lcWbFilename.lastIndexOf('.')));
+        //
         bandProducts.add(lcWbProduct);
         Band band = addBand(0, lcWbProduct, result);
         band.setDescription(LC_VARIABLE_DESCRIPTIONS[0]);

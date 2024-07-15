@@ -1,15 +1,19 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.cci.lc.io.LcCdsBinWriter;
+import org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin;
+import org.esa.cci.lc.util.LcHelper;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.io.LcCondMetadata;
 import org.esa.cci.lc.util.PlanetaryGridName;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.io.File;
@@ -35,6 +39,12 @@ import java.util.Locale;
         autoWriteDisabled = true)
 public class LcCondAggregationOp extends AbstractLcAggregationOp {
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
+
     boolean outputTargetProduct;
 
     @Override
@@ -45,6 +55,7 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
 
         HashMap<String, String> lcProperties = getLcProperties();
         addAggregationTypeToLcProperties("Condition");
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addGridNameToLcProperties(planetaryGridClassName);
 
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
@@ -74,6 +85,11 @@ public class LcCondAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+
+        }
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);

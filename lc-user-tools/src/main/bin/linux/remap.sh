@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 # convert.sh /data/lc-map-example/lc_classif_lccs_2010_v2.tif
 
 if [ -z "$1" ]; then
@@ -9,9 +10,18 @@ if [ -z "$1" ]; then
 fi
 
 export TOOL_HOME=`( cd $(dirname $0); cd ..; pwd )`
+echo "using user tool $TOOL_HOME"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TOOL_HOME/lib
 
-exec java -Xmx8G -Dceres.context=beam \
-    -Dbeam.logLevel=INFO -Dbeam.consoleLog=true \
-    -Dbeam.mainClass=org.esa.beam.framework.gpf.main.GPT \
-    -jar "$TOOL_HOME/bin/ceres-launcher.jar" \
+exec java \
+    -cp "$TOOL_HOME/modules/*" \
+    -Xmx8G \
+    -Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT \
+    -Dsnap.home="$TOOL_HOME" \
+    -Djava.io.tmpdir=. \
+    -Dsnap.logLevel=INFO \
+    -Dsnap.consoleLog=true \
+    -Dsnap.dataio.reader.tileHeight=2025 \
+    -Dsnap.dataio.reader.tileWidth=2025 \
+    org.esa.snap.runtime.Launcher \
     LCCCI.Remap -e -c 1024M $@

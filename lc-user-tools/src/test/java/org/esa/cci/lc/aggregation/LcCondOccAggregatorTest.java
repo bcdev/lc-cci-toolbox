@@ -1,8 +1,8 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.support.VariableContextImpl;
-import org.esa.beam.binning.support.VectorImpl;
+import org.esa.snap.binning.BinContext;
+import org.esa.snap.binning.support.VariableContextImpl;
+import org.esa.snap.binning.support.VectorImpl;
 import org.junit.Test;
 import org.mockito.Mockito;
 

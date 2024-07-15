@@ -17,23 +17,8 @@
             <useProjectArtifact>true</useProjectArtifact>
             <unpack>false</unpack>
             <excludes>
-                <exclude>org.esa.beam:beam-ui</exclude>
-                <exclude>org.esa.beam:beam-visat-rcp</exclude>
-                <exclude>org.esa.beam:beam-visat</exclude>
-                <exclude>org.esa.beam:beam-csv-dataio</exclude>
-                <exclude>org.esa.beam:beam-processing</exclude>
-                <exclude>org.esa.beam:beam-statistics-op</exclude>
-                <exclude>org.jython:jython</exclude>
                 <exclude>com.jidesoft:jide-*</exclude>
-                <exclude>jfree:jfreechart</exclude>
             </excludes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>bin</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>com.bc.ceres:ceres-launcher</include>
-            </includes>
         </dependencySet>
     </dependencySets>
 
@@ -75,6 +60,17 @@
                 <include>*.csv</include>
             </includes>
             <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/lib/x86</directory>
+            <outputDirectory>lib</outputDirectory>
+            <lineEnding>keep</lineEnding>
+            <includes>
+                <include>*.dll</include>
+                <include>*.so</include>
+                <include>*.exe</include>
+            </includes>
+            <filtered>false</filtered>
         </fileSet>
     </fileSets>
 

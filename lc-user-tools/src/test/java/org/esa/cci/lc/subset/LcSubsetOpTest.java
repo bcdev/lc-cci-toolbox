@@ -1,18 +1,18 @@
 package org.esa.cci.lc.subset;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
-import org.esa.beam.gpf.operators.standard.SubsetOp;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
+import org.esa.snap.core.gpf.common.SubsetOp;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -21,6 +21,9 @@ import org.junit.Test;
 import javax.media.jai.operator.ConstantDescriptor;
 import java.io.File;
 
+
+
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.IsEqual.*;
 import static org.junit.Assert.*;
@@ -56,7 +59,7 @@ public class LcSubsetOpTest {
         final Product sourceProduct = createSourceProduct();
         final int sw = sourceProduct.getSceneRasterWidth();
         final int sh = sourceProduct.getSceneRasterHeight();
-        final GeoCoding sourceGC = sourceProduct.getGeoCoding();
+        final GeoCoding sourceGC = sourceProduct.getSceneGeoCoding();
         assertThat(sw, is(3600));
         assertThat(sh, is(1800));
         assertThat(sourceGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(90, -180)));
@@ -70,7 +73,7 @@ public class LcSubsetOpTest {
         final Product subsetProduct = lcSubsetOp.subsetProduct;
         final int th = subsetProduct.getSceneRasterHeight();
         final int tw = subsetProduct.getSceneRasterWidth();
-        final GeoCoding targetGC = subsetProduct.getGeoCoding();
+        final GeoCoding targetGC = subsetProduct.getSceneGeoCoding();
         assertThat(th, is(300));
         assertThat(tw, is(300));
         assertThat(targetGC.getGeoPos(new PixelPos(0, 0), null), equalTo(new GeoPos(15.0f, -15.0f)));
@@ -160,7 +163,7 @@ public class LcSubsetOpTest {
         final Band currentPixelState = product.addBand("current_pixel_state", ProductData.TYPE_UINT8);
         currentPixelState.setSourceImage(ConstantDescriptor.create(width.floatValue(), height.floatValue(),
                                                                    new Byte[]{1}, null));
-        product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
+        product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, width, height, -179.95, 89.95, 0.1, 0.1));
         MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
         globalAttributes.addAttribute(new MetadataAttribute("id", ProductData.createInstance("ESACCI-LC-L4-LCCS-Map-300m-P5Y-2010-v2"), true));
         product.getMetadataRoot().addElement(globalAttributes);

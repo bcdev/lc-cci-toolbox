@@ -1,13 +1,16 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.operator.BinningOp;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.cci.lc.io.LcCdsBinWriter;
+import org.esa.cci.lc.io.LcCdsNetCDF4WriterPlugin;
+import org.esa.cci.lc.util.LcHelper;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.cci.lc.io.LcBinWriter;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -27,7 +30,7 @@ import java.util.Locale;
 @OperatorMetadata(
         alias = "LCCCI.Aggregate.WB",
         internal = true,
-        version = "3.15",
+        version = "5.0",
         authors = "Marco Peters, Martin Boettcher",
         copyright = "(c) 2015 by Brockmann Consult",
         description = "Allows to aggregate LC WB products.",
@@ -42,6 +45,12 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
             label = "Number of Majority Classes")
     private int numMajorityClasses;
 
+    @Parameter(description = "Format of the output file: lccci,lccds",defaultValue = "lccci")
+    private String format;
+
+    @Parameter(description = "Output chunk size in format height:width, defaults to 2025:2025", defaultValue = "2025:2025")
+    private String outputTileSize;
+
     boolean outputTargetProduct;
     private String outputFormat;
     private String outputFile;
@@ -55,6 +64,7 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
 
         HashMap<String, String> lcProperties = getLcProperties();
         addAggregationTypeToLcProperties("WB");
+        lcProperties.put(LcHelper.PROP_NAME_TILE_SIZE, outputTileSize);
         addGridNameToLcProperties(planetaryGridClassName);
         MetadataElement globalAttributes = getSourceProduct().getMetadataRoot().getElement("Global_Attributes");
         addMetadataToLcProperties(globalAttributes);
@@ -78,6 +88,11 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         binningOp.setOutputTargetProduct(outputTargetProduct);
         binningOp.setParameter("outputBinnedData", true);
         binningOp.setBinWriter(new LcBinWriter(lcProperties, regionEnvelope));
+
+        if (format.equals("lccds")) {
+            setOutputFormat(LcCdsNetCDF4WriterPlugin.FORMAT_NAME);
+            binningOp.setBinWriter(new LcCdsBinWriter(lcProperties, regionEnvelope,getSourceProduct().getMetadataRoot().getElement("global_attributes")));
+        }
 
         Product dummyTarget = binningOp.getTargetProduct();
         setTargetProduct(dummyTarget);
@@ -116,12 +131,13 @@ public class LcWbAggregationOp extends AbstractLcAggregationOp {
         int sceneHeight = sourceProduct.getSceneRasterHeight();
         final double sourceMapResolutionX = 180.0 / sceneHeight;
         final double sourceMapResolutionY = 360.0 / sceneWidth;
+        final int numWbClasses = sourceProduct.getBand("wb_class").getIndexCoding().getIndexNames().length;
         PlanetaryGrid planetaryGrid = createPlanetaryGrid();
         AreaCalculator areaCalculator = new FractionalAreaCalculator(planetaryGrid, sourceMapResolutionX, sourceMapResolutionY);
 
         binningOp.setNumRows(getNumRows());
         binningOp.setSuperSampling(1);
-        LcWbAggregatorConfig lcWbAggregatorConfig = new LcWbAggregatorConfig(outputWbClasses, numMajorityClasses, areaCalculator);
+        LcWbAggregatorConfig lcWbAggregatorConfig = new LcWbAggregatorConfig(outputWbClasses, numMajorityClasses, numWbClasses, areaCalculator);
         binningOp.setAggregatorConfigs(lcWbAggregatorConfig);
         binningOp.setPlanetaryGridClass(planetaryGridClassName);
         binningOp.setOutputFile(outputFile == null ? new File(getTargetDir(), outputFilename).getPath() : outputFile);

@@ -1,6 +1,7 @@
 org.esa.cci.lc.aggregation.LcMapAggregationOp$Spi
 org.esa.cci.lc.aggregation.LcWbAggregationOp$Spi
 org.esa.cci.lc.aggregation.LcCondAggregationOp$Spi
+org.esa.cci.lc.aggregation.LcPftAggregationOp$Spi
 org.esa.cci.lc.conversion.LcConversionOp$Spi
 org.esa.cci.lc.conversion.RemapOp$Spi
 org.esa.cci.lc.conversion.RemapInternalOp$Spi

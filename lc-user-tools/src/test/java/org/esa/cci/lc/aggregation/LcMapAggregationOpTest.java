@@ -1,14 +1,15 @@
 package org.esa.cci.lc.aggregation;
 
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.cci.lc.io.LcMapNetCdf4WriterPlugIn;
 import org.esa.cci.lc.subset.PredefinedRegion;
 import org.esa.cci.lc.util.PlanetaryGridName;
 import org.esa.cci.lc.util.TestProduct;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
@@ -19,6 +20,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 
+//import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
@@ -32,6 +34,7 @@ public class LcMapAggregationOpTest {
 
     @BeforeClass
     public static void beforeClass() {
+        NetCdfActivator.activate();
         aggregationSpi = new LcMapAggregationOp.Spi();
         OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.loadOperatorSpis();

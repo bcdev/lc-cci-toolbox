@@ -1,25 +1,25 @@
 package org.esa.cci.lc.io;
 
-import org.esa.beam.dataio.netcdf.DefaultNetCdfWriter;
-import org.esa.beam.dataio.netcdf.NullProfilePartWriter;
-import org.esa.beam.dataio.netcdf.ProfileWriteContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartWriter;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
-import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
-import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
-import org.esa.beam.dataio.netcdf.nc.NVariable;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
-import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductWriter;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.util.StringUtils;
+import org.esa.snap.dataio.netcdf.DefaultNetCdfWriter;
+import org.esa.snap.dataio.netcdf.NullProfilePartWriter;
+import org.esa.snap.dataio.netcdf.ProfileWriteContext;
+import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
+import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamBandPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamInitialisationPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.core.dataio.ProductWriter;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.cci.lc.aggregation.LCCS;
 import org.esa.cci.lc.util.LcHelper;
 import ucar.ma2.Array;
@@ -74,7 +74,8 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
             final String epoch = lcMapMetadata.getEpoch();
             final String version = lcMapMetadata.getVersion();
 
-            final GeoCoding geoCoding = product.getGeoCoding();
+
+            final GeoCoding geoCoding = product.getSceneGeoCoding();
             final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
             final GeoPos lowerRight = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight()), null);
             final String latMax = String.valueOf(upperLeft.getLat());
@@ -207,10 +208,9 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final DataType ncDataType = DataTypeUtils.getNetcdfDataType(band.getDataType());
                 final String variableName = ReaderUtils.getVariableName(band);
                 //nccopy does not support reading ubyte variables, therefore preliminarily commented out
-                //final NVariable variable = ncFile.addVariable(variableName, ncDataType, true, tileSize, ncFile.getDimensions());
-                final NVariable variable = ncFile.addVariable(variableName, ncDataType, false, tileSize, ncFile.getDimensions());
+                final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 int[] lccsClassFlagValues = LCCS.getInstance().getClassValues();
-                final ArrayByte.D1 valids = new ArrayByte.D1(lccsClassFlagValues.length);
+                final ArrayByte.D1 valids = new ArrayByte.D1(lccsClassFlagValues.length,variable.getDataType().isUnsigned());
                 for (int i = 0; i < lccsClassFlagValues.length; ++i) {
                     valids.set(i, (byte) lccsClassFlagValues[i]);
                 }
@@ -233,7 +233,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 final byte[] flagValues = new byte[]{0, 1};
                 final String flagMeanings = "not_processed processed";
-                final Array valids = Array.factory(flagValues);
+                final Array valids = Array.factory(DataType.BYTE,new int[]{2},flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs status_flag");
                 variable.addAttribute("flag_values", valids);
@@ -253,7 +253,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 final byte[] flagValues = new byte[]{0, 1, 2, 3, 4, 5};
                 final String flagMeanings = "invalid clear_land clear_water clear_snow_ice cloud cloud_shadow";
-                final Array valids = Array.factory(flagValues);
+                final Array valids = Array.factory(DataType.BYTE,new int[]{6},flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs status_flag");
                 variable.addAttribute("flag_values", valids);
@@ -318,7 +318,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 final byte[] flagValues = new byte[]{0, 1, 2};
                 final String flagMeanings = "doubtful reasonable certain";
-                final Array valids = Array.factory(flagValues);
+                final Array valids = Array.factory(DataType.BYTE, new int[]{3},flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs overall_confidence");
                 variable.addAttribute("flag_values", valids);
@@ -354,7 +354,7 @@ public class LcMapNetCdf4WriterPlugIn extends BeamNetCdf4WriterPlugIn {
                 final NVariable variable = ncFile.addVariable(variableName, ncDataType, tileSize, ncFile.getDimensions());
                 final byte[] flagValues = new byte[]{0, 1, 2, 3};
                 final String flagMeanings = "invalid original_label first_alternative_label second_alternative_label";
-                final Array valids = Array.factory(flagValues);
+                final Array valids = Array.factory(DataType.BYTE,new int[]{4},flagValues);
                 variable.addAttribute("long_name", band.getDescription());
                 variable.addAttribute("standard_name", "land_cover_lccs status_flag");
                 variable.addAttribute("flag_values", valids);
